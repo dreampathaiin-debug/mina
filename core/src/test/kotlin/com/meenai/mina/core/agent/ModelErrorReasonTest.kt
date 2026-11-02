@@ -7,64 +7,64 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ModelErrorReasonTest {
-    /** 找不到模型:知道模型名时说清是哪个、去哪改、模型名大概长什么样;不知道时退回一般的说法。 */
+    /** Model not found: with a model name, say which one, where to fix it, what a model ID looks like; without one, fall back to the general wording. */
     @Test fun modelNotFoundNamesTheModel() {
         assertEquals(
-            "模型「gemini」在这个服务商那里不存在。去设置 › 模型,检查模型名(要填完整的模型 ID,比如 Gemini 的模型名类似 gemini-flash-latest)或改用对应的预设。",
+            "Model “gemini” does not exist at this provider. Open Settings › Models and check the model name (use the full model ID, e.g. Gemini model names look like gemini-flash-latest) or switch to the matching preset.",
             StopRules.modelFailed(ModelError.ModelNotFound("gemini")).reason,
         )
-        assertEquals("找不到该模型,请到设置 › 模型检查模型名和 Base URL 是否正确。", StopRules.modelFailed(ModelError.ModelNotFound()).reason)
-        assertEquals("找不到模型「gemini」", ModelError.ModelNotFound("gemini").message)
+        assertEquals("Model not found. Check the model name and Base URL in Settings › Models.", StopRules.modelFailed(ModelError.ModelNotFound()).reason)
+        assertEquals("Model not found: “gemini”", ModelError.ModelNotFound("gemini").message)
     }
 
-    /** 404 也可能是网关、中转服务在说别的:有原话时照原话说、不断定模型不存在,句末的点不重复;没有原话时和上面一样。 */
+    /** A 404 may also be a gateway or relay saying something else: with the server's own words, quote them and don't claim the model is gone; no detail falls back to the wording above. */
     @Test fun modelNotFoundCarriesWhatTheServerSaid() {
         assertEquals(
-            "调用模型「group/rpa」时服务端回复：none of group/rpa's models is ready。可能是模型名不对，或者服务那边暂时不可用。" +
-                "去设置 › 模型,检查模型名(要填完整的模型 ID,比如 Gemini 的模型名类似 gemini-flash-latest)或改用对应的预设。",
+            "Calling model “group/rpa”: the server replied: none of group/rpa's models is ready. The model name may be wrong, or the service may be temporarily unavailable. " +
+                "Open Settings › Models and check the model name (use the full model ID, e.g. Gemini model names look like gemini-flash-latest) or switch to the matching preset.",
             StopRules.modelFailed(ModelError.ModelNotFound("group/rpa", "none of group/rpa's models is ready")).reason,
         )
         assertEquals(
-            "服务端回复：The model `x` does not exist。可能是模型名不对，或者服务那边暂时不可用。请到设置 › 模型检查模型名和 Base URL 是否正确。",
+            "The server replied: The model `x` does not exist. The model name may be wrong, or the service may be temporarily unavailable. Check the model name and Base URL in Settings › Models.",
             StopRules.modelFailed(ModelError.ModelNotFound("", "The model `x` does not exist.")).reason,
         )
         val said = StopRules.modelFailed(ModelError.ModelNotFound("m", "gone")).reason
-        assertFalse(said.contains("不存在"))
+        assertFalse(said, said.contains("does not exist"))
     }
 
-    /** 引在句中的服务端原话,三种带原话的失败都只去掉末尾一个句号;截短的省略号不动。 */
+    /** Server text quoted mid-sentence: all three detail-carrying failures drop exactly one trailing period; a shortened ellipsis stays. */
     @Test fun quotedServerTextDropsOneTrailingPeriod() {
         fun reasons(detail: String) = listOf(
             StopRules.modelFailed(ModelError.ModelNotFound("m", detail)).reason,
             StopRules.modelFailed(ModelError.ChatGptNotEligible(detail)).reason,
             StopRules.modelFailed(ModelError.AccountPlanNotAllowed("ChatGPT", detail)).reason,
         )
-        reasons("Not allowed.").forEach { assertTrue(it, it.contains("Not allowed。") && !it.contains("Not allowed.")) }
-        reasons("不允许。").forEach { assertTrue(it, it.contains("不允许。") && !it.contains("不允许。。")) }
-        reasons("Not allowed").forEach { assertTrue(it, it.contains("Not allowed。")) }
-        reasons("Too long…").forEach { assertTrue(it, it.contains("Too long…。")) }
-        reasons("Wait...").forEach { assertTrue(it, it.contains("Wait...。")) }
+        reasons("Not allowed.").forEach { assertTrue(it, it.contains("Not allowed. ") && !it.contains("Not allowed..")) }
+        reasons("不允许。").forEach { assertTrue(it, it.contains("不允许. ") && !it.contains("不允许。。")) }
+        reasons("Not allowed").forEach { assertTrue(it, it.contains("Not allowed. ")) }
+        reasons("Too long…").forEach { assertTrue(it, it.contains("Too long…. ")) }
+        reasons("Wait...").forEach { assertTrue(it, it.contains("Wait.... ")) }
     }
 
-    /** 这个账号用不了的模型、不支持工具的模型:说清是哪个、去哪换,或到服务商后台开通。 */
+    /** Models this account cannot use, models without tool support: say which one, where to switch, or enable it in the provider console. */
     @Test fun modelNotAvailableNamesTheModel() {
         assertEquals(
-            "模型「qwen-max」这个账号没开通或没权限用。去设置 › 模型换一个模型，或到服务商后台开通。",
+            "Model “qwen-max” is not available for this account (not enabled or no permission). Switch models in Settings › Models, or enable it in the provider's console.",
             StopRules.modelFailed(ModelError.ModelNotAvailable("qwen-max", "not activated")).reason,
         )
         assertEquals(
-            "模型「gemma」不支持调用工具,Mina 干活要靠工具。去设置 › 模型换一个会调用工具的模型。",
+            "Model “gemma” does not support tool calls, and Mina needs tools to work. Switch to a model that supports tool calls in Settings › Models.",
             StopRules.modelFailed(ModelError.ToolsUnsupported("gemma")).reason,
         )
     }
 
-    /** 断流有自己的说法、不提 Base URL;真的解析不了(格式对不上)才提示检查 Base URL 和接口类型。 */
+    /** A cut stream has its own wording and never blames the Base URL; only a real parse failure (format mismatch) points at Base URL and API type. */
     @Test fun streamCutIsNotBlamedOnConfiguration() {
         val cut = StopRules.modelFailed(ModelError.StreamCut()).reason
-        assertTrue(cut.contains("连接就在上游被断开了"))
-        assertTrue(cut.contains("重试后"))
-        assertFalse(cut.contains("Base URL"))
-        assertFalse(cut.contains("接口类型"))
-        assertTrue(StopRules.modelFailed(ModelError.BadResponse("流式响应不是合法 JSON")).reason.contains("请检查 Base URL 和接口类型是否匹配"))
+        assertTrue(cut, cut.contains("upstream connection closed"))
+        assertTrue(cut, cut.contains("retries"))
+        assertFalse(cut, cut.contains("Base URL"))
+        assertFalse(cut, cut.contains("API type"))
+        assertTrue(StopRules.modelFailed(ModelError.BadResponse("streamed response is not valid JSON")).reason.contains("Check that the Base URL matches the API type"))
     }
 }

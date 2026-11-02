@@ -79,7 +79,7 @@ class LoopPoliciesTest {
 
     @Test fun modelFailureReasons() {
         assertTrue("503" in StopRules.modelFailed(ModelError.Server(503)).reason)
-        assertEquals("模型调用异常:boom", StopRules.modelFailed(IllegalStateException("boom")).reason)
+        assertEquals("Model call error: boom", StopRules.modelFailed(IllegalStateException("boom")).reason)
     }
 
     // ---- 卡住提醒 ----
