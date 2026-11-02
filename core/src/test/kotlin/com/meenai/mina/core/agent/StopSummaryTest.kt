@@ -41,7 +41,7 @@ class StopSummaryTest {
         val text = StopSummary.plain("把推荐里的岗位都打个招呼", greeting, null, ::label, ::app)
         assertEquals(
             listOf(
-                "已经停下,停止前做了这些:",
+                "Stopped. Here is what it did before stopping:",
                 "- 去过:jobs.example.com",
                 "- 看过:jobs.example.com的推荐职位",
                 "- 做过:打开网页",
@@ -64,7 +64,7 @@ class StopSummaryTest {
         assertTrue(text, text.contains("- 看过:设置的网络和互联网\n"))
         assertTrue(text, text.contains("- 做过:打开 App、点击 2 次\n"))
         assertTrue(text, text.contains("- 停下时正在写:网络页有 WLAN、热点\n"))
-        assertFalse(text, text.contains("对外发出"))
+        assertFalse(text, text.contains("sent out"))
     }
 
     @Test fun nothingToSayWithoutActionsOrDraft() {

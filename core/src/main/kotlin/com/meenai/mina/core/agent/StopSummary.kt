@@ -79,21 +79,21 @@ class StopSummary(
             for (a in events.filterIsInstance<RunEvent.Activity>()) {
                 val where = a.target?.let { where(it, appLabel) }
                 val what = listOfNotNull(label(a.label), where, a.title?.takeIf(String::isNotBlank)).joinToString(" · ")
-                val tags = listOfNotNull("对外发出".takeIf { a.outward && !a.failed }, "没成功".takeIf { a.failed })
-                val line = "第 ${a.step} 步 $what" + if (tags.isEmpty()) "" else "(${tags.joinToString("、")})"
+                val tags = listOfNotNull("sent out".takeIf { a.outward && !a.failed }, "failed".takeIf { a.failed })
+                val line = "Step ${a.step} $what" + if (tags.isEmpty()) "" else "(${tags.joinToString(", ")})"
                 // 连着读同一处只记一行
                 if (a.kind == "observe" && line == lastObserve) continue
                 lastObserve = if (a.kind == "observe") line else null
                 val note = notes[a.step]?.takeIf { said.add(a.step) }
-                lines += if (note == null) line else "$line —— 用意:$note"
+                lines += if (note == null) line else "$line -- intent: $note"
             }
             val shown = if (lines.size <= MAX_LINES) lines
-                else lines.take(20) + "…(中间省略 ${lines.size - MAX_LINES} 件)…" + lines.takeLast(MAX_LINES - 20)
+                else lines.take(20) + "…(${lines.size - MAX_LINES} omitted)…" + lines.takeLast(MAX_LINES - 20)
             val reads = events.filterIsInstance<RunEvent.Observed>().filter { it.kind == ObsKind.Read.wire && it.text.isNotBlank() }
                 .takeLast(MAX_READS).map { it.text.clip(READ_CHARS) }
             return buildString {
                 append("<request>\n").append(untag(goal)).append("\n</request>\n\n")
-                append("<actions>\n").append(untag(shown.joinToString("\n").ifEmpty { "(还没做任何操作)" })).append("\n</actions>")
+                append("<actions>\n").append(untag(shown.joinToString("\n").ifEmpty { "(nothing done yet)" })).append("\n</actions>")
                 if (reads.isNotEmpty()) append("\n\n<last_read>\n").append(untag(reads.joinToString("\n----\n"))).append("\n</last_read>")
                 draft?.trim()?.takeIf(String::isNotEmpty)?.let { append("\n\n<draft>\n").append(untag(it.clip(DRAFT_CHARS))).append("\n</draft>") }
             }
@@ -109,25 +109,25 @@ class StopSummary(
             val lines = mutableListOf<String>()
             val places = acts.mapNotNull { a -> a.target?.let { placeOf(it, appLabel) } }.distinct()
             val seen = acts.filter { it.kind == "observe" && !it.failed && !it.title.isNullOrBlank() }
-                .map { listOfNotNull(it.target?.let { t -> where(t, appLabel) }, it.title).joinToString("的") }.distinct()
+                .map { listOfNotNull(it.target?.let { t -> where(t, appLabel) }, it.title).joinToString(": ") }.distinct()
             val done = acts.filter { it.kind != "observe" && !it.failed && !it.outward }
                 .groupingBy { label(it.label) }.eachCount()
             val outward = acts.filter { it.outward && !it.failed }
             val failed = acts.count { it.failed }
-            if (places.isNotEmpty()) lines += "去过:" + list(places, 4)
-            if (seen.isNotEmpty()) lines += "看过:" + list(seen, 4)
-            if (done.isNotEmpty()) lines += "做过:" + done.entries.joinToString("、") { (what, n) -> if (n > 1) "$what $n 次" else what }
+            if (places.isNotEmpty()) lines += "Went to:" + list(places, 4)
+            if (seen.isNotEmpty()) lines += "Looked at:" + list(seen, 4)
+            if (done.isNotEmpty()) lines += "Did:" + done.entries.joinToString(", ") { (what, n) -> if (n > 1) "$what x$n" else what }
             if (outward.isNotEmpty()) {
                 val where = outward.mapNotNull { a -> a.target?.let { placeOf(it, appLabel) } }.distinct()
                 val which = outward.map { it.step }.distinct().mapNotNull(notes::get).distinct()
-                lines += "对外发出了 ${outward.size} 次" + (if (where.isEmpty()) "" else "(${where.joinToString("、")})") +
+                lines += "Sent out ${outward.size} times" + (if (where.isEmpty()) "" else "(${where.joinToString(", ")})") +
                     (if (which.isEmpty()) "" else ":" + list(which, 5))
             }
-            if (failed > 0) lines += "有 $failed 步没成功"
-            draft?.trim()?.takeIf(String::isNotEmpty)?.let { lines += "停下时正在写:" + it.clip(200) }
-            val head = if (acts.isEmpty()) "已经停下,还没开始操作。" else "已经停下,停止前做了这些:"
+            if (failed > 0) lines += "$failed steps failed"
+            draft?.trim()?.takeIf(String::isNotEmpty)?.let { lines += "Was writing when stopped:" + it.clip(200) }
+            val head = if (acts.isEmpty()) "Stopped. Nothing was done yet." else "Stopped. Here is what it did before stopping:"
             val body = lines.joinToString("\n") { "- $it" }
-            val tail = "「${goal.trim().clip(40)}」还没做完的部分没有接着做。"
+            val tail = "\u201c${goal.trim().clip(40)}\u201d was not finished, and nothing else was done on it."
             return listOf(head, body, tail).filter(String::isNotEmpty).joinToString("\n")
         }
 
@@ -147,7 +147,7 @@ class StopSummary(
         private const val SITE_PREFIX = "网站 "
 
         private fun list(items: List<String>, max: Int) =
-            items.take(max).joinToString("、") + if (items.size > max) " 等 ${items.size} 处" else ""
+            items.take(max).joinToString(", ") + if (items.size > max) " and ${items.size} more" else ""
 
         /** 每一步模型写的话:先用回复里的进度说明,没有用调用参数里的用意(reason)。 */
         private fun notes(events: List<RunEvent>): Map<Int, String> {

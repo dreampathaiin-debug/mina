@@ -192,7 +192,7 @@ class ChatScreenDeviceTest {
         awaitState { it == TaskState.Cancelled }
         // 停止后补上的交代(脚本模型不写,按记录直接拼)排在「已停止。」下面
         compose.onNodeWithText("已停止。").assertExists()
-        compose.waitUntil(15_000) { compose.onAllNodesWithText("已经停下,停止前做了这些:", substring = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(15_000) { compose.onAllNodesWithText("Stopped. Here is what it did before stopping:", substring = true).fetchSemanticsNodes().isNotEmpty() }
         shot("06b-stopped-summary")
 
         // 紧接着开新任务:服务可能还在收尾上一个,界面要等它收完再交过去

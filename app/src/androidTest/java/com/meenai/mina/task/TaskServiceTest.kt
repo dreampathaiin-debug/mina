@@ -283,7 +283,7 @@ class TaskServiceTest {
         TaskService.cancel(context)
         assertEquals(TaskState.Cancelled, awaitState { !it.running() })
         val plain = pollUntil(20_000) { store.turns(second).lastOrNull { it.runId == secondRun && it.outcome != "已取消" } }!!
-        assertTrue(plain.outcome, plain.outcome.startsWith("已经停下,停止前做了这些:"))
+        assertTrue(plain.outcome, plain.outcome.startsWith("Stopped. Here is what it did before stopping:"))
         assertEquals(1, model.summaryRequests.get())
     }
 
