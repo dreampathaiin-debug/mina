@@ -123,7 +123,13 @@ class ApkUpdater(private val context: Context, private val net: NetProxy = NetPr
             if (archive.packageName != context.packageName || archive.longVersionCode <= installed.longVersionCode) {
                 throw ApkRejected(ApkRejected.Reason.NotNewer)
             }
-            ApkIntegrity.requireSameSigner(installed.signers(), archive.signers(), archive.signerHistory())
+            // Some devices can't read v2/v3-only signatures from an archive at all (empty set here).
+            // The system installer still enforces the same-signature rule on every install, so only
+            // pre-check when the archive's signer was actually readable; otherwise proceed.
+            val archiveSigners = archive.signers()
+            if (archiveSigners.isNotEmpty()) {
+                ApkIntegrity.requireSameSigner(installed.signers(), archiveSigners, archive.signerHistory())
+            }
         } catch (e: ApkRejected) {
             cancel()
             throw e

@@ -17,8 +17,8 @@ android {
         applicationId = "com.meenai.mina"
         minSdk = 30
         targetSdk = 35
-        versionCode = 42
-        versionName = "0.1.41"
+        versionCode = 43
+        versionName = "0.1.42"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
         // 关于页版本号后的 Beta 标记;出正式版时改成 false
@@ -51,6 +51,14 @@ android {
 
     // 评测任务集(仓库根目录 eval/tasks)打进测试包的 assets,真机评测跑器从那里读题
     sourceSets.getByName("androidTest").assets.srcDir(rootProject.file("eval/tasks"))
+
+    signingConfigs {
+        // minSdk 30 se AGP v1 (JAR) signing band kar deta hai; kuch devices archive se
+        // sirf v1 signatures padh paate hain, isliye update pre-check ke liye v1 on rakho.
+        getByName("debug") {
+            enableV1Signing = true
+        }
+    }
 
     buildTypes {
         // 真机验收时并排安装,保留发行版和用户数据;默认构建标识不变。
