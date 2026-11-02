@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Control ids on the compatibility self-check page; the accessibility tree exposes exactly these ids and the check locates controls by them -->
+<resources>
+    <item name="selfcheck_title" type="id" />
+    <item name="selfcheck_note" type="id" />
+    <item name="selfcheck_count" type="id" />
+    <item name="selfcheck_button" type="id" />
+    <item name="selfcheck_input" type="id" />
+    <item name="selfcheck_tick" type="id" />
+    <item name="selfcheck_list" type="id" />
+</resources>

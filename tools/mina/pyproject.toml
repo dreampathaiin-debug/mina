@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mina-phone-cli"
+version = "0.1.0"
+description = "Command-line client for Mina's Android task API"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+dependencies = []
+
+[project.scripts]
+mina = "mina_cli:main"
+
+[tool.setuptools]
+py-modules = ["mina_cli"]
+packages = ["mina_desk"]
+package-dir = {"" = "scripts"}
+
+[tool.setuptools.package-data]
+mina_desk = ["*.html", "*.css", "*.js", "mina-logo.png"]
