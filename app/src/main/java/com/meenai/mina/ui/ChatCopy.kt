@@ -30,6 +30,8 @@ object ChatCopy {
         Example(ExampleKind.App, tr(R.string.chat_example_music)),
         Example(ExampleKind.Device, tr(R.string.chat_example_alarms)),
         Example(ExampleKind.App, tr(R.string.chat_example_creator)),
+        Example(ExampleKind.App, tr(R.string.chat_example_food)),
+        Example(ExampleKind.App, tr(R.string.chat_example_ride)),
     )
 
     /** 对话页顶栏的标题:固定是 App 名;副标题说此刻在做什么。 */

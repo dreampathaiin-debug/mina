@@ -6,12 +6,6 @@
     <string name="chat_greeting_evening">Selamat malam</string>
     <string name="chat_greeting_night">Belum tidur?</string>
     <string name="chat_empty_prompt">Apa yang harus dikerjakan Mina?</string>
-    <string name="chat_example_message">Buka WeChat dan kirim pesan ke Wang Zan agar saya ditambahkan ke grup beta Mina</string>
-    <string name="chat_example_group_summary">Ringkas obrolan grup beta Mina di WeChat hari ini</string>
-    <string name="chat_example_jobs">Lamar 150 lowongan manajer produk AI di BOSS Zhipin</string>
-    <string name="chat_example_music">Buka Qishui Music dan tonton iklan untuk dapat VIP 24 jam</string>
-    <string name="chat_example_alarms">Pasang alarm pukul 9.40, 9.50, dan 10.00 besok pagi</string>
-    <string name="chat_example_creator">Buka Xiaohongshu dan ringkas postingan kreator 王赞不赞</string>
     <string name="chat_working_on">Bekerja di %1$s</string>
     <string name="chat_working">Bekerja</string>
     <string name="chat_wait_previous_task">Dimulai setelah tugas sebelumnya selesai</string>

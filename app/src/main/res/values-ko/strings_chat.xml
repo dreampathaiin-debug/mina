@@ -6,12 +6,6 @@
     <string name="chat_greeting_evening">좋은 저녁이에요</string>
     <string name="chat_greeting_night">늦은 시간이네요</string>
     <string name="chat_empty_prompt">Mina가 무엇을 할까요?</string>
-    <string name="chat_example_message">WeChat을 열어서 Wang Zan에게 Mina 베타 그룹에 초대해 달라고 메시지 보내줘</string>
-    <string name="chat_example_group_summary">WeChat의 Mina 베타 그룹에서 오늘 나눈 이야기를 요약해 줘</string>
-    <string name="chat_example_jobs">BOSS Zhipin에서 AI 프로덕트 매니저 채용 공고 150개에 지원해 줘</string>
-    <string name="chat_example_music">Qishui Music을 열어서 광고를 보고 24시간 VIP를 받아 줘</string>
-    <string name="chat_example_alarms">내일 아침 9시 40분, 9시 50분, 10시에 알람을 맞춰 줘</string>
-    <string name="chat_example_creator">Xiaohongshu를 열어서 크리에이터 王赞不赞의 게시물을 요약해 줘</string>
     <string name="chat_working_on">%1$s에서 작업 중</string>
     <string name="chat_working">작업 중</string>
     <string name="chat_wait_previous_task">이전 작업이 끝나면 시작해요</string>
