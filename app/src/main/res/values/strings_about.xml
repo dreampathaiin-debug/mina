@@ -74,4 +74,7 @@
     <string name="diagnostics_share">Share</string>
     <string name="diagnostics_copied">Copied</string>
     <string name="diagnostics_loading">Collecting…</string>
+    <string name="about_update_channel">App updates</string>
+    <string name="about_update_ready">Mina %1$s ready to install</string>
+    <string name="about_update_notification_text">Tap to install the new version. Your chats and settings are kept.</string>
 </resources>

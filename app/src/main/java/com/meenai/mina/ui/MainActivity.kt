@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         monitor.start()
         // 每次打开都悄悄查一次新版本(两分钟内连着打开的只查一次),失败不吭声
-        (application as MinaApp).updates.autoCheckInBackground()
+        com.meenai.mina.about.UpdateAutomation.onAppOpened(this, (application as MinaApp).updates)
         // 电脑连接开着、服务却不在(被系统停过、从后台没能起来):界面在前台时补起来
         (application as MinaApp).mcp.ensureRunning()
     }
