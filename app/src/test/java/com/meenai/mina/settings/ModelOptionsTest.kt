@@ -66,16 +66,16 @@ class ModelOptionsTest {
             ListedModel("moonshot-v1"),
         )
         val options = ModelOptions.merge(listed, base)
-        val qwen = ProviderPresets.all.single { it.label == "通义千问" }.familyTokens
-        assertEquals(listOf("qwen"), qwen)
+        val kimi = ProviderPresets.all.single { it.label == "Kimi" }.familyTokens
+        assertEquals(listOf("kimi", "moonshot"), kimi)
         assertEquals(
-            listOf("qwen-plus", "qwen-max", "Other/Chat", "antdigital/Ling-3.1-flash", "moonshot-v1"),
-            ModelOptions.candidates(options, qwen),
+            listOf("moonshot-v1", "antdigital/Ling-3.1-flash", "qwen-plus", "qwen-max", "Other/Chat"),
+            ModelOptions.candidates(options, kimi),
         )
-        assertEquals("qwen-plus", ModelOptions.defaultMain(options, qwen))
+        assertEquals("moonshot-v1", ModelOptions.defaultMain(options, kimi))
         // 认不出是哪家:接口明说能调用工具的在前,其余照列表顺序
         assertEquals(listOf("antdigital/Ling-3.1-flash", "qwen-plus", "qwen-max", "Other/Chat", "moonshot-v1"), ModelOptions.candidates(options))
-        assertEquals(qwen, ModelOptions.familyOf("https://dashscope.aliyuncs.com/compatible-mode/v1/"))
+        assertEquals(kimi, ModelOptions.familyOf("https://api.moonshot.cn/v1/"))
         assertEquals(emptyList<String>(), ModelOptions.familyOf("https://openrouter.ai/api/v1"))
     }
 

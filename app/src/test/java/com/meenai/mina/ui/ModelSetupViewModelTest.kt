@@ -74,7 +74,7 @@ class ModelSetupViewModelTest {
         ModelSetupViewModel(s, backgroundScope, io = StandardTestDispatcher(testScheduler))
 
     private val deepseekUrl = "https://api.deepseek.com"
-    private val qwenUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    private val kimiUrl = "https://api.moonshot.cn/v1"
     private val deepseek = ModelListResult.Ok(
         listOf(ListedModel("deepseek-chat"), ListedModel("deepseek-reasoner"), ListedModel("deepseek-coder", toolCalls = false)),
     )
@@ -171,28 +171,28 @@ class ModelSetupViewModelTest {
         assertEquals("deepseek-reasoner", store.configFor(ModelRole.Main)?.model)
     }
 
-    /** 通义千问的 Key 下先列出别家的模型:先试自家的(qwen);第一个没开通就接着试下一个,通过的当主模型,说清先试的哪个没通过。 */
+    /** Kimi 的 Key 下先列出别家的模型:先试自家的(kimi);第一个没开通就接着试下一个,通过的当主模型,说清先试的哪个没通过。 */
     @Test fun notActivatedModelFallsBackToTheNextCandidate() = runTest {
-        listing[qwenUrl] = ModelListResult.Ok(listOf(
+        listing[kimiUrl] = ModelListResult.Ok(listOf(
             ListedModel("antdigital/Ling-3.1-flash", toolCalls = true), ListedModel("text-embedding-v4"),
-            ListedModel("qwen3-max-preview"), ListedModel("qwen-plus"),
+            ListedModel("kimi-k2-preview"), ListedModel("moonshot-v1-8k"),
         ))
         reply = {
-            if (built.last().first != "qwen-plus") throw ModelError.ModelNotAvailable(built.last().first, "The product is not activated.")
+            if (built.last().first != "moonshot-v1-8k") throw ModelError.ModelNotAvailable(built.last().first, "The product is not activated.")
             ModelReply(listOf(Part.ToolCall("c1", "get_time", "{}")), StopReason.ToolUse, null)
         }
         val store = store()
         val vm = vm(store)
-        vm.selectPreset("通义千问"); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
-        assertEquals("自家的先试、向量模型不试", listOf("qwen3-max-preview", "qwen-plus"), built.map { it.first })
+        vm.selectPreset("Kimi"); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
+        assertEquals("自家的先试、向量模型不试", listOf("kimi-k2-preview", "moonshot-v1-8k"), built.map { it.first })
         val p = store.providers.value.single()
-        assertEquals("qwen-plus", store.configFor(ModelRole.Main)?.model)
-        assertTrue("qwen-plus" in p.verifiedModels)
+        assertEquals("moonshot-v1-8k", store.configFor(ModelRole.Main)?.model)
+        assertTrue("moonshot-v1-8k" in p.verifiedModels)
         val s = vm.state.value
         assertFalse(s.showForm)
         assertNull(s.pickToProbe)
         assertEquals(
-            "先试的 qwen3-max-preview 没测试通过：这个账号没开通或没权限用这个模型（服务商说：The product is not activated.）。主模型用了测试通过的「qwen-plus」。",
+            "先试的 kimi-k2-preview 没测试通过：这个账号没开通或没权限用这个模型（服务商说：The product is not activated.）。主模型用了测试通过的「moonshot-v1-8k」。",
             s.probeNote,
         )
     }
@@ -401,14 +401,14 @@ class ModelSetupViewModelTest {
 
     /** 试的几个都没开通:Key 是对的,照样存下服务商,不定主模型,说清试了哪些,请用户从列表里选;选的时候先试调用,不通不选。 */
     @Test fun allCandidatesNotActivatedSavesProviderAndAsksToPick() = runTest {
-        listing[qwenUrl] = ModelListResult.Ok(listOf(
-            ListedModel("antdigital/Ling-3.1-flash", toolCalls = true), ListedModel("qwen-plus"), ListedModel("qwen-max"), ListedModel("qwen-turbo"),
+        listing[kimiUrl] = ModelListResult.Ok(listOf(
+            ListedModel("antdigital/Ling-3.1-flash", toolCalls = true), ListedModel("moonshot-v1-8k"), ListedModel("moonshot-v1-32k"), ListedModel("moonshot-v1-128k"),
         ))
         reply = { throw ModelError.ModelNotAvailable(built.last().first, "The product is not activated.") }
         val store = store()
         val vm = vm(store)
-        vm.selectPreset("通义千问"); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
-        assertEquals("至多试 3 个", listOf("qwen-plus", "qwen-max", "qwen-turbo"), built.map { it.first })
+        vm.selectPreset("Kimi"); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
+        assertEquals("至多试 3 个", listOf("moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"), built.map { it.first })
         val p = store.providers.value.single()
         assertEquals(4, p.models?.size)
         assertEquals("sk", store.providerKey(p.id))
@@ -417,8 +417,8 @@ class ModelSetupViewModelTest {
         assertFalse(s.showForm)
         assertEquals(ListState.Idle, s.form.test)
         assertEquals(
-            "服务商已连上，但「qwen-plus」没测试通过：这个账号没开通或没权限用这个模型（服务商说：The product is not activated.）。从列表里选一个你开通了的模型。\n" +
-                "试了 qwen-plus、qwen-max、qwen-turbo，都没开通。",
+            "服务商已连上，但「moonshot-v1-8k」没测试通过：这个账号没开通或没权限用这个模型（服务商说：The product is not activated.）。从列表里选一个你开通了的模型。\n" +
+                "试了 moonshot-v1-8k、moonshot-v1-32k、moonshot-v1-128k，都没开通。",
             s.probeNote,
         )
         assertEquals(p.id, s.pickToProbe)
@@ -432,21 +432,21 @@ class ModelSetupViewModelTest {
         assertEquals(0, picked)
         assertNull(store.roles.value.main)
         reply = { ModelReply(listOf(Part.ToolCall("c1", "get_time", "{}")), StopReason.ToolUse, null) }
-        vm.pickManual(ModelRole.Main, p.id, "qwen-turbo") { picked++ }; runCurrent()
+        vm.pickManual(ModelRole.Main, p.id, "moonshot-v1-128k") { picked++ }; runCurrent()
         assertEquals(1, picked)
-        assertEquals("qwen-turbo", store.configFor(ModelRole.Main)?.model)
+        assertEquals("moonshot-v1-128k", store.configFor(ModelRole.Main)?.model)
         assertNull(vm.state.value.probeNote)
         assertNull(vm.state.value.pickToProbe)
     }
 
     /** 第一个就是 Key 不对(或别的不是模型的问题):不试别的,不存。 */
     @Test fun authErrorOnTheFirstCandidateSavesNothing() = runTest {
-        listing[qwenUrl] = ModelListResult.Ok(listOf(ListedModel("qwen-plus"), ListedModel("qwen-max")))
+        listing[kimiUrl] = ModelListResult.Ok(listOf(ListedModel("moonshot-v1-8k"), ListedModel("moonshot-v1-32k")))
         reply = { throw ModelError.Auth() }
         val store = store()
         val vm = vm(store)
-        vm.selectPreset("通义千问"); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
-        assertEquals(listOf("qwen-plus"), built.map { it.first })
+        vm.selectPreset("Kimi"); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
+        assertEquals(listOf("moonshot-v1-8k"), built.map { it.first })
         assertTrue(vm.state.value.form.test is ListState.Failed)
         assertTrue(store.providers.value.isEmpty())
         assertNull(vm.state.value.pickToProbe)
@@ -542,15 +542,15 @@ class ModelSetupViewModelTest {
 
     /** 预设(列表接口照理有)没列出模型、手填的找不到:只说模型不存在。 */
     @Test fun presetWithoutListReportsTheMissingModel() = runTest {
-        val ark = ProviderPresets.all.first { it.label == "火山方舟" }
-        listing[ark.baseUrl] = ModelListResult.Failed(ListFailure.NotSupported)
-        reply = { throw ModelError.ModelNotFound("doubao") }
+        val kimiPreset = ProviderPresets.all.first { it.label == "Kimi" }
+        listing[kimiPreset.baseUrl] = ModelListResult.Failed(ListFailure.NotSupported)
+        reply = { throw ModelError.ModelNotFound("moonshot-pro") }
         val store = store()
         val vm = vm(store)
-        vm.selectPreset(ark.label); vm.setApiKey("k"); vm.testAndSave(); runCurrent()
+        vm.selectPreset(kimiPreset.label); vm.setApiKey("k"); vm.testAndSave(); runCurrent()
         assertTrue(vm.state.value.form.noList)
-        vm.setModel("doubao"); vm.testAndSave(); runCurrent()
-        assertEquals(ListState.Failed("模型「doubao」不存在。要填服务商文档里完整的模型 ID（例如 deepseek-chat）。"), vm.state.value.form.test)
+        vm.setModel("moonshot-pro"); vm.testAndSave(); runCurrent()
+        assertEquals(ListState.Failed("模型「moonshot-pro」不存在。要填服务商文档里完整的模型 ID（例如 deepseek-chat）。"), vm.state.value.form.test)
         assertTrue(store.providers.value.isEmpty())
     }
 
@@ -655,16 +655,16 @@ class ModelSetupViewModelTest {
 
     @Test fun addingTwoProvidersInARowKeepsTheFirstMain() = runTest {
         listing[deepseekUrl] = deepseek
-        listing[qwenUrl] = ModelListResult.Ok(listOf(ListedModel("qwen-vl", vision = true), ListedModel("qwen-max")))
+        listing[kimiUrl] = ModelListResult.Ok(listOf(ListedModel("kimi-vl", vision = true), ListedModel("moonshot-v1-8k")))
         val store = store()
         val vm = vm(store)
         vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
         val main = store.roles.value.main
         vm.openForm()
         assertTrue(vm.state.value.showForm)
-        vm.selectPreset("通义千问")
+        vm.selectPreset("Kimi")
         vm.setApiKey("qk"); vm.testAndSave(); runCurrent()
-        assertEquals(listOf("DeepSeek", "通义千问"), vm.state.value.providers.map { it.name })
+        assertEquals(listOf("DeepSeek", "Kimi"), vm.state.value.providers.map { it.name })
         assertEquals(listOf("sk", "qk"), store.providers.value.map { store.providerKey(it.id) })
         assertEquals("第二家不改主模型", main, store.roles.value.main)
         assertEquals(1, store.list().size)
@@ -673,29 +673,29 @@ class ModelSetupViewModelTest {
 
     @Test fun visionCanComeFromAnotherProvider() = runTest {
         listing[deepseekUrl] = deepseek
-        listing[qwenUrl] = ModelListResult.Ok(listOf(ListedModel("qwen-max"), ListedModel("qwen-plain", toolCalls = false)))
+        listing[kimiUrl] = ModelListResult.Ok(listOf(ListedModel("moonshot-v1-8k"), ListedModel("moonshot-plain", toolCalls = false)))
         val store = store()
         val vm = vm(store)
         vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
-        vm.openForm(); vm.selectPreset("通义千问"); vm.setApiKey("qk"); vm.testAndSave(); runCurrent()
-        val qwen = vm.state.value.providers.first { it.name == "通义千问" }
+        vm.openForm(); vm.selectPreset("Kimi"); vm.setApiKey("qk"); vm.testAndSave(); runCurrent()
+        val kimi = vm.state.value.providers.first { it.name == "Kimi" }
         // 选择页列出所有服务商的全部模型,不按能力过滤
         assertEquals(listOf(3, 2), vm.state.value.providers.map { vm.state.value.options(it).size })
-        vm.pick(ModelRole.Vision, qwen.id, "qwen-plain"); runCurrent()
+        vm.pick(ModelRole.Vision, kimi.id, "moonshot-plain"); runCurrent()
         val vision = store.configFor(ModelRole.Vision)!!
-        assertEquals("qwen-plain", vision.model)
-        assertEquals(qwen.id, vision.providerId)
+        assertEquals("moonshot-plain", vision.model)
+        assertEquals(kimi.id, vision.providerId)
         assertTrue("选了看图就记看图", vision.capabilities.vision)
         assertEquals("qk", store.apiKey(vision.id))
         assertEquals("deepseek-chat", store.configFor(ModelRole.Main)?.model)
-        assertTrue(vm.state.value.picked(ModelRole.Vision, qwen.id, "qwen-plain"))
-        assertEquals(listOf(ModelRole.Vision), vm.state.value.rolesOf(qwen))
+        assertTrue(vm.state.value.picked(ModelRole.Vision, kimi.id, "moonshot-plain"))
+        assertEquals(listOf(ModelRole.Vision), vm.state.value.rolesOf(kimi))
         // 用主模型:看图这一路用主模型,不再有单独的看图配置
         vm.choose(ModelRole.Vision, RoleChoice.SameAsMain); runCurrent()
         assertEquals("deepseek-chat", store.configFor(ModelRole.Vision)?.model)
-        assertFalse(vm.state.value.picked(ModelRole.Vision, qwen.id, "qwen-plain"))
+        assertFalse(vm.state.value.picked(ModelRole.Vision, kimi.id, "moonshot-plain"))
         assertEquals(1, store.list().size)
-        assertEquals(emptyList<ModelRole>(), vm.state.value.rolesOf(qwen))
+        assertEquals(emptyList<ModelRole>(), vm.state.value.rolesOf(kimi))
         // 不用
         vm.choose(ModelRole.Vision, RoleChoice.Off); runCurrent()
         assertNull(store.configFor(ModelRole.Vision))
