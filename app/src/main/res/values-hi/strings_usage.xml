@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_24h">24 घंटे</string>
+    <string name="usage_7d">7 दिन</string>
+    <string name="usage_30d">30 दिन</string>
+    <string name="usage_90d">90 दिन</string>
+    <string name="usage_custom">रिवाज़</string>
+    <string name="usage_title">टोकन का उपयोग</string>
+    <string name="usage_none">अभी तक कोई नहीं</string>
+    <string name="usage_empty_title">इस अवधि में कोई उपयोग नहीं</string>
+    <string name="usage_empty_body">मीना से कुछ करने के लिए कहें और इस्तेमाल किए गए टोकन यहां रिकॉर्ड किए जाएंगे।</string>
+    <string name="usage_note">नंबर आपके प्रदाताओं द्वारा बताए गए अनुसार हैं और केवल इसी फ़ोन पर रहते हैं।</string>
+    <string name="usage_total">कुल</string>
+    <string name="usage_trend">रुझान</string>
+    <string name="usage_by_provider">प्रदाता द्वारा</string>
+    <string name="usage_by_provider_hint">इसके मॉडल देखने के लिए किसी एक पर टैप करें</string>
+    <string name="usage_by_model">मॉडल द्वारा</string>
+    <string name="usage_all">सभी</string>
+    <string name="usage_all_providers">सभी प्रदाता</string>
+    <string name="usage_others">अन्य</string>
+    <string name="usage_deleted">"(हटाया गया)"</string>
+    <string name="usage_change_dates">तारीखें बदलें</string>
+    <string name="usage_last_7d">%1$s 7 दिनों में</string>
+    <plurals name="usage_missing">
+        <item quantity="one">%1$d प्रदाता द्वारा कॉल का कोई उपयोग रिपोर्ट नहीं किया गया था और इसे गिना नहीं गया है।</item>
+        <item quantity="other">%1$d प्रदाता द्वारा कॉलों का कोई उपयोग रिपोर्ट नहीं किया गया था और उनकी गिनती नहीं की गई।</item>
+    </plurals>
+    <string name="usage_hourly">प्रति घंटा</string>
+    <string name="usage_daily">दैनिक</string>
+    <string name="usage_weekly">साप्ताहिक</string>
+    <string name="usage_past_24h">पिछले 24 घंटे</string>
+    <string name="usage_until_today">%1$s - आज</string>
+    <string name="usage_now">अब</string>
+    <string name="usage_today">आज</string>
+    <string name="usage_input">इनपुट</string>
+    <string name="usage_output">उत्पादन</string>
+    <string name="usage_calls">कॉल</string>
+</resources>

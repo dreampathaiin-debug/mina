@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="viewer_no_open_app">कोई भी ऐप इस फ़ाइल को नहीं खोल सकता</string>
+    <string name="viewer_no_share_app">कोई भी ऐप इस फ़ाइल को साझा नहीं कर सकता</string>
+    <string name="viewer_open_elsewhere">किसी अन्य ऐप से खोलें</string>
+    <string name="viewer_unsupported">यह फ़ाइल मीना में नहीं देखी जा सकती.</string>
+    <string name="viewer_read_error">इस फ़ाइल को पढ़ने में कुछ ग़लत हो गया.</string>
+    <string name="viewer_page">पृष्ठ %1$d</string>
+    <string name="viewer_truncated">यह फ़ाइल बड़ी है; केवल आरंभ दिखाया गया है.</string>
+</resources>

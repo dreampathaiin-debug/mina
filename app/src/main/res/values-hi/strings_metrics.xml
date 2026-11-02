@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="metrics_model">मॉडल सोच</string>
+    <string name="metrics_observe">स्क्रीन पढ़ना</string>
+    <string name="metrics_act">कार्रवाई</string>
+    <string name="metrics_other">अन्य (प्रतीक्षा करता है, पुनः प्रयास करता है)</string>
+    <string name="metrics_title">आँकड़े चलाएँ</string>
+    <string name="metrics_sub">समय, मॉडल राउंड ट्रिप और हाल की दौड़ के टोकन</string>
+    <string name="metrics_empty">अभी तक कोई रन आँकड़े नहीं. मीना से कुछ करने के लिए कहें और इसे यहां रिकॉर्ड किया जाएगा।</string>
+    <string name="metrics_note">इस फ़ोन पर केवल अंतिम %1$d रन ही गिने जाते हैं। समय तब शुरू होता है जब मीना काम करना शुरू करती है; पहली प्रतिक्रिया तब होती है जब आप पहली बार देखते हैं कि यह क्या कर रहा है।</string>
+    <string name="metrics_copy">JSON कॉपी करें</string>
+    <string name="metrics_share">JSON साझा करें</string>
+    <string name="metrics_last_10">अंतिम 10</string>
+    <plurals name="metrics_runs">
+        <item quantity="one">%1$d</item>
+        <item quantity="other">%1$d</item>
+    </plurals>
+    <string name="duration_h_m">%1$d घंटा %2$d मिनट</string>
+    <string name="metrics_total">%1$s कुल</string>
+    <plurals name="metrics_round_trips">
+        <item quantity="one">%1$d मॉडल राउंड ट्रिप</item>
+        <item quantity="other">%1$d मॉडल राउंड ट्रिप</item>
+    </plurals>
+    <string name="metrics_first_feedback_at">पहली प्रतिक्रिया %1$s</string>
+    <string name="metrics_retry_wait">जिनमें से पुनःप्रयास प्रतीक्षा करता है</string>
+    <string name="metrics_input_tokens">इनपुट टोकन</string>
+    <string name="metrics_output_tokens">आउटपुट टोकन</string>
+    <string name="usage_cached">कैश हिट</string>
+    <string name="metrics_no_usage">कोई उपयोग रिपोर्ट नहीं किया गया</string>
+    <string name="metrics_all_calls">सभी मॉडल अनुरोध</string>
+    <plurals name="metrics_all_calls_value">
+        <item quantity="one">%1$d (साइड कॉल और पुनः प्रयास सहित)</item>
+        <item quantity="other">%1$d (साइड कॉल और पुनः प्रयास सहित)</item>
+    </plurals>
+    <string name="metrics_steps">कदम</string>
+    <string name="metrics_observe_act">पढ़ता/कार्य करता है</string>
+    <string name="metrics_observe_act_value">%1$d / %2$d</string>
+    <string name="metrics_counted">गिना गया</string>
+    <plurals name="metrics_n_runs">
+        <item quantity="one">%1$d भागो</item>
+        <item quantity="other">%1$d रन</item>
+    </plurals>
+    <string name="metrics_success_rate">सफलता दर</string>
+    <string name="metrics_success_value">%1$s (%2$d/%3$d)</string>
+    <string name="metrics_median_time">माध्य समय</string>
+    <string name="metrics_median_feedback">माध्यिका प्रथम प्रतिक्रिया</string>
+    <string name="metrics_avg_round_trips">औसत मॉडल राउंड ट्रिप</string>
+    <string name="metrics_avg_round_trips_value">%1$s</string>
+    <string name="metrics_avg_tokens">औसत टोकन</string>
+    <plurals name="metrics_copied">
+        <item quantity="one">%1$d रन का सारांश कॉपी किया गया</item>
+        <item quantity="other">%1$d रनों का सारांश कॉपी किया गया</item>
+    </plurals>
+    <string name="metrics_export_failed">निर्यात नहीं किया जा सका; डेटा बहुत बड़ा हो सकता है. छोटी रेंज आज़माएं.</string>
+    <string name="metrics_where_time">देखो समय कहाँ गया</string>
+    <string name="metrics_overview">सिंहावलोकन</string>
+    <string name="metrics_time_split">समय कहाँ गया</string>
+    <string name="metrics_export">निर्यात</string>
+    <plurals name="metrics_summary_of">
+        <item quantity="one">इनका सारांश %1$d चलायें</item>
+        <item quantity="other">इन %1$d रनों का सारांश</item>
+    </plurals>
+    <string name="metrics_summary_sub">आपके अपने विश्लेषण के लिए प्रति रन एक प्रविष्टि</string>
+    <plurals name="chat_steps_n">
+        <item quantity="one">%1$d कदम</item>
+        <item quantity="other">%1$d कदम</item>
+    </plurals>
+</resources>

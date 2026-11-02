@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfcheck_title">अनुकूलता स्व-जांच</string>
+    <string name="selfcheck_row_sub">देखें कि इस फ़ोन पर क्या काम करता है और इसकी रिपोर्ट करें</string>
+    <string name="selfcheck_intro">लगभग 1 मिनट का समय लगता है. यह आपके अन्य ऐप्स को नहीं छूता, सेटिंग्स नहीं बदलता और नेटवर्क का उपयोग नहीं करता। कृपया इस पृष्ठ के चलने तक इस पर बने रहें।</string>
+    <string name="selfcheck_start">शुरू</string>
+    <string name="selfcheck_again">दोबारा दौड़ें</string>
+    <string name="selfcheck_cancel">रद्द करना</string>
+    <string name="selfcheck_task_running">एक कार्य चल रहा है. इसके ख़त्म होने के बाद स्वयं-जाँच शुरू करें।</string>
+    <string name="selfcheck_checks">चेकों</string>
+    <string name="selfcheck_report">प्रतिवेदन</string>
+    <string name="selfcheck_copy">रिपोर्ट कॉपी करें</string>
+    <string name="selfcheck_github">GitHub पर रिपोर्ट करें</string>
+    <string name="selfcheck_copied">रिपोर्ट कॉपी की गई</string>
+    <string name="selfcheck_github_copied">रिपोर्ट कॉपी की गई. खुलने वाले पेज पर इसे "सेल्फ-चेक रिपोर्ट" में पेस्ट करें।</string>
+    <string name="selfcheck_report_note">रिपोर्ट में केवल फ़ोन मॉडल, सिस्टम संस्करण और प्रत्येक जाँच का परिणाम है, कोई खाता, ऐप सूची या आपकी सामग्री नहीं है। पोस्ट करने से पहले आप इसे पढ़ सकते हैं.</string>
+
+    <string name="selfcheck_check_device">उपकरण</string>
+    <string name="selfcheck_check_permissions">अनुमतियां</string>
+    <string name="selfcheck_check_helper">अंतर्निहित सहायक</string>
+    <string name="selfcheck_check_display">आभासी प्रदर्शन</string>
+    <string name="selfcheck_check_launch">ऐप्स खुल रहे हैं</string>
+    <string name="selfcheck_check_reading">स्क्रीन पढ़ना</string>
+    <string name="selfcheck_check_actions">टैप करें और टाइप करें</string>
+    <string name="selfcheck_check_alive">चलता रहता है</string>
+    <string name="selfcheck_check_main">आपकी स्क्रीन अबाधित है</string>
+    <string name="selfcheck_check_browser">अंतर्निर्मित ब्राउज़र</string>
+    <string name="selfcheck_check_sandbox">सैंडबॉक्स</string>
+    <string name="selfcheck_check_copies">ऐप प्रतियां</string>
+
+    <string name="selfcheck_status_pending">इंतज़ार में</string>
+    <string name="selfcheck_status_running">चेकिंग</string>
+    <string name="selfcheck_status_pass">उत्तीर्ण</string>
+    <string name="selfcheck_status_partial">आंशिक</string>
+    <string name="selfcheck_status_fail">असफल</string>
+    <string name="selfcheck_status_skipped">छोड़ा गया</string>
+
+    <string name="selfcheck_line_pending">अभी तक शुरू नहीं हुआ</string>
+    <string name="selfcheck_line_running">जाँच हो रही है...</string>
+    <string name="selfcheck_line_pass">काम करता है</string>
+    <string name="selfcheck_line_needs">छोड़ा गया: "%1$s" को पहले पास करना होगा</string>
+    <string name="selfcheck_line_other">पास नहीं हुआ विवरण के लिए रिपोर्ट देखें.</string>
+
+    <string name="selfcheck_advice_too_old">यह सिस्टम Android 12 से पुराना है, इसलिए फ़ोन नियंत्रण उपलब्ध नहीं है। चैट, वेब और सैंडबॉक्स अभी भी काम करते हैं।</string>
+    <string name="selfcheck_advice_no_wireless">इस सिस्टम में कोई वायरलेस डिबगिंग नहीं है. इसके बजाय आप USB पर कंप्यूटर से फ़ोन नियंत्रण प्रारंभ कर सकते हैं।</string>
+    <string name="selfcheck_advice_phone_unavailable">यह वातावरण आपके फ़ोन पर ऐप्स संचालित नहीं कर सकता (कोई डेवलपर विकल्प या वायरलेस डिबगिंग नहीं); चैट, वेब, फ़ाइलें और गणनाएँ हमेशा की तरह काम करती हैं।</string>
+    <string name="selfcheck_advice_a11y_off">अभिगम्यता बंद है. सेटिंग &gt; फ़ोन नियंत्रण में मीना की पहुंच चालू करें।</string>
+    <string name="selfcheck_advice_a11y_restart">एक्सेसिबिलिटी चालू है लेकिन चल नहीं रही है. सिस्टम सेटिंग्स में मीना की पहुंच को बंद और फिर से चालू करें।</string>
+    <string name="selfcheck_advice_notifications">सूचनाएं अवरुद्ध हैं, इसलिए आपको कार्य प्रगति या "आपकी आवश्यकता है" अलर्ट नहीं दिखाई देंगे।</string>
+    <string name="selfcheck_advice_battery">बैटरी का उपयोग प्रतिबंधित है, इसलिए मीना को पृष्ठभूमि में रोका जा सकता है। आप इसे पुनर्प्राप्ति एवं मरम्मत में उठा सकते हैं.</string>
+    <string name="selfcheck_advice_setup">अंतर्निर्मित सहायक नहीं चल रहा है. सेटिंग्स › फ़ोन नियंत्रण में सेटअप समाप्त करें, फिर इसे फिर से चलाएँ।</string>
+    <string name="selfcheck_advice_display">मीना का वर्चुअल डिस्प्ले नहीं बनाया जा सका. सहायक को पुनः कनेक्ट करें और पुनः प्रयास करें; यदि यह अभी भी विफल रहता है, तो कृपया इसकी रिपोर्ट करें।</string>
+    <string name="selfcheck_advice_focus">मीना के वर्चुअल डिस्प्ले का अपना कोई फोकस नहीं है, इसलिए मीना के काम करने के दौरान आपकी स्क्रीन कुछ समय के लिए इनपुट फोकस खो सकती है। सब कुछ अभी भी काम करता है.</string>
+    <string name="selfcheck_advice_launch">मीना के वर्चुअल डिस्प्ले पर एक पेज नहीं खुला। कृपया इसकी रिपोर्ट करें.</string>
+    <string name="selfcheck_advice_on_main">मीना के वर्चुअल डिस्प्ले के बजाय आपकी स्क्रीन पर सिस्टम सेटिंग्स खुल गईं। कृपया इसकी रिपोर्ट करें.</string>
+    <string name="selfcheck_advice_settings_in_use">सिस्टम सेटिंग्स आपकी स्क्रीन पर खुली हैं, इसलिए इस चरण ने इसे नहीं खोला। इसे बंद करें और इसे फिर से चलाएँ।</string>
+    <string name="selfcheck_advice_read">पृष्ठ के नियंत्रण पढ़े नहीं जा सके. मीना की पहुंच को बार-बार बंद करें, फिर इसे चलाएं।</string>
+    <string name="selfcheck_advice_blank">वर्चुअल डिस्प्ले का चित्र पूरा काला या खाली है। कृपया इसकी रिपोर्ट करें.</string>
+    <string name="selfcheck_advice_action">कुछ कार्रवाइयां प्रभावी नहीं हुईं (रिपोर्ट देखें)। कृपया इसकी रिपोर्ट करें.</string>
+    <string name="selfcheck_advice_frames">वर्चुअल डिस्प्ले कुछ समय बाद अपडेट होना बंद हो जाता है, इसलिए कार्य अटक सकते हैं। कृपया इसकी रिपोर्ट करें.</string>
+    <string name="selfcheck_advice_main">जांच के दौरान आपकी स्क्रीन बदल गई. यदि आप इस पृष्ठ पर रुके हैं, तो कृपया इसकी रिपोर्ट करें।</string>
+    <string name="selfcheck_advice_no_webview">इस सिस्टम पर कोई प्रयोग करने योग्य वेबव्यू नहीं है, इसलिए अंतर्निहित ब्राउज़र काम नहीं कर सकता है। सिस्टम वेबव्यू घटक स्थापित या अद्यतन करें।</string>
+    <string name="selfcheck_advice_web">अंतर्निहित ब्राउज़र स्थानीय परीक्षण पृष्ठ को पढ़ या टैप नहीं कर सका। कृपया इसकी रिपोर्ट करें.</string>
+    <string name="selfcheck_advice_sandbox_unsupported">सैंडबॉक्स केवल 64-बिट एआरएम फोन पर उपलब्ध है।</string>
+    <string name="selfcheck_advice_sandbox_not_prepared">सैंडबॉक्स अभी तक तैयार नहीं हुआ है. यह पहली बार तब तैयार हो जाता है जब कोई कार्य इसका उपयोग करता है; फिर इसे दोबारा चलाएँ।</string>
+    <string name="selfcheck_advice_sandbox_failed">सैंडबॉक्स कमांड ने अपेक्षित परिणाम नहीं दिया। आप फ़ाइलें और कंप्यूटिंग परिवेश में परिवेश को रीसेट कर सकते हैं और पुनः प्रयास कर सकते हैं।</string>
+    <string name="selfcheck_advice_timeout">इस जाँच में बहुत अधिक समय लग गया। इसे फिर से चलाएँ; यदि यह समय-समय पर समाप्त होता रहता है, तो कृपया इसकी रिपोर्ट करें।</string>
+    <string name="selfcheck_advice_error">इस चेक में त्रुटि आ गई. कृपया इसकी रिपोर्ट करें.</string>
+    <string name="selfcheck_advice_out_of_time">इस जाँच से पहले स्व-जाँच का समय समाप्त हो गया।</string>
+    <string name="selfcheck_advice_cancelled">रद्द कर दिया गया.</string>
+
+    <string name="selfcheck_target_title">मीना स्व-जाँच पृष्ठ</string>
+    <string name="selfcheck_target_note">यह मीना का अपना परीक्षण पृष्ठ है। अनुकूलता स्व-जाँच नल और प्रकार यहाँ; यह आपके अन्य ऐप्स को नहीं छूता.</string>
+    <string name="selfcheck_target_taps">नल: %1$d</string>
+    <string name="selfcheck_target_button">मुझे टैप करें</string>
+    <string name="selfcheck_target_input">यहाँ टाइप करें</string>
+    <string name="selfcheck_target_tick">टिक करें %1$d</string>
+    <string name="selfcheck_target_row">पंक्ति %1$d</string>
+</resources>

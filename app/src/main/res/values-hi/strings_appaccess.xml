@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appaccess_title">ऐप एक्सेस</string>
+    <string name="appaccess_row_sub">ऐप्स को ब्लॉक करें और प्रति ऐप स्क्रीन शेयरिंग करें</string>
+    <string name="appaccess_intro">चुनें कि मीना किन ऐप्स को पढ़ सकती है और मानक फ़ोन टूल के साथ संचालित कर सकती है। शेल कमांड, सैंडबॉक्स और कंप्यूटर एक्सेस (एमसीपी) इस सेटिंग द्वारा प्रतिबंधित नहीं हैं।</string>
+    <string name="appaccess_privacy">वर्गीकृत करने से ऐप के नाम और पैकेज के नाम एआई मॉडल पर भेजे जाते हैं; "ऐप सूची ताज़ा करें" आपसे पहले पूछता है।</string>
+    <string name="appaccess_unavailable">ऐप एक्सेस सेटिंग्स को पढ़ा नहीं जा सकता, इसलिए मानक फ़ोन एक्सेस रोक दिया गया है। रीसेट करने से सहेजी गई अनुमतियाँ और श्रेणियाँ साफ़ हो जाती हैं।</string>
+    <string name="appaccess_reset">ऐप एक्सेस रीसेट करें</string>
+    <string name="appaccess_search">नाम या पैकेज खोजें</string>
+    <string name="appaccess_refreshing">वर्गीकृत किया जा रहा है...</string>
+    <string name="appaccess_refresh">ऐप सूची ताज़ा करें</string>
+    <string name="appaccess_recommend">ब्लॉक करने की अनुशंसा की गई</string>
+    <string name="appaccess_recommend_count">ब्लॉक करने की अनुशंसा · %1$d</string>
+    <string name="appaccess_allow_all">सभी को अनुमति दें</string>
+    <string name="appaccess_risk_note">स्वचालित संचालन इनके लिए खाता सीमाएँ ला सकता है; जिनकी आपको आवश्यकता नहीं है उन्हें ब्लॉक करें।</string>
+    <string name="appaccess_blocked">अवरोधित</string>
+    <string name="appaccess_allowed">अनुमत</string>
+    <string name="appaccess_revoke_share">%1$s के लिए स्क्रीन शेयरिंग रद्द करें</string>
+
+    <string name="appaccess_send_title">ऐप सूची AI को भेजें?</string>
+    <string name="appaccess_send_body">रिफ्रेशिंग आपके इंस्टॉल किए गए ऐप्स को पढ़ता है और जोखिम श्रेणी का आकलन करने के लिए उनके नाम और पैकेज नाम आपके द्वारा कॉन्फ़िगर किए गए एआई मॉडल पर भेजता है। ऐप्स के अंदर कुछ भी नहीं भेजा जाता है.</string>
+    <string name="appaccess_send_confirm">जारी रखें और वर्गीकृत करें</string>
+    <string name="appaccess_cancel">रद्द करना</string>
+
+    <string name="appaccess_recommend_title">ब्लॉक करने की अनुशंसा: वित्त ऐप्स</string>
+    <string name="appaccess_recommend_body">इन ऐप्स को वित्त या भुगतान के रूप में वर्गीकृत किया गया है, और मीना अभी भी इन्हें संचालित कर सकती है। उन्हें एक-एक करके, या सभी को एक साथ ब्लॉक करें।</string>
+    <string name="appaccess_recommend_empty">रोकने के लिए कुछ भी नहीं.</string>
+    <string name="appaccess_block">अवरोध पैदा करना</string>
+    <string name="appaccess_block_all">सभी को ब्लॉक करें</string>
+
+    <string name="appaccess_edit_category">श्रेणी बदलें</string>
+    <string name="appaccess_category_manual">आपके द्वारा सेट किया गया</string>
+
+    <string name="appaccess_error_save">सहेजा नहीं जा सका</string>
+    <string name="appaccess_error_no_model">कोई मॉडल उपलब्ध नहीं है. ऐप सूची ताज़ा की गई थी लेकिन वर्गीकृत नहीं की जा सकी।</string>
+    <string name="appaccess_error_refresh">रिफ्रेश विफल रहा</string>
+    <string name="appaccess_error_load">ऐप्लिकेशन सूची नहीं पढ़ी जा सकी</string>
+
+    <string name="appaccess_category_finance">वित्त</string>
+    <string name="appaccess_category_social">सामाजिक</string>
+    <string name="appaccess_category_game">खेल</string>
+    <string name="appaccess_category_shopping">खरीदारी</string>
+    <string name="appaccess_category_productivity">उत्पादकता</string>
+    <string name="appaccess_category_media">मिडिया</string>
+    <string name="appaccess_category_other">अन्य</string>
+    <string name="appaccess_category_unknown">अवर्गीकृत</string>
+
+    <string name="appaccess_share_title">%1$s की स्क्रीन साझा करें</string>
+    <string name="appaccess_share_body">यह ऐप ब्लॉक कर दिया गया है. स्क्रीन साझाकरण आपको इसे उद्देश्यपूर्ण रूप से साझा करने की सुविधा देता है; स्वचालित रीडिंग और संचालन अवरुद्ध रहता है।</string>
+    <string name="appaccess_share_allow">केवल स्क्रीन शेयरिंग की अनुमति दें</string>
+    <string name="appaccess_share_unblock">अवरोधित से हटाएँ</string>
+    <string name="appaccess_share_cancel">साझाकरण रद्द करें</string>
+    <string name="appaccess_share_expired">स्क्रीन साझा करने की अनुमति समाप्त हो गई. एक नया स्क्रीनशॉट लें.</string>
+</resources>

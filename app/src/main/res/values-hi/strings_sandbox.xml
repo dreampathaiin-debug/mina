@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="install_check">डिवाइस की जांच हो रही है</string>
+    <string name="install_extract">खोल</string>
+    <string name="install_configure">का विन्यास</string>
+    <string name="install_skills">कौशल स्क्रिप्ट समन्वयित करना</string>
+    <string name="install_interrupted">सेटअप बाधित हो गया था; आप पुनः प्रयास कर सकते हैं</string>
+    <string name="install_checksum">फ़ाइल चेकसम बेमेल</string>
+    <string name="install_unpack_failed">पर्यावरण को अनपैक नहीं किया जा सका; कृपया मीना को पुनः स्थापित करें: %1$s</string>
+    <string name="install_unsupported">इस डिवाइस पर समर्थित नहीं है (arm64 की आवश्यकता है)</string>
+    <string name="install_no_space">पर्याप्त स्थान नहीं: %1$d एमबी की आवश्यकता है (%2$d एमबी निःशुल्क)</string>
+    <string name="install_cannot_start">पर्यावरण प्रारंभ नहीं होगा: %1$s</string>
+    <string name="install_exit_code">निकास कोड %1$d</string>
+    <string name="install_no_client">मीना कमांड अनुपलब्ध है (अपूर्ण पैकेज)</string>
+    <string name="sandbox_resetting">रीसेट किया जा रहा</string>
+    <string name="sandbox_incomplete">पर्यावरण फ़ाइलें अधूरी हैं; आप इसे सेटिंग्स → उन्नत में रीसेट कर सकते हैं</string>
+    <string name="sandbox_not_finished">सेटअप पूरा नहीं हुआ; आप पुनः प्रयास कर सकते हैं</string>
+    <string name="sandbox_network">स्क्रिप्ट को ऑनलाइन जाने की अनुमति दें</string>
+    <string name="sandbox_network_sub">डिफ़ॉल्ट रूप से बंद</string>
+    <string name="sandbox_network_explain">डिफ़ॉल्ट रूप से मीना फाइलों के साथ काम करती है और स्क्रिप्ट को ऑफ़लाइन चलाती है। इसके चालू होने से, स्क्रिप्ट नेटवर्क का उपयोग कर सकती हैं (उदाहरण के लिए कागजात या मानचित्र देखने के लिए) और चैट से फ़ाइलें भी भेज सकती हैं।</string>
+    <string name="sandbox_isolation_unavailable">यह डिवाइस स्क्रिप्ट को ऑफ़लाइन नहीं रख सकता: मीना केवल फ़ाइलों के साथ काम कर सकती है और स्क्रिप्ट चला सकती है जब "स्क्रिप्ट को ऑनलाइन जाने की अनुमति दें" चालू हो</string>
+    <string name="sandbox_reset_title">परिवेश रीसेट करें?</string>
+    <string name="sandbox_reset_body">मीना द्वारा फ़ाइलों और स्क्रिप्ट के लिए उपयोग किए जाने वाले वातावरण को हटाता है, साथ ही प्रत्येक चैट में बनाई गई फ़ाइलों (आपके द्वारा संलग्न की गई फ़ाइलों सहित) को हटाता है, फिर इसे स्वचालित रूप से फिर से सेट करता है। चैट और सेटिंग प्रभावित नहीं होंगी.</string>
+    <string name="sandbox_broken">सेटअप समाप्त नहीं हुआ: %1$s</string>
+    <string name="sandbox_reset_sub">जब कुछ गलत होता है: इसे हटा देता है और इसे फिर से सेट करता है</string>
+    <string name="sandbox_reset">वातावरण रीसेट करें</string>
+    <string name="reset">रीसेट करें</string>
+</resources>

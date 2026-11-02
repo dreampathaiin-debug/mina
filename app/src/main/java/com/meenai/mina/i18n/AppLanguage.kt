@@ -23,12 +23,7 @@ import java.util.Locale
 enum class AppLanguage(val tag: String?, val speechTag: String?) {
     System(null, null),
     English("en", "en-US"),
-    Japanese("ja", "ja-JP"),
-    Korean("ko", "ko-KR"),
-    Spanish("es", "es-ES"),
-    Portuguese("pt", "pt-BR"),
-    Russian("ru", "ru-RU"),
-    Indonesian("id", "id-ID");
+    Hindi("hi", "hi-IN");
 
     /** 语言代码(不带文字体系和地区);跟随系统时为 null。 */
     val language: String? get() = tag?.let { Locale.forLanguageTag(it).language.let(::modernCode) }

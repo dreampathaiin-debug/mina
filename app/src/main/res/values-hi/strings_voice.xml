@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Chat composer: hold to talk -->
+    <string name="voice_placeholder_idle">बात करने के लिए दबाए रखें, टाइप करने के लिए टैप करें</string>
+    <string name="voice_placeholder_busy">कार्य पर बात करने के लिए दबाए रखें, टाइप करने के लिए टैप करें</string>
+    <string name="voice_placeholder_answer">उत्तर देने के लिए दबाए रखें, टाइप करने के लिए टैप करें</string>
+    <string name="voice_listening">सुनना</string>
+    <string name="voice_steer_to">"%1$s" बता रहा हूँ</string>
+    <string name="voice_engine_phone">फ़ोन</string>
+    <string name="voice_engine_phone_offline">फ़ोन · ऑफ़लाइन</string>
+    <string name="voice_say_now">आगे बढ़ो, मैं सुन रहा हूँ...</string>
+    <string name="voice_recording">रिकॉर्डिंग. जाने दो और यह पाठ में बदल जाता है...</string>
+    <string name="voice_foot_live">जाने दें · शब्द संपादित करने के लिए बॉक्स में जाते हैं</string>
+    <string name="voice_foot_convert">जाने दें · टेक्स्ट में परिवर्तित, फिर बॉक्स में</string>
+    <string name="voice_left">%1$d शेष है</string>
+    <string name="voice_slide_cancel">रद्द करने के लिए ऊपर स्लाइड करें</string>
+    <string name="voice_release_cancel">रद्द करने के लिए जाने दो</string>
+    <string name="voice_release_fill">भरने के लिए जाने दो</string>
+    <string name="voice_release_convert">चलो कन्वर्ट करने के लिए</string>
+    <string name="voice_converting">परिवर्तित किया जा रहा है...</string>
+    <string name="voice_no_match">वह पकड़ में नहीं आया. पकड़ो और इसे फिर से कहो</string>
+    <string name="voice_busy">वाक् पहचान व्यस्त है. थोड़ी देर में पुनः प्रयास करें</string>
+    <string name="voice_network">कोई नेटवर्क नहीं, इसे टेक्स्ट में नहीं बदला जा सका</string>
+    <string name="voice_mic_unavailable">माइक्रोफ़ोन उपलब्ध नहीं है. हो सकता है कोई दूसरा ऐप इसका इस्तेमाल कर रहा हो</string>
+    <string name="voice_hold_to_talk">लगा रहो बातो मै</string>
+    <string name="voice_mic_blocked_title">माइक्रोफ़ोन अभी भी उपलब्ध नहीं है</string>
+    <string name="voice_mic_blocked_body">रिकॉर्डिंग की अनुमति पहले से ही है, लेकिन मीना अभी भी रिकॉर्ड नहीं कर सकती। जांचें कि त्वरित सेटिंग्स में माइक्रोफ़ोन एक्सेस स्विच चालू है (एंड्रॉइड 12 और बाद में), और सिस्टम के अनुमति प्रबंधक में मीना का माइक्रोफ़ोन बंद नहीं है। हो सकता है कि कोई अन्य ऐप भी माइक्रोफ़ोन का उपयोग कर रहा हो.</string>
+    <string name="voice_provider_failed">इसे पाठ में नहीं बदला जा सका: %1$s</string>
+    <string name="voice_unavailable_title">ध्वनि इनपुट तैयार नहीं है</string>
+    <string name="voice_unavailable_no_engine">इस फ़ोन में कोई अंतर्निहित वाक् पहचान नहीं है, और कोई वाक्-से-पाठ मॉडल नहीं चुना गया है। सेटिंग्स › मॉडल › स्पीच टू टेक्स्ट में प्रदाता का स्पीच मॉडल चुनें और यह काम करेगा।</string>
+    <string name="voice_unavailable_system_gone">स्पीच टू टेक्स्ट को फ़ोन की अंतर्निहित पहचान पर सेट किया गया है, लेकिन इस फ़ोन में अभी यह नहीं है। सेटिंग्स › मॉडल › स्पीच टू टेक्स्ट में कोई दूसरा चुनें।</string>
+    <string name="voice_unavailable_system_silent">फ़ोन की अंतर्निहित वाक् पहचान ने प्रतिक्रिया नहीं दी, इसलिए कोई शब्द नहीं आया। सेटिंग्स › मॉडल › स्पीच टू टेक्स्ट में प्रदाता का स्पीच मॉडल चुनें और यह काम करेगा।</string>
+    <string name="voice_unavailable_provider_gone">चुने गए भाषण मॉडल के प्रदाता को हटा दिया गया है। सेटिंग्स › मॉडल › स्पीच टू टेक्स्ट में कोई दूसरा चुनें।</string>
+    <string name="voice_unavailable_off">भाषण से पाठ बंद है. सेटिंग्स › मॉडल › स्पीच टू टेक्स्ट में से एक चुनें।</string>
+    <string name="voice_go_pick">एक चुनें</string>
+    <string name="voice_permission_title">मीना को माइक्रोफोन की जरूरत है</string>
+    <string name="voice_permission_body">जब आप बात कर रहे हों तो आपको सुनने के लिए, मीना को ऑडियो रिकॉर्ड करना होगा। इससे पहले इनकार कर दिया गया था, इसलिए फ़ोन दोबारा नहीं पूछेगा। सिस्टम सेटिंग्स में मीना के अनुमति पृष्ठ पर माइक्रोफ़ोन चालू करें।</string>
+    <string name="voice_permission_open">खुली सेटिंग</string>
+    <!-- Floating capsule: long press to talk -->
+    <string name="capsule_voice_talk">बात करना</string>
+    <string name="capsule_voice_send">भेजना</string>
+    <string name="capsule_voice_answer_title">मीना जवाब दे रही है</string>
+    <string name="capsule_voice_continue_title">जारी "%1$s"</string>
+    <string name="capsule_voice_cancel">रद्द करना</string>
+    <string name="capsule_voice_edit">संपादन करना</string>
+    <string name="capsule_voice_foot_send_up">भेजने के लिए जाने दें · रद्द करने या संपादित करने के लिए ऊपर खींचें</string>
+    <string name="capsule_voice_foot_send_down">भेजने के लिए जाने दें · रद्द करने या संपादित करने के लिए नीचे खींचें</string>
+    <string name="capsule_voice_foot_convert_up">कनवर्ट करने और भेजने के लिए आगे बढ़ें · रद्द करने या संपादित करने के लिए ऊपर खींचें</string>
+    <string name="capsule_voice_foot_convert_down">कनवर्ट करने और भेजने के लिए जाने दें · रद्द करने या संपादित करने के लिए नीचे खींचें</string>
+    <string name="capsule_voice_foot_edit">जाने दें · कार्ड बॉक्स में शब्दों के साथ खुलता है</string>
+    <string name="capsule_voice_foot_cancel">जाने दो · इसे त्याग दो</string>
+    <string name="capsule_voice_foot_a11y">जब आपका काम पूरा हो जाए, तो कैप्सूल की क्रियाओं में "भेजें" चुनें</string>
+    <string name="capsule_voice_steered">कार्य बताया: %1$s</string>
+    <string name="capsule_voice_answered">उत्तर दिया गया: %1$s</string>
+    <string name="capsule_voice_sent">भेजा गया: %1$s</string>
+    <string name="capsule_voice_need_mic">मीना में माइक की अनुमति देने के लिए टैप करें</string>
+    <string name="capsule_voice_not_ready">ध्वनि इनपुट तैयार नहीं है · टैप करें</string>
+    <string name="capsule_voice_open">मीना खोलें</string>
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dev_adaptive">पहले तत्वों को पढ़ें, आवश्यकता पड़ने पर छवियों को पढ़ें</string>
+    <string name="dev_adaptive_sub">यूआई ट्री पर्याप्त होने पर छवियाँ भेजना बंद कर देता है; जब ऐसा न हो तो एक जोड़ देता है</string>
+    <string name="dev_inline">क्रियाओं के बाद स्क्रीन परिवर्तन लौटाएँ</string>
+    <string name="dev_inline_sub">प्रत्येक क्रिया के बाद स्क्रीन पर नज़र डालें, एक अलग पढ़ने को सहेजें</string>
+    <string name="dev_batch">सुनिश्चित होने पर कई कदम उठाएँ</string>
+    <string name="dev_batch_sub">मॉडल से पूछने के लिए बिना रुके कुछ कदम एक बार में उठाता है</string>
+    <string name="dev_deep_links">लक्ष्य पृष्ठ सीधे खोलें</string>
+    <string name="dev_deep_links_sub">टैप करने के बजाय ऐप्स के अंदर सीधे पृष्ठों पर जाने के लिए लिंक का उपयोग करता है</string>
+    <string name="dev_light">आसान कदम प्रकाश मॉडल पर जाएं</string>
+    <string name="dev_light_sub">तेज़ प्रकाश मॉडल आसान कदम उठाता है; मुख्य मॉडल कठोर रखता है</string>
+    <string name="dev_replay">पिछली बार जो काम आया उसे दोहराएँ</string>
+    <string name="dev_replay_sub">पहले किए गए कार्यों के लिए सहेजे गए मार्गों को पुनः प्रदर्शित करता है; यदि वे मेल नहीं खाते तो मॉडल को वापस सौंप दें</string>
+    <string name="dev_parallel">चैट को समानांतर में चलाएँ</string>
+    <string name="dev_parallel_sub">अलग-अलग चैट के प्रत्येक कार्य को एक वर्चुअल स्क्रीन मिलती है और वे एक साथ चलते हैं</string>
+    <string name="dev_compaction">लंबे कार्यों के लिए संरचित सारांश</string>
+    <string name="dev_compaction_sub">जब कई चरणों को संपीड़ित करने की आवश्यकता होती है, तो लक्ष्य, तथ्य, प्रगति और अगला चरण नोट करें</string>
+    <string name="dev_group">मीना कैसे काम करती है</string>
+    <string name="dev_autonomy">स्वायत्त मोड</string>
+    <string name="dev_autonomy_sub">चालू होने पर, मीना भुगतान करने से पहले भी नहीं पूछती और बस ख़त्म कर देती है; बंद होने पर, यह भुगतान करने से पहले ही पूछता है</string>
+    <string name="dev_note">ये स्विच प्रभावित करते हैं कि मीना कैसे और कितनी तेजी से काम करती है। आमतौर पर उन्हें डिफॉल्ट पर छोड़ देते हैं।</string>
+    <string name="dev_grounding">विज़न ग्राउंडिंग सत्यापित</string>
+    <string name="dev_grounding_sub">चीज़ों का सटीक पता लगाने के लिए विज़न मॉडल %1$s का परीक्षण हो जाने पर उसे चालू करें; बंद होने पर, जिन स्थितियों को यह चिह्नित करता है उन्हें मीना द्वारा टैप करने से पहले अन्य साक्ष्य की आवश्यकता होती है।</string>
+    <string name="dev_speed">रफ़्तार</string>
+    <string name="dev_experiments">प्रयोगों</string>
+    <string name="dev_run_log">रिकॉर्ड चलाएँ</string>
+</resources>

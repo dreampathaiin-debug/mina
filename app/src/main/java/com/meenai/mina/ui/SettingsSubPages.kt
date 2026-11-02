@@ -349,12 +349,7 @@ fun languageLabel(l: AppLanguage): String = stringResource(
     when (l) {
         AppLanguage.System -> R.string.language_system
         AppLanguage.English -> R.string.language_english
-        AppLanguage.Japanese -> R.string.language_japanese
-        AppLanguage.Korean -> R.string.language_korean
-        AppLanguage.Spanish -> R.string.language_spanish
-        AppLanguage.Portuguese -> R.string.language_portuguese
-        AppLanguage.Russian -> R.string.language_russian
-        AppLanguage.Indonesian -> R.string.language_indonesian
+        AppLanguage.Hindi -> R.string.language_hindi
     },
 )
 

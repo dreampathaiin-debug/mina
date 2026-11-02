@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="confirm_note">जो कुछ भी पैसा खर्च करता है उसे हर बार आपकी सहमति की आवश्यकता होती है।</string>
+    <string name="confirm_pay">वेतन</string>
+    <string name="confirm_delete">मिटाना</string>
+    <string name="confirm_order">आदेश देना</string>
+    <string name="confirm_submit">जमा करना</string>
+    <string name="confirm_other">अन्य काम</string>
+    <string name="confirm_title">आपके ओके की आवश्यकता है: %1$s</string>
+    <string name="confirm_in_app">%1$s में</string>
+    <string name="confirm_target">प्रति: %1$s</string>
+    <string name="confirm_content">सामग्री: %1$s</string>
+</resources>

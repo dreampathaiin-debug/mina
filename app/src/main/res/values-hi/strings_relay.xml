@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="relay_transport">दूर</string>
+    <string name="relay_pair_title">एक दूरस्थ गेटवे जोड़ें</string>
+    <string name="relay_pair_sub">गेटवे वेब पेज पर एक पेयरिंग कोड बनाएं, फिर नीचे उसका पता और कोड दर्ज करें।</string>
+    <string name="relay_gateway">द्वार</string>
+    <string name="relay_code">युग्मन कोड</string>
+    <string name="relay_code_hint">आपके गेटवे से एक बार का कोड</string>
+    <string name="relay_pair">युग्म प्रवेशद्वार</string>
+    <string name="relay_busy">कृपया प्रतीक्षा करें…</string>
+    <string name="relay_enable">रिमोट एक्सेस की अनुमति दें</string>
+    <string name="relay_disabled">युग्मित। रिमोट एक्सेस बंद है</string>
+    <string name="relay_online">गेटवे जुड़ा हुआ है. सीएलआई/एमसीपी अनुरोधों की प्रतीक्षा की जा रही है</string>
+    <string name="relay_connecting">दूरस्थ गेटवे से कनेक्ट हो रहा है…</string>
+    <string name="relay_offline">कनेक्शन टूट गया। स्वचालित रूप से पुन: कनेक्ट हो रहा है</string>
+    <string name="relay_unauthorized">युग्मन समाप्त हो गया या निरस्त कर दिया गया. गेटवे को फिर से जोड़ें</string>
+    <string name="relay_copy_address">एमसीपी पता कॉपी करें</string>
+    <string name="relay_client_help">कनेक्ट करने के लिए कॉन्फ़िगरेशन को कंप्यूटर पर अपने MCP क्लाइंट में कॉपी करें।</string>
+    <string name="relay_unpair">गेटवे को अयुग्मित करें</string>
+    <string name="relay_unpair_body">इस फ़ोन को गेटवे से डिस्कनेक्ट करें. इंटरनेट कनेक्शन आवश्यक है. फ़ोन एक्सेस टोकन अपरिवर्तित रहता है.</string>
+    <string name="relay_failed">ख़त्म नहीं हो सका. गेटवे पता, इंटरनेट कनेक्शन और पेयरिंग कोड की जाँच करें। यदि अनपेयरिंग विफल हो जाती है, तो पहुंच बंद है; पुनः प्रयास करें या गेटवे पर फ़ोन रद्द करें।</string>
+    <string name="relay_notif_body">रिमोट एक्सेस सक्षम है. गेटवे कनेक्शन जांचने के लिए मीना खोलें।</string>
+    <string name="relay_incompatible">मिलान संस्करणों के लिए मीना और गेटवे को अपडेट करें</string>
+    <string name="relay_copy_gateway">गेटवे पता कॉपी करें</string>
+    <string name="relay_cli_help">अपने कंप्यूटर पर किसी फ़ाइल में एक्सेस टोकन सहेजें, फिर ऊपर दिए गए कनेक्शन कमांड को चलाएँ।</string>
+    <string name="relay_intro">गेटवे रिमोट एक्सेस के लिए सामान्य रूप से वाई-फाई/लैन पर भेजे गए सीएलआई और एमसीपी अनुरोधों को आपके फोन पर भेजता है। युग्मन से पहले इसे अपने सार्वजनिक सर्वर पर परिनियोजित करें।</string>
+    <string name="relay_device_access">गेटवे के माध्यम से जागने और अनलॉक करने की अनुमति दें</string>
+    <string name="relay_device_access_sub">डिफ़ॉल्ट रूप से बंद. इस पृष्ठ पर "रिमोट वेक और अनलॉक की अनुमति दें" की भी आवश्यकता है। जब दोनों चालू होते हैं, तो एक्सेस टोकन वाला कोई भी व्यक्ति इंटरनेट पर इस फ़ोन को सक्रिय और अनलॉक कर सकता है।</string>
+</resources>

@@ -1,0 +1,36 @@
+<resources>
+    <string name="trace_switch">विस्तृत ट्रेस रिकॉर्ड करें</string>
+    <string name="trace_switch_detail">नए रनों के लिए. अनुरोध पाठ में निजी जानकारी हो सकती है. इसे बंद करने से कैप्चर तुरंत बंद हो जाता है.</string>
+    <string name="trace_storage_limit">भंडारण सीमा का पता लगाएं</string>
+    <string name="trace_storage_hint">जगह की आवश्यकता होने पर पुराने तैयार निशान हटा दिए जाते हैं।</string>
+    <string name="trace_storage_value">%1$d एमआईबी</string>
+    <string name="trace_title">विस्तृत ट्रेस</string>
+    <string name="trace_partial">आंशिक रिकार्ड</string>
+    <string name="trace_recorded">इस डिवाइस पर रिकॉर्ड किया गया</string>
+    <string name="trace_unknown">रिपोर्ट न किया</string>
+    <string name="trace_ok">ठीक है</string>
+    <string name="trace_error">गलती</string>
+    <string name="trace_cancelled">रद्द कर दिया गया</string>
+    <string name="trace_attempt">चरण %1$d · प्रयास %2$d · %3$s</string>
+    <string name="trace_tool">चरण %1$d · %2$s</string>
+    <string name="trace_counts">इनपुट %1$s · कैश्ड %2$s · अनकैश्ड %3$s · आउटपुट %4$s</string>
+    <string name="trace_largest">सबसे अनकैश्ड इनपुट</string>
+    <string name="trace_diff">पहला अंतर: %1$s</string>
+    <string name="trace_no_body">अनुरोध का मुख्य भाग कैप्चर नहीं किया गया</string>
+    <string name="trace_attach">संपादित पाठ शामिल करें</string>
+    <string name="trace_attach_hint">केवल स्थानीय ज़िप. सहेजने से पहले उपरोक्त अनुरोध पाठ की समीक्षा करें।</string>
+    <string name="trace_save">इस ट्रेस को सहेजें</string>
+    <string name="trace_saved">ट्रेस सहेजा गया</string>
+    <string name="trace_failed">ट्रेस निर्यात विफल रहा</string>
+    <string name="trace_send">ओटीएलपी/एचटीटीपी के माध्यम से भेजें</string>
+    <string name="trace_network_hint">इस ट्रेस का मेटाडेटा ही भेजें.</string>
+    <string name="trace_endpoint">समापन बिंदु का पता लगाता है</string>
+    <string name="trace_endpoint_hint">सार्वजनिक पतों के लिए HTTPS का उपयोग करें. लोकलहोस्ट और स्थानीय नेटवर्क पर HTTP की अनुमति है।</string>
+    <string name="trace_header_name">प्रामाणिक शीर्षलेख नाम</string>
+    <string name="trace_header_value">प्रामाणिक शीर्षलेख मान (वैकल्पिक)</string>
+    <string name="trace_sent">ट्रेस स्वीकार कर लिया गया</string>
+    <string name="trace_sent_warning">रिसीवर चेतावनी के साथ ट्रेस स्वीकार किया गया</string>
+    <string name="trace_rejected">रिसीवर ने अस्वीकृत कर दिया %1$d स्पैन</string>
+    <string name="trace_http_error">रिसीवर ने HTTP लौटाया %1$d</string>
+    <string name="trace_send_failed">ट्रेस नहीं भेजा जा सका</string>
+</resources>

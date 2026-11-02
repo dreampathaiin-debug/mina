@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trigger_reminder">मीना अनुस्मारक</string>
+    <string name="trigger_not_started_body">एक निर्धारित कार्य प्रारंभ नहीं हो सका. इसे शेड्यूल किए गए कार्य पृष्ठ पर जाँचें और इसे फिर से चलाएँ।</string>
+    <string name="trigger_start_failed">प्रारंभ करने में विफल</string>
+    <string name="trigger_not_started">निर्धारित कार्य प्रारंभ नहीं हुआ</string>
+    <string name="trigger_interrupted_body">एक निर्धारित कार्य बाधित हो गया और उसके परिणाम की पुष्टि नहीं की जा सकी. पहले जाँचें कि वास्तव में क्या हुआ था; मीना इसे स्वचालित रूप से नहीं दोहराएगी।</string>
+    <string name="trigger_unconfirmed">निर्धारित कार्य परिणाम की जाँच की आवश्यकता है</string>
+    <string name="trigger_alarm_title">शेड्यूल किए गए कार्यों के लिए "अलार्म और अनुस्मारक" अनुमति की आवश्यकता होती है</string>
+    <string name="trigger_alarm_body">इसके बिना, निर्धारित कार्य देर से चल सकते हैं या बिल्कुल नहीं चल सकते। इसे चालू करने के लिए यहां टैप करें.</string>
+    <string name="op_failed">कुछ गलत हो गया</string>
+    <string name="plans_alarm_body">इस अनुमति के बिना, निर्धारित कार्य देर से चल सकते हैं या बिल्कुल नहीं चल सकते। आपको इसे केवल एक बार चालू करना होगा.</string>
+    <string name="plans_running_n">सक्रिय %1$d</string>
+    <string name="plans_stopped_n">बंद %1$d</string>
+    <string name="plans_empty">अभी तक कोई निर्धारित कार्य नहीं है\nमीना को चैट में बताएं कि आपको कब याद दिलाना है, या कब आपके लिए कुछ करना है।</string>
+    <string name="plans_none_running">कोई सक्रिय शेड्यूल कार्य नहीं</string>
+    <string name="plans_none_stopped">कोई भी निर्धारित कार्य बंद नहीं हुआ</string>
+    <string name="plans_footer">आप चैट में "हर दिन 8 बजे..." या "मुझे बताएं कि कीमत कब गिरती है" कहकर भी एक बना सकते हैं; परिणाम उस चैट पर वापस जाते हैं। बैटरी की बचत से समयबद्ध रन प्रभावित हो सकते हैं; बंद करना या हटाना केवल भविष्य के रन को प्रभावित करता है।</string>
+    <string name="plans_open_chat">चैट खोलें</string>
+    <string name="plans_run_now">अब दौड़े</string>
+    <string name="plans_edit_time">समय परिवर्तन करें</string>
+    <string name="plans_edit_title">अगला रन टाइम बदलें</string>
+    <string name="plans_edit_label">स्थानीय समय: yyyy-MM-dd HH:mm</string>
+    <string name="plans_need_future">भविष्य में एक वैध समय दर्ज करें</string>
+    <string name="plans_delete_title">यह निर्धारित कार्य हटाएं?</string>
+    <string name="plans_done">हो गया</string>
+    <string name="plans_checked">चेक किए गए</string>
+    <string name="plans_check_failed">जाँच विफल रही</string>
+    <string name="plans_result_pending">परिणाम की जांच की जरूरत है</string>
+    <string name="plans_every_day">रोज रोज</string>
+    <plurals name="plans_every_minutes">
+        <item quantity="one">हर %1$d मिनट</item>
+        <item quantity="other">प्रत्येक %1$d मिनट में</item>
+    </plurals>
+    <string name="plans_once">एक बार</string>
+    <string name="plans_next">%1$s · अगला %2$s</string>
+    <string name="plans_condition">केवल तभी चलता है जब: %1$s · %2$s</string>
+    <string name="plans_last">अंतिम %1$s · %2$s</string>
+    <string name="plans_never_run">अभी तक नहीं चला है</string>
+    <string name="plans_delivered">पहुंचा दिया</string>
+    <string name="plans_unchanged">स्थिति अपरिवर्तित</string>
+    <string name="plans_running_now">दौड़ना</string>
+    <string name="trigger_deleted">निर्धारित कार्य हटा दिया गया था</string>
+    <string name="trigger_busy">यह कार्य अभी भी चल रहा है</string>
+</resources>
