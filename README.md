@@ -18,42 +18,20 @@ It works on a hidden background screen, so you can keep using your phone.
 English · [日本語](docs/readme/README.ja.md) · [한국어](docs/readme/README.ko.md) · [Español](docs/readme/README.es.md)
 
 <br/>
-
-<img src="docs/media/wechat-send-side.gif" alt="From one sentence, Mina opens WeChat on its background screen, finds the contact and sends the message" width="640" />
-
-<sub>"Send a message to File Transfer": Mina's chat on the left, each step on its background screen on the right (4× speed; chat list blurred)</sub>
-
 </div>
 
 ## Get things done with one sentence
 
 <table>
 <tr>
-<td align="center" width="33%"><img src="docs/media/wechat-group.gif" width="230" alt="Reads through a WeChat group and summarizes today's chat" /><br/><b>"What did the group talk about today?"</b><br/><sub>Scrolls through the chat in the background, then sums it up</sub></td>
-<td align="center" width="33%"><img src="docs/media/amazon-cart.gif" width="230" alt="Picks a charger on a shopping site and adds it to the cart" /><br/><b>"A charger under $30, rated 4.5 stars or more"</b><br/><sub>Adds the pick to the cart and stops before checkout</sub></td>
-<td align="center" width="33%"><img src="docs/media/xhs-summary.gif" width="230" alt="Summarizes a creator's recent posts" /><br/><b>"What has this creator posted lately?"</b><br/><sub>Opens the app, reads post by post, then sums it up</sub></td>
+<td align="center" width="50%">
+<img src="docs/media/zepto-order.gif" width="260" alt="Mina orders milk on Zepto: it reads the screen, uses the saved address, picks cash on delivery and places the order" /><br/><b>"Order milk on Zepto with my saved address"</b><br/><sub>Adds the milk, uses the saved address, picks cash on delivery and checks out (recorded on a real phone)</sub></td>
+<td align="center" width="50%">
+<img src="docs/media/linkedin-jobs.gif" width="260" alt="One voice command opens LinkedIn on the background screen while Mina searches for product manager jobs" /><br/><b>"Open LinkedIn and apply for product manager jobs"</b><br/><sub>Said out loud on the home screen; Mina opens LinkedIn and starts the job search in the background</sub></td>
 </tr>
 </table>
 
-<details>
-<summary>More demos</summary>
 
-<table>
-<tr>
-<td align="center" width="33%"><img src="docs/media/boss-greet.gif" width="230" alt="Greets recruiters for 3 jobs on a job site" /><br/>Greets recruiters for 3 jobs on a job site</td>
-<td align="center" width="33%"><img src="docs/media/google-flights.gif" width="230" alt="Finds the cheapest nonstop flight" /><br/>Finds the cheapest nonstop from San Francisco to New York</td>
-<td align="center" width="33%"><img src="docs/media/hacker-news.gif" width="230" alt="Reads out the top 5 stories and their points" /><br/>Reads out the top 5 stories on a news site</td>
-</tr>
-<tr>
-<td align="center"><img src="docs/media/job-greet.jpg" width="230" alt="Finds jobs and greets recruiters" /><br/>Finds jobs and greets recruiters</td>
-<td align="center"><img src="docs/media/music-vip.jpg" width="230" alt="Watches ads to unlock music perks" /><br/>Watches ads to unlock music perks</td>
-<td align="center"><img src="docs/media/food-order.jpg" width="230" alt="Orders takeout with stacked discounts and asks you before paying" /><br/>Orders takeout with stacked discounts, asks before paying</td>
-</tr>
-</table>
-
-</details>
-
-<sub>Several demos use apps popular in China: WeChat is the main messaging app there, and Xiaohongshu (RED) is a lifestyle and social platform. Mina isn't tied to them; it works with any app or website on your phone.</sub>
 
 ## Why Mina
 
