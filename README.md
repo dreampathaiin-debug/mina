@@ -23,10 +23,12 @@ English · (docs/readme/README.ja.md) ·
 
 <table>
 <tr>
-<td align="center" width="50%">
+<td align="center" width="33%">
 <img src="docs/media/zepto-order.gif" width="260" alt="Mina orders milk on Zepto: it reads the screen, uses the saved address, picks cash on delivery and places the order" /><br/><b>"Order milk on Zepto with my saved address"</b><br/><sub>Adds the milk, uses the saved address, picks cash on delivery and checks out (recorded on a real phone)</sub></td>
-<td align="center" width="50%">
+<td align="center" width="33%">
 <img src="docs/media/linkedin-jobs.gif" width="260" alt="One voice command opens LinkedIn on the background screen while Mina searches for product manager jobs" /><br/><b>"Open LinkedIn and apply for product manager jobs"</b><br/><sub>Said out loud on the home screen; Mina opens LinkedIn and starts the job search in the background</sub></td>
+<td align="center" width="33%">
+<img src="docs/media/movie-booking.gif" width="260" alt="Mina books movie tickets on District: it finds the cheapest show, applies a promo code, selects three Rs 900 seats and opens the payment sheet" /><br/><b>"Book the cheapest movie seats on District"</b><br/><sub>Mina opens District, finds the cheapest show, applies the promo code it found, picks three ₹900 seats and brings up the payment sheet (recorded on a real phone)</sub></td>
 </tr>
 </table>
 
