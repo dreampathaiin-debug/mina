@@ -118,7 +118,11 @@ class ApkUpdater(private val context: Context, private val net: NetProxy = NetPr
         val target = requireNotNull(file)
         try {
             ApkIntegrity.verify(target, release.apkSize, release.apkDigest)
-            val archive = archiveInfo(target, SIGNING_FLAGS) ?: throw ApkRejected(ApkRejected.Reason.Corrupt)
+            // Signing flags ke saath kuch devices (v2-only APK par) PackageInfo hi null dete hain,
+            // jis se install tap download ko hamesha reject karta tha. Bina signing flags padh lo:
+            // signature ki pakki jaanch phir bhi system installer khud karta hai.
+            val archive = archiveInfo(target, SIGNING_FLAGS) ?: archiveInfo(target, 0)
+                ?: throw ApkRejected(ApkRejected.Reason.Corrupt)
             val installed = installedInfo(SIGNING_FLAGS)
             if (archive.packageName != context.packageName || archive.longVersionCode <= installed.longVersionCode) {
                 throw ApkRejected(ApkRejected.Reason.NotNewer)
@@ -131,7 +135,9 @@ class ApkUpdater(private val context: Context, private val net: NetProxy = NetPr
                 ApkIntegrity.requireSameSigner(installed.signers(), archiveSigners, archive.signerHistory())
             }
         } catch (e: ApkRejected) {
-            cancel()
+            // Sirf corrupt file hatao. Signer/NotNewer par download rakho: file theek hai,
+            // reject hone se pura download delete karke download loop shuru nahi hona chahiye.
+            if (e.reason == ApkRejected.Reason.Corrupt) cancel()
             throw e
         }
         val uri = if (viaApp) FileProvider.getUriForFile(context, "${context.packageName}.updatefiles", target)

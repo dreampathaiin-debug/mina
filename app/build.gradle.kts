@@ -17,8 +17,8 @@ android {
         applicationId = "com.meenai.mina"
         minSdk = 30
         targetSdk = 35
-        versionCode = 44
-        versionName = "0.1.43"
+        versionCode = 45
+        versionName = "0.1.44"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
         // 关于页版本号后的 Beta 标记;出正式版时改成 false
@@ -57,6 +57,13 @@ android {
         // sirf v1 signatures padh paate hain, isliye update pre-check ke liye v1 on rakho.
         getByName("debug") {
             enableV1Signing = true
+            // /tmp wipe hone par Gradle naya debug keystore bana deta hai, jisse release ka
+            // cert badal jata hai aur phone pe update install fail ho jata hai.
+            // Isliye keystore path workspace me pin kar diya (durable disk).
+            storeFile = file("/workspace/.android/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
         }
     }
 
