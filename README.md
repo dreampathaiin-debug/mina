@@ -13,7 +13,6 @@ It works on a hidden background screen, so you can keep using your phone.
 <a href="https://github.com/meenaispeaks6-droid/meena/stargazers"><img src="https://img.shields.io/github/stars/meenaispeaks6-droid/meena?style=flat&logo=github&label=Star&color=1f6feb" alt="stars" /></a>
 <a href="https://github.com/meenaispeaks6-droid/meena/releases"><img src="https://img.shields.io/github/downloads/meenaispeaks6-droid/meena/total?label=downloads&color=2ea043" alt="downloads" /></a>
 <a href="https://github.com/meenaispeaks6-droid/meena/releases/latest"><img src="https://img.shields.io/github/v/release/meenaispeaks6-droid/meena?include_prereleases&label=version" alt="version" /></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-lightgrey" alt="license" /></a>
 
 English · (docs/readme/README.ja.md) · 
 <br/>
@@ -73,7 +72,6 @@ By default Mina runs in **Ask mode**: it checks with you only before spending mo
 
 For how each of these works and the finer details, see [features in detail](docs/features.en.md).
 
-<details>
 <summary>Apps and websites with built-in usage knowledge (anything not listed still works)</summary>
 
 The names are shown as they appear in the knowledge files.
@@ -87,9 +85,7 @@ The names are shown as they appear in the knowledge files.
 | **How-to skills** | Change Mina's own settings, Turn content into text, Work with PDF documents, Look something up, Messages & email, Write skills |
 <!-- generated:knowledge:end -->
 
-</details>
 
-<details>
 <summary>Supported model providers</summary>
 
 <!-- generated:providers:start -->
@@ -99,7 +95,6 @@ Presets for DeepSeek, Qwen, Kimi, Zhipu, SiliconFlow, Volcengine Ark, MiniMax, S
 
 You can also skip the key and sign in with a ChatGPT (Plus / Pro), xAI / Grok or OpenRouter account. Steps for adding a model, and what to know about each sign-in, are in [models and sign-in](docs/models.en.md).
 
-</details>
 
 ## Which phones
 
@@ -113,9 +108,6 @@ Not sure your phone is up to it? Run Settings › Recovery & repair › **Compat
 
 ## FAQ
 
-
-<details>
-<summary><b>FAQ</b></summary>
 
 **Wireless debugging turned itself off?** Android turns it off when you change Wi-Fi or restart. With your permission, Mina turns it back on by itself; if it still can't connect, go back to "Set up phone control" and pair again.
 
@@ -131,5 +123,4 @@ Not sure your phone is up to it? Run Settings › Recovery & repair › **Compat
 
 More answers are in the [FAQ](docs/faq.en.md).
 
-</details>
 
