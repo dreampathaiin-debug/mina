@@ -111,11 +111,8 @@ You can also skip the key and sign in with a ChatGPT (Plus / Pro), xAI / Grok or
 
 Not sure your phone is up to it? Run Settings › Recovery & repair › **Compatibility self-check**: 12 checks in about a minute, and you can [send us the results](https://github.com/meenaispeaks6-droid/meena/issues/new?template=device-report.yml) in one tap.
 
-## Privacy & safety
+## FAQ
 
-- **There is no Mina server**: what you say and what's on your screen go only to the model provider you set up.
-- API keys and memories are stored encrypted on the phone; conversations and run records stay on the device; update checks only contact GitHub.
-- Operating third-party apps and websites automatically may break their terms of service, so use your own judgment. For anything important, use Ask mode and check the results. See the [disclaimer](docs/disclaimer.en.md).
 
 <details>
 <summary><b>FAQ</b></summary>
@@ -136,31 +133,3 @@ More answers are in the [FAQ](docs/faq.en.md).
 
 </details>
 
-## Community & contributing
-
-- **Docs**: all docs and a suggested reading order are in the [docs index](docs/README.en.md)
-- **Community**: join the [X group chat](https://x.com/i/chat/group_join/g2116926829198246025/48B52j5svL); to reach the author on WeChat, scan the QR code in the app under About › Contact the author (mention Mina in your request)
-- **Follow the author**: X [@wangzan101](https://x.com/wangzan101)
-- **Report a problem**: [open an issue](https://github.com/meenaispeaks6-droid/meena/issues/new/choose); About › Send feedback in the app can attach diagnostics
-- **Contribute**: add usage knowledge for an app or website (plain text, no code needed), or contribute code; see the [contributing guide](.github/CONTRIBUTING.md)
-
-## Star History
-
-<a href="https://star-history.com/#meenaispeaks6-droid/meena&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=meenaispeaks6-droid/meena&type=Date&theme=dark&v=20261101-1623" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=meenaispeaks6-droid/meena&type=Date&v=20261101-1623" width="600" />
-  </picture>
-</a>
-
-## Contributors
-
-Thanks to everyone who has helped build Mina:
-
-<a href="https://github.com/meenaispeaks6-droid/meena/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=meenaispeaks6-droid/meena&max=100&columns=12" alt="Contributors" />
-</a>
-
-## License
-
-[Apache-2.0](LICENSE) · [NOTICE](NOTICE) · [Third-party components](licenses/THIRD_PARTY_NOTICES.md)
