@@ -521,7 +521,7 @@ object IrreversibleDetector {
         }
         val fields = s?.elements?.filter { it.editable }.orEmpty()
         if (fields.isNotEmpty() && fields.all { isSearch(it, s) }) return null
-        return Irreversible(IrrevAction.send, "$keyName:焦点不明")
+        return Irreversible(IrrevAction.send, "$keyName:focus unclear")
     }
 
     /**

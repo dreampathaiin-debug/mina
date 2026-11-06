@@ -37,7 +37,7 @@ class AgentDisplay(
     val frames: StateFlow<Bitmap?> = _frames.asStateFlow()
 
     private val frameLock = Any()
-    private var fullFrame: Bitmap? = null // 带行填充的整帧,宽 = rowStride / pixelStride
+    private var fullFrame: Bitmap? = null // full frame with row padding, width = rowStride / pixelStride
     private var hasFrame = false
     private var lastProcessedAt = 0L
     private var pending = false

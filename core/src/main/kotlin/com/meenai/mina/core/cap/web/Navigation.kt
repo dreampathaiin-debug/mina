@@ -33,7 +33,7 @@ import com.meenai.mina.core.uistate.dwellStopped
 /** 打开网页。跳 App 的链接(含应用商店的网页链接)不在内置浏览器里打开。 */
 internal object Navigate : WebTool {
     override val verb = Verb.Navigate
-    override val label = "打开网页"
+    override val label = "Open web page"
     override val risk = Risk.Write
     override val entry = Entry.Opens
     override val logged = true
@@ -106,7 +106,7 @@ internal object Navigate : WebTool {
 internal fun pageFact(name: String, r: ToolExecution): Observation? {
     if (r.content["ok"] != JsonPrimitive(true)) return null
     fun res(k: String) = (r.content[k] as? JsonPrimitive)?.contentOrNull
-    return webFact("$name:网址 ${res("url")},网页标题「${res("title").orEmpty()}」" + (res("httpStatus")?.let { ",HTTP 状态 $it" } ?: ""))
+    return webFact("$name: url ${res("url")}, page title: ${res("title").orEmpty()}" + (res("httpStatus")?.let { ", HTTP status $it" } ?: ""))
 }
 
 /** 网页给出的一条事实(网址、标题、标签)。 */
@@ -114,7 +114,7 @@ internal fun webFact(text: String) = Observation(ObsKind.Fact, text, source = WE
 
 internal object Tabs : WebTool {
     override val verb = Verb.Tabs
-    override val label = "切换网页标签"
+    override val label = "Switch web tab"
     override val risk = Risk.Write
     override val logged = true
     override val def = ToolDef("web_tabs",
@@ -162,14 +162,14 @@ internal object Tabs : WebTool {
         val tabs = (r.content["tabs"] as? JsonArray)?.mapNotNull { it as? JsonObject } ?: listOf(r.content)
         return listOfNotNull(tabs.mapNotNull { t ->
             val title = (t["title"] as? JsonPrimitive)?.contentOrNull ?: return@mapNotNull null
-            "标签 ${(t["tabId"] as? JsonPrimitive)?.contentOrNull}:网址 ${(t["url"] as? JsonPrimitive)?.contentOrNull},网页标题「$title」"
+            "Tab ${(t["tabId"] as? JsonPrimitive)?.contentOrNull}: url ${(t["url"] as? JsonPrimitive)?.contentOrNull}, page title: $title"
         }.takeIf { it.isNotEmpty() }?.let { webFact(it.joinToString("\n", "$name:\n")) })
     }
 }
 
 internal object SiteMode : WebTool {
     override val verb = Verb.SiteMode
-    override val label = "切换网页版本"
+    override val label = "Switch page version"
     override val risk = Risk.Write
     override val def = ToolDef("web_site_mode",
         Prompts.tool("web_site_mode"),

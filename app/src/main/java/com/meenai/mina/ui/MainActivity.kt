@@ -137,7 +137,7 @@ class MainActivity : ComponentActivity() {
             Fix.OpenResultChannel -> openChannelSettings(TaskService.CHANNEL_RESULT)
             Fix.OpenProgressChannel -> openChannelSettings(TaskService.CHANNEL_PROGRESS)
             Fix.OpenPairingChannel -> openChannelSettings(PairingNotifier.ensureChannel(this).id)
-            Fix.AddModel -> Unit // 设置页自己处理
+            Fix.AddModel -> Unit // the settings screen handles it itself
             // 换页由 MinaRoot 处理
             Fix.OpenPhoneSetup, Fix.RepairPhoneHelper -> Unit
             Fix.RetryPhoneHelper -> phone.pairing.scope.launch {

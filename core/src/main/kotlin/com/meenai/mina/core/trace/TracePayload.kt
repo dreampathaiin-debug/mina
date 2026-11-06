@@ -21,7 +21,7 @@ internal object TracePayload {
     private val url = Regex("""https?://[^\s"'<>]+""", RegexOption.IGNORE_CASE)
     private val userInfo = Regex("""(://)[^/?#\s]*@""")
     private val dataUri = Regex("""(?i)data:[^,\s"']{0,100};base64,[a-z0-9+/=_-]+""")
-    private val assignment = Regex("""(?i)((?:\b(?:password|passwd|token|api[_-]?key|secret|otp|pin|authorization|cookie|session[_-]?id)|密码|口令)\s*[=:：]\s*)[^\s,;&]+""")
+    private val assignment = Regex("""(?i)((?:\b(?:password|passwd|token|api[_-]?key|secret|otp|pin|authorization|cookie|session[_-]?id))\s*[=:：]\s*)[^\s,;&]+""")
     private val identifier = Regex("[a-zA-Z0-9_.:/-]{1,96}")
 
     private fun scrub(value: String): String {

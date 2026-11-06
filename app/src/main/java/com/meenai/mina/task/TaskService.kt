@@ -646,7 +646,7 @@ class TaskService : Service() {
             .setContentText(text)
             .setStyle(Notification.BigTextStyle().bigText(text))
             .setCategory(Notification.CATEGORY_REMINDER)
-            .setOnlyAlertOnce(true) // 同一次等待里换按钮不再响铃;离开等待时撤掉,下一次会重新提醒
+            .setOnlyAlertOnce(true) // swapping buttons within one wait does not ring again; cleared on leaving the wait, the next one reminds again
             .setContentIntent(openApp())
         if (quiet) b.alertQuietly()
         when (state) {
@@ -753,7 +753,7 @@ class TaskService : Service() {
             taskState._activeConversations.value = emptyList()
             taskState.shownRun = null
         }
-        taskState._busy.value = false // 收尾被取消时也不能一直挡着新任务
+        taskState._busy.value = false // even when finalization is cancelled, it must not keep blocking new tasks
         super.onDestroy()
     }
 

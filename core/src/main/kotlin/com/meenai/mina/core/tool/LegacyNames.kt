@@ -88,8 +88,8 @@ class LegacyNames(
         var out = text
         for ((old, instead) in retired) {
             val name = Regex.escape(old)
-            out = Regex("(?:(?i:call)\\s+|调用\\s*)?`$name`").replace(out, instead)
-            out = Regex("(?:(?i:call)\\s+|调用\\s*)(?<![A-Za-z0-9_])$name(?![A-Za-z0-9_])").replace(out, instead)
+            out = Regex("(?:(?i:call)\\s+)?`$name`").replace(out, instead)
+            out = Regex("(?:(?i:call)\\s+)(?<![A-Za-z0-9_])$name(?![A-Za-z0-9_])").replace(out, instead)
             out = Regex("(?<=[\\u4e00-\\u9fff])\\s*$name(?![A-Za-z0-9_])|(?<![A-Za-z0-9_])$name\\s*(?=[\\u4e00-\\u9fff])").replace(out) { " $instead " }
         }
         return out

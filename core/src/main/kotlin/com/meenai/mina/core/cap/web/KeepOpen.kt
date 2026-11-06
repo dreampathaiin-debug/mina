@@ -36,7 +36,7 @@ const val KEEP_OPEN_HOURS = 2
  */
 internal object KeepOpen : WebTool {
     override val verb = Verb.KeepOpen
-    override val label = "保持网页开着"
+    override val label = "Keep the web page open"
     override val risk = Risk.Write
     override val logged = true
     override val def = ToolDef("web_keep_open",

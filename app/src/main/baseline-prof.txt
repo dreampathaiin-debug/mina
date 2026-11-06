@@ -1,5 +1,5 @@
-# 预先编译清单:安装后系统按它把这些代码提前编译成机器码,第一次进各个页面就不用边解释边跑。
-# 界面库自带清单,这里只补 Mina 自己的代码:启动和各个页面(Application、界面、设置、对话存储)。
+# Precompile list: after install the system uses it to compile this code ahead of time, so the first visit to each screen does not run it interpreted.
+# The UI library ships its own list; this only adds Mina's own code: startup and the main screens (Application, UI, settings, conversation storage).
 HSPLcom/meenai/mina/MinaApp;->**(**)**
 HSPLcom/meenai/mina/ui/**;->**(**)**
 HSPLcom/meenai/mina/settings/**;->**(**)**

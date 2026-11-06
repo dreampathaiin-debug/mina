@@ -1,30 +1,30 @@
 ---
 name: xiaohongshu.com
-display: 小红书
+display: Xiaohongshu
 domains: ["xiaohongshu.com", "xhslink.com"]
-aliases: ["小红书", "Xiaohongshu", "XHS", "xiaohongshu", "xhs"]
+aliases: ["Xiaohongshu", "XHS", "xiaohongshu", "xhs"]
 apps: ["xiaohongshu"]
 open: xiaohongshu.com
 mode: desktop
-description: 图文和视频笔记社区,可搜笔记并读取正文、互动数和评论
+description: Note community: search notes, read body and comments
 ---
-## 是什么
-以用户笔记为主的内容社区,笔记是图文或视频,其中有广告和求推荐帖。
+## What it is
+A content community built on user notes, which are image-text or video, with ads and recommendation-seeking posts mixed in.
 
-## 页面与网址
-- 搜索:`https://www.xiaohongshu.com/search_result?keyword=<编码关键词>&source=web_explore_feed`,直接打开即可。
-- 笔记详情:`/explore/<笔记ID>` 并带 `xsec_token` 参数,没有 token 打不开。
-- `xhslink.com` 是分享短链。
+## Pages and URLs
+- Search: `https://www.xiaohongshu.com/search_result?keyword=<encoded keyword>&source=web_explore_feed`, opens directly.
+- Note detail: `/explore/<note id>` with an `xsec_token` parameter; without the token it will not open.
+- `xhslink.com` is the share short-link domain.
 
-## 功能
-- **搜索**:结果是卡片,含标题、作者、点赞数、封面、图文或视频类型和链接。第一屏约 20 条,往下滚两三次可到五六十条。通常需要有效的登录会话。
-- **笔记详情**:正文、发布时间、IP 属地、点赞、收藏、评论数,以及评论(作者、原话、点赞数)。在搜索结果里点开卡片会弹出详情层,卡片链接自带 `xsec_token`。
-- **手机 App**:对应的说明见 `xiaohongshu`。
+## Features
+- **Search**: results are cards with title, author, like count, cover, image-text or video type, and link. About 20 per first screen; two or three scrolls down reach fifty or sixty. A valid signed-in session is usually required.
+- **Note detail**: body, publish time, IP location, likes, saves, comment count, and comments (author, wording, like count). Opening a card from search pops a detail layer; the card's link carries its own `xsec_token`.
+- **Phone app**: see `xiaohongshu` for the matching description.
 
-## 已知现象
-- 部分卡片没有标题,显示的是正文开头一段。
-- 评论一开始只加载第一页;评论数显示为 0 才表示没有评论。
-- 「1.2万」这类缩写计数按原样显示。
-- 发布时间和更新时间是两个字段,有的笔记只显示后者。
-- 搜索结果里夹有广告卡,不是笔记。
-- 服务繁忙时会提示网络繁忙,过几秒重试通常恢复。
+## Known behaviour
+- Some cards have no title and show the opening of the body instead.
+- Comments load only the first page at first; a comment count of 0 is what actually means no comments.
+- Abbreviated counts like "12k" display as-is.
+- Publish time and update time are two fields; some notes show only the latter.
+- Search results carry ad cards, which are not notes.
+- When the service is busy it says the network is busy; retrying after a few seconds usually clears it.

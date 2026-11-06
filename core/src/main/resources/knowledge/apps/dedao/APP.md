@@ -1,31 +1,31 @@
 ---
 name: dedao
-display: 得到
+display: Dedao
 packages: ["com.luojilab.player"]
-aliases: ["得到", "Dedao", "dedao", "得到App"]
+aliases: ["Dedao", "dedao", "Dedao app"]
 sites: []
-open: 得到
-description: 知识课程、听书、电子书和学习社区
+open: Dedao
+description: Courses, audiobooks, e-books and a learning community
 ---
-## 是什么
-得到是知识学习 App,包名 `com.luojilab.player`。有付费课程、听书、电子书、直播和学习社区。
+## What it is
+Dedao is a learning app, package `com.luojilab.player`. It has paid courses, audiobooks, e-books, live streams and a learning community.
 
-## 界面
-底部标签:首页、听书看书、知识城邦、学习、最右是个人页(没登录时显示「未登录」)。各标签顶部大多有搜索框,右边有积分、最近学习、消息或设置图标。
-- **首页**:搜索框右边有成长任务/积分换礼、最近学习、消息中心;下面频道:推荐、课程、长谈、AI 学习圈等(有时插着活动频道);推荐页有运营横幅、一排入口(得到榜单、得到课程、听书看书、得到积分、全部分类等)、栏目内容、直播预告。
-- **听书看书**:顶部分我的会员、听书、电子书等;有听书会员开通条、新书上架、名家讲书、镇馆之宝、知识地图、分类入口,下面是每日上新、重磅新书。
-- **知识城邦**:社区动态,分视频、关注、推荐;每条有作者、时间、正文(可「展开」)、转发、评论、点赞、分享。
-- **学习**:自己的学习内容;没登录时只有「登录 / 注册」。
-- **个人页**:头像(点击登录/注册)、学分、今日学习、勋章、证书;「我的账户」(账户余额、卡券、订单、购物车、会员、活动门票、积分);「我的内容」(笔记、最近学习、下载、收藏/清单、订阅通知);邀请好友。右上角齿轮是设置。
+## Interface
+Bottom tabs: Home, Read & Listen, Knowledge Community, Learning, and the profile page at the far right ("Not signed in" when signed out). Most tabs have a top search box with credits, recent learning, messages or settings icons beside it.
+- **Home**: beside the search box are growth tasks, recent learning and the message centre; below, channels: Recommended, Courses, Long Interviews, AI Learning Circle; the Recommended page has promo banners, entry rows (rankings, courses, read & listen, points, categories), column content and live previews.
+- **Read & Listen**: the top splits my membership, audiobooks, e-books; there is a membership banner, new arrivals, author lectures, signature titles, a knowledge map, then daily additions and major new books.
+- **Knowledge Community**: community feed split into Video, Following, Recommended; each post has author, time, body, reposts, comments, likes, share.
+- **Learning**: your own learning content; signed out only "Sign in / Register" shows.
+- **Profile**: avatar (tap to sign in or register), credits, today's learning, badges, certificates; "My account" (balance, coupons, orders, cart, membership, tickets, points); "My content" (notes, recent learning, downloads, saved, subscription notices); invite friends. The gear at the top right is Settings.
 
-## 功能
-- **搜索**:点顶部搜索框进入。有输入框、语音按钮、「取消」;下面是历史搜索(带删除),再是热搜、发现、课程、听书、电子书几个标签的排行。
-- **设置**:帐号/绑定设置、地址管理、安全中心、个人身份认证、隐私设置、后台播放优化、夜间模式、消息通知、一键记笔记、软件升级、添加桌面小组件、版本介绍、清除缓存、关于我们。
+## Features
+- **Search**: from the top search box. Has an input box, a voice button, "Cancel"; below is search history, then rankings under Trending, Discover, Courses, Audiobooks, E-books.
+- **Settings**: account, address management, security centre, identity verification, privacy, night mode, notifications, one-tap note, clear cache, about.
 
-## 已知现象
-- 没登录时打开先进手机号登录页(发送验证码、密码登录、微信登录),左上角返回可以跳过,不登录也能浏览。
-- 打开后常弹出整屏活动广告,底下有关闭按钮(资源 ID `close`,没有名字)。
-- 第一次切到某些标签可能出现引导提示(如「最近在学移到这里啦」),挡住点按,先点掉提示再切。
-- 搜索框里的词在轮换,元素名跟着变,按元素点可能报元素已过期,按位置点即可。
-- 顶部右边的图标(积分、最近学习、设置)多数没有名字,只有资源 ID,如设置是 `settingImageView`。
-- 底部标签在元素里看不出哪个被选中,要看画面。
+## Known behaviour
+- Signed out, opening lands on the phone-number sign-in page; "Back" at the top left skips it, and browsing works without signing in.
+- A full-screen promo ad often pops on open, with a close button at the bottom (resource ID `close`, no name).
+- Switching to some tabs the first time may pop an onboarding tip; dismiss it before switching.
+- The search box's words rotate and the element name changes with them; tapping by element may report it stale, so tap by position.
+- Most icons at the top right have no name, only a resource ID, like `settingImageView` for settings.
+- The bottom tabs do not show which is selected in the elements; read the picture.

@@ -1,91 +1,90 @@
-# 筛选代码
+# Filter codes
 
-搜索页筛选项对应的代码,来自网站公开的筛选表(`/wapi/zpgeek/search/job/condition.json`)。标题括号里是在页面上选了这一项后网址里出现的参数;没写参数的,没在网址里核对过。代码为 0 的「不限」就是不带这个参数。
+The codes for the search page's filter options, from the site's public filter table (`/wapi/zpgeek/search/job/condition.json`). The text in a heading's parentheses is the parameter that appears in the URL after that option is picked on the page; options without a parameter written have not been verified in a URL. The "no limit" option with code 0 is the same as omitting the parameter.
 
-## 工作经验(`experience=`)
+## Work experience (`experience=`)
 
-| 选项 | 代码 |
+| Option | Code |
 |---|---|
-| 在校生 | 108 |
-| 应届生 | 102 |
-| 经验不限 | 101 |
-| 1年以内 | 103 |
-| 1-3年 | 104 |
-| 3-5年 | 105 |
-| 5-10年 | 106 |
-| 10年以上 | 107 |
+| Current student | 108 |
+| Fresh graduate | 102 |
+| Any experience | 101 |
+| Under 1 year | 103 |
+| 1-3 years | 104 |
+| 3-5 years | 105 |
+| 5-10 years | 106 |
+| Over 10 years | 107 |
 
-## 学历要求(`degree=`)
+## Education (`degree=`)
 
-| 选项 | 代码 |
+| Option | Code |
 |---|---|
-| 初中及以下 | 209 |
-| 中专/中技 | 208 |
-| 高中 | 206 |
-| 大专 | 202 |
-| 本科 | 203 |
-| 硕士 | 204 |
-| 博士 | 205 |
+| Junior high or below | 209 |
+| Technical secondary school | 208 |
+| High school | 206 |
+| Associate degree | 202 |
+| Bachelor's | 203 |
+| Master's | 204 |
+| Doctorate | 205 |
 
-## 薪资待遇(`salary=`)
+## Salary (`salary=`)
 
-| 选项 | 代码 |
+| Option | Code |
 |---|---|
-| 3K以下 | 402 |
+| Under 3K | 402 |
 | 3-5K | 403 |
 | 5-10K | 404 |
 | 10-20K | 405 |
 | 20-50K | 406 |
-| 50K以上 | 407 |
+| Over 50K | 407 |
 
-## 公司规模(`scale=`)
+## Company size (`scale=`)
 
-| 选项 | 代码 |
+| Option | Code |
 |---|---|
-| 0-20人 | 301 |
-| 20-99人 | 302 |
-| 100-499人 | 303 |
-| 500-999人 | 304 |
-| 1000-9999人 | 305 |
-| 10000人以上 | 306 |
+| 0-20 people | 301 |
+| 20-99 people | 302 |
+| 100-499 people | 303 |
+| 500-999 people | 304 |
+| 1000-9999 people | 305 |
+| 10000+ people | 306 |
 
-## 融资阶段
+## Funding stage
 
-| 选项 | 代码 |
+| Option | Code |
 |---|---|
-| 未融资 | 801 |
-| 天使轮 | 802 |
-| A轮 | 803 |
-| B轮 | 804 |
-| C轮 | 805 |
-| D轮及以上 | 806 |
-| 已上市 | 807 |
-| 不需要融资 | 808 |
+| Not funded | 801 |
+| Angel round | 802 |
+| Series A | 803 |
+| Series B | 804 |
+| Series C | 805 |
+| Series D and beyond | 806 |
+| Listed | 807 |
+| Needs no funding | 808 |
 
-## 求职类型
+## Job type
 
-| 选项 | 代码 |
+| Option | Code |
 |---|---|
-| 全职 | 1901 |
-| 兼职 | 1903 |
+| Full-time | 1901 |
+| Part-time | 1903 |
 
-## 结算方式(兼职)
+## Settlement (part-time)
 
-| 选项 | 代码 |
+| Option | Code |
 |---|---|
-| 日结 | 2501 |
-| 周结 | 2502 |
-| 月结 | 2503 |
-| 完工结 | 2504 |
+| Daily | 2501 |
+| Weekly | 2502 |
+| Monthly | 2503 |
+| On completion | 2504 |
 
-## 兼职时段
+## Part-time schedule
 
-| 选项 | 代码 |
+| Option | Code |
 |---|---|
-| 周末/节假日 | 2701 |
-| 寒暑假 | 2702 |
-| 短期兼职 | 2703 |
-| 长期兼职 | 2704 |
-| 工作日 | 2705 |
-| 夜班 | 2706 |
-
+| Weekends / holidays | 2701 |
+| Winter and summer breaks | 2702 |
+| Short-term part-time | 2703 |
+| Long-term part-time | 2704 |
+| Weekdays | 2705 |
+| Night shift | 2706 |

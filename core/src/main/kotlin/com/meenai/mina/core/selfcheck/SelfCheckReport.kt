@@ -61,7 +61,7 @@ object SelfCheckReport {
 
     /** 反馈问题的标题:`[兼容性] Android <版本> <型号>`,型号就是系统给的那个(不另加厂商名)。 */
     fun issueTitle(f: DeviceFacts?): String =
-        if (f == null) "[兼容性]" else "[兼容性] Android ${f.androidRelease} ${f.model.trim()}".trim()
+        if (f == null) "[Compatibility]" else "[Compatibility] Android ${f.androidRelease} ${f.model.trim()}".trim()
 
     /**
      * 新建问题的地址:选好设备反馈的模板,只预填标题。报告太长,不放进地址里(地址有长度上限),由用户粘贴。

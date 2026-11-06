@@ -22,7 +22,7 @@ data class UserScreen(
     val app: String get() = appLabel?.takeIf(String::isNotBlank) ?: packageName ?: UNKNOWN_APP
 
     companion object {
-        const val UNKNOWN_APP = "某个 App"
+        const val UNKNOWN_APP = "An app"
     }
 }
 

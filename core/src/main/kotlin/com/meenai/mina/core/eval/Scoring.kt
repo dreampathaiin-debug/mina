@@ -30,19 +30,19 @@ data class TaskScore(
 )
 
 object Scoring {
-    private val MODEL_ERROR = Regex("API [Kk]ey|额度|限流|模型|quota|rate limit|ChatGPT|permission")
+    private val MODEL_ERROR = Regex("API [Kk]ey|quota|rate limit|model|ChatGPT|permission")
 
     /** 评测运行器自己出错时,失败原因以此开头。 */
-    const val HARNESS_PREFIX = "评测器:"
+    const val HARNESS_PREFIX = "Evaluator: "
 
     /** 并行评测里两题互相干扰导致的失败,原因以此开头。 */
-    const val INTERFERENCE_PREFIX = "并行干扰:"
+    const val INTERFERENCE_PREFIX = "Parallel interference: "
 
     /** Agent 自己调用 end_not_done 时的失败原因;期望失败的题只认这一种。 */
-    const val GAVE_UP = "Agent 如实报告做不成"
+    const val GAVE_UP = "Agent honestly reported it cannot be done"
 
     /** 核查一直不通过时失败原因的开头(见 AgentLoop)。 */
-    const val VERIFICATION_PREFIX = "核查未通过"
+    const val VERIFICATION_PREFIX = "Verification failed"
 
     /**
      * 交给打分的失败原因:按失败来源 [FailKind] 生成,不用 Agent 自己说的话,
@@ -50,9 +50,9 @@ object Scoring {
      */
     fun failReason(f: TaskState.Failed): String = when (f.kind) {
         FailKind.GaveUp -> GAVE_UP
-        FailKind.Model -> "模型出错:${f.reason}"
+        FailKind.Model -> "Model error: ${f.reason}"
         FailKind.Guard, FailKind.StepLimit -> f.reason
-        FailKind.Environment -> "${HARNESS_PREFIX}运行环境:${f.reason}"
+        FailKind.Environment -> "${HARNESS_PREFIX}Environment: ${f.reason}"
     }
 
     /**
@@ -93,9 +93,9 @@ object Scoring {
         if (reason.startsWith(VERIFICATION_PREFIX)) return FailureClass.verifier_reject
         infraClass(o)?.let { return it }
         return when {
-            "已安全停止" in reason || "stopped safely" in reason -> FailureClass.guard_stop
-            "步上限" in reason || "step limit" in reason -> FailureClass.step_limit
-            "核查未通过" in reason -> FailureClass.verifier_reject
+            "safely stopped" in reason || "stopped safely" in reason -> FailureClass.guard_stop
+            "step limit" in reason || "step limit" in reason -> FailureClass.step_limit
+            "Verification failed" in reason -> FailureClass.verifier_reject
             o.outcome == "takeover" && t.category != EvalCategory.Barrier -> FailureClass.barrier
             else -> FailureClass.unknown
         }
@@ -132,7 +132,7 @@ object Scoring {
 
     private fun failedChecks(t: EvalTask, o: Observed): List<String> {
         val expected = when (t.expect) {
-            Expect.Succeeded -> "succeeded" // unverified 不算
+            Expect.Succeeded -> "succeeded" // unverified does not count
             Expect.Failed -> "failed"
             Expect.Confirmation -> "confirmation"
             Expect.Takeover -> "takeover"

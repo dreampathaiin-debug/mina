@@ -56,7 +56,7 @@ class KnowledgeStore(private val bundled: List<KnowledgeEntry>, notes: Map<Strin
         return entries.mapNotNull { e -> score(e, t, followers)?.let { e to it } }
             .sortedWith(compareBy({ it.first.packages.none(packages::contains) }, { it.first.body == null }, { -it.second }))
             .map { it.first }
-            .distinctBy { it.service } // 同一服务的 App 与站点只给排序靠前的那份;另一份进入该 App/站点时再按包名/域名给
+            .distinctBy { it.service } // for one service only the higher-ranked of the app and the site is given; the other is matched by package or domain when that app or site is opened
             .take(limit)
     }
 

@@ -49,9 +49,9 @@ object SiteCommandFile {
     /** [file] 是站点目录下的相对路径(`scripts/<name>.js`)。 */
     fun parse(file: String, text: String): Parsed {
         val t = clean(text)
-        if (!t.startsWith(MARK)) return Parsed(null, "", listOf("头部要以 `$MARK` 开头"))
+        if (!t.startsWith(MARK)) return Parsed(null, "", listOf("the header must start with `$MARK`"))
         val end = t.indexOf("*/")
-        if (end < 0) return Parsed(null, "", listOf("头部没有用 */ 结束"))
+        if (end < 0) return Parsed(null, "", listOf("the header is not closed with */"))
         val body = t.substring(end + 2).trim()
         val errors = mutableListOf<String>()
         var name: String? = null
@@ -62,7 +62,7 @@ object SiteCommandFile {
             val line = raw.trim()
             if (line.isEmpty()) continue
             val i = line.indexOf(':')
-            if (i <= 0) { errors += "头部这一行看不懂:$line"; continue }
+            if (i <= 0) { errors += "cannot parse this header line: $line"; continue }
             val value = line.substring(i + 1).trim()
             when (val key = line.substring(0, i).trim()) {
                 "name" -> name = value
@@ -70,24 +70,24 @@ object SiteCommandFile {
                 "returns" -> returns = value
                 "arg" -> ARG.matchEntire(value)?.let { m ->
                     args += CommandArg(m.groupValues[1], m.groupValues[2], m.groupValues[3].isNotEmpty(), m.groupValues[4].trim())
-                } ?: run { errors += "arg 写作「名字 类型 [required] [- 说明]」,类型是 ${TYPES.joinToString("/")}:$value" }
-                else -> errors += "头部有不认得的键 $key"
+                } ?: run { errors += "arg is written as name type [required] [- description], with type one of ${TYPES.joinToString("/")}: $value" }
+                else -> errors += "the header has an unknown key $key"
             }
         }
         val base = file.substringAfterLast('/').removeSuffix(".js")
         when {
-            name == null -> errors += "缺少 name"
-            !NAME.matches(name) -> errors += "name 只能用小写字母、数字和下划线,以字母开头,至多 40 个字符"
-            name != base -> errors += "name($name)必须与文件名($base.js)一致"
+            name == null -> errors += "missing name"
+            !NAME.matches(name) -> errors += "name may only use lowercase letters, digits and underscores, must start with a letter, at most 40 characters"
+            name != base -> errors += "name ($name) must match the file name ($base.js)"
         }
-        if (description.isNullOrEmpty()) errors += "缺少 description"
-        else if (description.codePointCount(0, description.length) > DESCRIPTION_LIMIT) errors += "description 超过 $DESCRIPTION_LIMIT 字"
-        if (returns.isNullOrEmpty()) errors += "缺少 returns"
-        args.groupBy { it.name }.filterValues { it.size > 1 }.keys.forEach { errors += "arg $it 重复" }
-        if (body.isEmpty()) errors += "脚本正文为空"
-        if (body.length > BODY_LIMIT) errors += "脚本正文 ${body.length} 字,超过 $BODY_LIMIT"
+        if (description.isNullOrEmpty()) errors += "missing description"
+        else if (description.codePointCount(0, description.length) > DESCRIPTION_LIMIT) errors += "description exceeds $DESCRIPTION_LIMIT characters"
+        if (returns.isNullOrEmpty()) errors += "missing returns"
+        args.groupBy { it.name }.filterValues { it.size > 1 }.keys.forEach { errors += "duplicate arg $it" }
+        if (body.isEmpty()) errors += "script body is empty"
+        if (body.length > BODY_LIMIT) errors += "script body is ${body.length} characters, over the $BODY_LIMIT limit"
         // 动态 import 会在读取世界的全局作用域里跑模块,绕开只读包装
-        if (JsSource.usesImport(body)) errors += "脚本正文不能用 import(字符串、注释之外不能出现这个词)"
+        if (JsSource.usesImport(body)) errors += "the script body cannot use import (the word may not appear outside strings and comments)"
         val decl = if (errors.isEmpty()) SiteCommandDecl(name!!, description!!, args, returns!!, file) else null
         return Parsed(decl, body, errors)
     }

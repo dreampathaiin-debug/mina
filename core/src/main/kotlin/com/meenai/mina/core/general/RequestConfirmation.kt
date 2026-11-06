@@ -30,7 +30,7 @@ import com.meenai.mina.core.uistate.session
  */
 internal object RequestConfirmation : SurfaceAware {
     override val verb = Verb.RequestConfirmation
-    override val label = "请你同意"
+    override val label = "Ask for your approval"
     override val risk = Risk.Read
     override val def = ToolDef("request_confirmation",
         Prompts.tool("request_confirmation"),

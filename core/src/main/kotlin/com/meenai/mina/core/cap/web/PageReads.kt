@@ -44,7 +44,7 @@ internal fun webRead(text: String, url: String?, title: String? = null) =
  */
 internal object ReadPage : WebTool {
     override val verb = Verb.ReadPage
-    override val label = "读网页"
+    override val label = "Read web page"
     override val risk = Risk.Read
     override val entry = Entry.Alone
     override val def = ToolDef("web_read_page",
@@ -72,10 +72,10 @@ internal object ReadPage : WebTool {
         }
         p.netError?.let { return fail("page_not_loaded", Feedback.format("read_url_not_loaded", "url" to url.orEmpty(), "error" to it)) }
         // 模型看到的链接和图片说明也是可引用的事实,和正文一起记
-        val links = p.links.take(50).joinToString("\n") { (t, u) -> "链接「$t」$u" }
-        val images = p.images.take(20).filter { it.first.isNotBlank() }.joinToString("\n") { (alt, u) -> "图片「$alt」$u" }
+        val links = p.links.take(50).joinToString("\n") { (t, u) -> "Link: $t $u" }
+        val images = p.images.take(20).filter { it.first.isNotBlank() }.joinToString("\n") { (alt, u) -> "Image: $alt $u" }
         val read = listOf(p.text.take(max), links, images).filter { it.isNotBlank() }.joinToString("\n")
-        val seen = if (read.isNotBlank()) webRead("网页正文(${p.url},从第 $offset 字起)\n$read", p.url, p.title) else null
+        val seen = if (read.isNotBlank()) webRead("Page text (${p.url}, from char $offset)\n$read", p.url, p.title) else null
         val q = p.quality
         return ok {
             put("url", p.url); put("title", p.title)
@@ -105,7 +105,7 @@ internal object ReadPage : WebTool {
 
 internal object Downloads : WebTool {
     override val verb = Verb.Downloads
-    override val label = "查看下载"
+    override val label = "View downloads"
     override val risk = Risk.Read
     override val concurrency = Concurrency.ParallelSafe
     override val def = ToolDef("web_downloads",
@@ -129,7 +129,7 @@ internal object Downloads : WebTool {
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> {
         if (r.content["ok"] != JsonPrimitive(true)) return emptyList()
         return listOfNotNull((r.content["downloads"] as? JsonArray)?.let { list ->
-            webRead(list.joinToString("\n", "下载列表(文件名来自网页):\n") { d ->
+            webRead(list.joinToString("\n", "Download list (file names from the page):\n") { d ->
                 val dobj = d as? JsonObject
                 listOf("file", "status", "bytes", "error").mapNotNull { k -> (dobj?.get(k) as? JsonPrimitive)?.contentOrNull?.let { "$k=$it" } }.joinToString(" ")
             }, null)
@@ -140,7 +140,7 @@ internal object Downloads : WebTool {
 /** 网络响应:列表不带正文;给 id 时取正文。网址和正文先经 [Redactor.network] 脱敏再出去(运行记录在记录处还会再脱敏一次)。 */
 internal object Capture : WebTool {
     override val verb = Verb.Capture
-    override val label = "查看网页收到的数据"
+    override val label = "View data the page received"
     override val risk = Risk.Read
     override val def = ToolDef("web_capture",
         Prompts.tool("web_capture", "list_max" to CAPTURE_LIST_MAX),
@@ -173,7 +173,7 @@ internal object Capture : WebTool {
                 // 一次脱敏,交给模型、核查证据、运行记录的都是这一份
                 val red = Redactor.network(url = c.url, body = c.body)
                 val body = red.body
-                val seen = body?.let { webRead("网络响应(${red.url},HTTP ${c.status})\n${it.take(max)}", red.url) }
+                val seen = body?.let { webRead("Network response (${red.url}, HTTP ${c.status})\n${it.take(max)}", red.url) }
                 return ok {
                     fields(c)
                     if (body != null) {
@@ -208,7 +208,7 @@ internal object Capture : WebTool {
 
 internal object WebWaitFor : WebTool {
     override val verb = Verb.WaitFor
-    override val label = "等网页变化"
+    override val label = "Wait for page changes"
     override val yieldsToSteer = true
     override val risk = Risk.Read
     override val def = ToolDef("web_wait_for",

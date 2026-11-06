@@ -33,7 +33,7 @@ object Redactor {
             Json.parseToJsonElement(argsJson) as? JsonObject
         } catch (e: SerializationException) {
             null
-        } ?: return MASK // 解析不了就整段不记,宁可丢信息
+        } ?: return MASK // when it cannot be parsed, record nothing for the whole piece; better to lose the info
         val masked = if ("text" in o) JsonObject(o + ("text" to JsonPrimitive(MASK))) else o
         return text(masked.toString())
     }
@@ -94,12 +94,12 @@ object Redactor {
     private val MEMORY_ARGS = setOf("content", "quote", "keywords")
 
     /** 一次性码一类的词。 */
-    private val CODE_WORD = Regex("""验证|校验码|动态码|动态密码|确认码|安全码|短信|口令|(?i:\b(?:code|otp|passcode|pin|2fa)\b)""")
+    private val CODE_WORD = Regex("""verification|security code|one-time code|confirmation code|sms|passcode|(?i:\b(?:code|otp|passcode|pin|2fa)\b)""")
     /** 4–8 位数字,中间可以隔单个空格或连字符(「4 8 2 9 1 3」「482-913」)。 */
     private val CODE_DIGITS = Regex(
         """(?<![\d.¥$€£])(?<!\d,)(?<![¥$€£] )\d(?:[ \-]?\d){3,7}(?!\d)(?!\.\d)(?!,\d{3}(?!\d))""" +
             // 后面跟着单位、年份、货币的是量,不是码
-            """(?!\s*(?:年|元|块|角|分钟|小时|秒|天|月|日|号|次|个|人|件|条|米|公里|千米|克|公斤|千克|斤|吨|度|℃|°|%|‰|[¥$€£]|(?i:km|kg|mb|gb|kb|ms|cm|mm|mah|rmb|usd|cny)\b))""",
+            """(?!\s*(?:years?|months?|days?|hours?|minutes?|seconds?|times?|people|items?|pieces?|meters?|kilometers?|grams?|kilograms?|tons?|degrees?|℃|°|%|‰|[¥$€£]|(?i:km|kg|mb|gb|kb|ms|cm|mm|mah|rmb|usd|cny)\b))""",
     )
     /** 码和这类词之间至多隔几个字(哪一边都算)。 */
     private const val CODE_WINDOW = 24

@@ -999,7 +999,7 @@ class TaskRun(
                         // 用户点「我来处理」后 App 本来就该在主屏
                         if (handoverRef?.handedOver == true) return@collect
                         gate?.onTaskMovedAway()
-                        publish(_state.value) // 立即显示暂停,不等下一个改动屏幕的工具
+                        publish(_state.value) // show the pause at once, do not wait for the next tool that changes the screen
                     }
                 }
             }

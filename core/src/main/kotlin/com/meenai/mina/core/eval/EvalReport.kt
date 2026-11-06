@@ -44,109 +44,109 @@ object EvalReport {
         val wallT = scores.sumOf { it.second.wallMs }
 
         val sb = StringBuilder()
-        sb.appendLine("# 评测汇总 $run")
+        sb.appendLine("# Eval summary $run")
         sb.appendLine()
-        sb.appendLine("模型:$model;开关:$flags;实跑 $n 题,跳过 ${skipped.size} 题" + (if (parallel > 1) ";并行 $parallel 题。" else "。"))
+        sb.appendLine("Model: $model; flags: $flags; ran $n tasks, skipped ${skipped.size}" + (if (parallel > 1) "; ran $parallel in parallel." else "."))
         sb.appendLine()
-        sb.appendLine("## 指标")
+        sb.appendLine("## Metrics")
         sb.appendLine()
-        sb.appendLine("| 指标 | 值 |")
+        sb.appendLine("| Metric | Value |")
         sb.appendLine("|---|---|")
-        sb.appendLine("| 办成率 | ${ratio(passed, n)} |")
-        if (totalWallMs != null) sb.appendLine("| 总墙钟时间(秒) | ${num(totalWallMs / 1000.0)} |")
-        sb.appendLine("| 假成功率(占报成功) | ${ratio(falseSuccess, reportedSuccess)} |")
-        sb.appendLine("| 假成功率(占全部) | ${ratio(falseSuccess, n)} |")
-        sb.appendLine("| 未核实成功 | $unverified |")
-        sb.appendLine("| 未核实且没过 | ${scores.count { it.first.failureClass == FailureClass.unverified_wrong }} |")
+        sb.appendLine("| Pass rate | ${ratio(passed, n)} |")
+        if (totalWallMs != null) sb.appendLine("| Total wall time (s) | ${num(totalWallMs / 1000.0)} |")
+        sb.appendLine("| False success rate (of reported success) | ${ratio(falseSuccess, reportedSuccess)} |")
+        sb.appendLine("| False success rate (of all) | ${ratio(falseSuccess, n)} |")
+        sb.appendLine("| Unverified success | $unverified |")
+        sb.appendLine("| Unverified and failed | ${scores.count { it.first.failureClass == FailureClass.unverified_wrong }} |")
         // 撞上屏上看得出的登录墙等交给了用户:单列,不算办成(算不算由人定)
         scores.mapNotNull { it.first.handedOver }.groupingBy { it }.eachCount().toSortedMap()
-            .forEach { (kind, c) -> sb.appendLine("| 交给用户:$kind(不算办成) | $c |") }
-        sb.appendLine("| 步数中位数 | ${num(median(steps))} |")
-        sb.appendLine("| 步数 P90 | ${num(p90(steps))} |")
-        sb.appendLine("| 耗时中位数(秒) | ${num(median(secs))} |")
-        sb.appendLine("| 耗时 P90(秒) | ${num(p90(secs))} |")
-        sb.appendLine("| 模型调用次数中位数 | ${num(median(calls))} |")
-        sb.appendLine("| 模型调用次数 P90 | ${num(p90(calls))} |")
-        sb.appendLine("| 模型等待占比 | ${percent(scores.sumOf { it.second.modelMs }, wallT)} |")
-        sb.appendLine("| 工具执行占比 | ${percent(scores.sumOf { it.second.toolMs }, wallT)} |")
+            .forEach { (kind, c) -> sb.appendLine("| Handed to user: $kind (not counted as done) | $c |") }
+        sb.appendLine("| Steps median | ${num(median(steps))} |")
+        sb.appendLine("| Steps P90 | ${num(p90(steps))} |")
+        sb.appendLine("| Time median (s) | ${num(median(secs))} |")
+        sb.appendLine("| Time P90 (s) | ${num(p90(secs))} |")
+        sb.appendLine("| Model calls median | ${num(median(calls))} |")
+        sb.appendLine("| Model calls P90 | ${num(p90(calls))} |")
+        sb.appendLine("| Model wait share | ${percent(scores.sumOf { it.second.modelMs }, wallT)} |")
+        sb.appendLine("| Tool execution share | ${percent(scores.sumOf { it.second.toolMs }, wallT)} |")
         val waitT = scores.sumOf { it.second.waitMs }
         // 等界面的时间要工具上报;一条都没有就是没量到,不写 0%
-        sb.appendLine("| 其中等界面占比 | ${if (waitT == 0L) "(暂无数据)" else percent(waitT, wallT)} |")
+        sb.appendLine("| Of which waiting on UI | ${if (waitT == 0L) "(no data yet)" else percent(waitT, wallT)} |")
         // 模型、工具之外:等用户回答或同意、重试退避、界面开销;三项加起来是 100%
         val otherT = (wallT - scores.sumOf { it.second.modelMs } - scores.sumOf { it.second.toolMs }).coerceAtLeast(0)
-        sb.appendLine("| 其他/等用户占比 | ${percent(otherT, wallT)} |")
-        sb.appendLine("| 回放命中 | ${scores.sumOf { it.second.replayHits }} |")
-        sb.appendLine("| 回放交还 | ${scores.sumOf { it.second.replayHandBacks }} |")
+        sb.appendLine("| Other / waiting on user share | ${percent(otherT, wallT)} |")
+        sb.appendLine("| Replay hits | ${scores.sumOf { it.second.replayHits }} |")
+        sb.appendLine("| Replay hand-backs | ${scores.sumOf { it.second.replayHandBacks }} |")
         if (scores.any { it.second.replayHits + it.second.replayHandBacks > 0 }) {
             val handedBack = scores.filter { it.second.replayHandBacks > 0 }
-            sb.appendLine("| 回放命中率(走完路线的题) | ${ratio(scores.count { it.second.replayHits > 0 }, n)} |")
-            sb.appendLine("| 回放交还率(中途交还模型的题) | ${ratio(handedBack.size, n)} |")
-            sb.appendLine("| 交还后办成率 | ${ratio(handedBack.count { it.first.passed }, handedBack.size)} |")
+            sb.appendLine("| Replay hit rate (tasks that followed the route) | ${ratio(scores.count { it.second.replayHits > 0 }, n)} |")
+            sb.appendLine("| Replay hand-back rate (tasks handed back mid-way) | ${ratio(handedBack.size, n)} |")
+            sb.appendLine("| Pass rate after hand-back | ${ratio(handedBack.count { it.first.passed }, handedBack.size)} |")
         }
-        sb.appendLine("| 输入 token | $inT |")
-        sb.appendLine("| 其中缓存 token | $cachedT |")
-        sb.appendLine("| 输出 token | $outT |")
-        sb.appendLine("| 缓存命中率(cached/input) | ${percent(cachedT, inT)} |")
+        sb.appendLine("| Input tokens | $inT |")
+        sb.appendLine("| Of which cached tokens | $cachedT |")
+        sb.appendLine("| Output tokens | $outT |")
+        sb.appendLine("| Cache hit rate (cached/input) | ${percent(cachedT, inT)} |")
         val perTask = scores.filter { it.second.inputTokens > 0 }.map { it.second.cachedTokens * 100.0 / it.second.inputTokens }
-        sb.appendLine("| 每题缓存命中率中位数 | ${if (perTask.isEmpty()) "—" else num(median(perTask)) + "%"} |")
+        sb.appendLine("| Median per-task cache hit rate | ${if (perTask.isEmpty()) "-" else num(median(perTask)) + "%"} |")
         if (prices != null) {
             // 输入 token 含缓存部分,缓存部分按缓存单价计
             val cost = ((inT - cachedT) * prices.inputPerM + cachedT * prices.cachedPerM + outT * prices.outputPerM) / 1_000_000
-            sb.appendLine("| 花费 | ${num(cost)} |")
+            sb.appendLine("| Cost | ${num(cost)} |")
         }
         sb.appendLine()
 
         metricsSection(sb, scores)
 
-        sb.appendLine("## 按类计数")
+        sb.appendLine("## Counts by class")
         sb.appendLine()
         val byClass = scores.mapNotNull { it.first.failureClass }.groupingBy { it }.eachCount()
-        if (byClass.isEmpty()) sb.appendLine("无失败。")
+        if (byClass.isEmpty()) sb.appendLine("No failures.")
         else {
-            sb.appendLine("| 类别 | 数 |")
+            sb.appendLine("| Class | Count |")
             sb.appendLine("|---|---|")
             FailureClass.entries.filter { it in byClass }.forEach { sb.appendLine("| ${it.name} | ${byClass.getValue(it)} |") }
         }
         sb.appendLine()
 
-        sb.appendLine("## 每题")
+        sb.appendLine("## Per task")
         sb.appendLine()
-        sb.appendLine("| id | 结局 | 通过 | 类别 | 核查 | 步数 | 秒数 | 输入 token | 缓存命中率 | 输出 token |")
+        sb.appendLine("| id | Outcome | Pass | Class | Check | Steps | Seconds | Input tokens | Cache hit rate | Output tokens |")
         sb.appendLine("|---|---|---|---|---|---|---|---|---|---|")
         scores.forEach { (s, o) ->
             // 交出了回答、判下来没办成的:写判的结局
-            val judged = o.judged?.takeIf { Scoring.recorded(o) !== o }?.let { "(判:$it)" }.orEmpty()
-            sb.appendLine("| ${s.id} | ${o.outcome}$judged${s.handedOver?.let { "(交给用户:$it)" }.orEmpty()} | ${if (s.passed) "是" else "否"} | ${s.failureClass?.name ?: ""} | ${o.verdict ?: ""} | ${o.steps} | " +
+            val judged = o.judged?.takeIf { Scoring.recorded(o) !== o }?.let { "(judged: $it)" }.orEmpty()
+            sb.appendLine("| ${s.id} | ${o.outcome}$judged${s.handedOver?.let { "(handed to user: $it)" }.orEmpty()} | ${if (s.passed) "yes" else "no"} | ${s.failureClass?.name ?: ""} | ${o.verdict ?: ""} | ${o.steps} | " +
                 "${num(o.wallMs / 1000.0)} | ${o.inputTokens} | ${percent(o.cachedTokens, o.inputTokens)} | ${o.outputTokens} |")
         }
         sb.appendLine()
 
         if (originals.isNotEmpty()) {
-            sb.appendLine("## 原题(记下路线用,不计入上面的指标)")
+            sb.appendLine("## Original tasks (for route recording; not counted in the metrics above)")
             sb.appendLine()
-            sb.appendLine("| id | 结局 | 通过 | 步数 | 秒数 |")
+            sb.appendLine("| id | outcome | passed | steps | seconds |")
             sb.appendLine("|---|---|---|---|---|")
             originals.forEach { (s, o) ->
-                sb.appendLine("| ${s.id} | ${o.outcome}${s.handedOver?.let { "(交给用户:$it)" }.orEmpty()} | ${if (s.passed) "是" else "否"} | ${o.steps} | ${num(o.wallMs / 1000.0)} |")
+                sb.appendLine("| ${s.id} | ${o.outcome}${s.handedOver?.let { "(handed to user: $it)" }.orEmpty()} | ${if (s.passed) "yes" else "no"} | ${o.steps} | ${num(o.wallMs / 1000.0)} |")
             }
             sb.appendLine()
         }
 
-        sb.appendLine("## 跳过")
+        sb.appendLine("## Skipped")
         sb.appendLine()
-        if (skipped.isEmpty()) sb.appendLine("无。") else skipped.forEach { (id, why) -> sb.appendLine("- $id:$why") }
+        if (skipped.isEmpty()) sb.appendLine("None.") else skipped.forEach { (id, why) -> sb.appendLine("- $id:$why") }
         sb.appendLine()
 
-        sb.appendLine("## 离开题目范围的 App(只记录,不算失败)")
+        sb.appendLine("## Apps that left the task scope (recorded only, not a failure)")
         sb.appendLine()
         val drift = scores.filter { it.first.leftScope.isNotEmpty() }
-        if (drift.isEmpty()) sb.appendLine("无。") else drift.forEach { (s, _) -> sb.appendLine("- ${s.id}:${s.leftScope.joinToString("、")}") }
+        if (drift.isEmpty()) sb.appendLine("None.") else drift.forEach { (s, _) -> sb.appendLine("- ${s.id}:${s.leftScope.joinToString("、")}") }
         sb.appendLine()
 
-        sb.appendLine("## 留下的测试数据标记(需人工清理)")
+        sb.appendLine("## Test-data markers left behind (need manual cleanup)")
         sb.appendLine()
         val markers = (originals + scores).mapNotNull { (s, _) -> s.marker?.let { s.id to it } }
-        if (markers.isEmpty()) sb.appendLine("无。") else markers.forEach { (id, m) -> sb.appendLine("- $id:$m") }
+        if (markers.isEmpty()) sb.appendLine("None.") else markers.forEach { (id, m) -> sb.appendLine("- $id:$m") }
         return sb.toString()
     }
 
@@ -158,21 +158,21 @@ object EvalReport {
         val rows = scores.mapNotNull { (s, o) -> o.metrics?.let { s.id to it } }
         if (rows.isEmpty()) return
         val st = RunStats.of(rows.map { it.second })
-        sb.appendLine("## 运行小结")
+        sb.appendLine("## Run summary")
         sb.appendLine()
-        sb.appendLine("按运行记录算(${rows.size} 题):时间从 Mina 开始处理算起,读、操作按执行入口给的种类分,批里的子步不重复计。")
+        sb.appendLine("Computed from run records (${rows.size} tasks): time counts from when Mina starts handling the task; reads and actions are split by the kind given at the entry point; sub-steps inside a batch are not counted twice.")
         sb.appendLine()
-        sb.appendLine("| 指标 | 值 |")
+        sb.appendLine("| Metric | Value |")
         sb.appendLine("|---|---|")
-        sb.appendLine("| 用时中位数(秒) | ${num(st.medianTotalMs / 1000.0)} |")
-        sb.appendLine("| 第一次反馈中位数(秒) | ${st.medianFirstFeedbackMs?.let { num(it / 1000.0) } ?: "—"} |")
-        sb.appendLine("| 平均和模型来回 | ${num(Math.round(st.avgModelCalls * 10) / 10.0)} |")
-        sb.appendLine("| 模型思考占比 | ${percent(st.modelMs, st.totalMs)} |")
-        sb.appendLine("| 读屏占比 | ${percent(st.observeMs, st.totalMs)} |")
-        sb.appendLine("| 操作占比 | ${percent(st.actMs, st.totalMs)} |")
-        sb.appendLine("| 其他(等待、重试)占比 | ${percent(st.otherMs, st.totalMs)} |")
+        sb.appendLine("| Time median (s) | ${num(st.medianTotalMs / 1000.0)} |")
+        sb.appendLine("| First feedback median (s) | ${st.medianFirstFeedbackMs?.let { num(it / 1000.0) } ?: "-"} |")
+        sb.appendLine("| Avg model round-trips | ${num(Math.round(st.avgModelCalls * 10) / 10.0)} |")
+        sb.appendLine("| Model thinking share | ${percent(st.modelMs, st.totalMs)} |")
+        sb.appendLine("| Screen reading share | ${percent(st.observeMs, st.totalMs)} |")
+        sb.appendLine("| Action share | ${percent(st.actMs, st.totalMs)} |")
+        sb.appendLine("| Other (waiting, retries) share | ${percent(st.otherMs, st.totalMs)} |")
         sb.appendLine()
-        sb.appendLine("| id | 秒数 | 第一次反馈(秒) | 来回 | 全部请求 | 模型(秒) | 读屏(秒) | 操作(秒) | 其他(秒) | 读 / 操作次数 | token |")
+        sb.appendLine("| id | Seconds | First feedback (s) | Round-trips | Total requests | Model (s) | Reading (s) | Acting (s) | Other (s) | Read / action calls | Tokens |")
         sb.appendLine("|---|---|---|---|---|---|---|---|---|---|---|")
         rows.forEach { (id, m) ->
             sb.appendLine("| $id | ${secs(m.totalMs)} | ${m.firstFeedbackMs?.let(::secs) ?: "—"} | ${m.modelCalls} | ${m.allCalls ?: "—"} | " +
@@ -200,10 +200,10 @@ object EvalReport {
     fun gate(baseline: List<TaskScore>, treated: List<TaskScore>): Gate {
         val reasons = mutableListOf<String>()
         val fs = treated.count { it.falseSuccess }
-        if (fs > 0) reasons += "带技能的一轮有 $fs 题假成功(${treated.filter { it.falseSuccess }.joinToString("、") { it.id }})"
+        if (fs > 0) reasons += "$fs tasks in the skill round were false successes (${treated.filter { it.falseSuccess }.joinToString(", ") { it.id }})"
         val b = baseline.count { it.passed }
         val t = treated.count { it.passed }
-        if (t < b - 1) reasons += "办成数 $t 比基线 $b 少了 ${b - t} 题(最多允许少 1 题)"
+        if (t < b - 1) reasons += "Pass count $t is ${b - t} below the baseline $b (at most 1 fewer is allowed)"
         return Gate(reasons.isEmpty(), reasons)
     }
 
@@ -219,46 +219,46 @@ object EvalReport {
         treatedObserved: List<Observed> = emptyList(),
     ): String {
         val sb = StringBuilder()
-        sb.appendLine("## 基线 vs 带技能")
+        sb.appendLine("## Baseline vs skill")
         sb.appendLine()
-        sb.appendLine("| 指标 | 基线 | 带技能 | 变化 |")
+        sb.appendLine("| Metric | Baseline | Skill | Change |")
         sb.appendLine("|---|---|---|---|")
         fun row(name: String, f: (List<TaskScore>) -> Int) {
             val b = f(baseline); val t = f(treated)
             sb.appendLine("| $name | $b/${baseline.size} | $t/${treated.size} | ${signed(t - b)} |")
         }
-        row("办成") { s -> s.count { it.passed } }
-        row("假成功") { s -> s.count { it.falseSuccess } }
-        row("未核实成功") { s -> s.count { it.unverified } }
+        row("Pass") { s -> s.count { it.passed } }
+        row("False success") { s -> s.count { it.falseSuccess } }
+        row("Unverified success") { s -> s.count { it.unverified } }
         if (baselineObserved.isNotEmpty() && treatedObserved.isNotEmpty()) {
             fun med(o: List<Observed>, f: (Observed) -> Double) = median(o.map(f))
             val bs = med(baselineObserved) { it.steps.toDouble() }; val ts = med(treatedObserved) { it.steps.toDouble() }
-            sb.appendLine("| 步数中位数 | ${num(bs)} | ${num(ts)} | ${signedNum(ts - bs)} |")
+            sb.appendLine("| Steps median | ${num(bs)} | ${num(ts)} | ${signedNum(ts - bs)} |")
             val bt = med(baselineObserved) { it.wallMs / 1000.0 }; val tt = med(treatedObserved) { it.wallMs / 1000.0 }
-            sb.appendLine("| 耗时中位数(秒) | ${num(bt)} | ${num(tt)} | ${signedNum(tt - bt)} |")
+            sb.appendLine("| Time median (s) | ${num(bt)} | ${num(tt)} | ${signedNum(tt - bt)} |")
             // 用量按题号配对:两轮都跑了的题才比,各取每题的中位数(两轮题数不同时合计没法比)
             val bById = baseline.map { it.id }.zip(baselineObserved).toMap()
             val pairs = treated.map { it.id }.zip(treatedObserved).mapNotNull { (id, t) -> bById[id]?.let { it to t } }
             if (pairs.isNotEmpty()) {
                 fun row(name: String, f: (Observed) -> Double) {
                     val b = median(pairs.map { f(it.first) }); val t = median(pairs.map { f(it.second) })
-                    sb.appendLine("| $name(配对 ${pairs.size} 题中位数) | ${num(b)} | ${num(t)} | ${signedNum(t - b)} |")
+                    sb.appendLine("| $name (median over ${pairs.size} paired tasks) | ${num(b)} | ${num(t)} | ${signedNum(t - b)} |")
                 }
-                row("输入 token") { it.inputTokens.toDouble() }
-                row("输出 token") { it.outputTokens.toDouble() }
-                row("缓存命中率 %") { if (it.inputTokens == 0L) 0.0 else Math.round(it.cachedTokens * 1000.0 / it.inputTokens) / 10.0 }
+                row("Input tokens") { it.inputTokens.toDouble() }
+                row("Output tokens") { it.outputTokens.toDouble() }
+                row("Cache hit rate %") { if (it.inputTokens == 0L) 0.0 else Math.round(it.cachedTokens * 1000.0 / it.inputTokens) / 10.0 }
             }
         }
         sb.appendLine()
-        sb.appendLine("## 学到的技能用了几次")
+        sb.appendLine("## Learned skill usage")
         sb.appendLine()
-        if (skillUse.isEmpty()) sb.appendLine("没有用到学到的技能。")
-        else skillUse.entries.sortedByDescending { it.value }.forEach { (name, n) -> sb.appendLine("- $name:$n 次") }
+        if (skillUse.isEmpty()) sb.appendLine("No learned skills were used.")
+        else skillUse.entries.sortedByDescending { it.value }.forEach { (name, n) -> sb.appendLine("- $name: $n times") }
         sb.appendLine()
         val g = gate(baseline, treated)
-        sb.appendLine("## 门槛")
+        sb.appendLine("## Gate")
         sb.appendLine()
-        sb.appendLine(if (g.passed) "通过:带技能一轮没有假成功,办成数不低于基线减 1。" else "不通过:")
+        sb.appendLine(if (g.passed) "Passed: the skill round has no false successes and passes are at least baseline minus 1." else "Failed:")
         g.reasons.forEach { sb.appendLine("- $it") }
         return sb.toString()
     }

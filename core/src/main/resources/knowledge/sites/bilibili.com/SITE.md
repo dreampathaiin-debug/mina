@@ -1,29 +1,29 @@
 ---
 name: bilibili.com
-display: 哔哩哔哩
+display: Bilibili
 domains: ["bilibili.com"]
-aliases: ["B站", "哔哩哔哩", "bilibili", "b站"]
+aliases: ["bilibili", "Bilibili"]
 apps: ["bilibili"]
 open: bilibili.com
 mode: desktop
-description: 视频网站,搜实测、拆机、评测视频并看评论区反馈。
+description: Video site: teardown, comparison and review videos, comments
 ---
-## 是什么
+## What it is
 
-国内的视频社区,内容覆盖广。3C 数码的拆机、横评、长期使用类视频较多,白电、家居、母婴相对少。视频作者里既有独立测评者,也有厂商或带商业合作的账号。另有同名手机 App。
+A Chinese video community with wide coverage. 3C-tech teardown, comparison and long-term-use videos are plentiful; white goods, home and baby gear are relatively sparse. Among video authors there are both independent reviewers and vendor or commercially-partnered accounts. A same-named phone app exists.
 
-## 页面与网址
+## Pages and URLs
 
-- 搜索:`https://search.bilibili.com/all?keyword=<关键词>`,关键词需 URL 编码。要限定发布时间,加 `pubtime_begin_s`、`pubtime_end_s`,值是 Unix 秒级时间戳。
-- 视频页:`/video/BV…`。番剧和专栏的地址不是 BV 视频。
+- Search: `https://search.bilibili.com/all?keyword=<keyword>`, keyword URL-encoded. To limit by publish time, add `pubtime_begin_s` and `pubtime_end_s`, given as Unix second timestamps.
+- Video page: `/video/BV...`. Anime and column addresses are not BV videos.
 
-## 功能
+## Features
 
-- **视频搜索**:结果有视频链接、标题、发布日期。
-- **视频页**:简介正文和发布时间;正文不含评论。
-- **评论区**:评论渲染在单独的 shadow DOM 里,整页读文字或滚动外层页面常拿不到。能读到的通常是按热度排前面的部分,每条有作者、正文、点赞数、楼中楼回复数、日期、是否置顶;页面上另有评论总数。
+- **Video search**: results have video links, titles and publish dates.
+- **Video page**: description body and publish time; the body does not include comments.
+- **Comment section**: comments render inside a separate shadow DOM, so reading the whole page's text or scrolling the outer page usually misses them. What is readable is usually the heat-ranked leading part; each comment has author, body, like count, reply count, date and pinned state; the page separately shows the total.
 
-## 已知现象
+## Known behaviour
 
-- 评论没读到,可能是评论区关闭、没有评论或加载失败。
-- 评论接口有签名,页面外直接请求不稳定。
+- Comments not read may mean the section is closed, empty, or failed to load.
+- The comment API is signed, and requests from outside the page are unreliable.

@@ -1,19 +1,19 @@
 ---
 name: wechat
-display: 微信
+display: WeChat
 packages: ["com.tencent.mm"]
-aliases: ["WeChat", "weixin", "微信", "wechat"]
+aliases: ["WeChat", "weixin", "wechat"]
 sites: []
-open: 微信
+open: WeChat
 pace: careful
-description: 聊天、公众号与社交
+description: Chats, official accounts and social
 ---
-## 是什么
-微信是聊天与社交 App,包名 `com.tencent.mm`。
+## What it is
+WeChat is a chat and social app, package `com.tencent.mm`.
 
-## 界面
-主要结构通常是聊天列表、通讯录、发现和个人页,具体布局随版本、账号状态和字体设置而不同。顶部搜索会同时返回联系人、群聊、聊天记录、小程序和公众号,结果按分组显示。
+## Interface
+The main structure is usually a chat list, contacts, Discover and a profile page, with the exact layout varying by version, account state and font settings. Top search returns contacts, group chats, chat history, mini programs and official accounts at once, grouped in the results.
 
-## 功能
-- **会话**:未读标记、置顶、草稿、服务通知和普通消息都在列表里,容易混淆。联系人显示名、备注名、群名和头像可能相似,进入会话后标题才是实际对象。输入框里有文字只是草稿,发出后会话里才有本人的气泡。群聊中每条消息有发言人。
-- **公众号**:内容与个人会话是分开的。
+## Features
+- **Conversations**: unread badges, pinned chats, drafts, service notices and ordinary messages all live in the list and are easy to mix up. A contact's display name, saved name, group name and avatar may look alike; only after entering the conversation does the title show the actual recipient. Text in the input box is only a draft; the sender's own bubble appears in the conversation only after sending. In group chats every message names its speaker.
+- **Official accounts**: their content is separate from personal conversations.

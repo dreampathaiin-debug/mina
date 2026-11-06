@@ -17,7 +17,7 @@ import kotlinx.serialization.json.put
 internal object Wait : AgentTool {
     override val verb = Verb.Wait
     override val batchable = true
-    override val label = "等待"
+    override val label = "Wait"
     override val risk = Risk.Read
     override val logged = true
     override val yieldsToSteer = true

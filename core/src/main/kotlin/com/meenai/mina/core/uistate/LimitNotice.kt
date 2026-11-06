@@ -8,14 +8,14 @@ package com.meenai.mina.core.uistate
 object LimitNotice {
     /** 比对时去掉空白、不分大小写。 */
     val WORDS = listOf(
-        "次数已用完", "次数用完", "机会已用完", "额度已用完", "已达上限", "已达到上限", "达到上限", "超过上限", "超出上限",
-        "明天再来", "明日再来", "明天再试", "明日再试", "操作过于频繁", "操作太频繁", "操作频繁", "请求过于频繁", "访问过于频繁",
+        "you have used up your", "out of attempts", "out of quota", "limit reached", "the limit has been reached", "over the limit", "exceeded the limit",
+        "come back tomorrow", "try again tomorrow", "too many requests", "too frequent", "requests are too frequent",
         "limitreached", "reachedthelimit", "reachedyourlimit", "reachedthedailylimit", "reachedyourdailylimit", "dailylimit",
         "tryagaintomorrow", "comebacktomorrow", "toomanyrequests", "doingthattoooften",
     )
 
     /** 「已达到沟通上限」「超过每日投递上限」这样中间夹着几个字的说法。 */
-    private val REACHED = Regex("(已达|达到|超过|超出)[^，,。.!！?？]{0,6}上限")
+    private val REACHED = Regex("(?:reached|exceeded|over)[^,，.!！?？]{0,6}limit")
 
     /** 算「短文字」的上限(去掉空白后的字数):提示条、弹窗里的一两句话。 */
     private const val MAX_CHARS = 120

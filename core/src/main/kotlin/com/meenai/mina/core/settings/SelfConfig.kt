@@ -45,7 +45,7 @@ private fun port(ctx: ToolContext): SelfConfig =
 /** 列出 Mina 自己能改的设置:键、给人看的名字、现在的值、可选值。只读。 */
 internal object SettingsList : AgentTool {
     override val verb = Verb.SettingsList
-    override val label = "查看设置"
+    override val label = "View settings"
     override val risk = Risk.Read
     override val concurrency = Concurrency.ParallelSafe
 
@@ -68,7 +68,7 @@ internal object SettingsList : AgentTool {
 /** 改 Mina 自己的一项设置;键和值都得来自 [SettingsList]。 */
 internal object SettingsSet : AgentTool {
     override val verb = Verb.SettingsSet
-    override val label = "改设置"
+    override val label = "Change settings"
     override val risk = Risk.Write
     /** 不动屏幕:改的是 Mina 自己的设置,和当前任务的屏无关。 */
     override val offScreen = true

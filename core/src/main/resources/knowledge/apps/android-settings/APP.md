@@ -1,23 +1,23 @@
 ---
 name: android-settings
-display: Android 设置
+display: Android Settings
 packages: ["com.android.settings"]
-aliases: ["系统设置", "手机设置", "Android Settings", "Settings", "设置"]
+aliases: ["system settings", "phone settings", "Android Settings", "Settings", "settings"]
 sites: []
-open: 设置
-description: 安卓系统设置,管理网络、显示、权限、账号和系统信息
+open: Settings
+description: Android system settings: network, display, permissions
 ---
-## 是什么
-安卓系统自带的设置,包名 `com.android.settings`。
+## What it is
+The settings app that ships with Android, package `com.android.settings`.
 
-## 界面
-首页是分类列表,顶部有搜索框;点进分类后是逐层的子页面和详情页。设置项的名称、分类和层级会随系统版本与手机厂商而不同,有的厂商还会加自己的入口。返回按钮的文字和样子随页面变化,是否回到首页以页面标题和结构判断。
+## Interface
+The home page is a category list with a search box at the top; entering a category leads through layers of sub-pages and detail pages. Setting names, categories and layering vary by system version and phone maker, and some makers add their own entries. The back button's text and look change per page; whether it returns to the home page is judged from the page title and structure.
 
-## 功能
-- **搜索设置项**:顶部搜索框可直接按名称找到设置项。
-- **开关类设置**:Wi-Fi、蓝牙、飞行模式、定位等。开关的状态有时只靠颜色和位置表示,界面树里不一定有明确的「开/关」文字。
-- **关于手机**:型号、系统版本等,同一页里还可能有序列号、IMEI、设备名称等标识。
-- **权限、开发者选项、账号、安全、系统更新、安装来源、重置**:修改后会真实改变设备状态。
+## Features
+- **Search settings**: the top search box finds a setting by name directly.
+- **Toggle settings**: Wi-Fi, Bluetooth, airplane mode, location and the like. A toggle's state is sometimes shown only by colour and position; the UI tree may carry no clear on/off text.
+- **About phone**: model, system version and more; the same page may also hold the serial number, IMEI, device name and other identifiers.
+- **Permissions, developer options, accounts, security, system update, install sources, reset**: changing these really changes the device's state.
 
-## 已知现象
-点击开关会立即切换状态,所以只想知道当前状态时,要读无障碍属性或看截图,不能靠点击。
+## Known behaviour
+Tapping a toggle switches it at once, so to merely learn the current state, read the accessibility properties or look at a screenshot; never rely on tapping.

@@ -1,14 +1,14 @@
 ---
 name: jike
-display: 即刻
+display: Jike
 packages: ["com.ruguoapp.jike"]
-aliases: ["即刻", "Jike", "jike"]
+aliases: ["Jike", "jike"]
 sites: []
-open: 即刻
-description: 兴趣社区 App
+open: Jike
+description: Interest community app
 ---
-## 是什么
-即刻,包名 `com.ruguoapp.jike`。
+## What it is
+Jike, package `com.ruguoapp.jike`.
 
-## 已知现象
-- 第一次打开先是「服务协议与隐私政策」弹窗,只有「不同意并退出」「同意」两个按钮,按返回键关不掉;不点「同意」进不去 App。
+## Known behaviour
+- On first open, a "Terms of service and privacy policy" dialog appears with only "Disagree and exit" and "Agree" buttons; back cannot close it, and the app cannot be entered without tapping "Agree".

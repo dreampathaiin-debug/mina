@@ -166,7 +166,7 @@ class Replayer(
         "${s.packageName ?: "unknown app"}: " + s.elements.map { it.name.trim() }.filter { it.isNotEmpty() }.distinct().take(8).joinToString(", ")
 
     private fun emit(e: RunEvent) {
-        try { sink.event(e) } catch (x: CancellationException) { throw x } catch (x: Exception) { /* 记录失败不影响回放 */ }
+        try { sink.event(e) } catch (x: CancellationException) { throw x } catch (x: Exception) { /* a failed sink does not affect replay */ }
     }
 
     companion object {

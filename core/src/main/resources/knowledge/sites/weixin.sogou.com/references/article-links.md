@@ -1,7 +1,7 @@
-# 卡片与链接的结构
+# Card and link structure
 
-文章卡片在页面的 `.news-list li` 里(取不到时退到 `ul li`),每张卡片含公众号名和一个跳转 href。
+Article cards sit in the page's `.news-list li` (fall back to `ul li` when that is missing); each card holds an account name and one redirect href.
 
-一批结果里,如果至少有两条非空且互不相同的链接,链接可以作为区分各卡片的入口;出现重复,或者整批只有一条,链接就区分不了卡片,这时只能用搜索页地址、关键词和卡片文字来定位一条结果。
+Within one batch of results, when at least two non-empty, distinct links exist, the links can distinguish the cards; when duplicates appear, or the whole batch has a single one, links cannot tell the cards apart, and a result must then be located by the search page's address, the keyword and the card's text.
 
-跳转 href 是加密的,有效期短,同一个地址可能被多条重复使用。账号名是自称的名字,不代表实名主体。
+The redirect href is encrypted, short-lived, and one address may be reused by several duplicates. The account name is a self-chosen name, not a verified legal entity.

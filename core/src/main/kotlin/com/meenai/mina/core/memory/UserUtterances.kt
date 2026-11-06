@@ -53,6 +53,6 @@ class UserUtterances {
         val DIGITS = Regex("\\d+")
         val LATIN = Regex("[A-Za-z][A-Za-z0-9._-]{2,}")
         val PLACE = Regex("\\p{IsHan}{2}(?:小区|大厦|广场|公寓|花园|单元|路|街|巷|弄|镇|村|号|楼|栋|室|区|县|市|省|园|苑|城|道|里|湾)")
-        val PERSON = Regex("用户的|用户|我的|我")
+        val PERSON = Regex("the user's|the user|my|I")
     }
 }

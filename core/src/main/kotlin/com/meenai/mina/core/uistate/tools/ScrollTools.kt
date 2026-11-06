@@ -29,7 +29,7 @@ internal class Scroll(f: ScreenFamily) : ScreenTool(f, "scroll") {
     override val verb = Verb.Scroll
     override val batchable = true
     override val routable = f.routable
-    override val label = "滚动"
+    override val label = "Scroll"
     override val risk = Risk.External
     override val gateTarget = GateTarget.Swipe
     override val showsScreenAfter = true
@@ -73,7 +73,7 @@ internal class Swipe(f: ScreenFamily) : ScreenTool(f, "swipe") {
     override val verb = Verb.Swipe
     override val batchable = true
     override val routable = f.routable
-    override val label = "滑动"
+    override val label = "Swipe"
     override val risk = Risk.External
     override val gateTarget = GateTarget.Swipe
     override val showsScreenAfter = true

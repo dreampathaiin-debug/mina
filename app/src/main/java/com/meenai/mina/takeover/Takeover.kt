@@ -293,7 +293,7 @@ class Takeover(
             mutex.withLock {
                 // 挪到主屏失败退回等待时也照常超时;已经接手或换成了下一次等待就不算
                 if (_stage.value == Stage.Waiting && current === state) {
-                    timer = null // 交还时不能把正在交还的自己取消掉
+                    timer = null // handing back must not cancel the hand-back itself
                     giveBackLocked(HandBack(HandBackOutcome.timeout))
                 }
             }

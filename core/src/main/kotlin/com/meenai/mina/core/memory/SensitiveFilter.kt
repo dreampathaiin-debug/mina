@@ -11,12 +11,12 @@ import java.time.LocalDate
  */
 object SensitiveFilter {
     private const val KEYWORDS =
-        "支付密码|密码|口令|验证码|校验码|动态码|安全码|安全问题|" +
+        "payment password|password|passcode|verification code|security code|one-time code|security question|" +
             "(?<![A-Za-z])(?:password|passcode|passwd|cvv|cvc|verification code|security code|security question|one-time code)(?![A-Za-z])"
     // 这两个词太短,常见于普通英文(pinned、hotpot),只在后面跟数字时才算
     private const val DIGIT_KEYWORDS = "(?<![A-Za-z])(?:pin|otp)(?![A-Za-z])"
-    private const val GAP = "[\\s:：=,，是为叫]{0,4}(?:(?:is|was|are)\\s+)?"
-    private const val OWNER = "\\s*(?:就是|是|为)(?:我的|我|用户的)?\\s*"
+    private const val GAP = "[\\s:=,]{0,4}(?:(?:is|was|are)\\s+)?"
+    private const val OWNER = "\\s*(?:is)?\\s*"
 
     // 关键词与 4 位以上数字/字母串之间只允许很短的连接(「是」「:」「 is 」),免得一句普通话里的数字被误判
     private val KEYWORD_RULES = listOf(

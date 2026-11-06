@@ -52,7 +52,7 @@ object Attachments {
     suspend fun importInto(
         context: Context, uris: List<Uri>, workspace: File, gate: WorkspaceFileGate, tree: SandboxTree,
         freeBytes: () -> Long = { workspace.usableSpace }, workspaceBytes: () -> Long = { 0L },
-    ): ImportResult = tree.shared { withContext(Dispatchers.IO) { // 写进 files/sandbox/:和重置互斥
+    ): ImportResult = tree.shared { withContext(Dispatchers.IO) { // written into files/sandbox/: mutually exclusive with reset
         val added = mutableListOf<Pair<String, Long>>()
         val rejected = mutableListOf<String>()
         for (uri in uris) {

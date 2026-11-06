@@ -86,43 +86,43 @@ internal object RecordedEvidence {
         val name = tools[e.tool]?.name ?: e.tool
         fun add(kind: ObsKind, text: String, place: Place? = null, authored: String? = null, title: String? = null) =
             l.add(Observation(kind, text, place = place, authored = authored, title = title), e.step, e.atMs)
-        fun page() = add(ObsKind.Fact, "$name:网址 ${r.s("url")},网页标题「${r.s("title").orEmpty()}」" + (r.s("httpStatus")?.let { ",HTTP 状态 $it" } ?: ""))
+        fun page() = add(ObsKind.Fact, "$name: url ${r.s("url")}, page title: ${r.s("title").orEmpty()}" + (r.s("httpStatus")?.let { ", HTTP status $it" } ?: ""))
         when (tools.verb(e.tool)) {
             Verb.Navigate -> if (ok) page()
             Verb.ReadPage -> if (ok) {
-                val links = r.list("links").joinToString("\n") { "链接「${it.s("text")}」${it.s("url")}" }
-                val images = r.list("images").filter { !it.s("alt").isNullOrBlank() }.joinToString("\n") { "图片「${it.s("alt")}」${it.s("url")}" }
+                val links = r.list("links").joinToString("\n") { "Link: ${it.s("text")} ${it.s("url")}" }
+                val images = r.list("images").filter { !it.s("alt").isNullOrBlank() }.joinToString("\n") { "Image: ${it.s("alt")} ${it.s("url")}" }
                 val read = listOf(r.s("text").orEmpty(), links, images).filter { it.isNotBlank() }.joinToString("\n")
-                if (read.isNotBlank()) add(ObsKind.Read, "网页正文(${r.s("url")},从第 ${a.s("offset") ?: "0"} 字起)\n$read", r.s("url")?.let(Place::page), title = r.s("title"))
+                if (read.isNotBlank()) add(ObsKind.Read, "Page text (${r.s("url")}, from char ${a.s("offset") ?: "0"})\n$read", r.s("url")?.let(Place::page), title = r.s("title"))
                 page()
             }
             Verb.Tabs -> if (ok) {
                 val tabs = r.list("tabs").ifEmpty { listOf(r) }.filter { it.s("title") != null }
-                if (tabs.isNotEmpty()) add(ObsKind.Fact, tabs.joinToString("\n", "$name:\n") { "标签 ${it.s("tabId")}:网址 ${it.s("url")},网页标题「${it.s("title")}」" })
+                if (tabs.isNotEmpty()) add(ObsKind.Fact, tabs.joinToString("\n", "$name:\n") { "Tab ${it.s("tabId")}: url ${it.s("url")}, page title: ${it.s("title")}" })
             }
-            Verb.EvaluateJs -> if (ok) r.s("result")?.let { add(ObsKind.Read, "网页数据脚本的结果(${site ?: "当前网页"})\n$it", site?.let(Place::site)) }
-            Verb.SiteCommand -> if (ok) r.s("result")?.let { add(ObsKind.Read, "站点命令 ${a.s("name")} 的结果(${site ?: "当前网页"})\n$it", site?.let(Place::site)) }
-            Verb.Script -> r.s("result")?.takeIf { it != "null" }?.let { add(ObsKind.Read, "页面脚本的结果(${site ?: "当前网页"})\n$it", site?.let(Place::site)) }
+            Verb.EvaluateJs -> if (ok) r.s("result")?.let { add(ObsKind.Read, "Result of the page data script (${site ?: "current page"})\n$it", site?.let(Place::site)) }
+            Verb.SiteCommand -> if (ok) r.s("result")?.let { add(ObsKind.Read, "Result of site command ${a.s("name")} (${site ?: "current page"})\n$it", site?.let(Place::site)) }
+            Verb.Script -> r.s("result")?.takeIf { it != "null" }?.let { add(ObsKind.Read, "Result of the page script (${site ?: "current page"})\n$it", site?.let(Place::site)) }
             Verb.Downloads -> if (ok) r.list("downloads").takeIf { it.isNotEmpty() }?.let { list ->
-                add(ObsKind.Read, list.joinToString("\n", "下载列表(文件名来自网页):\n") { d ->
+                add(ObsKind.Read, list.joinToString("\n", "Download list (file names from the page):\n") { d ->
                     listOf("file", "status", "bytes", "error").mapNotNull { k -> d.s(k)?.let { "$k=$it" } }.joinToString(" ")
                 })
             }
-            Verb.Capture -> if (ok) r.s("body")?.let { add(ObsKind.Read, "网络响应(${r.s("url")},HTTP ${r.s("status")})\n$it", r.s("url")?.let(Place::page)) }
-            Verb.RunCommand -> r.s("output")?.let { add(ObsKind.Output, "退出码 ${r.s("exitCode")}:\n$it", Place.command("run_command「${a.s("command")?.take(200)}」"), a.s("command")) }
-            Verb.RunBundledScript -> r.s("output")?.let { add(ObsKind.Output, "退出码 ${r.s("exitCode")}:\n$it", Place.command("run_bundled_script ${a.s("source") ?: a.s("skill")}/${a.s("script")}"), a["args"]?.toString()) }
+            Verb.Capture -> if (ok) r.s("body")?.let { add(ObsKind.Read, "Network response (${r.s("url")}, HTTP ${r.s("status")})\n$it", r.s("url")?.let(Place::page)) }
+            Verb.RunCommand -> r.s("output")?.let { add(ObsKind.Output, "Exit code ${r.s("exitCode")}:\n$it", Place.command("run_command「${a.s("command")?.take(200)}」"), a.s("command")) }
+            Verb.RunBundledScript -> r.s("output")?.let { add(ObsKind.Output, "Exit code ${r.s("exitCode")}:\n$it", Place.command("run_bundled_script ${a.s("source") ?: a.s("skill")}/${a.s("script")}"), a["args"]?.toString()) }
             Verb.ReadFile -> if (ok && r.s("path") !in written) r.s("content")?.let { add(ObsKind.Output, it, Place.file("read_file ${r.s("path")}")) }
             Verb.WriteFile -> if (ok) {
                 r.s("path")?.let { written += it }
-                add(ObsKind.Output, "write_file 写入 ${r.s("path")}(${r.s("bytesWritten")} 字节,文件现为 ${r.s("size")} 字节)")
+                add(ObsKind.Output, "write_file wrote ${r.s("path")} (${r.s("bytesWritten")} bytes, file is now ${r.s("size")} bytes)")
             }
             Verb.SearchFiles -> if (ok) r.list("matches").let { m ->
                 add(ObsKind.Output, m.joinToString("\n") { "${it.s("file")}:${it.s("line")}: ${it.s("text")}" }, Place.command("search_files「${a.s("pattern")?.take(100)}」"))
             }
-            Verb.ShareFile -> if (ok) add(ObsKind.Output, "share_file 已存到 ${r.s("savedAs")}")
+            Verb.ShareFile -> if (ok) add(ObsKind.Output, "share_file saved to ${r.s("savedAs")}")
             Verb.ListApps -> if (ok) r.list("apps").forEach { app -> app.s("package")?.let { p -> app.s("label")?.let { labels[p] = it } } }
-            Verb.LaunchApp -> if (ok) a.s("package")?.let { p -> add(ObsKind.Fact, "$name 打开了 $p" + (labels[p]?.let { "(App 名字「$it」)" } ?: "")) }
-            Verb.ShareText -> if (ok) a.s("package")?.let { p -> add(ObsKind.Fact, "$name 打开了 $p 的分享页(还没发出)" + (labels[p]?.let { "(App 名字「$it」)" } ?: "")) }
+            Verb.LaunchApp -> if (ok) a.s("package")?.let { p -> add(ObsKind.Fact, "$name opened $p" + (labels[p]?.let { "(app name: $it)" } ?: "")) }
+            Verb.ShareText -> if (ok) a.s("package")?.let { p -> add(ObsKind.Fact, "$name opened the share sheet for $p (not sent yet)" + (labels[p]?.let { "(app name: $it)" } ?: "")) }
             else -> Unit
         }
     }

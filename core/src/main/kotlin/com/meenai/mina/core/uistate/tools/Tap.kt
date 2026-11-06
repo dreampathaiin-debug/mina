@@ -40,7 +40,7 @@ internal class Tap(f: ScreenFamily) : ScreenTool(f, "tap") {
     override val verb = Verb.Tap
     override val batchable = true
     override val routable = f.routable
-    override val label = "点击"
+    override val label = "Tap"
     override val risk = Risk.External
     override val gateTarget = GateTarget.Tap
     override val showsScreenAfter = true

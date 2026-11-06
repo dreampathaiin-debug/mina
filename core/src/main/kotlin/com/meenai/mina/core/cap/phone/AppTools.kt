@@ -35,7 +35,7 @@ import com.meenai.mina.core.uistate.session
 /** 列出、打开手机上的 App:永远作用于手机。 */
 internal object ListApps : PhoneTool {
     override val verb = Verb.ListApps
-    override val label = "查看已装的 App"
+    override val label = "View installed apps"
     override val risk = Risk.Read
     override val entry = Entry.Alone
     override val def = ToolDef("phone_list_apps", Prompts.tool("phone_list_apps"))
@@ -71,7 +71,7 @@ internal object LaunchApp : PhoneTool {
     override val verb = Verb.LaunchApp
     override val batchable = true
     override val routable = true
-    override val label = "打开 App"
+    override val label = "Open app"
     override val risk = Risk.Write
     override val entry = Entry.Opens
     override val showsScreenAfter = true
@@ -120,8 +120,8 @@ internal object LaunchApp : PhoneTool {
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> {
         if (r.content["ok"] != JsonPrimitive(true)) return emptyList()
         return listOfNotNull(o.argStr("package")?.let { p ->
-            val copy = (o["user"] as? JsonPrimitive)?.contentOrNull?.let { "(另一份,用户 $it)" }.orEmpty()
-            Observation(ObsKind.Fact, "$name 打开了 $p$copy" + (log.appLabels[p]?.let { "(App 名字「$it」)" } ?: ""), source = PHONE)
+            val copy = (o["user"] as? JsonPrimitive)?.contentOrNull?.let { "(another copy, user $it)" }.orEmpty()
+            Observation(ObsKind.Fact, "$name opened $p$copy" + (log.appLabels[p]?.let { "(app name: $it)" } ?: ""), source = PHONE)
         })
     }
 
@@ -140,7 +140,7 @@ internal object LaunchApp : PhoneTool {
  */
 internal object AppAfterTask : PhoneTool {
     override val verb = Verb.AppAfterTask
-    override val label = "定下 App 做完后留着还是关掉"
+    override val label = "Keep or close apps after the task"
     override val risk = Risk.Write
     override val logged = true
     override val def = ToolDef("phone_app_after_task", Prompts.tool("phone_app_after_task"),
@@ -188,7 +188,7 @@ internal object AppAfterTask : PhoneTool {
  */
 internal object ShareText : PhoneTool {
     override val verb = Verb.ShareText
-    override val label = "分享文字到 App"
+    override val label = "Share text to an app"
     override val risk = Risk.Write
     override val showsScreenAfter = true
     override val logged = true
@@ -219,7 +219,7 @@ internal object ShareText : PhoneTool {
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> {
         if (r.content["ok"] != JsonPrimitive(true)) return emptyList()
         return listOfNotNull(o.argStr("package")?.let { p ->
-            Observation(ObsKind.Fact, "$name 打开了 $p 的分享页(还没发出)" + (log.appLabels[p]?.let { "(App 名字「$it」)" } ?: ""), source = PHONE)
+            Observation(ObsKind.Fact, "$name opened the share sheet for $p (not sent yet)" + (log.appLabels[p]?.let { "(app name: $it)" } ?: ""), source = PHONE)
         })
     }
 }

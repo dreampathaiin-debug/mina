@@ -388,7 +388,7 @@ class PageChat(private val context: Context, private val browser: UserBrowser, p
     private companion object {
         const val TAG = "MinaPageChat"
         /** 运行记录里网页那一屏的对象写成「网站 <域名>」。 */
-        const val SITE_PREFIX = "网站 "
+        const val SITE_PREFIX = "Site "
     }
 }
 

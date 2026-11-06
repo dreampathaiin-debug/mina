@@ -6,10 +6,10 @@ package com.meenai.mina.core.agent
  * 旧对话里的消息也是这个写法。
  */
 object AttachmentLines {
-    private const val PREFIX = "附件:"
+    private const val PREFIX = "Attachment:"
 
     /** 名字里可以有括号(「报表 (1).csv」):大小只认最后那对括号里的「数字 + B/KB/MB」;路径在沙箱的 /workspace 下。 */
-    private val LINE = Regex("^附件:(/workspace/.+)\\((\\d+(?:\\.\\d+)? (?:B|KB|MB))\\)$")
+    private val LINE = Regex("^Attachment:(/workspace/.+)\\((\\d+(?:\\.\\d+)? (?:B|KB|MB))\\)$")
 
     /** 拆开的一句话:[files] 是每个附件的路径和写在消息里的大小(「2 KB」),按出现先后;[words] 是附件行以外的话(去掉首尾空白)。 */
     data class Parsed(val files: List<Pair<String, String>>, val words: String)

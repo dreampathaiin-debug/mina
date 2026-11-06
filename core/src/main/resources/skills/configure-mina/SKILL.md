@@ -1,32 +1,32 @@
 ---
 name: configure-mina
-display: 改 Mina 自己的设置
-description: 用户让 Mina 改自己的设置时用它看和改;模型、Key 与删数据不在其中
-aliases: ["设置你自己", "改你的设置", "调快一点", "别静音", "换个外观"]
-terms: ["设置", "配置", "快一点", "慢一点", "静音", "外观", "深色", "浅色", "胶囊"]
+display: Change Mina's own settings
+description: View and change Mina's own settings
+aliases: ["change your settings", "go faster", "stop muting", "change the look"]
+terms: ["settings", "configure", "faster", "slower", "mute", "appearance", "dark", "light", "capsule"]
 ---
-## 先看能改什么
+## See what can be changed first
 
-先调 `settings_list`。它会列出此刻能改的每一项:键、给人看的名字、现在的值,以及(如果能选的只有几个)全部可选值。
+Call `settings_list` first. It lists every setting changeable right now: key, display name, current value, and (when there are only a few choices) all allowed values.
 
-**只用列表里给出的键和值**,不要自己猜一个词。用户说的和你看到的对不上时(比如用户说「别静音」,列表里叫「mute_apps」),按名字挑出那一项,把 `label` 念给用户听确认是这个。
+**Use only the keys and values the list gives**; never guess a word. When what the user said and what you see disagree (the user says "stop muting", the list calls it "mute_apps"), pick the entry by name and read its `label` back to the user to confirm it is that one.
 
-## 改之前先说一句
+## Say it before changing
 
-用户明确说了要改什么,就用 `settings_set` 直接改,改完告诉用户现在的值。用户的话含糊时(「让它快一点」)先说清你打算改哪一项、改成什么,再改:
+When the user has clearly said what to change, use `settings_set` directly and report the new value after. When their words are vague ("make it faster"), first say what you will change and to what, then change it:
 
-> 我把操作节奏改成「快」了,下个任务开始生效。
+> I set the operating pace to "fast"; it applies from the next task.
 
-**不要改用户没提到的东西**。一次改几项时逐项说。
+**Never change anything the user did not mention.** When changing several items, say so item by item.
 
-## 改不了的东西
+## What cannot be changed here
 
-- **模型、API Key、登录**:不在列表里。用户要这些时,告诉他去「设置 › 模型」,你说不了这一步。
-- **删数据**(清工作区、重置运行环境、删对话):也不在列表里,同样请他自己做。
-- **容器的联网与代理**:不在列表里。这两项会让数据离开手机,要用户自己去「设置 › 文件与计算环境」里开或填,你不要替他改。
+- **Model, API key, sign-in**: not in the list. When the user wants these, send them to Settings › Models; you cannot do this step.
+- **Deleting data** (clearing the workspace, resetting the run environment, deleting conversations): also not in the list; ask the user to do it themselves.
+- **Container network and proxy**: not in the list. Both move data off the phone, so the user opens or fills them in Settings › Files & compute themselves; never change them for them.
 
-这几类是故意的:第一类等于让模型换掉自己的脑子、动用户的钱;第二类不可逆;联网那道线得用户自己划。
+These exclusions are deliberate: the first would let the model swap out its own brain and touch the user's money, the second is irreversible, and the network line is the user's to draw.
 
-## 生效时间
+## When it takes effect
 
-大多数改动下一个任务开始生效;外观(深浅色)当场就换。改完顺带说一句,免得用户以为没生效。
+Most changes apply from the next task; the look (dark or light) switches at once. Mention that when reporting, so the user does not think it did not apply.

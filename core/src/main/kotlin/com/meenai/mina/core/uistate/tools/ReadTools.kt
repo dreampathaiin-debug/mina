@@ -23,7 +23,7 @@ import com.meenai.mina.core.uistate.session
 /** 读这块屏:元素表(observe 按配置补截图)、单独截图。 */
 internal class Observe(f: ScreenFamily) : ScreenTool(f, "observe") {
     override val verb = Verb.Observe
-    override val label = "看屏幕"
+    override val label = "Read screen"
     override val risk = Risk.Read
     override val def by lazy { ToolDef(name, describe()) }
 
@@ -35,7 +35,7 @@ internal class Observe(f: ScreenFamily) : ScreenTool(f, "observe") {
 
 internal class ListElements(f: ScreenFamily) : ScreenTool(f, "list_elements") {
     override val verb = Verb.ListElements
-    override val label = "读取界面元素"
+    override val label = "Read UI elements"
     override val risk = Risk.Read
     override val def by lazy { ToolDef(name, describe()) }
 
@@ -45,7 +45,7 @@ internal class ListElements(f: ScreenFamily) : ScreenTool(f, "list_elements") {
 /** 主模型能看图才提供。 */
 internal class Screenshot(f: ScreenFamily) : ScreenTool(f, "screenshot") {
     override val verb = Verb.Screenshot
-    override val label = "截图"
+    override val label = "Take screenshot"
     override val risk = Risk.Read
     override val def by lazy { ToolDef(name, describe()) }
 

@@ -1,26 +1,26 @@
 ---
 name: zhihu.com
-display: 知乎
+display: Zhihu
 domains: ["zhihu.com"]
-aliases: ["知乎", "Zhihu", "zhihu"]
+aliases: ["Zhihu", "zhihu"]
 apps: ["zhihu"]
 open: zhihu.com
 mode: desktop
-description: 中文问答社区,看问题的回答、专栏文章,含专业解释和经验争论
+description: Chinese Q&A community: answers and column articles
 ---
-## 是什么
-中文问答与专栏社区,一个问题下有多个回答,回答附作者和赞同数。内容涉及原理解释、使用经历,也有反对意见。
+## What it is
+A Chinese Q&A and column community; one question carries many answers, each with author and upvote count. Content covers principle explanations and lived experience, with dissenting views too.
 
-## 页面与网址
-- 搜索:`https://www.zhihu.com/search?type=content&q=<编码关键词>`。
+## Pages and URLs
+- Search: `https://www.zhihu.com/search?type=content&q=<encoded keyword>`.
 
-## 功能
-- **搜索**:结果含问题、回答、专栏的标题、真实链接和发布日期。搜索词写对象和要点即可,不用加站名。
-- **阅读回答**:正文、作者、赞同数。问题页常先只加载前几个高赞回答,往下滚还会加载,滚动后没有新增就是已到底。
-- **公司讨论**:用公司全称或有辨识度的核心词搜索,取到问题、回答和专栏的链接与片段。
-- **手机 App**:对应说明见 `zhihu`。
+## Features
+- **Search**: results carry titles, real links and publish dates for questions, answers and columns. The search term needs only the object and the key points, no site name.
+- **Reading answers**: body, author, upvote count. A question page usually loads only the first few highly-upvoted answers, loading more on scroll; when scrolling adds nothing, that is the end.
+- **Company discussions**: search with the company's full name or a distinctive core term, to get question, answer and column links with snippets.
+- **Phone app**: see `zhihu` for the matching description.
 
-## 已知现象
-- 未登录时会出现登录弹层,页面只剩导航和页脚,没有正文。
-- 搜索结果里有 AI 生成的回答,只能当找原文的线索。
-- 专栏地址不能说明作者的真实身份。
+## Known behaviour
+- When signed out a sign-in layer appears, leaving only navigation and footer on the page, with no content.
+- Search results include AI-generated answers; treat them only as leads to the original text.
+- A column's address says nothing about the author's real identity.

@@ -1,33 +1,33 @@
 ---
 name: kuaishou
-display: 快手
+display: Kuaishou
 packages: ["com.smile.gifmaker"]
-aliases: ["快手", "Kuaishou", "kuaishou", "kwai"]
+aliases: ["Kuaishou", "kuaishou", "kwai"]
 sites: []
-open: 快手
+open: Kuaishou
 pace: careful
-description: 短视频、直播、私信和快手小店
+description: Short videos, live streams, DMs and the Kuaishou shop
 ---
-## 是什么
-快手是短视频与直播 App,包名 `com.smile.gifmaker`。也有商城(快手小店)和私信。
+## What it is
+Kuaishou is a short-video and live-stream app, package `com.smile.gifmaker`. It also has a shop (Kuaishou Store) and direct messages.
 
-## 界面
-底部标签:首页、精选、中间的「拍摄」、消息、我。
-- **首页**:顶部左边是「侧边栏」按钮,中间一排频道:商城、关注、发现、同城、热门(右边有编辑频道的按钮),最右是「查找」(搜索)。发现等频道是两列的作品卡片。
-- **精选**:全屏竖屏视频,上下滑切换。右侧是作者头像(「关注」)、点赞、评论、收藏、分享、音乐转盘,下方是作者名和文案。
-- **消息**:上面一排常联系的人,下面是新增粉丝、互动消息、私信会话列表,再往下是「你可能感兴趣的人」。
-- **我**:个人资料、粉丝/关注/获赞;快手小店、常看的人、购物团、离线模式等入口;作品、私密、推荐、收藏、赞几个标签。右上角有搜索和「侧边栏入口」。
+## Interface
+Bottom tabs: Home, Featured, the central "shoot" button, Messages, Me.
+- **Home**: sidebar button top left; channels: Store, Following, Discover, Nearby, Trending, and "Find" (search) at the far right. Discover shows two columns of work cards.
+- **Featured**: full-screen vertical videos, switched with vertical swipes. On the right: the author's avatar ("Follow"), like, comments, save, share, music disc; below, the author's name and caption.
+- **Messages**: frequent contacts on top, then new followers, interaction notices and the direct-message list.
+- **Me**: profile, followers / following / likes; entries for Kuaishou Store, people watched often, shopping groups, offline mode; tabs for Works, Private, Recommended, Saved, Liked. Top right has search and the "sidebar entry".
 
-## 功能
-- **搜索**:点首页右上角「查找」进入。顶部有返回、输入框、「搜索」;下面是历史搜索(带删除)、「搜索发现」「想看的人」(可「换一换」),再往下是热点、热搜人物、直播榜、购物榜等榜单。
-- **首页侧边栏**:扫一扫、快手小店、任务中心;系统消息;常用功能(历史记录、离线模式、设置、我的钱包、草稿箱);工具服务(官方客服、未成年人模式、内容偏好、稍后再看等)。
-- **「我」页的侧边栏**:我的钱包、我的群聊、购物车、二维码、扫一扫、分享主页、离线模式、稍后再看,底部有「管理主页」「设置」。
-- **设置**:账号(绑定手机号、账号与安全、隐私设置),通用(通用设置、添加小组件、通知设置、播放设置、屏蔽设置、开通直播、存储空间、深色模式)等。
+## Features
+- **Search**: entered from "Find" at the top right of Home. The top has back, an input box, "Search"; below are search history (with a delete), "Trending searches", "People you may want to watch" (with a "shuffle"), then rankings for hot topics, trending people, live streams and shopping.
+- **Home sidebar**: scan, Kuaishou Store, task centre; system notices; common functions (history, offline mode, settings, my wallet, drafts); tool services (official support, minor mode, content preferences, watch later).
+- **"Me" page sidebar**: my wallet, my group chats, cart, QR code, scan, share profile, offline mode, watch later; at the bottom "Manage profile" and "Settings".
+- **Settings**: account (bound phone, account and security, privacy), general (general settings, add widget, notifications, playback, block list, go live, storage, dark mode) and more.
 
-## 已知现象
-- 打开后可能直接是全屏视频(精选),这时读出来底部选中的标签仍可能是「首页」,要看画面确认。
-- 页面左上方常有一个红包挂件(带数字和关闭按钮),盖在内容上。
-- 第一次进「消息」可能弹出介绍群聊功能的提示,点「知道了」关掉。
-- 系统消息不在「消息」标签里,在首页侧边栏里。
-- 首页侧边栏里各项可点的元素名是「item_数字」,文字是旁边单独的元素。
-- 搜索输入框的元素名是框里预先显示的推荐词。
+## Known behaviour
+- On open it may land straight on a full-screen video (Featured); the element read may still show "Home" as the selected tab, so confirm from the picture.
+- A red-packet widget (with a number and a close button) often hangs over the top-left of the page, covering content.
+- First entry to "Messages" may pop an intro to group chats; dismiss it with "Got it".
+- System notices are not in the "Messages" tab; they are in the home sidebar.
+- In the home sidebar, tappable elements are named "item_N"; their text is a separate element beside them.
+- The search input box's element name is the recommended term pre-shown inside the box.

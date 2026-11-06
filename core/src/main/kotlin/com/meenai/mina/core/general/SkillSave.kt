@@ -30,7 +30,7 @@ import kotlinx.serialization.json.put
  */
 internal object SkillSave : AgentTool {
     override val verb = Verb.SkillSave
-    override val label = "保存技能"
+    override val label = "Save skill"
     override val risk = Risk.Read
     override val def = ToolDef("skill_save",
         Prompts.tool("skill_save"),

@@ -419,7 +419,7 @@ internal class OverlayFrame(context: Context) : FrameLayout(context) {
     override fun onInterceptTouchEvent(e: MotionEvent): Boolean = track(e) && (dragging || holding)
 
     /** 按在内容里没有东西接的地方也能拖。 */
-    @SuppressLint("ClickableViewAccessibility") // 拖动只是挪位置;读屏时用胶囊上的「移到另一边」
+    @SuppressLint("ClickableViewAccessibility") // dragging only moves the capsule; screen reading uses the capsule's "move to the other side"
     override fun onTouchEvent(e: MotionEvent): Boolean = track(e)
 
     /** 跟着这串触摸;返回 true 表示还要接着收(能拖、能长按的时候)。 */

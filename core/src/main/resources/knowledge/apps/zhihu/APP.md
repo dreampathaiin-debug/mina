@@ -1,15 +1,15 @@
 ---
 name: zhihu
-display: 知乎
+display: Zhihu
 packages: ["com.zhihu.android"]
-aliases: ["知乎", "Zhihu", "zhihu"]
+aliases: ["Zhihu", "zhihu"]
 sites: ["zhihu.com"]
-open: 知乎
-description: 问答与专栏
+open: Zhihu
+description: Q&A and columns
 ---
-## 是什么
-知乎是问答和文章社区,包名 `com.zhihu.android`。网站知识见 `zhihu.com`。
+## What it is
+Zhihu is a Q&A and article community, package `com.zhihu.android`. For the website see `zhihu.com`.
 
-## 功能
-- **搜索**:得到问题和文章的链接、标题、发布日期。
-- **回答**:能读到已渲染的回答、作者、具体论据和反驳,看不到的回答不算看过。回答作者的身份、利益关系和适用的型号要另外核实。
+## Features
+- **Search**: returns links, titles and publish dates for questions and articles.
+- **Answers**: rendered answers, authors, specific arguments and rebuttals are readable; an answer that cannot be read does not count as seen. An answer author's identity, conflicts of interest and applicable model need separate verification.

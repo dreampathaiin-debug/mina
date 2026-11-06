@@ -1,27 +1,27 @@
 ---
 name: baijiahao
-display: 百家号
+display: Baijiahao
 packages: ["com.baidu.baijia"]
-aliases: ["百家号", "Baijiahao", "baijiahao", "百度百家号"]
+aliases: ["Baijiahao", "baijiahao", "Baidu Baijiahao"]
 sites: []
-open: 百家号
-description: 百度的内容创作者 App,发布图文和视频、管理作品、看数据和收益
+open: Baijiahao
+description: Baidu's creator app: publish content, track stats
 ---
-## 是什么
-百家号是百度的创作者 App,包名 `com.baidu.baijia`。用来发布和管理自己的内容,看阅读、粉丝、收益数据,处理评论和通知。
+## What it is
+Baijiahao is Baidu's creator app, package `com.baidu.baijia`. It is used to publish and manage your own content, watch reads, followers and earnings, and handle comments and notices.
 
-## 界面
-底部标签:首页、管理、中间的「+」(发布)、消息、我的。
-- **首页**:标题「百家号」,下面是「热门事件」,可按全网、城市、娱乐、体育等频道切换(右边按钮改频道)。
-- **管理**:上面是数据卡片:累计阅读、本月收益、粉丝总数、消息分析;下面按全部、动态、图文、视频、小视频、直播分标签列出自己的作品,每条有标题、发布时间、状态(如「已发布」)、几个互动数和「…」操作菜单,列表右上有搜索按钮。
-- **消息**:顶部分互动、通知、公告,右上角是消息设置;「互动」里按评论、关注、点赞、收藏、分享分类,下面是消息列表。
-- **我的**:资料卡(粉丝、关注、活力值、信用分),右上角有扫一扫和二维码;「常用功能」:我的权益、我的认证、我的信息、评论管理、素材管理、话题管理、橱窗管理、黑名单管理、我的收藏、主播中心、百+;「更多功能」:发文设置、消息设置、系统设置、帮助反馈。
+## Interface
+Bottom tabs: Home, Manage, the central "+" (publish), Messages, Me.
+- **Home**: title "Baijiahao", below it "Trending events", switchable by channel (whole web, city, entertainment, sports; a button at the right changes channels).
+- **Manage**: stat cards on top: total reads, this month's earnings, total followers, message analytics; below, your own works listed under tabs for all, posts, articles, videos, shorts and live; each row has a title, publish time, status (say "Published"), a few interaction counts and a "..." action menu; a search button sits at the top right of the list.
+- **Messages**: the top splits interactions, notices, announcements, with message settings at the top right; "Interactions" groups by comment, follow, like, save, share, with the message list below.
+- **Me**: profile card (followers, following, activity score, credit score), with scan and QR code at the top right; "Common functions": my benefits, my verification, my info, comment management, material management, topic management, showcase management, block-list management, my saves, streamer centre, Bai+; "More functions": publishing settings, message settings, system settings, help and feedback.
 
-## 功能
-- **发布**:底部「+」弹出发布面板,显示今天还能发几篇;可选图文、动态、直播、图集、拍视频、上传视频、视频合集、草稿,下面是「推荐活动」;底部有关闭按钮。
-- **系统设置**:清除缓存、关于(版本号)、已收集个人信息清单、第三方信息共享清单、退出登录。
+## Features
+- **Publish**: the bottom "+" pops a publish panel showing how many posts are left today; choices include article, post, live, photo set, record video, upload video, video collection, drafts, with "Recommended events" below and a close button at the bottom.
+- **System settings**: clear cache, about (version number), collected-personal-information list, third-party data sharing list, sign out.
 
-## 已知现象
-- 打开时可能弹出「检测到您尚未打开通知功能……」,按钮是「取消」「去开启」。
-- 不少按钮没有名字,只有资源 ID:返回按钮(`left_button`)、扫一扫(`scan_it`)、二维码(`qr_code`)、作品的操作菜单(`operation_menu_layout`)。
-- 管理页作品下面的几个数字在元素里只有数,没有说明是哪一项,要看画面上的图标。
+## Known behaviour
+- On open it may pop "Notifications are not enabled yet ...", with buttons "Cancel" and "Enable".
+- Many buttons have no name, only a resource ID: back (`left_button`), scan (`scan_it`), QR code (`qr_code`), the work action menu (`operation_menu_layout`).
+- In Manage, the numbers under a work show only the count in the elements, without saying which metric; read the picture's icons.

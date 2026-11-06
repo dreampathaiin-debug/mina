@@ -64,7 +64,7 @@ object ModelJson {
     }
 
     /** 第一次读不出来时补的一句。 */
-    const val JSON_ONLY = "上一条回复读不出 JSON。请只输出一个 JSON 对象,不要代码块标记,不要任何其他文字,格式照系统提示。"
+    const val JSON_ONLY = "The previous reply could not be read as JSON. Output only one JSON object, no code fence, no other text, in the format given in the system prompt."
 
     /**
      * 调一次模型并用 [parse] 读回复;读不出来就把那次回复和 [JSON_ONLY] 接在后面再问一次。两次都不行为 null。
@@ -74,7 +74,7 @@ object ModelJson {
         val first = model.complete(system, messages, emptyList())
         val firstText = first.parts.filterIsInstance<Part.Text>().joinToString("") { it.text }
         parse(firstText)?.let { return it }
-        val retry = messages + Message(Role.Assistant, listOf(Part.Text(firstText.ifBlank { "(空)" })), Author.Mina) +
+        val retry = messages + Message(Role.Assistant, listOf(Part.Text(firstText.ifBlank { "(empty)" })), Author.Mina) +
             Message(Role.User, listOf(Part.Text(JSON_ONLY)), Author.Mina)
         val second = model.complete(system, retry, emptyList())
         return parse(second.parts.filterIsInstance<Part.Text>().joinToString("") { it.text })

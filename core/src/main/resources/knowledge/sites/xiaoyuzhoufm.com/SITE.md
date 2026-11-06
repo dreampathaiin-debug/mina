@@ -1,29 +1,29 @@
 ---
 name: xiaoyuzhoufm.com
-display: 小宇宙
+display: Xiaoyuzhou
 domains: ["xiaoyuzhoufm.com"]
-aliases: ["小宇宙", "Xiaoyuzhou"]
+aliases: ["Xiaoyuzhou"]
 apps: []
 open: xiaoyuzhoufm.com
 mode: desktop
-description: 中文播客平台,单集页可取音频地址、标题和时长
+description: Chinese podcast platform: episode audio, title, duration
 ---
-## 是什么
-中文播客平台。每一集有公开的单集页,页面里带音频地址和元信息。
+## What it is
+A Chinese podcast platform. Each episode has a public episode page carrying the audio address and metadata.
 
-## 页面与网址
-单集页 `https://www.xiaoyuzhoufm.com/episode/<id>`,`<id>` 是 20 到 32 位小写十六进制(`[0-9a-f]{20,32}`)。
+## Pages and URLs
+Episode page `https://www.xiaoyuzhoufm.com/episode/<id>`, where `<id>` is 20 to 32 lowercase hex characters (`[0-9a-f]{20,32}`).
 
-## 接口
-单集页整页 HTML 约 300KB,只需抽三个字段,在沙箱里用 `wget` 取页面后 `grep -oE` 过滤:
+## APIs
+The episode page's full HTML is about 300KB; only three fields are needed, so fetch the page with `wget` in the sandbox and filter with `grep -oE`:
 
 ```sh
 wget -qO- 'https://www.xiaoyuzhoufm.com/episode/<id>' | grep -oE '<meta property="og:audio" content="[^"]+"|"duration":[0-9]+|<meta property="og:title" content="[^"]+"'
 ```
 
-- `og:audio`:音频文件的真实地址,通常在 `https://media.xyzcdn.net/` 下。
-- `duration`:单集时长,单位秒。
-- `og:title`:单集标题。
+- `og:audio`: the audio file's real address, usually under `https://media.xyzcdn.net/`.
+- `duration`: episode duration in seconds.
+- `og:title`: the episode title.
 
-## 已知现象
-页面改版后可能缺 `og:audio`,此时页面里取不到音频地址。
+## Known behaviour
+After a redesign the page may lack `og:audio`; the audio address can then not be read from the page.

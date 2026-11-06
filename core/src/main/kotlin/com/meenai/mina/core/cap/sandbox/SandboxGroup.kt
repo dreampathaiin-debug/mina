@@ -49,7 +49,7 @@ private fun ok(r: ToolExecution) = r.content["ok"] == JsonPrimitive(true)
 
 internal object RunCommand : SandboxTool {
     override val verb = Verb.RunCommand
-    override val label = "处理文件"
+    override val label = "Work with files"
     override val risk = Risk.Write
     override val entry = Entry.Opens
     override val composite = true
@@ -67,12 +67,12 @@ internal object RunCommand : SandboxTool {
     override fun logTarget(o: JsonObject, r: ToolExecution, ctx: ToolContext) = o.argStr("command")
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog) =
         // 命令是助手自己写的:放在来处里,不当证据;输出里原样是命令里的字的行(echo 回显)也不算
-        listOfNotNull(res(r, "output")?.let { output("退出码 ${res(r, "exitCode")}:\n$it", Place.command("run_command「${o.argStr("command")?.take(200)}」"), o.argStr("command")) })
+        listOfNotNull(res(r, "output")?.let { output("Exit code ${res(r, "exitCode")}:\n$it", Place.command("run_command「${o.argStr("command")?.take(200)}」"), o.argStr("command")) })
 }
 
 internal object RunBundledScript : SandboxTool {
     override val verb = Verb.RunBundledScript
-    override val label = "运行自带脚本"
+    override val label = "Run bundled script"
     override val risk = Risk.Write
     override val composite = true
     override val logged = true
@@ -89,12 +89,12 @@ internal object RunBundledScript : SandboxTool {
     override suspend fun execute(a: Args, ctx: ToolContext) = ctx.sandboxRunner!!.run { ws, ready -> runScript(a, ws, ready.network, ctx.callId, ctx.sub, ctx.tools) }
     override fun logTarget(o: JsonObject, r: ToolExecution, ctx: ToolContext) = listOfNotNull(o.argStr("source"), o.argStr("script")).joinToString("/")
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog) =
-        listOfNotNull(res(r, "output")?.let { output("退出码 ${res(r, "exitCode")}:\n$it", Place.command("run_bundled_script ${o.argStr("source")}/${o.argStr("script")}"), o["args"]?.toString()) })
+        listOfNotNull(res(r, "output")?.let { output("Exit code ${res(r, "exitCode")}:\n$it", Place.command("run_bundled_script ${o.argStr("source")}/${o.argStr("script")}"), o["args"]?.toString()) })
 }
 
 internal object ReadFile : SandboxTool {
     override val verb = Verb.ReadFile
-    override val label = "读文件"
+    override val label = "Read file"
     override val risk = Risk.Read
     override val concurrency = Concurrency.ParallelSafe
     override val def = ToolDef("read_file",
@@ -113,7 +113,7 @@ internal object ReadFile : SandboxTool {
 
 internal object WriteFile : SandboxTool {
     override val verb = Verb.WriteFile
-    override val label = "写文件"
+    override val label = "Write file"
     override val risk = Risk.Write
     override val logged = true
     override val wideTarget = true
@@ -130,13 +130,13 @@ internal object WriteFile : SandboxTool {
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> {
         if (!ok(r)) return emptyList()
         res(r, "path")?.let { log.writtenPaths += it }
-        return listOf(output("write_file 写入 ${res(r, "path")}(${res(r, "bytesWritten")} 字节,文件现为 ${res(r, "size")} 字节)"))
+        return listOf(output("write_file wrote ${res(r, "path")} (${res(r, "bytesWritten")} bytes, file is now ${res(r, "size")} bytes)"))
     }
 }
 
 internal object SearchFiles : SandboxTool {
     override val verb = Verb.SearchFiles
-    override val label = "搜索文件"
+    override val label = "Search files"
     override val risk = Risk.Read
     override val concurrency = Concurrency.ParallelSafe
     override val def = ToolDef("search_files",
@@ -159,7 +159,7 @@ internal object SearchFiles : SandboxTool {
 
 internal object ShareFile : SandboxTool {
     override val verb = Verb.ShareFile
-    override val label = "导出文件"
+    override val label = "Export file"
     override val risk = Risk.Write
     override val logged = true
     override val wideTarget = true
@@ -173,7 +173,7 @@ internal object ShareFile : SandboxTool {
     override suspend fun execute(a: Args, ctx: ToolContext) = ctx.sandboxRunner!!.run { ws, _ -> shareFile(a, ws) }
     override fun logTarget(o: JsonObject, r: ToolExecution, ctx: ToolContext) = o.argStr("path")
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog) =
-        listOfNotNull(if (ok(r)) output("share_file 已存到 ${res(r, "savedAs")}") else null)
+        listOfNotNull(if (ok(r)) output("share_file saved to ${res(r, "savedAs")}") else null)
 }
 
 /** 沙箱给出的一条观察:命令输出、文件内容、写入与导出的路径。[authored] 是助手自己写的命令(输出里的回显不记)。 */

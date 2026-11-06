@@ -48,7 +48,7 @@ class SourceViewModel(
 }
 
 private fun evidencePlace(place: String, appLabel: (String) -> String): String = when {
-    place.startsWith("网站 ") -> place.removePrefix("网站 ")
+    place.startsWith("Site ") -> place.removePrefix("Site ")
     place.startsWith("http://") || place.startsWith("https://") -> runCatching { java.net.URI(place).host }.getOrNull() ?: place
     com.meenai.mina.core.tool.PACKAGE_NAME_RE.matches(place) -> appLabel(place)
     else -> place

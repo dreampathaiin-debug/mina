@@ -32,7 +32,7 @@ internal object PhoneFind : PhoneTool {
     override val verb = Verb.PhoneFind
     override val risk = Risk.Write
     override val composite = true
-    override val label = "滚动查找"
+    override val label = "Scroll to find"
     override val def = ToolDef("phone_find", Prompts.tool("phone_find"), mapOf(
         "text" to str("Text or accessibility description to find."),
         "resourceId" to str("Full or partial Android resource ID."),
@@ -92,7 +92,7 @@ internal object PhoneFind : PhoneTool {
 internal object PhoneWait : PhoneTool {
     override val verb = Verb.WaitFor
     override val risk = Risk.Read
-    override val label = "等待界面条件"
+    override val label = "Wait for a screen condition"
     override val yieldsToSteer = true
     override val def = ToolDef("phone_wait", Prompts.tool("phone_wait"), mapOf(
         "condition" to str("appear, disappear, activity, or stable.", listOf("appear", "disappear", "activity", "stable")),
@@ -113,7 +113,7 @@ internal object PhoneWait : PhoneTool {
 internal object PhoneEventTool : PhoneTool {
     override val verb = Verb.PhoneEvent
     override val risk = Risk.Read
-    override val label = "等待界面事件"
+    override val label = "Wait for a screen event"
     override val yieldsToSteer = true
     override val def = ToolDef("phone_event", Prompts.tool("phone_event"), mapOf(
         "kind" to str("window, content, notification, or any.", listOf("window", "content", "notification", "any")),
@@ -153,7 +153,7 @@ internal object PhoneEventTool : PhoneTool {
 internal object PhoneExtract : PhoneTool {
     override val verb = Verb.PhoneExtract
     override val risk = Risk.Read
-    override val label = "提取界面数据"
+    override val label = "Extract screen data"
     override val def = ToolDef("phone_extract", Prompts.tool("phone_extract"), mapOf(
         "mode" to str("text, list, or form.", listOf("text", "list", "form")),
         "maxItems" to int("Maximum records, 1-200 (default 100).", 1, 200),
@@ -216,7 +216,7 @@ internal object PhoneDialog : PhoneTool {
     override val verb = Verb.PhoneDialog
     override val risk = Risk.Write
     override val composite = true
-    override val label = "检查弹窗"
+    override val label = "Check pop-ups"
     override val def = ToolDef("phone_dialog", Prompts.tool("phone_dialog"), mapOf(
         "buttonText" to str("Optional exact visible button label to dismiss the dialog."),
     ))
@@ -275,7 +275,7 @@ internal object PhoneDialog : PhoneTool {
 internal object PhoneGesture : PhoneTool {
     override val verb = Verb.PhoneGesture
     override val risk = Risk.Write
-    override val label = "多点手势"
+    override val label = "Multi-touch gesture"
     override val showsScreenAfter = true
     override val reportsEffect = true
     override val logged = true
@@ -314,7 +314,7 @@ internal object PhoneCommand : PhoneTool {
     override val verb = Verb.PhoneCommand
     override val risk = Risk.Write
     override val offScreen = true
-    override val label = "系统命令"
+    override val label = "System command"
     override val def = ToolDef("phone_system_command", Prompts.tool("phone_system_command"), mapOf(
         "command" to str("Android shell command. MINA_DISPLAY_ID is the current task's virtual display ID."),
     ), listOf("command"))

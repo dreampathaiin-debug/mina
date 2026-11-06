@@ -27,15 +27,15 @@ data class MemoryNote(val kind: NoteKind, val memoryId: String, val undoToken: S
     fun text(item: MemoryItem?): String {
         val content = item?.content ?: DELETED
         return when (kind) {
-            NoteKind.added -> "记住了:$content"
-            NoteKind.updated -> "更新了:$content" + (item?.replaces?.let { "(原来:$it)" } ?: "")
-            NoteKind.forgot -> if (item == null) "忘掉了一条记忆" else "忘掉了:$content"
-            NoteKind.pending -> "要我以后都这样做吗?$content"
+            NoteKind.added -> "Remembered: $content"
+            NoteKind.updated -> "Updated: $content" + (item?.replaces?.let { "(was: $it)" } ?: "")
+            NoteKind.forgot -> if (item == null) "Forgot one memory" else "Forgot: $content"
+            NoteKind.pending -> "Should I always do it this way from now on? $content"
         }
     }
 
     companion object {
-        const val DELETED = "一条已删除的记忆"
+        const val DELETED = "A deleted memory"
     }
 }
 
@@ -87,12 +87,12 @@ class MemoryExtractor(private val model: ChatModel) {
     }
 
     private fun request(utterances: List<String>, labels: Map<String, MemoryItem>) = buildString {
-        appendLine("用户本次说的话:")
+        appendLine("What the user said this time:")
         utterances.filter { it.isNotBlank() }.forEachIndexed { i, u -> appendLine("${i + 1}. $u") }
         appendLine()
-        if (labels.isEmpty()) append("已有的相关记忆:无")
+        if (labels.isEmpty()) append("Relevant memories on file: none")
         else {
-            appendLine("已有的相关记忆:")
+            appendLine("Relevant memories on file:")
             labels.forEach { (label, m) -> appendLine("$label [${m.kind.name}] ${m.content}") }
         }
     }.trimEnd()
@@ -100,8 +100,8 @@ class MemoryExtractor(private val model: ChatModel) {
     companion object {
         const val MAX_OPS = 5
         const val MAX_RELATED = 10
-        private val FORGET = Regex("忘|别记|删|不用记|forget", RegexOption.IGNORE_CASE)
-        private val ONE_OFF = Regex("这次|这一次|今天先|this time", RegexOption.IGNORE_CASE)
+        private val FORGET = Regex("forget|do not remember|do not record", RegexOption.IGNORE_CASE)
+        private val ONE_OFF = Regex("this time|just this once|for now", RegexOption.IGNORE_CASE)
 
         val PROMPT: String by lazy { Prompts.role("memory_extract") }
 

@@ -1,17 +1,17 @@
 ---
 name: douyin
-display: 抖音
+display: Douyin
 packages: ["com.ss.android.ugc.aweme"]
-aliases: ["抖音", "抖音商城", "抖音电商", "douyin", "douyinshop"]
+aliases: ["douyin", "Douyin Shop", "douyinshop"]
 sites: ["douyin.com"]
-open: 抖音
+open: Douyin
 pace: careful
-description: 短视频、直播和商城 App
+description: Short video, live-stream and shop app
 ---
-## 是什么
-抖音,包名 `com.ss.android.ugc.aweme`。网站是 douyin.com。短视频、商城、直播都在同一个 App 里。
+## What it is
+Douyin, package `com.ss.android.ugc.aweme`. The website is douyin.com. Short videos, the shop and live streams live in one app.
 
-## 功能
-- **电商入口**:商城和直播间里的商品入口都在主应用内。早期的电商网页会跳到应用商店。
-- **直播间商品**(网页直播间):能读到当前讲解的商品 ID、序号、商品链接、画面上的价格标签,以及接口返回的信息。
-- **直播间福袋**(网页直播间):需要登录。条件、口令、倒计时、是否已参与来自接口;有的福袋要花钻石参与。
+## Features
+- **E-commerce entry**: the shop and the product entries inside live rooms are all inside the main app. Older e-commerce web pages redirect to the app store.
+- **Live-room products** (web live rooms): the product ID being explained, its index, the product link and the price tag on the picture are readable, along with what the API returns.
+- **Live-room gift bags** (web live rooms): need a sign-in. Conditions, the passphrase, the countdown and whether already joined come from the API; some gift bags cost diamonds to join.

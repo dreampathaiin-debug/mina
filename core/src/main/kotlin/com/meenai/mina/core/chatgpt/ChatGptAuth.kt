@@ -164,7 +164,7 @@ class ChatGptAuth(
             val detail = root?.let { it.str("error_description") ?: (it["error"] as? JsonObject)?.str("message") }
             return TokenResult.Rejected(code, code in TERMINAL_REFRESH_ERRORS, detail, nonJson = root == null)
         }
-        val access = root?.str("access_token") ?: return TokenResult.Failed(ModelError.BadResponse("换令牌的返回里没有 access_token"))
+        val access = root?.str("access_token") ?: return TokenResult.Failed(ModelError.BadResponse("Token refresh response has no access_token"))
         return TokenResult.Ok(
             TokenSet(
                 accessToken = access,

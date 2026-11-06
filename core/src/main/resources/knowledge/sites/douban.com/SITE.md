@@ -1,27 +1,27 @@
 ---
 name: douban.com
-display: 豆瓣
-description: 书影音条目的评分分布与短评，以及小组讨论帖
+display: Douban
+description: Ratings, short reviews and group threads for books and films
 domains: ["douban.com"]
-aliases: ["豆瓣", "Douban"]
+aliases: ["Douban"]
 apps: []
 open: douban.com
 mode: desktop
 ---
-## 是什么
-书籍、电影、音乐的评分与评论社区，也有按兴趣分的小组讨论（如各城市的租房小组）。
+## What it is
+A rating and review community for books, films and music, with interest-based group discussions (city rental groups, for example).
 
-## 页面与网址
-- 分类搜索：`https://search.douban.com/<book|movie|music>/subject_search?search_text=<编码后的名称>`。全站搜索的旧路径读不到普通链接，用分类搜索。
-- 小组讨论搜索：`https://www.douban.com/group/search?cat=1013&q=<编码后的关键词>`。不登录能看到搜索结果。
-- 小组帖子：`https://www.douban.com/group/topic/<帖子号>/`。未登录时显示「你没有权限访问这个页面。请登录后重试。」。
+## Pages and URLs
+- Category search: `https://search.douban.com/<book|movie|music>/subject_search?search_text=<encoded name>`. The old site-wide search path exposes no ordinary links; use category search.
+- Group discussion search: `https://www.douban.com/group/search?cat=1013&q=<encoded keyword>`. Results are viewable without signing in.
+- Group threads: `https://www.douban.com/group/topic/<thread id>/`. When signed out it shows "You do not have permission to view this page. Please sign in and try again.".
 
-## 功能
-- **条目搜索**：书、影视、音乐条目。同名作品很多：影视按年份区分正片与续作，书按作者和版本，音乐按创作者和专辑。
-- **评分与短评**：总评分、评价人数、1–5 星分布，热门短评的作者、日期、有用数和正文。总分相同的作品，分布可能一边倒也可能两极分化。
-- **小组帖子**：标题、发帖时间、正文、回复数。帖子内容是发帖人自述；租房帖时效很短，转租、求租和中介冒充个人的都有。
+## Features
+- **Entry search**: book, film and music entries. Same-named works abound: films are separated into originals and sequels by year, books by author and edition, music by creator and album.
+- **Ratings and short reviews**: overall score, number of raters, 1-5 star distribution, and for popular short reviews the author, date, helpful count and body. Works with the same total score may be lopsided or polarized in their distribution.
+- **Group threads**: title, post time, body, reply count. Thread content is the poster's own account; rental threads go stale fast, with sublets, wanted ads and agents posing as individuals mixed in.
 
-## 已知现象
-- 类别选错会搜出空结果。
-- 小组搜索结果会混入与关键词沾边的无关讨论（情感、买房等），可看标题和所属小组筛选。
-- 找个人房源可以搜「<城市>租房」小组，同名小组多时成员数多的更活跃。
+## Known behaviour
+- Picking the wrong category returns empty results.
+- Group search results mix in discussions merely touching the keywords (relationships, buying a home and the like); filter by title and group.
+- To find personal listings, search the "<city> rentals" group; among same-named groups, the one with more members is more active.

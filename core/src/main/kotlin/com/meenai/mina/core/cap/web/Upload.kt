@@ -28,7 +28,7 @@ private const val FILE_ROLE = "file"
 /** 把工作区里的文件交给页面上的文件控件;要点文件控件,和点击一样判不可逆。 */
 internal object Upload : WebTool {
     override val verb = Verb.Upload
-    override val label = "上传文件"
+    override val label = "Upload file"
     override val risk = Risk.External
     override val gateTarget = GateTarget.FileControl
     override val logged = true

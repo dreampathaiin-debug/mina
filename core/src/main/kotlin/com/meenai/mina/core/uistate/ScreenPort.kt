@@ -291,7 +291,7 @@ interface ScreenPort {
         listOfNotNull(nextEvent(kind, packageName, durationMs))
     /** 直接经任务持有的 shell 助手执行命令。 */
     suspend fun systemCommand(command: String): SystemCommandResult? = null
-    suspend fun listApps(): List<Pair<String, String>> // 包名, 显示名
+    suspend fun listApps(): List<Pair<String, String>> // package name, display name
 
     /** 也装在这台手机另一份用户里(分身、工作资料等)的 App:包名 → 那几份用户的名字。查不到或不支持时为空。 */
     suspend fun otherProfiles(): Map<String, List<String>> = emptyMap()

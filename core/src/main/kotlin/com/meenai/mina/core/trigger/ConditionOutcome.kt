@@ -14,9 +14,9 @@ sealed interface ConditionOutcome {
         fun parse(answer: String): ConditionOutcome {
             val raw = answer.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
             val body = runCatching { Json.parseToJsonElement(raw) as? JsonObject }.getOrNull()
-                ?: return Error("条件检查没有返回可读取的结果")
+                ?: return Error("The condition check returned no readable result")
             val met = (body["met"] as? JsonPrimitive)?.takeUnless { it.isString }?.booleanOrNull
-                ?: return Error("条件检查结果缺少 met 状态")
+                ?: return Error("The condition check result is missing the met status")
             val evidence = (body["evidence"] as? JsonPrimitive)?.content?.take(500)
             return Checked(met, evidence)
         }

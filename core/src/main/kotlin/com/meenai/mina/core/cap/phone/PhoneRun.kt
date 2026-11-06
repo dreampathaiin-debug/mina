@@ -28,7 +28,7 @@ internal object PhoneRun : PhoneTool {
     override val verb = Verb.PhoneRun
     override val risk = Risk.Write
     override val composite = true
-    override val label = "连续操作手机"
+    override val label = "Run phone actions in sequence"
     override val def = ToolDef("phone_run", Prompts.tool("phone_run"), mapOf(
         "commands" to buildJsonObject {
             put("type", "array"); put("minItems", 1); put("maxItems", 30)

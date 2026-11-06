@@ -85,7 +85,7 @@ internal class TypeText(f: ScreenFamily) : ScreenTool(f, "type_text") {
     override val verb = Verb.TypeText
     override val batchable = true
     override val routable = f.routable
-    override val label = "输入文字"
+    override val label = "Type text"
     override val risk = Risk.External
     override val gateTarget = GateTarget.Enter
     override val showsScreenAfter = true
@@ -159,7 +159,7 @@ internal class ClearText(f: ScreenFamily) : ScreenTool(f, "clear_text") {
     override val verb = Verb.ClearText
     override val batchable = true
     override val routable = f.routable
-    override val label = "清空输入框"
+    override val label = "Clear the input box"
     override val risk = Risk.Write
     override val showsScreenAfter = true
     override val reportsEffect = true

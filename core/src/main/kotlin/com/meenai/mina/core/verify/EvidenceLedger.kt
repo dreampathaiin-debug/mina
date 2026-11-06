@@ -162,14 +162,14 @@ class EvidenceLedger(private val capChars: Int = STORE_CHARS) {
             val keep = if (hits.isEmpty() || withHead) head + near else near
             val out = StringBuilder()
             var skipped = 0
-            fun flush() { if (skipped > 0) { out.append("[省略 $skipped 行]\n"); skipped = 0 } }
+            fun flush() { if (skipped > 0) { out.append("[omitted $skipped lines]\n"); skipped = 0 } }
             var room = cap
             for (i in ls.indices) {
                 if (i !in keep || room <= 0) { skipped++; continue }
                 flush()
                 val l = ls[i]
                 if (l.length <= room) { out.append(l).append('\n'); room -= l.length + 1 }
-                else { out.append(l.take(room)).append("[本行后面省略 ${l.length - room} 字]\n"); room = 0 }
+                else { out.append(l.take(room)).append("[omitted ${l.length - room} characters on this line]\n"); room = 0 }
             }
             flush()
             return out.toString().trimEnd()
@@ -178,7 +178,7 @@ class EvidenceLedger(private val capChars: Int = STORE_CHARS) {
         private fun clip(kind: ObsKind, t: String): String = when (kind) {
             ObsKind.Read, ObsKind.Reply, ObsKind.UserSaid, ObsKind.Attachment -> t.take(READ_CHARS)
             ObsKind.Output, ObsKind.Fact ->
-                if (t.length <= OUTPUT_CHARS) t else t.take(OUTPUT_CHARS * 3 / 4) + "\n…(中间省略)…\n" + t.takeLast(OUTPUT_CHARS / 4)
+                if (t.length <= OUTPUT_CHARS) t else t.take(OUTPUT_CHARS * 3 / 4) + "\n... (middle omitted) ...\n" + t.takeLast(OUTPUT_CHARS / 4)
         }
     }
 }

@@ -29,7 +29,7 @@ import kotlinx.serialization.json.put
 internal object SetWheel : PhoneTool {
     override val verb = Verb.SetWheel
     override val batchable = true
-    override val label = "拨滚轮"
+    override val label = "Turn the wheel"
     override val risk = Risk.Write
     override val showsScreenAfter = true
     override val reportsEffect = true

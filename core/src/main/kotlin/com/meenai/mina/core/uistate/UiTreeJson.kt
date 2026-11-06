@@ -51,7 +51,7 @@ object UiTreeJson {
         val updated = buildJsonArray {
             for ((path, n) in now) {
                 val previous = old[path]
-                if (previous == null && parent(path) in now && parent(path) !in old) continue // 新父节点已经带上完整子树
+                if (previous == null && parent(path) in now && parent(path) !in old) continue // the new parent already carries the full subtree
                 if (previous == null || shallow(previous) != shallow(n)) add(buildJsonObject {
                     put("path", path)
                     put("node", if (previous == null) node(n) else shallow(n))

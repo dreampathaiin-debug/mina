@@ -20,7 +20,7 @@ import com.meenai.mina.core.uistate.session
 /** 诊断空白、加载中、锁屏或受保护的屏幕;要过锁屏关卡(锁着屏诊断不出东西)。 */
 internal class Diagnose(f: ScreenFamily) : ScreenTool(f, "diagnose") {
     override val verb = Verb.Diagnose
-    override val label = "检查屏幕"
+    override val label = "Check screen"
     override val risk = Risk.Write
     override val def by lazy { ToolDef(name, describe()) }
 

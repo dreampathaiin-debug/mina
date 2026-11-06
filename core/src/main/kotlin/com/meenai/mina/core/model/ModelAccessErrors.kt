@@ -29,7 +29,7 @@ object ModelAccessErrors {
     private val TOOLS_UNSUPPORTED = listOf(
         "does not support tools", "does not support tool", "doesn't support tools", "tools is not supported", "tools are not supported",
         "tool use is not supported", "tool calling is not supported", "function calling is not supported",
-        "does not support function calling", "不支持工具", "不支持函数调用", "不支持 function call",
+        "does not support function calling", "does not support tools", "does not support function calls", "does not support function call",
     )
 
     private val NOT_AVAILABLE = listOf(
@@ -38,10 +38,10 @@ object ModelAccessErrors {
         "do not have access to the model", "does not have access to the model", "does not have access to model",
         "do not have access to model", "no access to model", "no permission to access the model", "no permission to use the model",
         "model_not_available", "model is not available", "model not available", "not available for your account",
-        "未开通", "没有开通", "尚未开通", "无权限", "没有权限使用", "无权访问", "无权使用",
+        "not enabled", "not activated", "no permission", "no permission to use", "no access", "not authorized to use",
         // 模型已经下线
         "no longer available", "has been retired", "has been discontinued", "has been shut down",
-        "已下线", "已停用", "已下架", "已停止服务",
+        "discontinued", "deactivated", "delisted", "service has stopped",
     )
 
     /**
@@ -69,7 +69,7 @@ object ModelAccessErrors {
 
     private val NOT_FOUND = listOf(
         "model_not_found", "model not found", "model does not exist", "model not exist", "no such model", "unknown model",
-        "not found for api version", "模型不存在", "找不到模型",
+        "not found for api version", "model does not exist", "model not found",
     )
 
     /** [model] 是请求的模型名。 */

@@ -149,7 +149,7 @@ class BuiltinShellRecovery(
             val filter = IntentFilter(Intent.ACTION_USER_UNLOCKED)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) app.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
             else app.registerReceiver(receiver, filter)
-            trySend(read()) // 注册前后之间的变化
+            trySend(read()) // catch changes between the before and after reads
             awaitClose { runCatching { app.unregisterReceiver(receiver) } }
         }.stateIn(scope, SharingStarted.Eagerly, read())
     }

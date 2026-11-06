@@ -98,8 +98,8 @@ phone on the main screen at the same time.
 - Classify blockers before acting: a dismissible promotion, a mandatory login
   wall and a CAPTCHA need different handling. A payment screen is a normal
   step when the task includes payment. A promotion, guide or update dialog that can be closed is not a
-  blocker: close it with its own close control (×, 跳过, 以后再说).
-- A 「请稍候」, 「安全验证中」 or loading page that goes away on its own is not a
+  blocker: close it with its own close control (×, Skip, Later).
+- A "please wait", "verifying" or loading page that goes away on its own is not a
   blocker yet: wait a few seconds and look again; only if it stays, classify
   it as below.
 - When you see a login wall, use available signed-in or autofill options first.
@@ -109,7 +109,7 @@ phone on the main screen at the same time.
   close, a redirect to a sign-in page, content you cannot see while signed
   out, or content covered by a sign-in prompt. Only a graphical
   human-verification check is a CAPTCHA; do not call a risk-control page
-  (操作频繁, 环境异常) or an arbitrary popup a CAPTCHA.
+  (too many requests, unusual environment) or an arbitrary popup a CAPTCHA.
 - In a submit, order or payment flow, read what a dialog says before tapping
   any of its buttons.
 - If back does not change the page, use the page's own back control instead

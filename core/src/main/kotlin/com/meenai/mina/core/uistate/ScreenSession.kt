@@ -546,10 +546,10 @@ internal data class TreeRead(val tree: TreeCheck, val ocr: List<VisibleTextLine>
 internal fun screenText(s: ScreenSnapshot): String {
     val names = s.elements.filter { it.meaningful && it.name.isNotBlank() && !it.secret }.map { it.name.replace('\n', ' ') }
     // 网页标题不在元素里,也是这一屏的事实(页面给的,和元素文字一样是待核对的材料);没有可读元素的网页也照样留着
-    val title = s.web?.title?.takeIf { it.isNotBlank() }?.let { "网页标题:${it.replace('\n', ' ')}" }
-    val dialog = s.web?.dialog?.let { "网页弹框(${it.kind}):${it.message.replace('\n', ' ')}" }
+    val title = s.web?.title?.takeIf { it.isNotBlank() }?.let { "Page title: ${it.replace('\n', ' ')}" }
+    val dialog = s.web?.dialog?.let { "Web dialog (${it.kind}): ${it.message.replace('\n', ' ')}" }
     if (names.isEmpty() && title == null && dialog == null) return ""
-    val where = s.web?.let { "当前网页:${it.url}" } ?: "当前 App:${s.packageName ?: "未知"}"
+    val where = s.web?.let { "Current page: ${it.url}" } ?: "Current app: ${s.packageName ?: "unknown"}"
     return (listOfNotNull(where, title, dialog) + names).joinToString("\n").take(MAX_READ_CHARS)
 }
 
@@ -557,7 +557,7 @@ internal fun screenText(s: ScreenSnapshot): String {
 private fun observationText(s: ScreenSnapshot, ocr: List<VisibleTextLine>): String {
     val tree = screenText(s)
     if (ocr.isEmpty()) return tree
-    return listOf(tree, "屏幕可见文字(OCR):", ocr.joinToString("\n") { it.text }).filter(String::isNotEmpty)
+    return listOf(tree, "Visible on-screen text (OCR):", ocr.joinToString("\n") { it.text }).filter(String::isNotEmpty)
         .joinToString("\n").take(MAX_READ_CHARS)
 }
 

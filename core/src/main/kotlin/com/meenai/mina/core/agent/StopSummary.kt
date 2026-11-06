@@ -144,7 +144,7 @@ class StopSummary(
             if (target.startsWith(SITE_PREFIX) || PACKAGE_NAME_RE.matches(target)) where(target, appLabel) else null
 
         /** 运行记录里网页那一屏的对象写成「网站 <域名>」。 */
-        private const val SITE_PREFIX = "网站 "
+        private const val SITE_PREFIX = "Site "
 
         private fun list(items: List<String>, max: Int) =
             items.take(max).joinToString(", ") + if (items.size > max) " and ${items.size} more" else ""

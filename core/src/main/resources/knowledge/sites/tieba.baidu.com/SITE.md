@@ -1,26 +1,26 @@
 ---
 name: tieba.baidu.com
-display: 百度贴吧
-description: 查老型号和小众话题的使用经验、通病讨论帖
+display: Baidu Tieba
+description: User experience and failure threads for old models
 domains: ["tieba.baidu.com"]
-aliases: ["贴吧", "百度贴吧"]
+aliases: ["Tieba", "Baidu Tieba"]
 apps: []
 open: tieba.baidu.com
 mode: desktop
 ---
-## 是什么
-百度的社区论坛,按「吧」分话题。老型号、长尾话题的长期使用、维修和反复出现的问题讨论多,但老帖不反映当前售价和政策。
+## What it is
+Baidu's community forum, organized into topic "bars". Old models and long-tail topics have many discussions of long-term use, repairs and recurring problems, but old posts do not reflect current prices or policies.
 
-## 页面与网址
-- 搜索 `https://tieba.baidu.com/f/search/res?qw=<编码后的关键词>`,可能要登录。
-- 进具体的吧 `https://tieba.baidu.com/f?kw=<编码后的吧名>`,不登录也能看帖子列表。置顶帖常是吧规和定期汇总(装机吧、显卡吧每月一期装机推荐)。
+## Pages and URLs
+- Search `https://tieba.baidu.com/f/search/res?qw=<encoded keyword>`; may require a sign-in.
+- Enter a specific bar at `https://tieba.baidu.com/f?kw=<encoded bar name>`; the thread list is viewable without signing in. Pinned threads are usually bar rules and periodic roundups (the PC-building bar's monthly build recommendations, for example).
 
-## 功能
-- **搜索**:结果有帖子链接、吧名和日期;没有可用的时间筛选参数。
-- **帖子**:原帖和跟帖里有具体使用经历,包括型号、批次、故障、使用时长、修复过程。
+## Features
+- **Search**: results carry thread links, bar names and dates; there is no usable time-filter parameter.
+- **Threads**: original posts and replies hold concrete usage experience, including model, batch, failures, length of use and the repair process.
 
-## 已知现象
-- 不存在的吧也会显示「<名字>吧」的页面,但没有帖子;零帖子就是这个吧不存在。
-- 搜索页显示「木有找到相关内容」后,下面的热门吧、签到、「我常逛的吧」是导航,不是搜索结果。
-- 同一故障出现在多个回复里,可能是转述或同一个案例。
-- 偶尔出现安全验证。
+## Known behaviour
+- A bar that does not exist still shows a "<name> bar" page, but with no threads; zero threads means the bar does not exist.
+- After the search page shows "nothing found", the hot bars, check-in and "bars I frequent" below are navigation, not results.
+- The same failure appearing in several replies may be a retelling or one and the same case.
+- A security check appears occasionally.

@@ -41,7 +41,7 @@ class EncryptedMemoryFile(
     @Synchronized
     override fun load(): List<MemoryItem> {
         if (!file.exists()) return emptyList()
-        val bytes = file.readBytes() // 读不了是 IO 故障,照常抛出,不当作坏文件处理
+        val bytes = file.readBytes() // a read failure is an IO fault; throw as usual, do not treat it as a corrupt file
         return try {
             json.decodeFromString(serializer, cipher.decrypt(bytes).toString(Charsets.UTF_8))
         } catch (e: Exception) {

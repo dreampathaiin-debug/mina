@@ -20,7 +20,7 @@ internal class Back(f: ScreenFamily) : ScreenTool(f, "back") {
     override val verb = Verb.Back
     override val batchable = true
     override val routable = f.routable
-    override val label = "返回"
+    override val label = "Back"
     override val risk = Risk.Write
     override val showsScreenAfter = true
     override val reportsEffect = true
@@ -35,7 +35,7 @@ internal class PressKey(f: ScreenFamily) : ScreenTool(f, "press_key") {
     override val verb = Verb.PressKey
     override val batchable = true
     override val routable = f.routable
-    override val label = "按键"
+    override val label = "Press key"
     override val risk = Risk.External
     override val gateTarget = GateTarget.Key
     override val showsScreenAfter = true

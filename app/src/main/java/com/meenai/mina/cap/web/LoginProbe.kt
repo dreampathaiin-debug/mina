@@ -38,13 +38,13 @@ data class LoginSignals(
 object LoginProbe {
     private val LOGIN_PATH = Regex("""(^|[/_.-])(log-?in|sign-?in|sign_in|logon|passport|sso|oauth|authorize|auth/login|account/login|user/login)([/_.?#-]|$)""", RegexOption.IGNORE_CASE)
     /** 整条文字就是它才算(太常见,以它开头的多半是别的意思,如「退出全屏」)。 */
-    private val LOGOUT_EXACT = setOf("退出", "注销", "logout", "signout")
+    private val LOGOUT_EXACT = setOf("logout", "signout")
     /** 整条文字是它、或以它开头(后面至多再跟 [LOGOUT_SLACK] 个字)。 */
-    private val LOGOUT = listOf("退出登录", "退出账号", "安全退出", "注销登录", "log out", "sign out", "log off")
+    private val LOGOUT = listOf("log out", "sign out", "log off")
     /** 带这些字的不是退出链接(注销账号的说明、帮助页)。 */
-    private val NOT_LOGOUT = listOf("说明", "帮助", "须知", "协议", "账号注销", "注销账号", "注销账户", "help", "how to", "delete account")
-    private val SIGN_IN = listOf("登录", "登入", "请登录", "立即登录", "登录/注册", "注册/登录", "登录 / 注册", "注册 / 登录", "log in", "login", "sign in", "signin", "sign in / register", "sign up / log in")
-    private val ACCOUNT = listOf("个人中心", "我的账号", "我的账户", "账号设置", "账户设置", "my account", "your account", "account settings")
+    private val NOT_LOGOUT = listOf("help", "how to", "delete account")
+    private val SIGN_IN = listOf("log in", "login", "sign in", "signin", "sign in / register", "sign up / log in")
+    private val ACCOUNT = listOf("my account", "your account", "account settings")
     /** 「退出」类词后面最多再跟几个字还算(如「退出登录 >」「Log out of Example」不算,太长的是句子)。 */
     private const val LOGOUT_SLACK = 4
 
@@ -100,7 +100,7 @@ if(t==='A'||t==='BUTTON'||t==='INPUT'||e.getAttribute('role')==='button'||e.getA
 if(out.account.length>=60)continue;var s=String(e.innerText||e.value||e.getAttribute('aria-label')||e.getAttribute('title')||'').replace(/\s+/g,' ').trim();
 if(s&&s.length<=24&&(r=vis(e))&&top(e,r))out.account.push(s);continue;}
 if(t==='IMG'&&out.avatars<3){var k=(e.className&&typeof e.className==='string'?e.className:'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('src')||'');
-if(/avatar|头像/i.test(k)&&(r=vis(e))&&top(e,r)&&!e.closest('article,li,[class*=comment],[class*=list],[class*=feed]'))out.avatars++;}}
+if(/avatar/i.test(k)&&(r=vis(e))&&top(e,r)&&!e.closest('article,li,[class*=comment],[class*=list],[class*=feed]'))out.avatars++;}}
 return JSON.stringify(out);}catch(x){return null;}})()"""
 
     private const val SCAN_BUDGET = 4000

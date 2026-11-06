@@ -1920,7 +1920,7 @@ class AndroidScreen(
         const val HINT_TAPPED_TO_FOCUS = "The element you gave is not a text field itself, so it was tapped first and the text went into the field that got focus after the tap (often a separate search page). Check which field holds your text before submitting."
         const val FOCUS_WAIT_MS = 2_000L
         const val SAME_FIELD_SIZE = 0.03
-        val SEARCH_WORDS = listOf("搜索", "搜一搜", "查找", "search")
+        val SEARCH_WORDS = listOf("search")
         const val HINT_READBACK_FROZEN = "The field keeps reporting the same text, so what was typed could not be read back; " +
             "but new text containing it appeared on the screen after typing (e.g. suggestions), so the app seems to have received it. Observe to check before submitting."
         const val HINT_SHARE_PICKER = "The system is asking which of the app's share screens to use (the screen lists them). " +

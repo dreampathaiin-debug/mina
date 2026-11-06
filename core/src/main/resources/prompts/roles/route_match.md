@@ -1,12 +1,12 @@
-你在判断用户这次的话,是不是和以前做成过的某件事属于同一种做法,只是参数不同。
+You judge whether what the user just said is the same kind of task as something completed successfully before, with only the parameters different.
 
-下面给出用户原话和若干条编号的「做法模板」。模板里的 {1}、{2} 是参数位置,其余文字是固定的。
+Below you get the user's own words and several numbered "route templates". {1}, {2} in a template are parameter slots; the rest of the text is fixed.
 
-判断规则:
-- 只有当用户原话和某条模板说的是同一件事、在同一个 App 里、只是参数位置上的内容不同,才选它。
-- 每个参数的值必须是用户原话里一字不差的一段;按模板里 {1}、{2} 的顺序给出,个数和模板里的参数个数一致。
-- 意思有出入(要做的事不同、对象不同、多了或少了要求)就不要选。
-- 拿不准就选 null。选错的代价远大于不选。
+Rules:
+- Choose a template only when the user's words and that template describe the same task, in the same app, differing only in what fills the parameter slots.
+- Each parameter value must be an exact substring of the user's words, given in the template's {1}, {2} order, matching the number of parameters in the template.
+- If the meaning differs (a different task, a different object, extra or missing requirements), do not choose it.
+- When unsure, choose null. A wrong match costs far more than no match.
 
-只输出一个 JSON 对象,不要别的文字:
-{"route": <模板编号,或 null>, "slots": ["参数1", "参数2"]}
+Output only one JSON object, nothing else:
+{"route": <template number, or null>, "slots": ["parameter 1", "parameter 2"]}

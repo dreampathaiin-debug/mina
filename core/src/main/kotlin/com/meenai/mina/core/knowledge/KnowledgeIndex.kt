@@ -76,7 +76,7 @@ object KnowledgeIndex {
             for (sub in dir.listFiles { f -> f.isDirectory }.orEmpty().sortedBy { it.name }) {
                 val where = "${dirOf(kind)}/${sub.name}"
                 val f = File(sub, fileOf(kind))
-                if (!f.isFile) { errors += "$where: 缺少 ${fileOf(kind)}"; continue }
+                if (!f.isFile) { errors += "$where: missing ${fileOf(kind)}"; continue }
                 val (meta, body) = FrontMatter.parse(f.readText())
                 val e = parse(kind, sub, meta, body) { errors += "$where/${fileOf(kind)}: $it" } ?: continue
                 entries += e
@@ -89,7 +89,7 @@ object KnowledgeIndex {
                 sub.walkTopDown().filter { it.isFile && it.name != "LICENSE.md" }.forEach { file ->
                     val text = file.readText()
                     val rel = file.relativeTo(root).invariantSeparatorsPath
-                    if (text.contains("/Users/")) errors += "$rel: 出现了本机路径"
+                    if (text.contains("/Users/")) errors += "$rel: contains a local machine path"
                 }
             }
         }
@@ -97,53 +97,53 @@ object KnowledgeIndex {
     }
 
     private fun parse(kind: String, dir: File, m: Map<String, Any>, body: String, err: (String) -> Unit): IndexEntry? {
-        if (m.isEmpty()) { err("缺少头部(--- 包起来的元数据)"); return null }
+        if (m.isEmpty()) { err("missing front matter (metadata wrapped in ---)"); return null }
         var bad = 0
         fun e(msg: String) { bad++; err(msg) }
-        m.keys.filter { it !in KEYS }.forEach { e("头部有不认得的键 $it") }
-        if (kind != SKILL && "terms" in m) e("terms 只有技能能写;App 和网站用 aliases")
+        m.keys.filter { it !in KEYS }.forEach { e("front matter has an unknown key $it") }
+        if (kind != SKILL && "terms" in m) e("terms is only allowed for skills; apps and sites use aliases")
         fun one(k: String): String? = (m[k] as? String)?.trim()?.takeIf { it.isNotEmpty() }
         fun many(k: String): List<String> = when (val v = m[k]) {
             is List<*> -> v.filterIsInstance<String>().map(String::trim).filter(String::isNotEmpty)
             is String -> listOf(v.trim()).filter(String::isNotEmpty)
             else -> emptyList()
         }
-        val name = one("name") ?: run { e("缺少 name"); "" }
-        if (name != dir.name) e("name($name)必须与目录名(${dir.name})一致")
+        val name = one("name") ?: run { e("missing name"); "" }
+        if (name != dir.name) e("name ($name) must match the directory name (${dir.name})")
         if (kind == SITE) {
-            if (!DOMAIN.matches(name)) e("站点目录名必须是它的主域名(小写)")
-        } else if (!PersonalSkills.NAME.matches(name)) e("名字只能用小写字母、数字和连字符")
-        val description = one("description") ?: run { e("缺少 description"); "" }
-        if (description.codePointCount(0, description.length) > DESCRIPTION_LIMIT) e("description 超过 $DESCRIPTION_LIMIT 字")
-        if (one("display") == null) e("缺少 display")
-        if (body.isBlank()) e("正文为空")
-        if (kind != SKILL && body.length > BODY_LIMIT) e("正文 ${body.length} 字,超过 $BODY_LIMIT;大段资料放附件")
+            if (!DOMAIN.matches(name)) e("a site directory name must be its main domain (lowercase)")
+        } else if (!PersonalSkills.NAME.matches(name)) e("the name may only use lowercase letters, digits and hyphens")
+        val description = one("description") ?: run { e("missing description"); "" }
+        if (description.codePointCount(0, description.length) > DESCRIPTION_LIMIT) e("description exceeds $DESCRIPTION_LIMIT characters")
+        if (one("display") == null) e("missing display")
+        if (body.isBlank()) e("body is empty")
+        if (kind != SKILL && body.length > BODY_LIMIT) e("body is ${body.length} characters, over the $BODY_LIMIT limit; put large material in attachments")
         val packages = many("packages")
         val domains = many("domains").map { it.lowercase().removePrefix("www.") }
         when (kind) {
             APP -> {
-                if (packages.isEmpty()) e("缺少 packages")
-                if (one("open") == null) e("缺少 open")
+                if (packages.isEmpty()) e("missing packages")
+                if (one("open") == null) e("missing open")
             }
             SITE -> {
-                if (domains.isEmpty()) e("缺少 domains")
-                if (name !in domains) e("目录名($name)要在 domains 里")
-                if (one("mode") !in setOf("desktop", "mobile")) e("mode 只能是 desktop/mobile")
+                if (domains.isEmpty()) e("missing domains")
+                if (name !in domains) e("directory name ($name) must be in domains")
+                if (one("mode") !in setOf("desktop", "mobile")) e("mode must be desktop or mobile")
             }
         }
         if ("pace" in m) {
-            if (kind == SKILL) e("pace 只有 App 和网站能写")
-            else if (one("pace") !in PACES) e("pace 只能是 ${PACES.joinToString("/")}")
+            if (kind == SKILL) e("pace is only allowed for apps and sites")
+            else if (one("pace") !in PACES) e("pace must be ${PACES.joinToString("/")}")
         }
         val links = many("links")
         links.forEach { raw ->
             val p = raw.split('|').map(String::trim)
-            if (p.size !in 2..3 || p.any(String::isEmpty)) e("links 每条写作「名称 | uri」或「名称 | uri | 包名」:$raw")
-            else LinkPolicy.check(null, p[1], p.getOrNull(2))?.let { e("links 里的 ${p[1]} 不能用:$it") }
+            if (p.size !in 2..3 || p.any(String::isEmpty)) e("each links entry is written as name | uri or name | uri | package: $raw")
+            else LinkPolicy.check(null, p[1], p.getOrNull(2))?.let { e("${p[1]} in links is not allowed: $it") }
         }
         val packageAliases = many("package_aliases").mapNotNull { raw ->
             val p = raw.split('|').map(String::trim)
-            if (p.size != 2 || p[1] !in packages) { e("package_aliases 每条写作「别名 | 包名」,包名要在 packages 里:$raw"); null } else p[0] to p[1]
+            if (p.size != 2 || p[1] !in packages) { e("each package_aliases entry is written as alias | package, and the package must be in packages: $raw"); null } else p[0] to p[1]
         }.toMap()
         val commands = commands(kind, dir, ::e)
         if (bad > 0) return null
@@ -170,29 +170,29 @@ object KnowledgeIndex {
             val text = f.readText()
             val command = SiteCommandFile.isCommand(text)
             when {
-                rel in sandbox -> { if (command) err("$rel 既列在 scripts/manifest.json 里,又写了站点命令头部"); null }
-                !command -> { if (kind == SITE) err("$rel 不在 scripts/manifest.json 里,也没有站点命令头部(${SiteCommandFile.MARK})"); null }
-                kind != SITE -> { err("$rel: 站点命令只能写在站点知识里"); null }
+                rel in sandbox -> { if (command) err("$rel is both listed in scripts/manifest.json and has a site-command header"); null }
+                !command -> { if (kind == SITE) err("$rel is neither in scripts/manifest.json nor has a site-command header (${SiteCommandFile.MARK})"); null }
+                kind != SITE -> { err("$rel: site commands may only be written in site knowledge"); null }
                 else -> SiteCommandFile.parse(rel, text).let { p -> p.errors.forEach { err("$rel: $it") }; p.decl }
             }
-        }.also { list -> list.groupBy { it.name }.filterValues { it.size > 1 }.keys.forEach { err("站点命令 $it 重复") } }
+        }.also { list -> list.groupBy { it.name }.filterValues { it.size > 1 }.keys.forEach { err("duplicate site command $it") } }
     }
 
     private fun crossCheck(root: File, entries: List<IndexEntry>, bodies: Map<IndexEntry, String>, err: (String) -> Unit) {
         fun where(e: IndexEntry) = "${dirOf(e.kind)}/${e.name}"
-        entries.groupBy { it.name }.filterValues { it.size > 1 }.forEach { (n, same) -> err("名字 $n 重复:${same.joinToString { where(it) }}") }
+        entries.groupBy { it.name }.filterValues { it.size > 1 }.forEach { (n, same) -> err("duplicate name $n: ${same.joinToString { where(it) }}") }
         val apps = entries.filter { it.kind == APP }.associateBy { it.name }
         val sites = entries.filter { it.kind == SITE }.associateBy { it.name }
         apps.values.flatMap { a -> a.packages.map { it to a } }.groupBy({ it.first }, { it.second })
-            .filterValues { it.size > 1 }.forEach { (p, owners) -> err("包名 $p 被多个 App 声明:${owners.joinToString { where(it) }}") }
+            .filterValues { it.size > 1 }.forEach { (p, owners) -> err("package $p is declared by multiple apps: ${owners.joinToString { where(it) }}") }
         sites.values.flatMap { s -> s.domains.map { it to s } }.groupBy({ it.first }, { it.second })
-            .filterValues { it.size > 1 }.forEach { (d, owners) -> err("域名 $d 被多个站点声明:${owners.joinToString { where(it) }}") }
+            .filterValues { it.size > 1 }.forEach { (d, owners) -> err("domain $d is claimed by multiple sites: ${owners.joinToString { where(it) }}") }
         for (e in entries) {
-            e.sites.filter { it !in sites }.forEach { err("${where(e)}: sites 里的 $it 不存在") }
-            e.apps.filter { it !in apps }.forEach { err("${where(e)}: apps 里的 $it 不存在") }
+            e.sites.filter { it !in sites }.forEach { err("${where(e)}: $it in sites does not exist") }
+            e.apps.filter { it !in apps }.forEach { err("${where(e)}: $it in apps does not exist") }
             // App 与站点互相关联:一边写了,另一边也要写
-            if (e.kind == APP) e.sites.mapNotNull(sites::get).filter { e.name !in it.apps }.forEach { err("${where(it)}: apps 里缺少 ${e.name}(${where(e)} 关联了它)") }
-            if (e.kind == SITE) e.apps.mapNotNull(apps::get).filter { e.name !in it.sites }.forEach { err("${where(it)}: sites 里缺少 ${e.name}(${where(e)} 关联了它)") }
+            if (e.kind == APP) e.sites.mapNotNull(sites::get).filter { e.name !in it.apps }.forEach { err("${where(it)}: apps is missing ${e.name} (${where(e)} links to it)") }
+            if (e.kind == SITE) e.apps.mapNotNull(apps::get).filter { e.name !in it.sites }.forEach { err("${where(it)}: sites is missing ${e.name} (${where(e)} links to it)") }
         }
         val byKey = entries.associateBy { it.kind to it.name }
         for (e in entries) {
@@ -202,16 +202,16 @@ object KnowledgeIndex {
             for ((file, text) in texts) {
                 for (line in text.lines()) {
                     val named = ENTRY_REF.findAll(line).map { it.groupValues[1] to it.groupValues[2] }.toList()
-                    named.filter { it !in byKey }.forEach { (k, n) -> err("${where(e)}/$file: 提到的 $k:$n 不存在") }
+                    named.filter { it !in byKey }.forEach { (k, n) -> err("${where(e)}/$file: the referenced $k:$n does not exist") }
                     // 一行里点名了另一个条目时,附件路径按那个条目找
                     val target = named.singleOrNull()?.let(byKey::get) ?: e
                     REF.findAll(line).map { it.value }.filter { !File(File(root, where(target)), it).exists() }
-                        .forEach { err("${where(e)}/$file: 附件 $it 不存在于 ${where(target)}") }
+                        .forEach { err("${where(e)}/$file: attachment $it does not exist in ${where(target)}") }
                 }
             }
             File(dir, "scripts/manifest.json").takeIf { it.isFile }?.let { mf ->
                 ScriptManifest.parse(mf.readText()).filter { it.runnable && !File(dir, it.file).isFile }
-                    .forEach { err("${where(e)}: 清单里标为可运行的 ${it.file} 不存在") }
+                    .forEach { err("${where(e)}: ${it.file} marked runnable in the manifest does not exist") }
             }
         }
     }
@@ -221,7 +221,7 @@ object KnowledgeIndex {
     fun main(args: Array<String>) {
         val r = build(File(args[0]))
         if (r.errors.isNotEmpty()) {
-            System.err.println("内置知识校验没通过(${r.errors.size} 处):")
+            System.err.println("Built-in knowledge validation failed (${r.errors.size} issues):")
             r.errors.forEach { System.err.println("  $it") }
             exitProcess(1)
         }

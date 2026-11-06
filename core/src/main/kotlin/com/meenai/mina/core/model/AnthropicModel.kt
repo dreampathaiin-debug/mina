@@ -160,7 +160,7 @@ class AnthropicModel(
         put("name", t.name)
         put("description", t.description)
         put("input_schema", try { json.parseToJsonElement(t.parametersJsonSchema) } catch (e: Exception) {
-            throw IllegalArgumentException("工具 ${t.name} 的参数 schema 不是合法 JSON", e)
+            throw IllegalArgumentException("The parameter schema for tool ${t.name} is not valid JSON", e)
         })
         if (last) put("cache_control", ephemeral)
     }
@@ -229,7 +229,7 @@ class AnthropicModel(
     private fun parse(text: String): ModelReply {
         try {
             val root = json.parseToJsonElement(text).jsonObject
-            val content = root["content"]?.jsonArray ?: throw ModelError.BadResponse("缺少 content")
+            val content = root["content"]?.jsonArray ?: throw ModelError.BadResponse("Response is missing content")
             val parts = mutableListOf<Part>()
             content.forEach { el ->
                 val b = el.jsonObject
@@ -293,7 +293,7 @@ private class AnthropicStream(
 
     fun accept(data: String) {
         val root = try { json.parseToJsonElement(data).jsonObject }
-        catch (e: Exception) { throw ModelError.BadResponse("流式响应不是合法 JSON", e) }
+        catch (e: Exception) { throw ModelError.BadResponse("Streaming response is not valid JSON", e) }
         when ((root["type"] as? JsonPrimitive)?.contentOrNull) {
             "message_start" -> usage = usageOf((root["message"] as? JsonObject)?.get("usage"))
             "content_block_start" -> {
@@ -348,7 +348,7 @@ private class AnthropicStream(
                 }
                 "redacted_thinking" -> block.data.takeIf(String::isNotEmpty)?.let { Part.Thinking("", SignedThinking.redacted(endpoint, it)) }
                 "tool_use" -> {
-                    if (block.id.isEmpty() || block.name.isEmpty()) throw ModelError.BadResponse("工具调用流缺少名称或编号")
+                    if (block.id.isEmpty() || block.name.isEmpty()) throw ModelError.BadResponse("Tool-call stream is missing a name or id")
                     Part.ToolCall(block.id, block.name, block.input.toString().ifEmpty { block.initialInput })
                 }
                 else -> null

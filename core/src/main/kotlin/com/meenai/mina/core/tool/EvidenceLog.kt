@@ -56,7 +56,7 @@ internal class EvidenceLog(private val clock: () -> Long = System::currentTimeMi
     fun noteTyped(text: String) = ledger.noteTyped(text)
 
     private fun noteUserFact(text: String) {
-        userFacts.addLast(if (text.length <= USER_FACT_CHARS) text else text.take(USER_FACT_CHARS * 3 / 4) + "\n…(中间省略)…\n" + text.takeLast(USER_FACT_CHARS / 4))
+        userFacts.addLast(if (text.length <= USER_FACT_CHARS) text else text.take(USER_FACT_CHARS * 3 / 4) + "\n... (middle omitted) ...\n" + text.takeLast(USER_FACT_CHARS / 4))
         while (userFacts.size > USER_FACTS) userFacts.removeFirst()
     }
 
@@ -74,9 +74,9 @@ internal class EvidenceLog(private val clock: () -> Long = System::currentTimeMi
     fun logAction(label: String, name: String, target: String?, typed: String?, r: ToolExecution, wide: Boolean) {
         val effect = when {
             r.content["ok"] != JsonPrimitive(true) -> (r.content["error"] as? JsonPrimitive)?.content
-                ?: (r.content["exitCode"] as? JsonPrimitive)?.let { "退出码 ${it.content}" } ?: "失败"
-            r.changed == false -> "画面没变化"
-            else -> "生效"
+                ?: (r.content["exitCode"] as? JsonPrimitive)?.let { "Exit code ${it.content}" } ?: "failed"
+            r.changed == false -> "screen did not change"
+            else -> "applied"
         }
         val what = listOfNotNull(target?.take(if (wide) 120 else 40), typed).joinToString(" ")
         actionLog.addLast("$label $name($what) $effect")

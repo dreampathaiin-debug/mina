@@ -17,7 +17,7 @@ sealed interface Delivery {
 
     data class Result(
         override val id: String, override val threadId: String, val text: String,
-        val restored: Boolean = false, val title: String = "Mina 任务结果",
+        val restored: Boolean = false, val title: String = "Mina task result",
     ) : Delivery
     data class Progress(override val id: String, override val threadId: String, val text: String) : Delivery
     data class Notice(override val id: String, override val threadId: String, val text: String) : Delivery

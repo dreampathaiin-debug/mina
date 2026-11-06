@@ -15,13 +15,13 @@ object Wav {
         buf.putInt(36 + dataSize)
         buf.put("WAVE".toByteArray(Charsets.US_ASCII))
         buf.put("fmt ".toByteArray(Charsets.US_ASCII))
-        buf.putInt(16)              // fmt 块长度
+        buf.putInt(16)              // fmt chunk length
         buf.putShort(1)             // PCM
-        buf.putShort(1)             // 单声道
+        buf.putShort(1)             // mono
         buf.putInt(rate)
-        buf.putInt(rate * 2)        // 每秒字节数 = 采样率 × 声道 × 2 字节
-        buf.putShort(2)             // 块对齐
-        buf.putShort(16)            // 位深
+        buf.putInt(rate * 2)        // bytes per second = sample rate x channels x 2 bytes
+        buf.putShort(2)             // block align
+        buf.putShort(16)            // bits per sample
         buf.put("data".toByteArray(Charsets.US_ASCII))
         buf.putInt(dataSize)
         for (s in pcm16) buf.putShort(s)

@@ -81,7 +81,7 @@ object RootfsExtractor {
                 val entry = tar.nextEntry ?: break
                 if (++entries > maxEntries) throw UnsafeArchiveException("archive has more than $maxEntries entries")
                 val rel = relativeName(entry.name)
-                if (rel.isEmpty()) continue // "./" 本身就是 dest
+                if (rel.isEmpty()) continue // "./" is dest itself
                 val target = resolveInside(root, rel, entry.name)
                 when {
                     entry.isDirectory -> {
@@ -123,7 +123,7 @@ object RootfsExtractor {
                         setMode(target, entry.mode, isDir = false)
                         files++
                     }
-                    else -> skip(rel) // 其他不认识的类型
+                    else -> skip(rel) // other unrecognized types
                 }
             }
         }
@@ -199,7 +199,7 @@ object RootfsExtractor {
         if (Files.isSymbolicLink(target)) {
             Files.delete(target)
         } else if (Files.isDirectory(target, LinkOption.NOFOLLOW_LINKS)) {
-            if (!dirOk) Files.delete(target) // 非空目录会抛 IOException,交给调用方
+            if (!dirOk) Files.delete(target) // a non-empty dir throws IOException, left to the caller
         } else if (Files.exists(target, LinkOption.NOFOLLOW_LINKS)) {
             Files.delete(target)
         }

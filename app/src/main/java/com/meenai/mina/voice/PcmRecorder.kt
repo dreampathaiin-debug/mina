@@ -37,13 +37,13 @@ class PcmRecorder(private val maxMs: Int = 60_000, private val streaming: Boolea
     private var pcm = ShortArray(0)
     private var size = 0
 
-    @SuppressLint("MissingPermission") // 权限由调用方在 start 之前检查
+    @SuppressLint("MissingPermission") // the caller checks the permission before start
     override fun start(): Boolean {
         synchronized(lock) {
             if (record != null) return false
             val minBuf = AudioRecord.getMinBufferSize(Wav.RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
             if (minBuf <= 0) return false
-            val chunk = Wav.RATE / 20 // 50ms 一块
+            val chunk = Wav.RATE / 20 // one 50 ms chunk
             val rec = try {
                 AudioRecord(
                     MediaRecorder.AudioSource.MIC, Wav.RATE,
@@ -86,13 +86,13 @@ class PcmRecorder(private val maxMs: Int = 60_000, private val streaming: Boolea
                 synchronized(lock) {
                     if (streaming && record === rec) audio.close(IOException("Audio capture failed"))
                 }
-                break // 读失败或已被停掉
+                break // read failed or already stopped
             }
             var sum = 0.0
             for (i in 0 until n) sum += buf[i].toDouble() * buf[i]
             val lvl = (sqrt(sum / n) / 8000.0).coerceIn(0.0, 1.0).toFloat()
             val full = synchronized(lock) {
-                if (record !== rec) return // 已被 stop/cancel
+                if (record !== rec) return // already stopped or cancelled
                 // 在锁里、确认还没被停掉之后才写,免得 cancel 刚归零又被这一块的音量盖回去
                 _level.value = lvl
                 val take = minOf(n, pcm.size - size)
@@ -111,7 +111,7 @@ class PcmRecorder(private val maxMs: Int = 60_000, private val streaming: Boolea
             if (record === rec) {
                 release(rec)
                 record = null
-                _level.value = 0f // 不录了,波形别停在最后一块的音量上
+                _level.value = 0f // recording stopped; do not leave the waveform at the last chunk's level
             }
         }
         if (streaming) audio.close()

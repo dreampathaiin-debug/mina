@@ -49,7 +49,7 @@ private val LOCAL_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM
 
 internal object SetAlarm : PhoneTool {
     override val verb = Verb.SetAlarm
-    override val label = "设闹钟"
+    override val label = "Set alarm"
     override val risk = Risk.Write
     override val entry = Entry.Alone
     override val logged = true
@@ -98,14 +98,14 @@ internal object SetAlarm : PhoneTool {
         val time = time(r) ?: return emptyList()
         val check = (r.content["check"] as? JsonPrimitive)?.contentOrNull
         val by = (r.content["handledBy"] as? JsonPrimitive)?.contentOrNull
-        val tail = if (check == AlarmCheck.Status.VERIFIED.wire) ",系统报的下一个闹钟就是它" else ",系统没报出它(未核实)"
-        return listOf(Observation(ObsKind.Fact, "$name 把 $time 的闹钟交给了 ${by ?: "时钟 App"}$tail", source = PHONE))
+        val tail = if (check == AlarmCheck.Status.VERIFIED.wire) ", the system reports it as the next alarm" else ", the system did not report it (unverified)"
+        return listOf(Observation(ObsKind.Fact, "$name handed the $time alarm to ${by ?: "Clock app"}$tail", source = PHONE))
     }
 }
 
 internal object SetTimer : PhoneTool {
     override val verb = Verb.SetTimer
-    override val label = "设计时器"
+    override val label = "Set timer"
     override val risk = Risk.Write
     override val entry = Entry.Alone
     override val logged = true
@@ -131,14 +131,14 @@ internal object SetTimer : PhoneTool {
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> {
         if (r.content["ok"] != JsonPrimitive(true)) return emptyList()
         val by = (r.content["handledBy"] as? JsonPrimitive)?.contentOrNull
-        return listOf(Observation(ObsKind.Fact, "$name 把 ${seconds(o)} 的计时器交给了 ${by ?: "时钟 App"}", source = PHONE))
+        return listOf(Observation(ObsKind.Fact, "$name handed the ${seconds(o)} timer to ${by ?: "Clock app"}", source = PHONE))
     }
 }
 
 /** 在 Mina 的屏上打开时钟的闹钟列表:核对、删除、改闹钟都在那一页上操作。 */
 internal object ShowAlarms : PhoneTool {
     override val verb = Verb.ShowAlarms
-    override val label = "查看闹钟"
+    override val label = "View alarms"
     override val risk = Risk.Write
     override val showsScreenAfter = true
     override val logged = true
@@ -157,7 +157,7 @@ internal object ShowAlarms : PhoneTool {
 /** 打开日历预填好的新日程页:保存由模型在那一页上点,这里不存任何东西;不要日历权限。 */
 internal object AddCalendarEvent : PhoneTool {
     override val verb = Verb.AddCalendarEvent
-    override val label = "添加日程"
+    override val label = "Add calendar event"
     override val risk = Risk.Write
     override val entry = Entry.Opens
     override val showsScreenAfter = true
@@ -197,7 +197,7 @@ internal object AddCalendarEvent : PhoneTool {
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> {
         if (r.content["ok"] != JsonPrimitive(true)) return emptyList()
         val by = (r.content["handledBy"] as? JsonPrimitive)?.contentOrNull ?: return emptyList()
-        return listOf(Observation(ObsKind.Fact, "$name 打开了 $by 的新日程页(还没保存)", source = PHONE))
+        return listOf(Observation(ObsKind.Fact, "$name opened a new event page in $by (not saved yet)", source = PHONE))
     }
 }
 

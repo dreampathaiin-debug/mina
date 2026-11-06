@@ -109,7 +109,7 @@ class AdbConnection private constructor(
                         s.opened.complete(false)
                         s.remoteClosed()
                     }
-                    else -> Unit // 连接建立后的 CNXN/AUTH 等不处理
+                    else -> Unit // CNXN/AUTH etc. after the connection is set up are not handled
                 }
             }
         } catch (_: IOException) {

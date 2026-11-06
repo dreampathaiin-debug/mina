@@ -145,7 +145,7 @@ internal class RouteReplay(
 
     companion object {
         /** 回放期间界面上这一步的说明。 */
-        const val REPLAY_NOTE = "按以往的做法操作"
+        const val REPLAY_NOTE = "Do it the way it was done before"
         /** 同一步连续对不上这么多次就停用路线。 */
         const val ROUTE_MISSES_TO_DISABLE = 2
     }

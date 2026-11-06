@@ -59,7 +59,7 @@ internal object MemorySearch : AgentTool {
     override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> {
         if (r.content["ok"] != JsonPrimitive(true)) return emptyList()
         return listOfNotNull((r.content["memories"] as? JsonArray)?.takeIf { it.isNotEmpty() }?.let { list ->
-            Observation(ObsKind.UserSaid, list.joinToString("\n", "记忆检索「${o.argStr("query")}」:\n") { m -> ((m as? JsonObject)?.get("content") as? JsonPrimitive)?.contentOrNull.orEmpty() },
+            Observation(ObsKind.UserSaid, list.joinToString("\n", "Memory search: ${o.argStr("query")}\n") { m -> ((m as? JsonObject)?.get("content") as? JsonPrimitive)?.contentOrNull.orEmpty() },
                 source = "memory")
         })
     }
@@ -73,7 +73,7 @@ internal object MemorySave : AgentTool {
         Prompts.tool("memory_save"),
         mapOf(
             "kind" to str("fact = about the user, preference = what the user likes, procedure = how the user wants a kind of task done.", listOf("fact", "preference", "procedure")),
-            "content" to str("One sentence in the third person, at most 200 characters, e.g. 用户点外卖不要香菜."),
+            "content" to str("One sentence in the third person, at most 200 characters, e.g. The user does not want cilantro in food deliveries."),
             "quote" to str("The user's exact words this is based on."),
             "keywords" to buildJsonObject {
                 put("type", "array"); put("description", "Optional, up to 8 search words incl. synonyms.")

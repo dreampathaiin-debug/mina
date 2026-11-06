@@ -149,7 +149,7 @@ class RootfsInstaller(
                 val keepOpen = object : FilterInputStream(raw) { override fun close() = Unit }
                 RootfsExtractor.extractTar(XZInputStream(keepOpen), fresh, maxBytes = bundle.maxBytes, maxEntries = bundle.maxEntries)
                 val buf = ByteArray(1 shl 16)
-                while (raw.read(buf) >= 0) Unit // xz 尾部没读到的字节也要算进校验
+                while (raw.read(buf) >= 0) Unit // bytes unread at the xz tail must still count toward the checksum
             }
             val actual = digest.digest().joinToString("") { "%02x".format(it) }
             if (actual != bundle.sha256) throw IOException(tr(R.string.install_checksum))

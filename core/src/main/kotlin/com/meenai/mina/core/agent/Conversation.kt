@@ -39,7 +39,7 @@ object Conversation {
     const val HEADER = "Earlier turns of this conversation (for reference; what you read this time shows the current state):"
 
     /** 停止的那一轮还没有交代(或没什么可交代)时记下的话。 */
-    const val CANCELLED_OUTCOME = "已取消"
+    const val CANCELLED_OUTCOME = "Cancelled"
 
     /** 停止的那一轮补上的交代;没有时为 null。 */
     fun stopSummary(t: Turn): String? =

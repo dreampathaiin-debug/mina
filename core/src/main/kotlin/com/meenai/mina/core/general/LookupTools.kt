@@ -29,7 +29,7 @@ import kotlinx.serialization.json.put
 /** 查 App 与网站知识;只读目录,有目录才提供。 */
 internal object KnowledgeSearch : AgentTool {
     override val verb = Verb.KnowledgeSearch
-    override val label = "查找 App/网站知识"
+    override val label = "Look up app/site knowledge"
     override val risk = Risk.Read
     override val concurrency = Concurrency.ParallelSafe
     private val KINDS = KnowledgeIndex.KINDS.filter { it in KNOWLEDGE_KINDS }
@@ -53,7 +53,7 @@ internal object KnowledgeSearch : AgentTool {
 /** 查技能(内置技能与用户在用的个人技能);只读目录,有目录才提供。 */
 internal object SkillSearch : AgentTool {
     override val verb = Verb.SkillSearch
-    override val label = "查找技能"
+    override val label = "Look up skills"
     override val risk = Risk.Read
     override val concurrency = Concurrency.ParallelSafe
     override val def = ToolDef("skill_search", Prompts.tool("skill_search"), mapOf("query" to query("Words for the kind of task, 1-200 characters.")), listOf("query"))
@@ -67,7 +67,7 @@ internal object SkillSearch : AgentTool {
 /** 读 App 或网站知识的正文或附件。 */
 internal object KnowledgeRead : AgentTool {
     override val verb = Verb.KnowledgeRead
-    override val label = "查看 App/网站知识"
+    override val label = "View app/site knowledge"
     override val risk = Risk.Read
     override val concurrency = Concurrency.ParallelSafe
     override val def = ToolDef("knowledge_read",
@@ -85,7 +85,7 @@ internal object KnowledgeRead : AgentTool {
 /** 读技能的正文或附件,含用户的个人技能。 */
 internal object SkillRead : AgentTool {
     override val verb = Verb.SkillRead
-    override val label = "查看技能"
+    override val label = "View skills"
     override val risk = Risk.Read
     override val concurrency = Concurrency.ParallelSafe
     override val def = ToolDef("skill_read",

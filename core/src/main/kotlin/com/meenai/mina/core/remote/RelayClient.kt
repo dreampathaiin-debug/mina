@@ -89,7 +89,7 @@ class RelayClient(private val scope: CoroutineScope, private val handle: (HttpRe
         running?.cancel(); running = null
         current?.dispose(); current = null
         mutable.value = RelayState.Off
-        while (networkChanges.tryReceive().isSuccess) { /* 丢弃上次连接的网络事件。 */ }
+        while (networkChanges.tryReceive().isSuccess) { /* drop leftover network events from the last connection. */ }
     }
 
     private inner class Session(parent: CoroutineScope) : WebSocketListener() {

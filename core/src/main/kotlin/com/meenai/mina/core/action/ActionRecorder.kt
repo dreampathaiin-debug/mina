@@ -85,6 +85,6 @@ class ActionRecorder(
     }
 
     private companion object {
-        const val HIDDEN_ANSWER = "(用户的回答,不记录)"
+        const val HIDDEN_ANSWER = "(user's answer, not recorded)"
     }
 }

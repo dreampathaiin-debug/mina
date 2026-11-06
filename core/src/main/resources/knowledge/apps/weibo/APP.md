@@ -1,16 +1,16 @@
 ---
 name: weibo
-display: 微博
+display: Weibo
 packages: ["com.sina.weibo"]
-aliases: ["微博", "Weibo", "weibo"]
+aliases: ["Weibo", "weibo"]
 sites: ["weibo.com"]
-open: 微博
+open: Weibo
 pace: careful
-description: 微博:热点与原帖
+description: Weibo: trending topics and original posts
 ---
-## 是什么
-微博是社交平台,包名 `com.sina.weibo`。网站知识见 `weibo.com`。
+## What it is
+Weibo is a social platform, package `com.sina.weibo`. For the website see `weibo.com`.
 
-## 功能
-- **搜索**:按热度排序,也可以限定日期窗口。
-- **原帖**:有作者、发布时间、转发、评论、点赞数和原话。转评赞反映传播程度,不是有同样问题的人数。
+## Features
+- **Search**: sorted by heat, with a date window available.
+- **Original posts**: show author, publish time, reposts, comments, like counts and the original wording. Repost-comment-like counts show how far it spread, not how many people have the same problem.

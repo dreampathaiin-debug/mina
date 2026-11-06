@@ -49,13 +49,13 @@ object ScreenDiagnosis {
     const val UNSUPPORTED_BROWSER = "unsupported_browser"
 
     private val CAPTCHA = listOf(
-        "captcha", "人机验证", "安全验证", "滑块验证", "拖动滑块", "向右滑动完成", "请完成验证", "verify you are human", "not a robot",
+        "captcha", "verify you are human", "not a robot",
     )
     private val PAYMENT = listOf(
-        "支付密码", "确认支付", "确认付款", "立即支付", "输入密码支付", "payment password", "confirm payment", "pay now",
+        "payment password", "confirm payment", "pay now",
     )
     private val SMS_CODE = listOf(
-        "获取验证码", "发送验证码", "短信验证码", "get code", "send code", "verification code",
+        "get code", "send code", "verification code",
     )
 
     /** 屏上文字里第一个付款字样(确认支付、支付密码一类);没有为 null。 */

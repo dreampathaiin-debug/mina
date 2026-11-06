@@ -983,10 +983,10 @@ class AgentLoop(
         /** 正常任务没有固定步数截止；显式步数预算只用于评测和指定上限的子任务。 */
         const val UNLIMITED_STEPS = Int.MAX_VALUE
         /** 核查期间界面上这一步的说明。 */
-        const val VERIFYING_NOTE = "正在核实结果"
+        const val VERIFYING_NOTE = "Verifying results"
         val APPROVED_STEP_FIRST: String get() = Feedback["approved_step_first"]
         /** 回答里退回一次后仍没对上的几处,结局说明里这样开头(界面另按 [TaskState.Succeeded.unconfirmed] 逐条标出)。 */
-        const val UNCONFIRMED_NOTE = "未确认:"
+        const val UNCONFIRMED_NOTE = "Unconfirmed:"
         /** hand_to_user 交给用户付款时的原因;付款是不可逆的事,回答要另请核查。 */
         private const val PAYMENT = "payment"
         const val DEFAULT_INPUT_TIMEOUT_MS = 15 * 60_000L
@@ -1017,8 +1017,8 @@ class AgentLoop(
         // 核对过却没能核实(含标成未确认的):记成 unverified,和评测、对话记录同一个说法
         is TaskState.Succeeded -> RunEvent.TaskEnded(now(), if (end.doubtful) "unverified" else "succeeded", Redactor.text(end.answer))
         is TaskState.Failed -> RunEvent.TaskEnded(now(), "failed", Redactor.text(end.reason), end.kind.name.lowercase())
-        TaskState.Cancelled -> RunEvent.TaskEnded(now(), "cancelled", "已取消")
-        else -> RunEvent.TaskEnded(now(), "error", "任务异常中断")
+        TaskState.Cancelled -> RunEvent.TaskEnded(now(), "cancelled", "Cancelled")
+        else -> RunEvent.TaskEnded(now(), "error", "Task aborted unexpectedly")
     }
 
     private fun waitingEvent(s: TaskState): RunEvent.State = when (s) {
@@ -1028,4 +1028,4 @@ class AgentLoop(
 }
 
 /** 用户点名走网页的说法(评测强制网页渠道时也加在目标前)。 */
-private const val WEB_CHANNEL_PREFIX = "用网页"
+private const val WEB_CHANNEL_PREFIX = "Via web"

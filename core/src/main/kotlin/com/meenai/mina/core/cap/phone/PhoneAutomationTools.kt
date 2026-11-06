@@ -25,7 +25,7 @@ import com.meenai.mina.core.uistate.session
 internal object PhoneQuery : PhoneTool {
     override val verb = Verb.Query
     override val risk = Risk.Read
-    override val label = "查找界面控件"
+    override val label = "Find screen widgets"
     override val def = ToolDef("phone_query", Prompts.tool("phone_query"), mapOf(
         "text" to str("Case-insensitive text or accessibility description to find."),
         "resourceId" to str("Full or partial Android resource ID to find."),
@@ -47,7 +47,7 @@ internal object PhoneCollect : PhoneTool {
     override val verb = Verb.Collect
     override val risk = Risk.Write
     override val composite = true
-    override val label = "采集多屏内容"
+    override val label = "Capture multi-screen content"
     override val def = ToolDef("phone_collect", Prompts.tool("phone_collect"), mapOf(
         "direction" to str("Direction of newer content: up or down.", listOf("up", "down")),
         "pages" to int("Maximum screens to inspect, 1-30 (default 10).", 1, 30),

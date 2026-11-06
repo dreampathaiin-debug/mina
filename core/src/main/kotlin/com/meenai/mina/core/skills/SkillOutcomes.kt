@@ -24,7 +24,7 @@ object SkillOutcomes {
     private const val WINDOW = 3
     private const val BAD_IN_WINDOW = 2
     /** 结果卡片与核查退回:照着技能做却被核查退回,判为 verifier_rejected。 */
-    const val VERIFIER_REJECTED_MARK = "核查未通过"
+    const val VERIFIER_REJECTED_MARK = "Verification failed"
 
     /** 追加一次结果并只留最近 [KEEP] 次;按规则可能转为停用。 */
     fun record(s: PersonalSkill, r: SkillResult, followed: Boolean): PersonalSkill {

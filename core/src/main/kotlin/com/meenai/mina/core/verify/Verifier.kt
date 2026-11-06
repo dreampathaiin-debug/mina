@@ -118,7 +118,7 @@ class Verifier(
     suspend fun verify(goal: String, criteria: Criteria, answer: String, evidence: Evidence, earlierGoals: List<String> = emptyList()): Verification {
         val chosen = evidence.ledger.forAnswer(goal, answer)
         val reads = evidence.sources(chosen)
-        if (evidence.protected && reads.isEmpty()) return cannot("结果页受系统防截屏保护,看不到画面,没法核实")
+        if (evidence.protected && reads.isEmpty()) return cannot("the result screen is protected from screenshots, so the picture cannot be read and the result cannot be verified")
         val image = evidence.freshImage?.takeIf { visionModel != null && !evidence.protected }
         val model = if (image != null) visionModel!! else textModel
         val v = when (val first = ask(model, goal, criteria, answer, evidence, chosen, EvidenceLedger.EXCERPT_CHARS, earlierGoals, image)) {
@@ -128,7 +128,7 @@ class Verifier(
             Asked.TimedOut -> when (val second = ask(model, goal, criteria, answer, trimmed(evidence), chosen, TRIM_EXCERPT_CHARS, earlierGoals, image)) {
                 is Asked.Done -> second.v
                 is Asked.Failed -> return cannot(second.reason)
-                Asked.TimedOut -> return cannot("核查超时")
+                Asked.TimedOut -> return cannot("Verification timed out")
             }
         }
         return when (v.verdict) {
@@ -164,11 +164,11 @@ class Verifier(
             withTimeoutOrNull(timeoutMs(body.length, if (image != null) 1 else 0)) {
                 // 回复走容错解析;读不出来时再问一次、只要 JSON;还不行才算解析不了
                 ModelJson.completeParsed(model, PROMPT, listOf(Message(Role.User, parts, Author.Mina)), ::parse).also { unparsed = it == null }
-            }?.let { Asked.Done(it) } ?: if (unparsed) Asked.Failed("核查器的回复无法解析") else Asked.TimedOut
+            }?.let { Asked.Done(it) } ?: if (unparsed) Asked.Failed("The verifier's reply could not be parsed") else Asked.TimedOut
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Asked.Failed("核查器出错:${e.message ?: e::class.simpleName}")
+            Asked.Failed("Verifier error: ${e.message ?: e::class.simpleName}")
         }
     }
 
@@ -192,10 +192,10 @@ class Verifier(
             put("goal", goal)
             if (earlierGoals.isNotEmpty()) put("earlierGoals", JsonArray(earlierGoals.map(::JsonPrimitive)))
             put("criteria", JsonArray(c.items.map(::JsonPrimitive)))
-            if (c.fallback) put("criteriaNote", "没有另列标准,criteria 只是用户原话本身,请对照用户的目标核对")
+            if (c.fallback) put("criteriaNote", "no separate criteria; criteria is just the user's own request, so check against the user's goal")
             put("kind", c.kind)
             put("answer", answer)
-            put("freshLook", if (e.nothingRead) NOTHING_READ else freshShown(goal, answer, e).ifBlank { if (e.protected) "(页面受防截屏保护,读不到)" else "(没读到文字)" })
+            put("freshLook", if (e.nothingRead) NOTHING_READ else freshShown(goal, answer, e).ifBlank { if (e.protected) "(the page is protected from screenshots and cannot be read)" else "(no text was read)" })
             put("ledger", JsonArray(shown.map { r ->
                 buildJsonObject {
                     if (r.step > 0) put("step", r.step)
@@ -210,7 +210,7 @@ class Verifier(
             if (e.takeovers.isNotEmpty()) put("takeovers", JsonArray(e.takeovers.map(::JsonPrimitive)))
             if (e.userFacts.isNotEmpty()) put("userFacts", JsonArray(e.userFacts.map(::JsonPrimitive)))
         }
-        return "下面是待核对的材料(JSON,字段说明见系统提示):\n$material"
+        return "Below is the material to verify (JSON; the field meanings are in the system prompt):\n$material"
     }
 
     companion object {
@@ -230,12 +230,12 @@ class Verifier(
         /** 等多久与要读的东西成正比:基础 60 秒,每张图、每 KB 文字另加,封顶 150 秒。 */
         fun timeoutMs(textChars: Int, images: Int): Long =
             minOf(MAX_TIMEOUT_MS, TIMEOUT_MS + images * PER_IMAGE_MS + textChars / 1024 * PER_KB_MS)
-        const val NOT_IN_READS = "回答的依据在读到的界面、网页或命令输出里都找不到"
-        const val NOT_EVERY_CRITERION = "核查器没有逐条核对每一条标准"
-        const val FAIL_WITHOUT_REASON = "核查器认为没有做成,但没有指出哪条标准没满足"
-        const val FOLLOW_UP_UNCLEAR = "这是接着上文的追问,没能列出具体标准,核查判不准"
-        const val NOTHING_READ = "本次任务没有打开 App,也没有读到任何材料"
-        const val TRUNCATED = "回答依据的是屏上被截断的文字(以…结尾),只看到了一部分,没能完整核实"
+        const val NOT_IN_READS = "The evidence for the answer cannot be found in the screens, pages or command output that were read"
+        const val NOT_EVERY_CRITERION = "The verifier did not check every criterion one by one"
+        const val FAIL_WITHOUT_REASON = "The verifier judged it not done but did not say which criterion failed"
+        const val FOLLOW_UP_UNCLEAR = "This is a follow-up question; no concrete criteria could be listed, so verification cannot be judged reliably"
+        const val NOTHING_READ = "No app was opened and nothing was read during this task"
+        const val TRUNCATED = "The answer relies on truncated on-screen text (ending in ...); only part was seen, so it could not be fully verified"
         private val STATUSES = setOf("met", "unmet", "unknown")
 
         val PROMPT: String by lazy { Prompts.role("verifier") }

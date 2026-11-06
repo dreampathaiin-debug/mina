@@ -96,7 +96,7 @@ internal class WebCapability(
     /** 整页正文的开头。 */
     private suspend fun pageStart(p: WebPort): String? {
         val text = try { p.readPage(EVIDENCE_PAGE_CHARS, 0, scrollLazy = false).text } catch (e: CancellationException) { throw e } catch (e: Exception) { null }
-        return text?.takeIf { it.isNotBlank() }?.let { "网页正文(开头):\n$it" }
+        return text?.takeIf { it.isNotBlank() }?.let { "Page text (start):\n$it" }
     }
 
     /** 当前标签此刻用的版本(mobile / desktop);读不到为 null。 */

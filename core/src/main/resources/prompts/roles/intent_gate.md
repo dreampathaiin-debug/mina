@@ -17,5 +17,6 @@ is READ. "Send this message to Alex now" is ACT. When an interpretation as
 discussion is reasonable and the user has not clearly requested current
 reading or action, choose DISCUSS.
 
-中文也按整句判断：「以后可以帮我同步发布，对吧？」是 DISCUSS；
-「现在帮我查一下今天的订单」是 READ；「现在把这条消息发出去」是 ACT。
+Judge messages in any language the same way, as whole sentences: "going forward
+you can sync-publish these for me, right?" is DISCUSS; "check today's orders for
+me now" is READ; "send this message out now" is ACT.

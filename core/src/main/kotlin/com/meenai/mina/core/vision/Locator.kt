@@ -60,7 +60,7 @@ private val BBOX_2D = Regex("\"?bbox_2d\"?\\s*:\\s*\\[\\s*(\\d+(?:\\.\\d+)?)\\s*
 private val BARE_BOX = Regex("^\\[\\s*(\\d+(?:\\.\\d+)?)\\s*,\\s*(\\d+(?:\\.\\d+)?)\\s*,\\s*(\\d+(?:\\.\\d+)?)\\s*,\\s*(\\d+(?:\\.\\d+)?)\\s*]$")
 private val FOUR_NUMBERS = Regex("\\[\\s*\\d+(?:\\.\\d+)?\\s*,\\s*\\d+(?:\\.\\d+)?\\s*,\\s*\\d+(?:\\.\\d+)?\\s*,\\s*\\d+(?:\\.\\d+)?\\s*]")
 private val SEEN = Regex("\"seen\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
-private val YES = Regex("^(是|yes(?![A-Za-z0-9_]))", RegexOption.IGNORE_CASE)
+private val YES = Regex("^(yes(?![A-Za-z0-9_]))", RegexOption.IGNORE_CASE)
 private const val MAX_SEEN = 120
 
 private val PROMPTS: Pair<String, String> by lazy {

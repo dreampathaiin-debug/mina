@@ -18,7 +18,7 @@ class RunEventBus : RunSink {
         listeners.forEach { listener ->
             try { listener.event(e) }
             catch (e: CancellationException) { throw e }
-            catch (_: Throwable) { /* 运行不能被订阅者的故障打断 */ }
+            catch (_: Throwable) { /* a subscriber failure must not break the run */ }
         }
     }
 
@@ -26,7 +26,7 @@ class RunEventBus : RunSink {
         listeners.forEach { listener ->
             try { listener.media(mediaId, png) }
             catch (e: CancellationException) { throw e }
-            catch (_: Throwable) { /* 同上 */ }
+            catch (_: Throwable) { /* same as above */ }
         }
     }
 }

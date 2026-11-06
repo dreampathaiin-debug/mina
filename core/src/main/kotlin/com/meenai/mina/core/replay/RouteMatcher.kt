@@ -40,7 +40,7 @@ class RouteMatcher(private val model: ChatModel, val store: RouteStore, private 
     suspend fun choose(goal: String): RouteChoice? {
         val list = candidates(goal)
         if (list.isEmpty()) return null
-        val text = list.withIndex().joinToString("\n", "用户原话:$goal\n\n做法模板:\n") { (i, r) -> "${i + 1}. ${r.template}" }
+        val text = list.withIndex().joinToString("\n", "User's request: $goal\n\nRoute template:\n") { (i, r) -> "${i + 1}. ${r.template}" }
         val reply = try {
             withTimeoutOrNull(TIMEOUT_MS) { model.complete(PROMPT, listOf(Message(Role.User, listOf(Part.Text(text)), Author.Mina)), emptyList()) } ?: return null
         } catch (e: CancellationException) {

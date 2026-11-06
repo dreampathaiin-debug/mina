@@ -98,7 +98,7 @@ object PermissionCommands {
 object AccessibilityList {
     fun entries(raw: String?): List<String> {
         val v = raw?.trim().orEmpty()
-        if (v == "null") return emptyList() // `settings get` 对没写过的项输出 null
+        if (v == "null") return emptyList() // `settings get` prints null for keys that were never set
         return v.split(':').map { it.trim() }.filter { it.isNotEmpty() }
     }
 

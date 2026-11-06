@@ -24,7 +24,7 @@ import kotlinx.serialization.json.put
 /** 做不成、问用户或交给用户的工具:结果里带给循环的 [Outcome]。 */
 internal object EndNotDone : AgentTool {
     override val verb = Verb.EndNotDone
-    override val label = "说明没办成的原因"
+    override val label = "Explain why it could not be done"
     override val risk = Risk.Read
     override val def = ToolDef("end_not_done",
         Prompts.tool("end_not_done"),
@@ -46,7 +46,7 @@ internal object EndNotDone : AgentTool {
 
 internal object AskUser : AgentTool {
     override val verb = Verb.AskUser
-    override val label = "问你一个问题"
+    override val label = "Ask you a question"
     override val risk = Risk.Read
     override val def = ToolDef("ask_user",
         Prompts.tool("ask_user"),
@@ -68,7 +68,7 @@ internal object AskUser : AgentTool {
 /** 交给用户亲手操作屏幕;要过锁屏关卡(用户要在屏上操作)。 */
 internal object HandToUser : SurfaceAware {
     override val verb = Verb.HandToUser
-    override val label = "请你接手"
+    override val label = "Ask you to take over"
     override val risk = Risk.Write
     override val withScreens = true
     override val def = ToolDef("hand_to_user",

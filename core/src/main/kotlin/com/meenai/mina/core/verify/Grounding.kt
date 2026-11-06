@@ -18,7 +18,7 @@ package com.meenai.mina.core.verify
  */
 internal object Grounding {
     private val QUOTED = Regex("「([^」]*)」|『([^』]*)』|“([^”]*)”|\"([^\"]*)\"|‘([^’]*)’")
-    private val EVIDENCE = Regex("依据\\**\\s*[:：]")
+    private val EVIDENCE = Regex("[Ee]vidence\\**\\s*[:：]")
     /**
      * 数后面的亿/万/千是数量级(中间只能隔空白,App 常排成「1561 万热度」;隔了标点就不是);
      * 「千米」「千克」「千瓦」里的千是单位的一部分,不是数量级。行首、引文开头的序号(「5 千与千寻」)先按 [ORDINAL] 去掉。
@@ -61,7 +61,7 @@ internal object Grounding {
     )
     private val FOOTNOTE = Regex("\\[\\^?\\d{1,3}]|【\\d{1,3}】")
     private val MAGNITUDE = mapOf("亿" to 8, "万" to 4, "千" to 3)
-    const val APP_HEADER = "当前 App:"
+    const val APP_HEADER = "Current app: "
     /** 依据里的文字片段太短会碰巧和任何屏幕都对得上(「屏上」「设置」),不算。 */
     private const val MIN_FRAGMENT = 4
     /** 屏上的一行出现在依据里时,这一行至少要有几个字。 */

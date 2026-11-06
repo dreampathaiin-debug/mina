@@ -101,8 +101,8 @@ class MemoryIndex(private val items: List<MemoryItem>) {
         const val MIN_CORPUS = 50
         // 只作用于查询词:口头的虚词两字组合,几乎每句话都有,不能单凭它们算相关
         val STOP_TERMS = setOf(
-            "帮我", "给我", "一下", "我的", "不要", "这个", "那个", "可以", "一个", "用户",
-            "今天", "这次", "现在", "什么", "怎么", "我们", "一些", "看看",
+            "please", "for me", "a bit", "my", "do not", "this", "that", "can", "one", "user",
+            "today", "this time", "now", "what", "how", "we", "some", "look",
         )
     }
 }

@@ -57,7 +57,7 @@ class DeviceStateWatcher(
         } else {
             appContext.registerReceiver(receiver, filter)
         }
-        lock.refresh() // 注册前后之间的变化
+        lock.refresh() // catch changes between the before and after reads
     }
 
     /**
