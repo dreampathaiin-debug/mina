@@ -431,7 +431,10 @@ private fun EmptyState(conversation: String?, onPick: (String) -> Unit) {
             Text(ChatCopy.greeting(hour), style = MinaType.LargeTitle, color = c.ink)
             Text(ChatCopy.EMPTY_PROMPT, Modifier.padding(top = 6.dp), style = EmptyLead, color = c.ink2)
         }
-        MinaCard(Modifier.padding(top = 28.dp)) {
+        // AURA-style curved app marquee: the installed apps scroll by one at a time,
+        // the centred app's example prompt sits under it, and a tap fills the composer.
+        AppPromptMarquee(Modifier.padding(top = 16.dp), onPick = onPick)
+        MinaCard(Modifier.padding(top = 20.dp)) {
             ChatCopy.examples.forEachIndexed { i, ex ->
                 ExampleRow(exampleIcon(ex.kind), ex.text, first = i == 0) { onPick(ex.text) }
             }
