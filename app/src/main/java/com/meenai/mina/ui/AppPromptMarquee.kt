@@ -24,8 +24,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,6 +58,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.meenai.mina.ui.theme.MinaIcons
 import com.meenai.mina.ui.theme.MinaTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -517,7 +516,7 @@ private fun MarqueeLogo(item: MarqueeItem, size: Dp, modifier: Modifier = Modifi
                 )
             } else {
                 Icon(
-                    Icons.Outlined.Apps,
+                    MinaIcons.Apps,
                     contentDescription = item.label,
                     tint = c.ink2,
                     modifier = Modifier.size(size * 0.47f),
