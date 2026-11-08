@@ -12,7 +12,7 @@ import kotlin.math.roundToInt
  * 画面只要看得清版面和文字。哪些画面不能发(受保护页面、付款页)由调用方决定,这里只管编码。
  */
 object ModelImage {
-    const val MAX_SIDE = 1280
+    const val MAX_SIDE = 1024
     const val QUALITY = 80
 
     /**
