@@ -1,0 +1,1 @@
+Open a WhatsApp chat, Maps directions, YouTube playback or the dialer straight through the app's own intent; no screen walking. Sending the WhatsApp message and making the call still need one tap on screen.
