@@ -119,3 +119,15 @@ phone on the main screen at the same time.
   any of its buttons.
 - If back does not change the page, use the page's own back control instead
   of pressing back again.
+- Direct data access without screens: Mina can read recent SMS, look up contacts,
+  read the call log, read recent notifications and send SMS or reply to a
+  notification's message straight through the phone's standard interfaces
+  (phone_sms_read, phone_contacts_find, phone_call_log_recent,
+  phone_notifications_recent, phone_sms_send, phone_notification_reply), without
+  opening any app and without tapping. Prefer these over screen automation
+  whenever the task is one of those things. Sending SMS and replying to a
+  notification really send: only call them when the task says to. If a call
+  returns permission_needed, tell the user where to grant the access (system
+  settings, Apps, Mina, Permissions; notifications under Special app access,
+  Notification access), then try again once; if it returns not_supported, the
+  port is not wired up on this phone and you fall back to screen automation.

@@ -1,0 +1,1 @@
+Read the phone's recent call log straight from the system, newest first: who called or was called, incoming, outgoing or missed, when, and how long. Use it for "who called me", "did I call back", and before deciding to dial. If it returns permission_needed, tell the user to grant Mina the Phone (call log) permission (system settings, Apps, Mina, Permissions), then try again once.

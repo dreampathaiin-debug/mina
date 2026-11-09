@@ -25,6 +25,7 @@ import com.meenai.mina.core.memory.ProfileStore
 import com.meenai.mina.core.memory.UserUtterances
 import com.meenai.mina.core.skills.PersonalSkills
 import com.meenai.mina.core.uistate.ScreenPort
+import com.meenai.mina.core.cap.phone.PhoneDataPort
 import com.meenai.mina.core.tool.AgentTool
 import com.meenai.mina.core.tool.LegacyNames
 import com.meenai.mina.core.tool.ToolConfig
@@ -113,6 +114,7 @@ fun toolDispatcher(
     /** 改 Mina 自己设置的白名单入口;为空时不提供 settings_list、settings_set(见 [SelfConfig])。 */
     selfConfig: com.meenai.mina.core.settings.SelfConfig? = null,
     /** 存下的运行记录;给了、而这个对话之前有记过运行的轮次时提供 history_read(查之前几轮读到的东西)。 */
+    phoneData: PhoneDataPort? = null,
     runRecords: RunRecords? = null,
 ): ToolDispatcher {
     val config = ToolConfig(visionEnabled, skills, recordFrames, vision, inlineScreen, adaptiveVision, memory, profile, utterances, conversationId,
@@ -120,7 +122,7 @@ fun toolDispatcher(
     val providers: List<CapabilityProvider> = listOf(
         object : CapabilityProvider {
             override val id = PHONE
-            override fun open(spec: RunSpec) = PhoneCapability(screen, deepLinks, appPacing(), appPace, appIdleScroll())
+            override fun open(spec: RunSpec) = PhoneCapability(screen, deepLinks, appPacing(), appPace, appIdleScroll(), phoneData)
         },
         object : CapabilityProvider {
             override val id = WEB

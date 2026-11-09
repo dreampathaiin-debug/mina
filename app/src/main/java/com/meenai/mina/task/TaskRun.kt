@@ -134,6 +134,7 @@ import java.io.File
 import java.util.UUID
 import com.meenai.mina.core.tool.ToolIndex
 import com.meenai.mina.core.assembly.legacyNames
+import com.meenai.mina.cap.phone.shell.PhoneDataBridge
 import com.meenai.mina.core.assembly.toolDispatcher
 import com.meenai.mina.core.cap.web.WEB
 
@@ -736,6 +737,7 @@ class TaskRun(
                         web = web, webPacing = { PagePacing.human() }, webPlacePace = { PlacePace.of(catalog.sitePace(it)) },
                         webIdleScroll = { IdleScroll(Random.Default) },
                         appPacing = { pace.appPacing() }, appPace = { PlacePace.of(catalog.appPace(it)) }, appIdleScroll = { IdleScroll(Random.Default) },
+                        phoneData = PhoneDataBridge(service),
                         sandbox = sandbox, workspace = { conversationId }, runSpec = childSpec,
                         conversationId = conversationId, inlineScreen = speed.inlineScreen,
                         adaptiveVision = speed.adaptiveVision)
@@ -748,6 +750,7 @@ class TaskRun(
                 ownerAlive = { job?.isActive == true },
             ).also { children = it } else null
             val tools = toolDispatcher(accessedPhone, model.capabilities.vision, catalog, recordFrames = true, vision = vision?.let { VisionService(it, BitmapImageOps) },
+                phoneData = PhoneDataBridge(service),
                 // 设置里允许 Mina 改自己时,才把 settings_list、settings_set 发给模型
                 selfConfig = if (FeatureFlags.get(service).selfConfig()) {
                     com.meenai.mina.settings.SelfConfigImpl(FeatureFlags.get(service))

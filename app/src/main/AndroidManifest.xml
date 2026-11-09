@@ -17,6 +17,15 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- phone_set_alarm / phone_set_timer:经安卓标准接口请时钟 App 设闹钟、计时器(普通权限,安装即有) -->
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+    <!-- 权限层(phone_sms_send / phone_sms_read / phone_contacts_find / phone_call_log_recent):
+         经安卓标准接口直接读写短信、联系人、通话记录,不开任何界面;运行时逐项征得用户同意 -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <!-- 「重启后自动恢复」:开机时重新打开无线调试。这个授权普通安装拿不到,只在用户打开那个开关后
          经已配对的连接授予;不在这里声明的话连授予都做不了 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -148,6 +157,16 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service" />
+        </service>
+        <!-- 通知监听:phone_notifications_recent 读最近的通知,phone_notification_reply 用通知自带的回复动作直接回话。
+             通知的授权在系统的「通知使用权」里给,不是运行时权限 -->
+        <service
+            android:name="com.meenai.mina.cap.phone.shell.MinaNotificationListener"
+            android:exported="false"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
         </service>
 
         <service

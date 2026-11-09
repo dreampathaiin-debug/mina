@@ -37,6 +37,8 @@ internal class PhoneCapability(
     pacing: AppPacing = AppPacing.Off,
     appPace: (String) -> PlacePace = { PlacePace.NORMAL },
     idle: IdleScroll? = null,
+    /** 权限层端口(短信、联系人、通话记录、通知的直接读写);没接上时不提供这一组工具。 */
+    val data: PhoneDataPort? = null,
 ) : Capability {
     val dwell = AppDwell(pacing, appPace, idle)
 

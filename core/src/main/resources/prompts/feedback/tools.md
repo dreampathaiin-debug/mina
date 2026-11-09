@@ -603,3 +603,9 @@ Earlier turns in this conversation: {{count}}. turn counts back from the most re
 
 ## history.not_recorded
 No detailed record of this turn is kept any more (only recent tasks keep one); what it ended with is in outcome.
+
+## phone_data.permission_needed
+Mina's access for this is not granted yet: ask the user to open system settings, Apps, Mina, Permissions and grant it (for notifications: Special app access, Notification access), then call again. Do not open any app screens meanwhile.
+
+## phone_data.unavailable
+This direct access is not wired up on this phone; do the task by opening the app and operating its screens instead.
