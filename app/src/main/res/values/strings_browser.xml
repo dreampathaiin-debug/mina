@@ -97,4 +97,6 @@
     <string name="browser_ask_web">Web</string>
     <string name="browser_ask_app">App</string>
     <string name="browser_ask_handling">The page is yours. When you’re done, tap “Done”.</string>
+    <string name="browser_login_for_mika">Sign in for Mika</string>
+    <string name="browser_login_for_mika_sub">" · opens the %1$s version Mika uses for tasks; once you sign in Mika can use it too"</string>
 </resources>
