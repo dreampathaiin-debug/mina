@@ -120,11 +120,11 @@ class StartPageModelTest {
         val now = at(2026, 10, 28, 11, 30)
         fun rel(t: Long) = StartPageModel.relativeTime(t, now, zone)
         assertEquals("Just now", rel(now - 20_000))
-        assertEquals("10 分钟前", rel(now - 10 * 60_000))
-        assertEquals("今天 09:05", rel(at(2026, 10, 28, 9, 5)))
-        assertEquals("今天 00:10", rel(at(2026, 10, 28, 0, 10)))
-        assertEquals("昨天", rel(at(2026, 10, 27, 23, 50)))
-        assertEquals("10 月 21 日", rel(at(2026, 10, 21, 8, 0)))
-        assertEquals("2025 年 12 月 31 日", rel(at(2025, 12, 31, 8, 0)))
+        assertEquals("10 minutes ago", rel(now - 10 * 60_000))
+        assertEquals("Today 09:05", rel(at(2026, 10, 28, 9, 5)))
+        assertEquals("Today 00:10", rel(at(2026, 10, 28, 0, 10)))
+        assertEquals("Yesterday", rel(at(2026, 10, 27, 23, 50)))
+        assertEquals("Oct 21", rel(at(2026, 10, 21, 8, 0)))
+        assertEquals("Dec 31, 2025", rel(at(2025, 12, 31, 8, 0)))
     }
 }
