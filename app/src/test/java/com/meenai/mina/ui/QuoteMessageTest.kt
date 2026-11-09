@@ -1,14 +1,14 @@
 package com.meenai.mina.ui
 
 import com.meenai.mina.core.agent.QuoteMessage
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
 /** 对话页上的引用:和附件一起时各归各,标题里不带引用;回答复制成纯文字。写进话里的样子见 core 的 QuoteMessageTest。 */
 class QuoteMessageTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val mina = QuoteMessage.Quote(QuoteMessage.From.Mina, "明天上午有小雨\n下午转晴")
 

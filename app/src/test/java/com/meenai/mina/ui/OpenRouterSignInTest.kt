@@ -3,7 +3,7 @@ package com.meenai.mina.ui
 import com.meenai.mina.core.model.ListedModel
 import com.meenai.mina.core.model.ModelListResult
 import com.meenai.mina.core.oauth.OpenRouterAuth
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.settings.AesGcmKeyCipher
 import com.meenai.mina.settings.ChatGptSignIns
 import com.meenai.mina.settings.ProviderConfig
@@ -37,7 +37,7 @@ import javax.crypto.KeyGenerator
  * 按 OpenRouter 预设存成服务商、选上主模型、打开详情;退出只删本机的 Key。换 Key 的接口是本地假服务。
  */
 class OpenRouterSignInTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @get:Rule val tmp = TemporaryFolder()
 
@@ -124,8 +124,8 @@ class OpenRouterSignInTest {
         val vm = ModelSetupViewModel(s, scope, io = Dispatchers.IO, browser = browser, signIns = ChatGptSignIns(scope))
         val ui = vm.signInAndWait(AccountProvider.OpenRouter)
         assertEquals(AccountProvider.OpenRouter, ui.accountSignIn.provider)
-        assertEquals("已取消登录。", ui.accountSignIn.failure)
-        assertEquals(listOf<String?>("已取消登录。"), browser.pages)
+        assertEquals("Sign-in was cancelled.", ui.accountSignIn.failure)
+        assertEquals(listOf<String?>("Sign-in was cancelled."), browser.pages)
         assertTrue(s.providers.value.isEmpty())
         assertEquals(0, server.requestCount)
     }

@@ -174,7 +174,7 @@ class HoldToTalkTest {
         pressed()
         now = 2_000
         hold.release()
-        hold.onEvent(SpeechEvent.Final("好"))
+        hold.onEvent(SpeechEvent.Final("OK"))
         hold.reset()
         assertEquals(HoldToTalk.State.Idle, hold.state.value)
     }
@@ -258,10 +258,10 @@ class HoldToTalkTest {
     fun earlyFinalAppliedWhenTimeRunsOut() {
         pressed()
         now = 2_000
-        hold.onEvent(SpeechEvent.Final("好"))
+        hold.onEvent(SpeechEvent.Final("OK"))
         now = 60_000
         hold.tick()
-        assertEquals(HoldToTalk.State.Done("好"), hold.state.value)
+        assertEquals(HoldToTalk.State.Done("OK"), hold.state.value)
     }
 
     @Test

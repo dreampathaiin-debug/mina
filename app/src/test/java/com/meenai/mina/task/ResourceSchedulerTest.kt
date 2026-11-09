@@ -98,7 +98,7 @@ class ResourceSchedulerTest {
         val a = async { r.awaitApp("com.mail", "a", 60_000, active, r.freeFor("com.mail", "a")) }
         runCurrent()
         assertEquals(AppWait.WouldDeadlock, r.awaitApp("com.chat", "b", 60_000, active, r.freeFor("com.chat", "b")))
-        assertEquals("没等:时间没走", 0L, currentTime)
+        assertEquals("没等:  时间没走", 0L, currentTime)
         // b 不等、做完收尾放掉邮件,a 就等到了
         r.releaseOwner("b")
         runCurrent()

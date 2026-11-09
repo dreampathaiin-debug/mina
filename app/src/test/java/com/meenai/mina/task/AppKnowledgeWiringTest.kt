@@ -1,6 +1,6 @@
 package com.meenai.mina.task
 
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.agent.FailKind
 import com.meenai.mina.core.agent.RunOutcome
 import com.meenai.mina.core.agent.TaskState
@@ -25,7 +25,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 class AppKnowledgeWiringTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @get:Rule val tmp = TemporaryFolder()
     private val knowledge = KnowledgeStore(KnowledgeStore.loadBundled())
@@ -58,7 +58,7 @@ class AppKnowledgeWiringTest {
         val learning = learning(files, TextModel(facts))
         val notes = learning.learn(aftermath(runEvents()))
         assertEquals(AppKnowledgeStage.Draft, files.all().single().stage)
-        assertEquals("Mina 记下了几条关于闲鱼的知识，等你确认", notes.skillNotes.single().text)
+        assertEquals("Mina noted a few facts about Goofish for you to review", notes.skillNotes.single().text)
         assertTrue(files.notes().isEmpty())
         files.approve(files.all().single().id)
         assertTrue(files.notes().getValue("xianyu").trial)
@@ -76,7 +76,7 @@ class AppKnowledgeWiringTest {
         files.approve(first.id)
         // 再来一次:对在用的那份起草修订
         val notes = learning(files, TextModel(more)).learn(aftermath(runEvents()))
-        assertEquals("Mina 修订了闲鱼的知识，等你确认", notes.skillNotes.single().text)
+        assertEquals("Mina revised its notes on Goofish for you to review", notes.skillNotes.single().text)
         val ui = SkillsUi.of(MapSkills(), files).appKnowledge.single { it.stage == AppKnowledgeStage.Draft }
         assertTrue(ui.revision)
         assertEquals(listOf("+ - 「我的」页里的「我发布的」列出自己挂出的商品。"), ui.changedLines)

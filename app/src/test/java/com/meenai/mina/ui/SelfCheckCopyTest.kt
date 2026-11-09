@@ -8,14 +8,14 @@ import com.meenai.mina.core.selfcheck.DeviceFacts
 import com.meenai.mina.core.selfcheck.SelfCheck
 import com.meenai.mina.core.selfcheck.SelfCheckReport
 import com.meenai.mina.core.selfcheck.SelfCheckState
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
 class SelfCheckCopyTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val jargon = listOf("shell", "Binder", "uid", "adb", "SDK", "ABI")
 

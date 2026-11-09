@@ -1,7 +1,7 @@
 package com.meenai.mina.ui
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.model.Capabilities
 import com.meenai.mina.core.model.ListedModel
 import com.meenai.mina.core.model.ModelRole
@@ -17,7 +17,7 @@ import org.junit.Test
 
 /** 模型页的文字:用途卡、服务商一行、删除提示,以及列表排序。 */
 class ModelsCopyTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val caps = Capabilities(toolCalls = true, vision = false, contextTokens = 64_000, reasoning = false)
     private val ds = Provider("p1", "DeepSeek", ProviderConfig.Kind.OpenAiCompat, "https://api.deepseek.com",

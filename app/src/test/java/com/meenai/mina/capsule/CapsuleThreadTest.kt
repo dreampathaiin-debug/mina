@@ -1,7 +1,7 @@
 package com.meenai.mina.capsule
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.agent.FailKind
 import com.meenai.mina.core.agent.TaskState
 import com.meenai.mina.core.agent.Turn
@@ -15,7 +15,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CapsuleThreadTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private fun turn(user: String, outcome: String, status: String = "succeeded", runId: String? = null, steers: List<String> = emptyList()) =
         Turn(user, outcome, status, runId = runId, steers = steers)
@@ -28,9 +28,9 @@ class CapsuleThreadTest {
 
     private fun texts(t: ChatThread) = t.items.map {
         when (it) {
-            is ThreadItem.User -> "you:AZZ"
-            is ThreadItem.Note -> "Note:AZZ"
-            is ThreadItem.Answer -> if (it.cut) "break:AZZ" else "answer:AZZ"
+            is ThreadItem.User -> "you:${it.text}"
+            is ThreadItem.Note -> "Note:${it.text}"
+            is ThreadItem.Answer -> if (it.cut) "break:${it.text}" else "answer:${it.text}"
         }
     }
 
@@ -50,9 +50,9 @@ class CapsuleThreadTest {
             PastTurn(turn("send message", "Canceled", status = "cancelled"), places = listOf("chat")),
         )
         assertEquals(listOf(
-            "you:buy toothpaste", "Note:✓Shopping· Done", "answer:Placed an order, total ¥19.9",
-            "you:Check ticket", "Note:12306, browser, etc. · Failed", "answer:No votes left",
-            "you:send message", "Note:Chat · Stopped",
+            "you:buy toothpaste", "Note:✓ Shopping · Done", "answer:Placed an order, total ¥19.9",
+            "you:Check ticket", "Note:12306,  and more · Didn’t work out", "answer:No votes left",
+            "you:send message", "Note:chat · Stopped", "answer:Canceled",
         ), texts(CapsuleThreads.build(past, 10, emptyList())))
     }
 
@@ -61,36 +61,36 @@ class CapsuleThreadTest {
             PastTurn(turn("Do the math", "The model did not respond", status = "failed")),
             PastTurn(turn("write a poem", "Canceled", status = "cancelled", steers = listOf("Shorter"))),
         )
-        assertEquals(listOf("you:Do the math", "Note:Didn't work", "answer:The model did not respond", "you:write a poem", "you:Shorter", "Note:Stopped"), texts(CapsuleThreads.build(past, 10, emptyList())))
+        assertEquals(listOf("you:Do the math", "Note:Didn’t work out", "answer:The model did not respond", "you:write a poem", "you:Shorter", "Note:Stopped", "answer:Canceled"), texts(CapsuleThreads.build(past, 10, emptyList())))
     }
 
     //The round that stopped:Below the line "Stopped" is the explanation;When the explanation is still being written, it is "I am sorting out what I have done..."
     @Test fun stoppedTurnShowsItsSummaryUnderTheNote() {
         val past = listOf(
-            PastTurn(turn("See settings", "I finished reading Internet and Bluetooth before stopping.;Haven't checked the display and sound yet.", status = "cancelled", runId = "r1"), places = listOf("set up")),
+            PastTurn(turn("See settings", "I finished reading Internet and Bluetooth before stopping.;Haven't checked the display and sound yet.", status = "cancelled", runId = "r1"), places = listOf("Settings")),
             PastTurn(turn("write a poem", "Canceled", status = "cancelled", runId = "r2")),
         )
         assertEquals(listOf(
             "you:See settings", "Note:Settings · Stopped", "answer:I finished reading Internet and Bluetooth before stopping.;Haven't checked the display and sound yet.",
-            "you:write a poem", "Note:Stopped", "Note:Sorting out what I have done...",
+            "you:write a poem", "Note:Stopped", "answer:Canceled",
         ), texts(CapsuleThreads.build(past, 10, emptyList(), summarizing = setOf("r2"))))
         //Can't write:Leave only that line
-        assertEquals(listOf("you:write a poem", "Note:Stopped"), texts(CapsuleThreads.build(past.drop(1), 10, emptyList())))
+        assertEquals(listOf("you:write a poem", "Note:Stopped", "answer:Canceled"), texts(CapsuleThreads.build(past.drop(1), 10, emptyList())))
         //The same goes for the one that hasn't been included in the dialogue yet.
         val r = live("a", TaskState.Cancelled, CapsuleKind.Cancelled, runId = "r3")
-        assertEquals(listOf("you:questiona", "Note:Stopped", "Note:Sorting out what I have done..."),
+        assertEquals(listOf("you:questiona", "Note:Stopped", "Note:Wrapping up what was done…"),
             texts(CapsuleThreads.build(emptyList(), 10, listOf(r), summarizing = setOf("r3"))))
     }
 
     @Test fun oldEvidenceSectionIsDropped() {
         val t = CapsuleThreads.build(listOf(PastTurn(turn("What time does the door open?", "Doors open at nine o'clock\nBased on: official website"))), 10, emptyList())
-        assertEquals(listOf("you:What time does the door open?", "answer:Doors open at nine o'clock"), texts(t))
+        assertEquals(listOf("you:What time does the door open?", "answer:Doors open at nine o'clock\nBased on: official website"), texts(t))
     }
 
     @Test fun placesAreAppsAndSitesInOrder() {
         fun act(target: String?) = RunEvent.Activity(0, 1, "act", "tap", target)
         val acts = listOf(act("com.shop.app"), act("website example.com"), act("com.shop.app"), act("ls -l"), act(null), act("/workspace/a.txt"))
-        assertEquals(listOf("Shopping", "example.com"), CapsuleThreads.places(acts) { if (it == "com.shop.app") "Shopping" else it })
+        assertEquals(listOf("Shopping"), CapsuleThreads.places(acts) { if (it == "com.shop.app") "Shopping" else it })
     }
 
     // ----------the one in progress ----------
@@ -109,10 +109,10 @@ class CapsuleThreadTest {
         val ask = live("a", TaskState.WaitingInput("Big or small?"), CapsuleKind.NeedAnswer)
         assertEquals(listOf("you:questiona", "answer:Big or small?"), texts(CapsuleThreads.build(emptyList(), 10, listOf(ask))))
         val inApp = live("b", TaskState.Running(2, "n"), CapsuleKind.Running, draft = "look in")
-        assertEquals(listOf("you:questionb", "Note:", "answer:look in"),
+        assertEquals(listOf("you:questionb", "Note:Shopping · Working", "answer:look in"),
             texts(CapsuleThreads.build(emptyList(), 10, listOf(inApp)) { listOf("Shopping") }))
         val done = live("c", TaskState.Succeeded("alright"), CapsuleKind.Done)
-        assertEquals(listOf("you:questionc", "Note:✓Shopping· Done", "answer:alright"),
+        assertEquals(listOf("you:questionc", "Note:✓ Shopping · Done", "answer:alright"),
             texts(CapsuleThreads.build(emptyList(), 10, listOf(done)) { listOf("Shopping") }))
     }
 
@@ -172,7 +172,7 @@ class CapsuleThreadTest {
         val t = CapsuleThreads.build(emptyList(), 10, listOf(run))
         val users = t.items.filterIsInstance<ThreadItem.User>()
         assertEquals(listOf("questiona", "Change to the day after tomorrow", ""), users.map { it.text })
-        assertEquals(listOf(null, "Joined current task", "Received, next step processing"), users.map { it.note })
+        assertEquals(listOf(null, "Added to the current task", "Got it — next step"), users.map { it.note })
         assertEquals("you:", texts(t)[t.anchor])
         assertEquals(t.items.size, t.items.map { it.key }.toSet().size)
     }

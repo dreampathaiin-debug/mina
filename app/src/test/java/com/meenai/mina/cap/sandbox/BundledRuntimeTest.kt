@@ -1,7 +1,7 @@
 package com.meenai.mina.cap.sandbox
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.workspace.SandboxTree
 import com.meenai.mina.core.cap.sandbox.SANDBOX_PACKAGES
 import com.meenai.mina.core.cap.sandbox.SandboxStatus
@@ -20,7 +20,7 @@ import java.security.MessageDigest
 
 /**The built-in runtime environment in the warehouse is consistent with the generated constants, package lists, and build scripts.,And it can really be solved. The working directory for unit tests is app/. */
 class BundledRuntimeTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val asset = File("src/main/assets/${BundledRuntime.ASSET}")
     private val manifest = Json.parseToJsonElement(File("src/main/assets/runtime/packages.json").readText()).jsonObject

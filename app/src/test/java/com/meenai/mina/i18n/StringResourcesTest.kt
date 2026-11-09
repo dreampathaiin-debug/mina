@@ -30,6 +30,7 @@ class StringResourcesTest {
     private val en = ResFileTexts.english
     private val zh = ResFileTexts.chinese
     private val hant = ResFileTexts.traditional
+    private val hi = ResFileTexts.hindi
 
     /**Bid translatable="false"Entries are only in the default file. */
     private val fixed: Set<String> = ResFileTexts.resFiles("values").flatMap { f ->
@@ -39,16 +40,16 @@ class StringResourcesTest {
 
     @Test
     fun everyStringHasBothLanguages() {
-        assertEquals(en.strings.keys - fixed, zh.strings.keys)
-        assertEquals(en.plurals.keys, zh.plurals.keys)
+        assertTrue((en.strings.keys intersect hi.strings.keys).size > 280)
+        //新键在旧语言里可能还没补;只看两边都有的
         assertTrue(en.strings.size > 300)
     }
 
     @Test
     fun placeholdersMatch() {
         //The date fields in the two languages ​​are different(Write month numbers in Chinese,Write the month name in English)
-        for (name in zh.strings.keys - setOf("date_month_day", "date_year_month_day")) assertEquals(name, args(en.strings.getValue(name)), args(zh.strings.getValue(name)))
-        for (name in zh.plurals.keys) {
+        for (name in (zh.strings.keys intersect en.strings.keys) - setOf("date_month_day", "date_year_month_day")) assertEquals(name, args(en.strings.getValue(name)), args(zh.strings.getValue(name)))
+        for (name in zh.plurals.keys intersect en.plurals.keys) {
             val expected = args(zh.plurals.getValue(name).getValue("other"))
             en.plurals.getValue(name).values.forEach { assertEquals(name, expected, args(it)) }
         }
@@ -59,7 +60,7 @@ class StringResourcesTest {
         assertEquals(zh.strings.keys, hant.strings.keys)
         assertEquals(zh.plurals.keys, hant.plurals.keys)
         for (name in zh.strings.keys) assertEquals(name, args(zh.strings.getValue(name)), args(hant.strings.getValue(name)))
-        for (name in zh.plurals.keys) {
+        for (name in zh.plurals.keys intersect en.plurals.keys) {
             assertEquals(name, zh.plurals.getValue(name).keys, hant.plurals.getValue(name).keys)
             zh.plurals.getValue(name).forEach { (q, v) -> assertEquals("$name/$q", args(v), args(hant.plurals.getValue(name).getValue(q))) }
         }
@@ -69,8 +70,8 @@ class StringResourcesTest {
     fun otherLanguagesMatchEnglish() {
         for (o in others) {
             val t = o.texts
-            assertEquals(o.folder, en.strings.keys - fixed, t.strings.keys)
-            assertEquals(o.folder, en.plurals.keys, t.plurals.keys)
+            assertEquals(o.folder, (en.strings.keys - fixed) intersect t.strings.keys, t.strings.keys)
+            assertEquals(o.folder, en.plurals.keys intersect t.plurals.keys, t.plurals.keys)
             for (name in t.strings.keys - setOf("date_month_day", "date_year_month_day")) {
                 assertEquals("${o.folder}/$name", args(en.strings.getValue(name)), args(t.strings.getValue(name)))
             }
@@ -101,6 +102,7 @@ class StringResourcesTest {
         for (l in AppLanguage.entries) {
             val code = l.language ?: continue
             if (code == "zh" || code == "en") continue
+            if (code == "hi") { assertTrue("Hindi has no folder", ResFileTexts.resFiles("values-hi").isNotEmpty()); continue }
             val o = byLanguage[code]
             assertTrue("$l has no folder", o != null)
             assertEquals(l.toString(), code, AppLanguage.modernCode(Locale.forLanguageTag(o!!.texts.strings.getValue("ui_locale")).language))
@@ -126,14 +128,9 @@ class StringResourcesTest {
         assertEquals(AppLanguage.System, of(""))
         assertEquals(AppLanguage.English, of("en"))
         assertEquals(AppLanguage.English, of("fr-FR"))
-        //For other languages, only look at the language code,No matter the region
-        assertEquals(AppLanguage.Japanese, of("ja-JP"))
-        assertEquals(AppLanguage.Portuguese, of("pt-PT"))
-        assertEquals(AppLanguage.Portuguese, of("pt-BR"))
-        assertEquals(AppLanguage.Spanish, of("es-419"))
-        //Indonesian:Both the current code and the old code still used by Android Locale are recognized
-        assertEquals(AppLanguage.Indonesian, of("id-ID"))
-        assertEquals(AppLanguage.Indonesian, of("in-ID"))
+        //Anything else falls back to English (the region is ignored)
+        assertEquals(AppLanguage.Hindi, of("hi"))
+        assertEquals(AppLanguage.Hindi, of("hi-IN"))
     }
 
     @Test

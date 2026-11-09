@@ -1,7 +1,7 @@
 package com.meenai.mina.cap.sandbox
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.workspace.SandboxTree
 import com.meenai.mina.core.cap.sandbox.SandboxStatus
 import kotlinx.coroutines.runBlocking
@@ -13,7 +13,7 @@ import java.io.File
 import java.nio.file.Files
 
 class SkillsSyncTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val tmp: File = Files.createTempDirectory("skills-sync").toFile()
     private val dirs = SandboxDirs(File(tmp, "files/sandbox"), File(tmp, "cache"), File(tmp, "lib"), JVM_GATE, SandboxTree())
@@ -83,11 +83,11 @@ class SkillsSyncTest {
     }
 
     @Test fun cardLineForSandboxSteps() {
-        assertEquals("Processing file:python3 sum.py", com.meenai.mina.ui.StatusCopy.sandboxCommand("python3   sum.py", network = false))
-        assertEquals("Processing file:${"x".repeat(40)}… · Can be connected to the Internet", com.meenai.mina.ui.StatusCopy.sandboxCommand("x".repeat(50), network = true))
-        assertEquals("Running script", com.meenai.mina.ui.StatusCopy.sandboxScript(network = false))
+        assertEquals("Working on files: python3 sum.py", com.meenai.mina.ui.StatusCopy.sandboxCommand("python3   sum.py", network = false))
+        assertEquals("Working on files: ${"x".repeat(40)}… · online", com.meenai.mina.ui.StatusCopy.sandboxCommand("x".repeat(50), network = true))
+        assertEquals("Running a script", com.meenai.mina.ui.StatusCopy.sandboxScript(network = false))
         assertEquals("No. 3/10 pages", com.meenai.mina.ui.StatusCopy.sandboxProgress("No. 3/10 pages", network = false))
         //Zero-width characters and characters in the rewriting direction in the command do not appear on the card.
-        assertEquals("Processing file:rm a.txt", com.meenai.mina.ui.StatusCopy.sandboxCommand("rm \u202Ea\u200B.txt", network = false))
+        assertEquals("Working on files: rm a.txt", com.meenai.mina.ui.StatusCopy.sandboxCommand("rm \u202Ea\u200B.txt", network = false))
     }
 }

@@ -26,7 +26,7 @@ class SiteLooksTest {
     @Test
     fun initialIsFirstCharacterUppercased() {
         assertEquals("E", SiteNames.initial("example"))
-        assertEquals("purchase", SiteNames.initial("Shopping"))
+        assertEquals("S", SiteNames.initial("Shopping"))
         assertEquals("?", SiteNames.initial(" "))
     }
 
@@ -44,9 +44,9 @@ class SiteLooksTest {
     @Test
     fun pickPrefersDeclaredNameThenTitlePart() {
         assertEquals("Shopping" to SiteNames.RANK_DECLARED, SiteNames.pick("Shopping", "whatever -Others", false))
-        assertEquals("Shopping" to SiteNames.RANK_HOME_TITLE, SiteNames.pick(null, "Shopping -All the good stuff is here", true))
+        assertEquals("Shopping" to SiteNames.RANK_HOME_TITLE, SiteNames.pick(null, "Shopping - All the good stuff is here", true))
         assertEquals("Shopping" to SiteNames.RANK_DECLARED, SiteNames.pick("Shopping", "Log in -Shopping", false))
-        assertEquals("12306-railway" to SiteNames.RANK_HOME_TITLE, SiteNames.pick(null, "12306-railway", true))
+        assertEquals("12306-railwa" to SiteNames.RANK_HOME_TITLE, SiteNames.pick(null, "12306-railwa", true))
         assertNull(SiteNames.pick(null, "  ", true))
         assertEquals(SiteNames.MAX_LEN, SiteNames.pick("One, two, three, four, five, six, seven, eight, ninety-one, two, three, four, five", null, true)!!.first.length)
     }
@@ -54,10 +54,10 @@ class SiteLooksTest {
     @Test
     fun otherPagesTitlesDoNotNameTheSite() {
         //It is unclear which paragraph of the title of pages such as login and articles is the website name.:Unnamed
-        assertNull(SiteNames.pick(null, "Example -Unified login", false))
+        assertNull(SiteNames.pick(null, "Example - Unified login", false))
         assertNull(SiteNames.pick(" ", "Fresh mint toothpaste |Shopping", false))
         //Take the first paragraph of the same title on the homepage
-        assertEquals("Example" to SiteNames.RANK_HOME_TITLE, SiteNames.pick(null, "Example -Unified login", true))
+        assertEquals("Example" to SiteNames.RANK_HOME_TITLE, SiteNames.pick(null, "Example - Unified login", true))
     }
 
     @Test

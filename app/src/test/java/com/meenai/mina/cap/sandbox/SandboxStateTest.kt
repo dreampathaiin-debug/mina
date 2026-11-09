@@ -1,7 +1,7 @@
 package com.meenai.mina.cap.sandbox
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.workspace.SandboxTree
 import com.meenai.mina.core.cap.sandbox.SandboxStatus
 import org.junit.Assert.assertEquals
@@ -13,7 +13,7 @@ import java.io.File
 import java.nio.file.Files
 
 class SandboxStateTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val tmp: File = Files.createTempDirectory("sandbox-state").toFile()
     private val dirs = SandboxDirs(File(tmp, "files/sandbox"), File(tmp, "cache/proot-tmp"), File(tmp, "lib"), JVM_GATE, SandboxTree())

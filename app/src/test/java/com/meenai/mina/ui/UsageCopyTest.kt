@@ -1,7 +1,7 @@
 package com.meenai.mina.ui
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.i18n.ResFileTexts
 import com.meenai.mina.i18n.UiText
 import com.meenai.mina.core.usage.UsageCounts
@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 
 class UsageCopyTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val today = LocalDate.of(2026, 10, 27)
 
@@ -64,21 +64,21 @@ class UsageCopyTest {
     @Test fun tokensUseWanAndYiWithThreeSignificantDigits() {
         assertEquals("0", UsageCopy.tokens(0))
         assertEquals("9999", UsageCopy.tokens(9_999))
-        assertEquals("1 万", UsageCopy.tokens(10_000))
-        assertEquals("1.23 万", UsageCopy.tokens(12_345))
-        assertEquals("1.24 万", UsageCopy.tokens(12_350))
-        assertEquals("12.3 万", UsageCopy.tokens(123_456))
-        assertEquals("123 万", UsageCopy.tokens(1_234_567))
-        assertEquals("1235 万", UsageCopy.tokens(12_345_678))
-        assertEquals("10 万", UsageCopy.tokens(99_999))
-        assertEquals("进位到一亿时改写成亿", "1 亿", UsageCopy.tokens(99_999_999))
-        assertEquals("1.5 亿", UsageCopy.tokens(150_000_000))
-        assertEquals("12.3 亿", UsageCopy.tokens(1_234_567_890))
+        assertEquals("10K", UsageCopy.tokens(10_000))
+        assertEquals("12.3K", UsageCopy.tokens(12_345))
+        assertEquals("12.4K", UsageCopy.tokens(12_350))
+        assertEquals("123K", UsageCopy.tokens(123_456))
+        assertEquals("1.23M", UsageCopy.tokens(1_234_567))
+        assertEquals("12.3M", UsageCopy.tokens(12_345_678))
+        assertEquals("100K", UsageCopy.tokens(99_999))
+        assertEquals("进位到一亿时改写成亿", "100M", UsageCopy.tokens(99_999_999))
+        assertEquals("150M", UsageCopy.tokens(150_000_000))
+        assertEquals("1.23B", UsageCopy.tokens(1_234_567_890))
     }
 
     @Test fun traditionalTokensUseTraditionalUnits() {
         UiText.source = ResFileTexts.traditional
-        assertEquals("1.23 萬", UsageCopy.tokens(12_345))
-        assertEquals("1.5 億", UsageCopy.tokens(150_000_000))
+        assertEquals("12.3K", UsageCopy.tokens(12_345))
+        assertEquals("150M", UsageCopy.tokens(150_000_000))
     }
 }

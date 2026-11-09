@@ -2,7 +2,7 @@ package com.meenai.mina.cap.phone.setup
 
 import android.app.NotificationManager
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.shell.BuiltinShellFailure
 import com.meenai.mina.core.shell.BuiltinShellStatus
 import com.meenai.mina.core.shell.PairingChannelHealth
@@ -15,7 +15,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PairingNoticeTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @Test
     fun codeEntryAppearsOnlyOnceThePairingWindowIsFound() {
@@ -34,17 +34,17 @@ class PairingNoticeTest {
     @Test
     fun pairingFailuresKeepTheInputWithHowToRetry() {
         assertEquals(
-            PairingNotice.EnterCode(5, "The pairing code is incorrect or expired: Click "Use pairing code to pair device" in the pairing window to get a new code and fill it in again."),
+            PairingNotice.EnterCode(5, "Wrong or expired code: in the pairing window, tap “Pair device with pairing code” again to get a new code, then enter it again"),
             PairingNotice.of(BuiltinShellStatus.Failed(BuiltinShellFailure.WrongCode), PairingDiscovery.Found(5)),
         )
         //The window is closed(Pairing window not found)Also keep the input box,Say the same thing
         val closed = PairingNotice.of(BuiltinShellStatus.Failed(BuiltinShellFailure.PairingWindowClosed), PairingDiscovery.Searching)
         closed as PairingNotice.EnterCode
         assertNull(closed.port)
-        assertTrue(closed.error!!.endsWith("Get a new code and fill it in again"))
+        assertTrue(closed.error!!.endsWith("then enter it again"))
         //If pairing fails, please ask the user to reply Mina
         assertEquals(
-            PairingNotice.Problem("Connected,But not ready"),
+            PairingNotice.Problem("Connected, but couldn’t get ready"),
             PairingNotice.of(BuiltinShellStatus.Failed(BuiltinShellFailure.HelperStartFailed), PairingDiscovery.Found(5)),
         )
     }
@@ -54,11 +54,11 @@ class PairingNoticeTest {
     fun revokedPairingGetsTheInputOnceThePairingWindowIsFound() {
         val revoked = BuiltinShellStatus.Failed(BuiltinShellFailure.AuthorizationRevoked)
         assertEquals(PairingNotice.EnterCode(37001), PairingNotice.of(revoked, PairingDiscovery.Found(37001)))
-        assertEquals(PairingNotice.Problem("Pairing failed"), PairingNotice.of(revoked, PairingDiscovery.Searching))
-        assertEquals(PairingNotice.Problem("Pairing failed"), PairingNotice.of(revoked, PairingDiscovery.Idle))
+        assertEquals(PairingNotice.Problem("Pairing expired"), PairingNotice.of(revoked, PairingDiscovery.Searching))
+        assertEquals(PairingNotice.Problem("Pairing expired"), PairingNotice.of(revoked, PairingDiscovery.Idle))
         //The assistant started with the USB boot command stops and you need to run the command again.,There is no input box when the matching window is found.
         assertEquals(
-            PairingNotice.Problem("Mobile assistant has stopped"),
+            PairingNotice.Problem("Phone helper stopped"),
             PairingNotice.of(BuiltinShellStatus.Failed(BuiltinShellFailure.UsbHelperStopped), PairingDiscovery.Found(37001)),
         )
     }
@@ -104,7 +104,7 @@ class PairingNoticeTest {
         assertEquals(PairingNotice.Working to false, PairingNotice.follow(revoked, PairingDiscovery.Searching, repairing = false, submitted = true))
         assertEquals(PairingNotice.Working to false, PairingNotice.follow(BuiltinShellStatus.Running, PairingDiscovery.Searching, repairing = false, submitted = true))
         //If you do not fill in the code, it will be calculated according to the status as usual.
-        assertEquals(PairingNotice.Problem("Pairing failed") to false, PairingNotice.follow(revoked, PairingDiscovery.Searching, repairing = false, submitted = false))
+        assertEquals(PairingNotice.Problem("Pairing expired") to false, PairingNotice.follow(revoked, PairingDiscovery.Searching, repairing = false, submitted = false))
     }
 
     @Test

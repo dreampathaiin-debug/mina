@@ -1,6 +1,6 @@
 package com.meenai.mina.ui
 
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.model.Capabilities
 import com.meenai.mina.core.model.ChatModel
 import com.meenai.mina.core.model.ListFailure
@@ -40,7 +40,7 @@ import javax.crypto.KeyGenerator
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ModelSetupViewModelTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @get:Rule val tmp = TemporaryFolder()
 
@@ -58,7 +58,7 @@ class ModelSetupViewModelTest {
         modelLister = { kind, url, apiKey, _ -> listCalls += Triple(kind, url, apiKey); listing[url] ?: ModelListResult.Ok(emptyList()) },
     )
 
-    /** 建过的模型(模型名、请求头等);「测试并保存」的试调用回什么由 [reply] 定,默认调用试用的工具。 */
+    /** 建过的模型(模型名、请求头等);“测试并保存”的试调用回什么由 [reply] 定,默认调用试用的工具。 */
     private val built = mutableListOf<Pair<String, ClientSetup>>()
     private var reply: suspend () -> ModelReply = { ModelReply(listOf(Part.ToolCall("c1", "get_time", "{}")), StopReason.ToolUse, null) }
     private val probes = mutableListOf<Triple<String, List<Message>, List<ToolSpec>>>()
@@ -157,8 +157,7 @@ class ModelSetupViewModelTest {
         assertEquals(ListState.Idle, s.form.test)
         assertEquals(listOf("deepseek-chat", "deepseek-reasoner"), built.map { it.first })
         assertEquals(
-            "服务商已连上，但「deepseek-chat」没测试通过：它不会调用工具，Mina 干活需要会调用工具的模型。从列表里选一个你开通了的模型。\n" +
-                "试了 deepseek-chat、deepseek-reasoner，都没测试通过。",
+            "The provider is connected, but “deepseek-chat” didn’t pass the test: it doesn’t call tools, and Mina needs a model that can call tools. Pick a model from the list that your account has activated.\nTried deepseek-chat, deepseek-reasoner; none of them passed the test.",
             s.probeNote,
         )
         assertEquals(p.id, s.pickToProbe)
@@ -192,7 +191,7 @@ class ModelSetupViewModelTest {
         assertFalse(s.showForm)
         assertNull(s.pickToProbe)
         assertEquals(
-            "先试的 kimi-k2-preview 没测试通过：这个账号没开通或没权限用这个模型（服务商说：The product is not activated.）。主模型用了测试通过的「moonshot-v1-8k」。",
+            "kimi-k2-preview, tried first, didn’t pass the test: this account hasn’t activated this model or has no access to it (the provider says: The product is not activated.). The main model is “moonshot-v1-8k”, which passed.",
             s.probeNote,
         )
     }
@@ -221,8 +220,7 @@ class ModelSetupViewModelTest {
         assertFalse(s.showForm)
         assertNull(s.pickToProbe)
         assertEquals(
-            "先试的 meituan/longcat-flash-lite 没测试通过：服务端出错（HTTP 502）。" +
-                "主模型用了测试通过的「deepseek/deepseek-v4.1-flash」。",
+            "meituan/longcat-flash-lite, tried first, didn’t pass the test: the server returned an error (HTTP 502). The main model is “deepseek/deepseek-v4.1-flash”, which passed.",
             s.probeNote,
         )
     }
@@ -276,7 +274,7 @@ class ModelSetupViewModelTest {
             ListedModel("claude-sonnet-5-5", protocols = listOf(ModelProtocol.Messages)),
             ListedModel("claude-sonnet-5", protocols = listOf(ModelProtocol.Messages)),
         ))
-        reply = { throw AssertionError("不该试调用:这些模型不走 OpenAI 兼容") }
+        reply = { throw AssertionError("不该试调用: 这些模型不走 OpenAI 兼容") }
         val store = store()
         val vm = vm(store)
         vm.selectPreset(ProviderPresets.custom.label); vm.setBaseUrl(url); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
@@ -285,11 +283,10 @@ class ModelSetupViewModelTest {
         val s = vm.state.value
         assertFalse(s.showForm)
         // 一个都没通过:服务商照旧存下、说清原因,并请用户自己从列表里选(可能要换个接口类型)。
-        // 这两个模型一次都没试,所以不能出现「试了 X、Y」那一行。
+        // 这两个模型一次都没试,所以不能出现“试了 X、Y”那一行。
         assertEquals(p.id, s.pickToProbe)
         assertEquals(
-            "服务商已连上，但「claude-sonnet-5-5」没测试通过：它不走你选的接口类型，请求到不了它。" +
-                "从列表里选一个你开通了的模型。",
+            "The provider is connected, but “claude-sonnet-5-5” didn’t pass the test: it isn’t served over the interface type you picked, so the request never reaches it. Pick a model from the list that your account has activated.",
             s.probeNote,
         )
     }
@@ -301,7 +298,7 @@ class ModelSetupViewModelTest {
     @Test fun endpointMismatchOnTheFirstCandidateFallsBackToTheNext() = runTest {
         val url = "https://relay.example.com/provider/v1"
         listing[url] = ModelListResult.Ok(listOf(ListedModel("vendor/shape-a"), ListedModel("vendor/shape-b")))
-        val said = "Model 'vendor/shape-a' must be called via /provider/v1/messages."
+        val said = "vendor/shape-a"
         reply = {
             val m = built.last().first
             if (m == "vendor/shape-a") {
@@ -315,8 +312,7 @@ class ModelSetupViewModelTest {
         assertEquals(listOf("vendor/shape-a", "vendor/shape-b"), built.map { it.first })
         assertEquals("vendor/shape-b", store.configFor(ModelRole.Main)?.model)
         assertEquals(
-            "先试的 vendor/shape-a 没测试通过：这个账号没开通或没权限用这个模型（服务商说：Model 'vendor/shape-a' must be called via /provider/v1/messages.）。" +
-                "主模型用了测试通过的「vendor/shape-b」。",
+            "vendor/shape-a, tried first, didn’t pass the test: this account hasn’t activated this model or has no access to it (the provider says: vendor/shape-a). The main model is “vendor/shape-b”, which passed.",
             vm.state.value.probeNote,
         )
     }
@@ -342,7 +338,7 @@ class ModelSetupViewModelTest {
     }
 
     /**
-     * Key 的问题不能被当成「这个模型走不了这个接口」:401,或 403 说的是 Key 不能用这个接口,
+     * Key 的问题不能被当成“这个模型走不了这个接口”:401,或 403 说的是 Key 不能用这个接口,
      * 第一个候选就挡住整次保存,给出真实原因,什么都不存。
      */
     @Test fun keyErrorsThatMentionTheEndpointStillBlockTheSave() = runTest {
@@ -357,9 +353,9 @@ class ModelSetupViewModelTest {
             val store = store()
             val vm = vm(store)
             vm.selectPreset(ProviderPresets.custom.label); vm.setBaseUrl(url); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
-            assertEquals("HTTP $status:只试第一个", listOf("vendor/a"), built.map { it.first })
+            assertEquals("HTTP $status: 只试第一个", listOf("vendor/a"), built.map { it.first })
             val failed = vm.state.value.form.test as ListState.Failed
-            assertTrue(failed.message, failed.message.contains("API Key 无效"))
+            assertTrue(failed.message, failed.message.contains("The API key is invalid"))
             assertTrue(store.providers.value.isEmpty())
             assertNull(vm.state.value.pickToProbe)
         }
@@ -394,7 +390,7 @@ class ModelSetupViewModelTest {
         vm.selectPreset(ProviderPresets.custom.label); vm.setBaseUrl(url); vm.setApiKey("sk"); vm.testAndSave(); runCurrent()
         assertEquals(listOf("a-model", "b-model"), built.map { it.first })
         val failed = vm.state.value.form.test as ListState.Failed
-        assertTrue(failed.message, failed.message.contains("API Key 无效"))
+        assertTrue(failed.message, failed.message.contains("The API key is invalid"))
         assertTrue(store.providers.value.isEmpty())
         assertTrue(store.list().isEmpty())
     }
@@ -417,8 +413,8 @@ class ModelSetupViewModelTest {
         assertFalse(s.showForm)
         assertEquals(ListState.Idle, s.form.test)
         assertEquals(
-            "服务商已连上，但「moonshot-v1-8k」没测试通过：这个账号没开通或没权限用这个模型（服务商说：The product is not activated.）。从列表里选一个你开通了的模型。\n" +
-                "试了 moonshot-v1-8k、moonshot-v1-32k、moonshot-v1-128k，都没开通。",
+            """The provider is connected, but “moonshot-v1-8k” didn’t pass the test: this account hasn’t activated this model or has no access to it (the provider says: The product is not activated.). Pick a model from the list that your account has activated.
+Tried moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k; none of them is activated.""",
             s.probeNote,
         )
         assertEquals(p.id, s.pickToProbe)
@@ -426,7 +422,7 @@ class ModelSetupViewModelTest {
         var picked = 0
         vm.pickManual(ModelRole.Main, p.id, "antdigital/Ling-3.1-flash") { picked++ }; runCurrent()
         assertEquals(
-            ListState.Failed("这个账号没开通「antdigital/Ling-3.1-flash」或没权限用（服务商说：The product is not activated.）。换一个模型，或到服务商后台开通。"),
+            ListState.Failed("This account hasn’t activated “antdigital/Ling-3.1-flash” or has no access to it (the provider says: The product is not activated.). Pick another model, or activate it in the provider’s console."),
             vm.state.value.manualPick[p.id],
         )
         assertEquals(0, picked)
@@ -530,7 +526,7 @@ class ModelSetupViewModelTest {
         vm.testAndSave(); runCurrent()
         vm.setModel("gemini"); vm.testAndSave(); runCurrent()
         assertEquals(
-            ListState.Failed("列不出模型，用「gemini」试调用也说找不到：地址或接口类型可能填错了，也可能没有这个模型（模型名例如 gemini-flash-latest）。"),
+            ListState.Failed("No models could be listed, and a test call with “gemini” wasn’t found either: the address or interface type is probably wrong, or there is no such model (model names look like: e.g. gemini-flash-latest)."),
             vm.state.value.form.test,
         )
         assertTrue(store.providers.value.isEmpty())
@@ -550,7 +546,7 @@ class ModelSetupViewModelTest {
         vm.selectPreset(kimiPreset.label); vm.setApiKey("k"); vm.testAndSave(); runCurrent()
         assertTrue(vm.state.value.form.noList)
         vm.setModel("moonshot-pro"); vm.testAndSave(); runCurrent()
-        assertEquals(ListState.Failed("模型「moonshot-pro」不存在。要填服务商文档里完整的模型 ID（例如 deepseek-chat）。"), vm.state.value.form.test)
+        assertEquals(ListState.Failed("Model “moonshot-pro” doesn’t exist. Enter the full model ID from the provider’s docs (e.g. deepseek-chat)."), vm.state.value.form.test)
         assertTrue(store.providers.value.isEmpty())
     }
 
@@ -566,7 +562,7 @@ class ModelSetupViewModelTest {
         assertEquals("Gemini", f.suggestedPreset?.label)
         assertTrue(f.presetKindMismatch)
         assertEquals(
-            "这是「Gemini」的官方地址，用它的预设更省事：地址和接口类型都已填好。接口类型也对不上：「Gemini」用的是 Gemini 接口，这里选的是 OpenAI 兼容。",
+            "This is Gemini’s official address. Its preset fills in the address and interface type for you. The interface type doesn’t match either: Gemini uses the Gemini interface, but OpenAI-compatible is selected.",
             ModelSetupCopy.presetSuggestion(f),
         )
         assertEquals(ProviderConfig.Kind.Gemini, f.exampleKind)
@@ -596,13 +592,13 @@ class ModelSetupViewModelTest {
         vm.pickManual(ModelRole.Main, p.id, "gemini") { picked++ }
         assertEquals(ListState.Running, vm.state.value.manualPick[p.id])
         runCurrent()
-        assertEquals(ListState.Failed("模型「gemini」不存在。要填服务商文档里完整的模型 ID（例如 deepseek-chat）。"), vm.state.value.manualPick[p.id])
+        assertEquals(ListState.Failed("Model “gemini” doesn’t exist. Enter the full model ID from the provider’s docs (e.g. deepseek-chat)."), vm.state.value.manualPick[p.id])
         assertEquals(0, picked)
         assertNull(store.roles.value.main)
         // 只回话不调用工具的,当不了主模型
         reply = { ModelReply(listOf(Part.Text("noon")), StopReason.EndTurn, null) }
         vm.pickManual(ModelRole.Main, p.id, "chatty") { picked++ }; runCurrent()
-        assertEquals(ListState.Failed("chatty 没有调用工具，Mina 干活需要会调用工具的模型，换一个当主模型。"), vm.state.value.manualPick[p.id])
+        assertEquals(ListState.Failed("chatty didn’t call the tool. Mina needs a model that can call tools to get things done; pick another main model."), vm.state.value.manualPick[p.id])
         assertNull(store.roles.value.main)
         reply = { ModelReply(listOf(Part.ToolCall("c1", "get_time", "{}")), StopReason.ToolUse, null) }
         vm.pickManual(ModelRole.Main, p.id, " qwen3 ") { picked++ }; runCurrent()
@@ -612,7 +608,7 @@ class ModelSetupViewModelTest {
         assertEquals(setOf("qwen3"), store.provider(p.id)?.verifiedModels)
     }
 
-    /** 旧版本存下的不提供列表的服务商(手填的模型从没试过):提醒,「重新测试」通了提醒消失、记下;不通说原因。 */
+    /** 旧版本存下的不提供列表的服务商(手填的模型从没试过):提醒,“重新测试”通了提醒消失、记下;不通说原因。 */
     @Test fun unverifiedManualModelsWarnUntilRetested() = runTest {
         val store = store()
         val p = store.connect("generativelanguage.googleapis.com", ProviderConfig.Kind.OpenAiCompat, "https://generativelanguage.googleapis.com", "k", emptyList())
@@ -623,7 +619,7 @@ class ModelSetupViewModelTest {
         reply = { throw ModelError.ModelNotFound("gemini") }
         vm.retest(p.id); runCurrent()
         assertEquals(
-            ListState.Failed("模型「gemini」不存在。要填服务商文档里完整的模型 ID（例如 gemini-flash-latest）。"),
+            ListState.Failed("Model “gemini” doesn’t exist. Enter the full model ID from the provider’s docs (e.g. gemini-flash-latest)."),
             vm.state.value.retest[p.id],
         )
         assertEquals(listOf("gemini"), vm.state.value.unverified(vm.state.value.providers.single()))
@@ -648,7 +644,7 @@ class ModelSetupViewModelTest {
         vm.setBaseUrl("https://models.example.com/v1")
         assertNull(vm.state.value.form.unencryptedWarning)
         vm.setBaseUrl("http://models.example.com/v1")
-        assertEquals("这个地址不加密，API Key 和对话内容可能被同一网络里的人看到。", vm.state.value.form.unencryptedWarning)
+        assertEquals("This address isn’t encrypted; your API key and chats could be seen by others on the network.", vm.state.value.form.unencryptedWarning)
         vm.setApiKey("k")
         assertTrue(vm.state.value.form.canTest)
     }
@@ -720,7 +716,7 @@ class ModelSetupViewModelTest {
     @Test fun nextNeedsAMainModel() = runTest {
         val store = store()
         val vm = vm(store)
-        vm.selectPreset("自定义")
+        vm.selectPreset("Custom")
         vm.setBaseUrl("http://192.168.1.5:8000/v1")
         assertTrue("自定义的 OpenAI 兼容接口可以不填 Key", vm.state.value.form.canTest)
         listing["http://192.168.1.5:8000/v1"] = ModelListResult.Failed(ListFailure.NotSupported)
@@ -786,9 +782,9 @@ class ModelSetupViewModelTest {
             listOf(ListedModel("a"), ListedModel("b", toolCalls = true, contextTokens = 64_000), ListedModel("c", toolCalls = false)),
             Capabilities(true, false, 64_000, false),
         )
-        assertEquals(listOf("工具调用 · 未确认" to false), ModelSetupCopy.tags(o[0]))
-        assertEquals(listOf("工具调用" to true, "64K" to false), ModelSetupCopy.tags(o[1]))
-        assertEquals(listOf("不支持工具调用" to false), ModelSetupCopy.tags(o[2]))
+        assertEquals(listOf("Tool calling · unconfirmed" to false), ModelSetupCopy.tags(o[0]))
+        assertEquals(listOf("Tool calling" to true, "64K" to false), ModelSetupCopy.tags(o[1]))
+        assertEquals(listOf("No tool calling" to false), ModelSetupCopy.tags(o[2]))
     }
 
     /** 自定义服务商可以起名字(去掉首尾空白);不填用地址的主机名。同一个地址起不同的名字是两家。 */
@@ -894,12 +890,12 @@ class ModelSetupViewModelTest {
         val p = store.providers.value.single()
         assertEquals(emptySet<String>(), p.typedModels)
         assertEquals("deepseek-reasoner", store.configFor(ModelRole.Main)?.model)
-        // 收起「手动填写」就不用填的那个
+        // 收起“手动填写”就不用填的那个
         vm.openForm(); vm.setApiKey("sk"); vm.setManual(true); vm.setModel("x"); vm.setManual(false)
         assertEquals("", vm.state.value.form.typedModel)
     }
 
-    /** 选择页里有列表的那家也能手填;通了记为手填,刷新列表后还在,标「手填」。 */
+    /** 选择页里有列表的那家也能手填;通了记为手填,刷新列表后还在,标“手填”。 */
     @Test fun pickerAllowsTypingAModelForAListedProvider() = runTest {
         val store = store()
         val p = store.connect("DeepSeek", ProviderConfig.Kind.OpenAiCompat, deepseekUrl, "sk", deepseek.models)
@@ -920,7 +916,7 @@ class ModelSetupViewModelTest {
 
     // ---------- 不测试,直接保存 ----------
 
-    /** 一次网络都不打:不列模型、不试调用,只存下地址、Key 和「没测过」这件事。 */
+    /** 一次网络都不打:不列模型、不试调用,只存下地址、Key 和“没测过”这件事。 */
     @Test fun saveWithoutTestStoresProviderWithoutListingOrProbe() = runTest {
         val store = store()
         val vm = vm(store)

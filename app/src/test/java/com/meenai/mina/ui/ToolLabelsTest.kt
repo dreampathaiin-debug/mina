@@ -1,7 +1,7 @@
 package com.meenai.mina.ui
 
 import com.meenai.mina.core.assembly.knownTools
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.i18n.ResFileTexts
 import com.meenai.mina.i18n.UiText
 import org.junit.Assert.assertEquals
@@ -10,7 +10,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class ToolLabelsTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     /** 每个声明了 label 的工具都有界面文字,中文和声明一字不差;英文另有一份。 */
     @Test

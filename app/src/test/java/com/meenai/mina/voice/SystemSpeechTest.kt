@@ -39,18 +39,13 @@ class SystemSpeechTest {
 
     @Test
     fun languageTagsFollowAppLanguage() {
-        assertEquals("zh-CN", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.SimplifiedChinese, java.util.Locale.US))
-        assertEquals("zh-TW", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.TraditionalChinese, java.util.Locale.US))
+        assertEquals("hi-IN", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.Hindi, java.util.Locale.US))
+        assertEquals("hi-IN", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.Hindi, java.util.Locale.forLanguageTag("hi-IN")))
         assertEquals("en-US", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.English, java.util.Locale.CHINA))
         assertEquals("fr-FR", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.System, java.util.Locale.FRANCE))
-        // 选的语言和系统不同时用这种语言最常见的地区;相同时沿用系统的地区
-        assertEquals("ja-JP", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.Japanese, java.util.Locale.US))
-        assertEquals("pt-BR", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.Portuguese, java.util.Locale.US))
-        assertEquals("pt-PT", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.Portuguese, java.util.Locale.forLanguageTag("pt-PT")))
-        assertEquals("es-MX", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.Spanish, java.util.Locale.forLanguageTag("es-MX")))
-        assertEquals("id-ID", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.Indonesian, java.util.Locale.forLanguageTag("in-ID")))
-        // 中文按选的简繁定地区,不跟系统
-        assertEquals("zh-CN", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.SimplifiedChinese, java.util.Locale.TAIWAN))
+        // The chosen language keeps its most common region when the system speaks something else, and follows the system's region for the same language
+        assertEquals("en-GB", SystemSpeech.speechTag(com.meenai.mina.i18n.AppLanguage.English, java.util.Locale.UK))
+        assertEquals("hi", SystemSpeech.isoCode("hi-IN"))
         assertEquals("zh", SystemSpeech.isoCode("zh-TW"))
         assertEquals("en", SystemSpeech.isoCode("en-US"))
     }

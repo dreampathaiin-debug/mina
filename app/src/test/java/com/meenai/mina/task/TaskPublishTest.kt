@@ -16,7 +16,7 @@ class TaskPublishTest {
         assertFalse(TaskService.loopMayPublish(TaskState.Failed("x", FailKind.GaveUp)))
         assertFalse(TaskService.loopMayPublish(TaskState.Cancelled))
         assertFalse(TaskService.loopMayPublish(TaskState.Idle))
-        assertTrue(TaskService.loopMayPublish(TaskState.Running(1, "看屏幕", "phone_observe")))
+        assertTrue(TaskService.loopMayPublish(TaskState.Running(1, "Look at screen", "phone_observe")))
         assertTrue(TaskService.loopMayPublish(TaskState.WaitingInput("哪个?", null)))
     }
 }

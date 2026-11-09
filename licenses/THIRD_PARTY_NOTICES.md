@@ -73,7 +73,7 @@ This product includes software developed at
 The Apache Software Foundation (https://www.apache.org/).
 ```
 
-## Kotlin 标准库
+## Kotlin standard library
 
 - Project: https://kotlinlang.org/
 - Artifacts: `org.jetbrains.kotlin:kotlin-stdlib:2.1.20`、`kotlin-stdlib-common:2.1.20`、`kotlin-stdlib-jdk7:1.9.10`、
@@ -123,7 +123,7 @@ The Apache Software Foundation (https://www.apache.org/).
 - License: Apache-2.0(依据各自 POM)
 - Usage: OkHttp 的依赖。
 
-## AndroidX(含 Jetpack Compose)
+## AndroidX (including Jetpack Compose)
 
 - Project: https://developer.android.com/jetpack/androidx
 - License: Apache-2.0(依据各自 POM;`androidx.compose:compose-bom:2024.12.01` 只是版本清单,不含代码)
@@ -190,7 +190,7 @@ The Apache Software Foundation (https://www.apache.org/).
   GPL/LGPL/MPL 软件包的对应源码(Alpine 的构建配方与上游源码)随每个版本放进 `mina-<版本>-gpl-sources.tar.gz`,
   做法见 `tools/sandbox/README.md`。
 
-## Guava ListenableFuture(由 AndroidX 库引入)
+## Guava ListenableFuture (pulled in by AndroidX)
 
 - Project: https://github.com/google/guava
 - Artifact: `com.google.guava:listenablefuture:1.0` — Apache-2.0(依 Maven POM)

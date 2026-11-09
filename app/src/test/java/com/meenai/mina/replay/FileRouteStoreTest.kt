@@ -50,8 +50,8 @@ class FileRouteStoreTest {
 
     @Test fun putReplacingKeepsSuccessesAndDropsOld() {
         val store = FileRouteStore(tmp.newFolder("routes"))
-        store.put(route("old", "com.a", 1).copy(template = "打开A", successes = 3))
-        store.putReplacing(route("new", "com.b", 2).copy(template = "打开A"))
+        store.put(route("old", "com.a", 1).copy(template = "Open A", successes = 3))
+        store.putReplacing(route("new", "com.b", 2).copy(template = "Open A"))
         val r = store.all().single()
         assertEquals("new", r.id); assertEquals(3, r.successes)
     }

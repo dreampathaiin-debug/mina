@@ -1,7 +1,7 @@
 package com.meenai.mina.ui
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.shell.AutoOnBlock
 import com.meenai.mina.core.shell.HelperRestart
 import com.meenai.mina.core.shell.RecoveryCapability
@@ -12,7 +12,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class RecoveryCopyTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @Test
     fun pendingNoteOnlyForDefaultOnesNotYetApplied() {

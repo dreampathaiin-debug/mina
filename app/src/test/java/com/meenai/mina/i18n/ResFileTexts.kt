@@ -59,6 +59,7 @@ class ResFileTexts(folder: String, private val locale: Locale) : UiTexts {
 
     companion object {
         val chinese by lazy { ResFileTexts("values-zh", Locale.SIMPLIFIED_CHINESE) }
+        val hindi by lazy { ResFileTexts("values-hi", Locale.forLanguageTag("hi")) }
         val traditional by lazy { ResFileTexts("values-b+zh+Hant", Locale.TRADITIONAL_CHINESE) }
         val english: ResFileTexts by lazy { ResFileTexts("values", Locale.ENGLISH) }
 

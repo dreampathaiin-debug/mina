@@ -25,7 +25,7 @@ class LicensesTest {
         assertEquals("GPL-2.0-or-later", byName.getValue("PRoot").license)
         assertEquals("LGPL-3.0-or-later", byName.getValue("talloc").license)
         assertEquals("Apache-2.0", byName.getValue("Apache Commons Compress").license)
-        listOf("OkHttp", "Okio", "kotlinx.coroutines", "kotlinx.serialization", "Kotlin 标准库", "AndroidX(含 Jetpack Compose)")
+        listOf("OkHttp", "Okio", "kotlinx.coroutines", "kotlinx.serialization", "Kotlin standard library", "AndroidX (including Jetpack Compose)")
             .forEach { assertEquals(it, "Apache-2.0", byName.getValue(it).license) }
         assertTrue(Licenses.GPL_SOURCE_OFFER.contains("gpl-sources.tar.gz"))
         assertTrue(Licenses.GPL_SOURCE_OFFER.contains("PRoot") && Licenses.GPL_SOURCE_OFFER.contains("talloc"))
@@ -40,6 +40,6 @@ class LicensesTest {
         val entries = Licenses.runtimePackages(manifest.readText())
         assertTrue(entries.size > 40)
         listOf("busybox", "musl", "python3", "nodejs", "py3-pillow", "py3-pypdf").forEach { n -> assertTrue(n, entries.any { it.name == n }) }
-        entries.forEach { assertTrue(it.name, it.license.isNotBlank() && it.note.startsWith("版本 ")) }
+        entries.forEach { assertTrue(it.name, it.license.isNotBlank() && it.note.startsWith("Version ")) }
     }
 }

@@ -1,7 +1,7 @@
 package com.meenai.mina.ui
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.shell.BuiltinShellFailure
 import com.meenai.mina.core.shell.BuiltinShellFix
 import com.meenai.mina.core.shell.BuiltinShellStatus
@@ -16,7 +16,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PhoneSetupCopyTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     /** 给用户看的字里不出现这些技术说法(系统设置里本来就有的选项名除外,见下)。 */
     private val jargon = listOf("shell", "端口", "mDNS", "TLS", "Binder", "uid", "进程")
@@ -109,7 +109,7 @@ class PhoneSetupCopyTest {
             assertTrue("empty copy", t.isNotBlank())
             jargon.forEach { j -> if (!(j == "端口" && t == portAllowed)) assertFalse("「$j」 in: $t", t.contains(j, ignoreCase = true)) }
             // 只有系统里那个选项名本身带 adb
-            if (t.contains("adb")) assertTrue(t, t.contains("「停用 adb 授权超时功能」"))
+            if (t.contains("adb")) assertTrue(t, t.contains("Disable adb authorization timeout"))
         }
     }
 
@@ -117,31 +117,31 @@ class PhoneSetupCopyTest {
     fun failuresAreDistinctAndActionable() {
         val titles = BuiltinShellFailure.entries.map { PhoneSetupCopy.failure(it).title }
         assertEquals(titles.size, titles.toSet().size)
-        assertEquals("重新配对", PhoneSetupCopy.fixLabel(BuiltinShellStatus.Failed(BuiltinShellFailure.WrongCode).fix))
-        assertEquals("重试", PhoneSetupCopy.fixLabel(BuiltinShellStatus.Failed(BuiltinShellFailure.HelperStartFailed).fix))
+        assertEquals("Pair again", PhoneSetupCopy.fixLabel(BuiltinShellStatus.Failed(BuiltinShellFailure.WrongCode).fix))
+        assertEquals("Retry", PhoneSetupCopy.fixLabel(BuiltinShellStatus.Failed(BuiltinShellFailure.HelperStartFailed).fix))
     }
 
     /** USB 命令起的助手停了:设置页、横幅都直说停了、再运行命令;不往无线调试引(有的手机根本没有)。 */
     @Test
     fun usbHelperStoppedSaysHowToStartItAgain() {
         val stopped = BuiltinShellStatus.Failed(BuiltinShellFailure.UsbHelperStopped)
-        assertEquals("手机助手已停止", PhoneSetupCopy.failure(BuiltinShellFailure.UsbHelperStopped).title)
+        assertEquals("Phone helper stopped", PhoneSetupCopy.failure(BuiltinShellFailure.UsbHelperStopped).title)
         val line = PhoneSetupCopy.statusLine(stopped)
-        assertTrue(line, line.contains("USB 启动命令") && line.contains("再运行一次"))
+        assertTrue(line, line.contains("USB start command") && line.contains("Run the command below again"))
         assertFalse(line, line.contains("无线调试"))
         assertEquals(BuiltinShellFix.RunUsbCommand, stopped.fix)
-        assertEquals("复制", PhoneSetupCopy.fixLabel(stopped.fix))
-        // 本来就是用命令起的:卡片说「再运行一次」,不说「打不开无线调试」
+        assertEquals("Copy", PhoneSetupCopy.fixLabel(stopped.fix))
+        // 本来就是用命令起的:卡片说「Run the command below again」,不说「打不开无线调试」
         val (againTitle, againBody) = PhoneSetupCopy.usbCard(HelperRestart.UsbCommand)
-        assertEquals("再运行一次启动命令", againTitle)
-        assertTrue(againBody.contains("重启后"))
+        assertEquals("Run the start command again", againTitle)
+        assertTrue(againBody.contains("needed again after every phone restart"))
         assertEquals(PhoneSetupCopy.USB_TITLE to PhoneSetupCopy.USB_BODY, PhoneSetupCopy.usbCard(HelperRestart.None))
         val banner = StatusCopy.banner(Problem.PhoneHelper(stopped))
-        assertEquals("手机助手已停止", banner.title)
+        assertEquals("Phone helper stopped", banner.title)
         assertEquals(line, banner.detail)
-        assertEquals("这台手机打不开无线调试？改用电脑启动", PhoneSetupCopy.USB_TITLE)
-        assertEquals("找不到无线调试？", PhoneSetupCopy.USB_ASK)
-        assertTrue(PhoneSetupCopy.USB_BODY.contains("数据线"))
-        assertTrue(PhoneSetupCopy.USB_BODY.contains("重启后"))
+        assertEquals("Can’t use Wireless debugging on this phone? Start from a computer instead", PhoneSetupCopy.USB_TITLE)
+        assertEquals("Can’t find Wireless debugging?", PhoneSetupCopy.USB_ASK)
+        assertTrue(PhoneSetupCopy.USB_BODY.contains("USB cable"))
+        assertTrue(PhoneSetupCopy.USB_BODY.contains("after the phone restarts"))
     }
 }

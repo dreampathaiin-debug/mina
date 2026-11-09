@@ -72,7 +72,7 @@ class MarkdownModelTest {
     /** 流式输出写到一半、或格式写坏了,都照常出结果,不抛异常。 */
     @Test
     fun partialAndMalformedInputNeverThrows() {
-        val code = MarkdownModel.parse("看这里:\n```py\nprint(1)").last() as MdBlock.Code
+        val code = MarkdownModel.parse("看这里: \n```py\nprint(1)").last() as MdBlock.Code
         assertEquals("print(1)", code.code)
         assertEquals("**没写完", para("**没写完").text)
         assertEquals("| a | b |\n|--", para("| a | b |\n|--").text)

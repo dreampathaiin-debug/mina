@@ -110,7 +110,7 @@ class ConversationStoreTest {
         store.append(id, Turn("Check the weather in Shanghai tomorrow", "", "succeeded"))
         assertTrue(store.rename(id, "weather  "))
         assertFalse(store.setTitle(id, "Shanghai weather"))
-        assertEquals("", ConversationStore(dir).title(id))
+        assertEquals("weather", ConversationStore(dir).title(id))
 
         val other = store.newConversation()
         store.append(other, Turn("Book tickets", "alright", "succeeded"))
@@ -118,7 +118,7 @@ class ConversationStoreTest {
         assertTrue(store.rename(other, "ticket home"))
         assertFalse(store.rename(other, "   "))
         assertEquals("ticket home", store.title(other))
-        assertEquals(setOf("", "ticket home"), store.list().map { it.title }.toSet())
+        assertEquals(setOf("weather", "ticket home"), store.list().map { it.title }.toSet())
 
         store.delete(other)
         assertFalse(store.rename(other, "Change again"))

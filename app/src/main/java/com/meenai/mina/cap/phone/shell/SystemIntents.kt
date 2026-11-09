@@ -2,6 +2,7 @@ package com.meenai.mina.cap.phone.shell
 
 import android.content.Intent
 import android.net.Uri
+import java.net.URLEncoder
 import android.provider.AlarmClock
 import android.provider.CalendarContract
 import com.meenai.mina.core.uistate.SystemAction
@@ -62,12 +63,15 @@ object SystemIntents {
         is SystemAction.AppIntent -> when (a.kind) {
             // 指到具体的包:wa.me 这类链接别的应用也会认领,不指就有开错 App 的风险
             SystemAction.AppIntent.Kind.WHATSAPP_CHAT -> Spec(Intent.ACTION_VIEW,
-                "https://wa.me/${a.target.filter { it.isDigit() || it == '+' }}${a.text?.let { "?text=" + Uri.encode(it) } ?: ""}", pkg = "com.whatsapp")
-            SystemAction.AppIntent.Kind.MAPS_NAVIGATE -> Spec(Intent.ACTION_VIEW, "google.navigation:q=${Uri.encode(a.target)}", pkg = "com.google.android.apps.maps")
+                "https://wa.me/${a.target.filter { it.isDigit() || it == '+' }}${a.text?.let { "?text=" + enc(it) } ?: ""}", pkg = "com.whatsapp")
+            SystemAction.AppIntent.Kind.MAPS_NAVIGATE -> Spec(Intent.ACTION_VIEW, "google.navigation:q=${enc(a.target)}", pkg = "com.google.android.apps.maps")
             SystemAction.AppIntent.Kind.PLAY_MEDIA -> youtube(a.target)
             SystemAction.AppIntent.Kind.DIAL -> Spec(Intent.ACTION_DIAL, "tel:${a.target.filter { it.isDigit() || it == '+' || it == '*' || it == '#' }}")
         }
     }
+
+    /** JVM 单测里 android.net.Uri 不可用,这里用 URLEncoder 办同样的事(空格照样是 %20)。 */
+    private fun enc(s: String): String = URLEncoder.encode(s, "UTF-8").replace("+", "%20")
 
     /** 视频链接、视频编号就放它,别的一律当作在 YouTube 里搜这几个词。 */
     private fun youtube(target: String): Spec {
@@ -76,7 +80,7 @@ object SystemIntents {
         return when {
             t.startsWith("http") -> Spec(Intent.ACTION_VIEW, t, pkg = "com.google.android.youtube")
             id -> Spec(Intent.ACTION_VIEW, "vnd.youtube:$t", pkg = "com.google.android.youtube")
-            else -> Spec(Intent.ACTION_VIEW, "https://www.youtube.com/results?search_query=${Uri.encode(t)}", pkg = "com.google.android.youtube")
+            else -> Spec(Intent.ACTION_VIEW, "https://www.youtube.com/results?search_query=${enc(t)}", pkg = "com.google.android.youtube")
         }
     }
     /** 内置助手只替 Mina 启动这几种:动作在表里,插入的只能是日程。 */

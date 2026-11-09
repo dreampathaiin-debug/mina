@@ -2,7 +2,7 @@ package com.meenai.mina.ui
 
 import com.meenai.mina.core.model.ListFailure
 import com.meenai.mina.core.model.ModelRole
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.settings.AesGcmKeyCipher
 import com.meenai.mina.settings.ProviderConfig
 import com.meenai.mina.settings.ProviderPresets
@@ -33,7 +33,7 @@ import javax.crypto.KeyGenerator
  * 列表接口 404 时分得出「这家真不提供列表」(手填的模型调得通)和「地址、接口类型填错了」(调用也 404)。
  */
 class ModelSetupNetworkTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @get:Rule val tmp = TemporaryFolder()
 
@@ -97,7 +97,7 @@ class ModelSetupNetworkTest {
         vm.setModel("gemini")
         vm.testAndWait()
         val failed = vm.state.value.form.test as ListState.Failed
-        assertTrue(failed.message, failed.message.startsWith("列不出模型，用「gemini」试调用也说找不到：地址或接口类型可能填错了"))
+        assertTrue(failed.message, failed.message.startsWith("No models could be listed, and a test call with “gemini” wasn’t found either: the address or interface type is probably wrong"))
         assertTrue(store.providers.value.isEmpty())
         assertTrue(store.list().isEmpty())
     }
@@ -129,8 +129,8 @@ class ModelSetupNetworkTest {
         assertEquals("qwen-plus", store.configFor(ModelRole.Main)?.model)
         assertFalse(vm.state.value.showForm)
         val note = vm.state.value.probeNote.orEmpty()
-        assertTrue(note, note.startsWith("先试的 antdigital/Ling-3.1-flash 没测试通过：这个账号没开通或没权限用这个模型（服务商说：The product is not activated"))
-        assertTrue(note, note.endsWith("主模型用了测试通过的「qwen-plus」。"))
+        assertTrue(note, note.startsWith("antdigital/Ling-3.1-flash, tried first, didn’t pass the test: this account hasn’t activated this model or has no access to it (the provider says: The product is not activated"))
+        assertTrue(note, note.endsWith("The main model is “qwen-plus”, which passed."))
         assertEquals(null, vm.state.value.pickToProbe)
         assertTrue("qwen-plus" in p.verifiedModels)
     }
@@ -147,8 +147,8 @@ class ModelSetupNetworkTest {
         assertEquals(null, store.roles.value.main)
         val s = vm.state.value
         assertEquals(p.id, s.pickToProbe)
-        assertTrue(s.probeNote.orEmpty(), s.probeNote.orEmpty().startsWith("服务商已连上，但「antdigital/Ling-3.1-flash」没测试通过："))
-        assertTrue(s.probeNote.orEmpty(), s.probeNote.orEmpty().endsWith("试了 antdigital/Ling-3.1-flash、qwen-plus、qwen-max，都没开通。"))
+        assertTrue(s.probeNote.orEmpty(), s.probeNote.orEmpty().startsWith("The provider is connected, but “antdigital/Ling-3.1-flash” didn’t pass the test"))
+        assertTrue(s.probeNote.orEmpty(), s.probeNote.orEmpty().endsWith("Tried antdigital/Ling-3.1-flash, qwen-plus, qwen-max; none of them is activated."))
     }
 
     /** 先试的模型这个账号额度为零(429 里说 limit: 0):不当成限流卡住,接着试下一个,通了存下、它当主模型。 */
@@ -165,8 +165,8 @@ class ModelSetupNetworkTest {
         assertTrue("free-ok" in p.verifiedModels)
         assertFalse(vm.state.value.showForm)
         val note = vm.state.value.probeNote.orEmpty()
-        assertTrue(note, note.startsWith("先试的 paid-only 没测试通过：这个账号没开通或没权限用这个模型（服务商说："))
-        assertTrue(note, note.endsWith("主模型用了测试通过的「free-ok」。"))
+        assertTrue(note, note.startsWith("paid-only, tried first, didn’t pass the test: this account hasn’t activated this model or has no access to it (the provider says: "))
+        assertTrue(note, note.endsWith("The main model is “free-ok”, which passed."))
     }
 
     /** 真的限流(429 没说额度为零):第一个就因为模型以外的原因失败,不存、不试下一个。 */

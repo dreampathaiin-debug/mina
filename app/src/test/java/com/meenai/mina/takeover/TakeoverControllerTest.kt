@@ -314,10 +314,10 @@ class TakeoverControllerTest {
         takeover.onState(waiting)
         takeover.handOver()
         assertEquals("login.app", port.watching)
-        port.activity = HandoverActivity(3, "登录")
+        port.activity = HandoverActivity(3, "Sign-in")
         testScheduler.advanceTimeBy(42_000)
         assertTrue(takeover.handBack())
-        assertEquals(HandBack(HandBackOutcome.complete, durationMs = 42_000, inputCount = 3, stoppedAt = "登录"), port.results.single())
+        assertEquals(HandBack(HandBackOutcome.complete, durationMs = 42_000, inputCount = 3, stoppedAt = "Sign-in"), port.results.single())
         assertNull(port.watching)
     }
 

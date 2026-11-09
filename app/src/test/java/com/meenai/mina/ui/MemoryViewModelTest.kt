@@ -1,6 +1,6 @@
 package com.meenai.mina.ui
 
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.memory.MemoryKind
 import com.meenai.mina.core.memory.MemorySource
 import com.meenai.mina.settings.MemorySettings
@@ -22,10 +22,10 @@ import java.time.ZoneId
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MemoryViewModelTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @get:Rule val tmp = TemporaryFolder()
-    // 来历一行按本机时区显示日期:取本机时区那天的中午,在哪个时区跑都是 10 月 23 日
+    // 来历一行按本机时区显示日期:取本机时区那天的中午,在哪个时区跑都是 Oct 23
     private val said = MemorySource("user_said", "以后点外卖都不要香菜", "c1", LocalDateTime.of(2025, 10, 23, 12, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
     private val store = memoryStore().apply {
         add(MemoryKind.fact, "用户住在张江", listOf("家"), MemorySource("manual", atMs = 1)).getOrThrow()
@@ -49,8 +49,8 @@ class MemoryViewModelTest {
             vm.ui.value.rows.map { it.content }.toSet(),
         )
         assertEquals(MemoryKind.fact, vm.ui.value.rows.first { it.content == "用户住在张江" }.kind)
-        assertEquals("你手写的", vm.ui.value.rows.first { it.content == "用户住在张江" }.source)
-        assertEquals("你在 10 月 23 日说:『以后点外卖都不要香菜』", vm.ui.value.rows.first { it.kind == MemoryKind.preference }.source)
+        assertEquals("Written by you", vm.ui.value.rows.first { it.content == "用户住在张江" }.source)
+        assertEquals("You said on Oct 23: “以后点外卖都不要香菜”", vm.ui.value.rows.first { it.kind == MemoryKind.preference }.source)
     }
 
     @Test fun pendingCollectsProceduresAndCounts() = runTest {
@@ -90,13 +90,13 @@ class MemoryViewModelTest {
 
     @Test fun manualAddSensitiveShowsMessage() = runTest {
         val vm = vm()
-        vm.add(MemoryKind.fact, "我的支付密码是123456", emptyList()); runCurrent()
-        assertEquals("这类信息我不会记", vm.ui.value.message)
+        vm.add(MemoryKind.fact, "My payment password is 123456", emptyList()); runCurrent()
+        assertEquals("I don’t remember this kind of information", vm.ui.value.message)
         assertEquals(3, vm.ui.value.rows.size)
         vm.dismissMessage()
         vm.add(MemoryKind.fact, "用户的妈妈叫老妈", emptyList()); runCurrent()
         assertEquals(4, vm.ui.value.rows.size)
-        assertEquals("你手写的", vm.ui.value.rows.first { it.content == "用户的妈妈叫老妈" }.source)
+        assertEquals("Written by you", vm.ui.value.rows.first { it.content == "用户的妈妈叫老妈" }.source)
     }
 
     @Test fun clearAllNeedsTwoConfirms() = runTest {
@@ -129,26 +129,26 @@ class MemoryViewModelTest {
         assertFalse(reread.autoRemember); assertFalse(reread.learnSkills); assertTrue(reread.useMemory)
     }
 
-    private fun skillMd(name: String, body: String) = "---\nname: $name\ndisplay: 发微信\ndescription: 给联系人发微信\n---\n$body"
-    private fun fullMd(name: String, steps: String) = skillMd(name, "## 入口\n打开微信\n## 步骤\n$steps\n## 容易出错的地方\n同名群\n## 怎样算办成(核实证据)\n消息出现\n## 什么时候停下交给用户\n要登录时")
+    private fun skillMd(name: String, body: String) = "---\nname:  $name\ndisplay: 发微信\ndescription: 给联系人发微信\n---\n$body"
+    private fun fullMd(name: String, steps: String) = skillMd(name, "## Entry\n打开微信\n## Steps\n$steps\n## Where it goes wrong\n同名群\n## What counts as done\n消息出现\n## When to stop and hand back\n要登录时")
 
     private fun TestScope.skillsVm(skills: com.meenai.mina.task.MapSkills): MemoryViewModel =
         MemoryViewModel(store, MemorySettings(File(tmp.newFolder(), "s.json")), skills, backgroundScope).also { it.select(Segment.Skills); runCurrent() }
 
     @Test fun approveWithEdit() = runTest {
         val skills = com.meenai.mina.task.MapSkills()
-        skills.putPending("d1", com.meenai.mina.core.skills.PersonalSkill("wechat-msg", skillMd("wechat-msg", "## 步骤\n1. 点搜索"), com.meenai.mina.core.skills.SkillStatus.pending, "r1", null, 0, emptyList()))
+        skills.putPending("d1", com.meenai.mina.core.skills.PersonalSkill("wechat-msg", skillMd("wechat-msg", "## Steps\n1. 点搜索"), com.meenai.mina.core.skills.SkillStatus.pending, "r1", null, 0, emptyList()))
         val vm = skillsVm(skills)
         assertEquals(listOf("d1"), vm.ui.value.skills.drafts.map { it.id })
         // 改过的全文同样过校验:缺小节、带敏感信息、提到没有的工具都不收
-        vm.approveSkill("d1", skillMd("wechat-msg", "## 步骤\n1. 点搜索框")); runCurrent()
-        assertTrue(vm.ui.value.message!!.contains("五个小节"))
+        vm.approveSkill("d1", skillMd("wechat-msg", "## Steps\n1. 点搜索框")); runCurrent()
+        assertTrue(vm.ui.value.message!!.contains("section"))
         vm.dismissMessage()
-        vm.approveSkill("d1", fullMd("wechat-msg", "支付密码是123456")); runCurrent()
-        assertEquals("这类信息我不会记", vm.ui.value.message)
+        vm.approveSkill("d1", fullMd("wechat-msg", "payment password is 123456")); runCurrent()
+        assertEquals("I don’t remember this kind of information", vm.ui.value.message)
         vm.dismissMessage()
         vm.approveSkill("d1", fullMd("wechat-msg", "用 `open_chat` 打开")); runCurrent()
-        assertEquals("里面提到了 Mina 没有的工具", vm.ui.value.message)
+        assertEquals("It mentions tools Mina doesn’t have", vm.ui.value.message)
         assertEquals(1, vm.ui.value.skills.drafts.size)
         vm.approveSkill("d1", fullMd("renamed", "1. 用 `phone_tap` 点搜索框")); runCurrent()
         assertTrue(vm.ui.value.skills.drafts.isEmpty())
@@ -159,20 +159,20 @@ class MemoryViewModelTest {
     }
 
     @Test fun updateDraftShowsChangedLines() = runTest {
-        val old = com.meenai.mina.core.skills.PersonalSkill("wechat-msg", skillMd("wechat-msg", "## 步骤\n1. 点搜索\n2. 点发送"), com.meenai.mina.core.skills.SkillStatus.active, "r0", null, 0, emptyList())
+        val old = com.meenai.mina.core.skills.PersonalSkill("wechat-msg", skillMd("wechat-msg", "## Steps\n1. 点搜索\n2. 点发送"), com.meenai.mina.core.skills.SkillStatus.active, "r0", null, 0, emptyList())
         val skills = com.meenai.mina.task.MapSkills(old)
-        skills.putPending("d2", old.copy(markdown = skillMd("wechat-msg", "## 步骤\n1. 点搜索\n2. 长按发送"), replacesDraftOf = "wechat-msg"))
+        skills.putPending("d2", old.copy(markdown = skillMd("wechat-msg", "## Steps\n1. 点搜索\n2. 长按发送"), replacesDraftOf = "wechat-msg"))
         val vm = skillsVm(skills)
         assertEquals(listOf("+ 2. 长按发送", "- 2. 点发送"), vm.ui.value.skills.drafts.single().changedLines)
     }
 
     @Test fun restoreSuspended() = runTest {
-        val s = com.meenai.mina.core.skills.PersonalSkill("wechat-msg", skillMd("wechat-msg", "## 步骤\n1. 点搜索"), com.meenai.mina.core.skills.SkillStatus.suspended, "r0", null, 0, listOf("failed", "verified", "unverified"))
+        val s = com.meenai.mina.core.skills.PersonalSkill("wechat-msg", skillMd("wechat-msg", "## Steps\n1. 点搜索"), com.meenai.mina.core.skills.SkillStatus.suspended, "r0", null, 0, listOf("failed", "verified", "unverified"))
         val skills = com.meenai.mina.task.MapSkills(s)
         val vm = skillsVm(skills)
         val row = vm.ui.value.skills.installed.single()
         assertTrue(row.suspended)
-        assertEquals(listOf("没办成", "核查通过", "没能核实"), row.recent)
+        assertEquals(listOf("Didn’t work out", "Check passed", "Couldn’t verify"), row.recent)
         vm.restoreSkill("wechat-msg"); runCurrent()
         assertEquals(com.meenai.mina.core.skills.SkillStatus.active, skills.get("wechat-msg")!!.status)
         assertTrue(skills.get("wechat-msg")!!.outcomes.isEmpty())

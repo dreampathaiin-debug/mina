@@ -1,14 +1,14 @@
 package com.meenai.mina.task
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ParallelCapabilityTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @Test fun android13IsOne() {
         val limit = ParallelCapability.detect(sdk = 33, lowRam = false, userMax = 3, secondDisplayFailed = false)

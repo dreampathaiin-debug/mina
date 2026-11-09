@@ -91,7 +91,7 @@ class WebDownloadsTest {
     @Test
     fun nameRules() {
         assertEquals("report.pdf", WebDownloads.fileName("attachment; filename*=UTF-8''report.pdf; filename=\"old.pdf\"", "https://a/b", null))
-        assertEquals("quarterly report.pdf", WebDownloads.fileName("attachment; filename*=UTF-8''%E5%AD%A3%E5%BA%A6%E6%8A%A5%E5%91%8A.pdf", "https://a/b", null))
+        assertEquals("季度报告.pdf", WebDownloads.fileName("attachment; filename*=UTF-8''%E5%AD%A3%E5%BA%A6%E6%8A%A5%E5%91%8A.pdf", "https://a/b", null))
         assertEquals("invoice.pdf", WebDownloads.fileName(null, "https://a.example.com/x/invoice.pdf?token=1", null))
         //Control characters, bidirectional control characters(Can disguise exe as pdf), the leading dot, and the backslash path are all removed.
         assertEquals("evilfdp.exe", WebDownloads.fileName("attachment; filename=\"evil‮fdp.exe\"", "https://a/b", null))

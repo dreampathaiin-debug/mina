@@ -44,8 +44,8 @@ class AddressInputTest {
         assertEquals(bing("hello+world"), AddressInput.resolve("hello world"))
         assertEquals(bing("example.com+login"), AddressInput.resolve("example.com login"))
         assertEquals(bing("kotlin"), AddressInput.resolve("kotlin"))
-        assertEquals(bing("%E5%A4%A9%E6%B0%94"), AddressInput.resolve(""))
-        assertEquals(bing("%E4%B8%AD%E6%96%87.%E7%BD%91%E7%AB%99"), AddressInput.resolve("Chinese.website"))
+        assertEquals(bing("%E5%A4%A9%E6%B0%94"), AddressInput.resolve("天气"))
+        assertEquals(bing("%E4%B8%AD%E6%96%87.%E7%BD%91%E7%AB%99"), AddressInput.resolve("中文.网站"))
         assertEquals(bing("user%40example.com"), AddressInput.resolve("user@example.com"))
         //Like version number, decimal, out-of-bounds IP, incomplete domain name, out-of-bounds port
         assertEquals(bing("1.5"), AddressInput.resolve("1.5"))

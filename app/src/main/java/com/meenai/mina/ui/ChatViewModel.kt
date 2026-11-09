@@ -1364,6 +1364,7 @@ class ToolLabels(private val tools: ToolIndex, private val legacy: LegacyNames =
         val TOOL_LABELS: Map<String, Int> = mapOf(
             "View installed apps" to R.string.tool_list_apps,
             "Open app" to R.string.tool_open_app,
+            "Open app directly" to R.string.tool_app_intent,
             "Share text to an app" to R.string.tool_share_text,
             "Set alarm" to R.string.tool_set_alarm,
             "Set timer" to R.string.tool_set_timer,

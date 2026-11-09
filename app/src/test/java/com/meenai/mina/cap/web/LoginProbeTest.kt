@@ -20,15 +20,15 @@ class LoginProbeTest {
 
     @Test fun signedOutSignals() {
         assertEquals(LoginState.SignedOut, state(pw = true))
-        assertEquals(LoginState.SignedOut, state("front page", "Log in/register"))
+        assertEquals(LoginState.SignedOut, state("front page", "Sign in / register"))
         assertEquals(LoginState.SignedOut, state("Sign in"))
     }
 
     @Test fun signedInNeedsAProminentLogoutOrAccountEntry() {
         assertEquals(LoginState.SignedIn, state("front page", "Log out"))
         assertEquals(LoginState.SignedIn, state("Log out"))
-        assertEquals(LoginState.SignedIn, state("quit"))
-        assertEquals(LoginState.SignedIn, state("Personal Center"))
+        assertEquals(LoginState.SignedIn, state("log off"))
+        assertEquals(LoginState.SignedIn, state("My account"))
         assertEquals(LoginState.SignedIn, state("Sign out ›"))
     }
 
@@ -51,7 +51,7 @@ class LoginProbeTest {
         assertEquals(LoginState.Unknown, state())
         //Password change page:The password box and exit link are both there
         assertEquals(LoginState.Unknown, state("Log out", pw = true))
-        assertEquals(LoginState.Unknown, state("Log in", "Personal Center"))
+        assertEquals(LoginState.Unknown, state("Log in", "My account"))
         //Single sign-on and pass jump without drawing conclusions on the way,Even if there is a password box
         assertEquals(LoginState.Unknown, state(pw = true, url = "https://passport.example.com/login?return=/"))
         assertEquals(LoginState.Unknown, state("Log out", url = "https://example.com/sso/callback"))

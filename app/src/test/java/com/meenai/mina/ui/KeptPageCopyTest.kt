@@ -1,7 +1,7 @@
 package com.meenai.mina.ui
 
 import com.meenai.mina.cap.web.KeptPage
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -9,7 +9,7 @@ import org.junit.Test
 
 /** 对话页那一轮下面留页的那一行:还开着、关了(带原因或不带),和剩余时间的说法。 */
 class KeptPageCopyTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val page = KeptPage(1, "c1", "r1", "播放课程", "course.example.com", null, null, 0, 7_200_000)
     private fun ex(runId: String?, kept: String? = null, closed: String? = null) =

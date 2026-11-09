@@ -1,6 +1,6 @@
 package com.meenai.mina.settings
 
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.ui.AddForm
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -10,7 +10,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class ProviderPresetsTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private fun preset(label: String) = ProviderPresets.all.single { it.label == label }
 

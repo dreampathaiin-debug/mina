@@ -2,7 +2,7 @@ package com.meenai.mina.browser
 
 import com.meenai.mina.core.agent.GateReason
 import com.meenai.mina.core.agent.TaskState
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.task.TaskGate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -12,7 +12,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class PageAskModelTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val running = TaskState.Running(1, "x")
     private val paused get() = TaskState.Held(TaskGate.paused(TaskGate.USER_ON_PAGE))

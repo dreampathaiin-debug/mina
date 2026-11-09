@@ -1,7 +1,7 @@
 package com.meenai.mina.capsule
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.cap.web.KeptPage
 import com.meenai.mina.core.agent.FailKind
 import com.meenai.mina.core.agent.GateReason
@@ -17,7 +17,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CapsuleModelTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val model = CapsuleModel(reasonLabel = { if (it == "payment") "Payment" else null })
 
@@ -67,7 +67,7 @@ class CapsuleModelTest {
         for (mode in listOf(CapsuleMode.DuringTasks, CapsuleMode.Always)) {
             val v = shown(model.update(inputs(mode = mode, kept = kept), 0))
             assertEquals(CapsuleKind.KeptPage, v.kind)
-            assertEquals("The background web page is running", v.text)
+            assertEquals("Background page running", v.text)
             assertEquals("c-k", v.conversationId)
             assertTrue(v.pill)
         }
@@ -95,31 +95,31 @@ class CapsuleModelTest {
     // ----------that line ----------
 
     @Test fun runningTextNarrationThenReasonThenFallback() {
-        assertEquals("Searching toothpaste", CapsuleModel.runningText(running("Searching\nToothpaste ", reason = "Find the search box")))
+        assertEquals("Searching Toothpaste", CapsuleModel.runningText(running("Searching\nToothpaste ", reason = "Find the search box")))
         assertEquals("Find the search box", CapsuleModel.runningText(running(" ", reason = "Find the search box")))
         assertEquals(CapsuleModel.THINKING, CapsuleModel.runningText(running()))
         assertEquals(CapsuleModel.PREPARING, CapsuleModel.runningText(running(step = 0)))
-        assertEquals("follow the route 3/7", CapsuleModel.runningText(running("Searching for toothpaste", progress = RunProgress.Replay(3, 7))))
-        assertEquals("Do 4 steps at a time", CapsuleModel.runningText(running(progress = RunProgress.Batch(4))))
+        assertEquals("Following a route 3/7", CapsuleModel.runningText(running("Searching for toothpaste", progress = RunProgress.Replay(3, 7))))
+        assertEquals("4 steps at once", CapsuleModel.runningText(running(progress = RunProgress.Batch(4))))
     }
 
     @Test fun eachStateHasItsLine() {
         fun line(state: TaskState, stage: Takeover.Stage = Takeover.Stage.None) =
             shown(CapsuleModel(reasonLabel = { if (it == "payment") "Payment" else null }).update(inputs(run("a", state, stage)), 0))
-        assertEquals(CapsuleKind.NeedTakeover to "Needed from you: Payment", line(takeover, Takeover.Stage.Waiting).let { it.kind to it.text })
-        assertEquals("Need you: please log in", line(TaskState.WaitingTakeover("login", "Please log in"), Takeover.Stage.Waiting).text)
-        assertEquals(CapsuleKind.NeedConfirm to "Ask for your consent: send", line(confirm).let { it.kind to it.text })
-        assertEquals(CapsuleKind.NeedAnswer to "Mina asks you: Which color do you want?", line(TaskState.WaitingInput("Which color do you want?")).let { it.kind to it.text })
-        assertEquals(CapsuleKind.Held to "Wait a minute: you opened this App", line(TaskState.Held(GateReason("paused", "you opened this App"))).let { it.kind to it.text })
+        assertEquals(CapsuleKind.NeedTakeover to "Needs you: Payment", line(takeover, Takeover.Stage.Waiting).let { it.kind to it.text })
+        assertEquals("Needs you: Please log in", line(TaskState.WaitingTakeover("login", "Please log in"), Takeover.Stage.Waiting).text)
+        assertEquals(CapsuleKind.NeedConfirm to "Needs your OK: Send", line(confirm).let { it.kind to it.text })
+        assertEquals(CapsuleKind.NeedAnswer to "Mina asks: Which color do you want?", line(TaskState.WaitingInput("Which color do you want?")).let { it.kind to it.text })
+        assertEquals(CapsuleKind.Held to "On hold: you opened this App", line(TaskState.Held(GateReason("paused", "you opened this App"))).let { it.kind to it.text })
         //I want you to move your hands on your phone(Select one in the system selection box):It's up to you to handle it
-        val pick = line(TaskState.Held(GateReason("waiting_user", ""Chat" is asking which one to use, please select it on the screen.", needsYou = true)))
-        assertEquals(CapsuleKind.NeedStep to "Need you: "Chat" is asking which one to use, please choose on the screen", pick.kind to pick.text)
+        val pick = line(TaskState.Held(GateReason("waiting_user", "“Chat” is asking which one to use, please select it on the screen.", needsYou = true)))
+        assertEquals(CapsuleKind.NeedStep to "Needs you: “Chat” is asking which one to use, please select it on the screen.", pick.kind to pick.text)
         assertTrue(pick.kind.needsYou)
-        assertEquals("Wait first", line(TaskState.Held(GateReason("waiting_unlock"))).text)
+        assertEquals("On hold", line(TaskState.Held(GateReason("waiting_unlock"))).text)
         val bar = line(takeover, Takeover.Stage.HandedOver)
         assertEquals(CapsuleKind.HandedOver, bar.kind)
         assertEquals(CapsuleModel.HANDED_OVER, bar.text)
-        assertEquals("Payment·Click on the right after completion", bar.detail)
+        assertEquals("Payment · Tap the right side when done", bar.detail)
         //It has been handed back, and the cycle has not gone down yet.:no longer want you
         assertEquals(CapsuleKind.Running, line(takeover).kind)
     }
@@ -133,14 +133,14 @@ class CapsuleModelTest {
         assertEquals("c-b", v.conversationId)
         assertEquals(2, v.count)
         assertEquals(1, v.needCount)
-        assertEquals("1 item for you to handle · 2 items in total", v.text)
+        assertEquals("1 need you · 2 in total", v.text)
     }
 
     @Test fun severalRunningAddCount() {
         val v = shown(model.update(inputs(run("a", running("Searching for toothpaste")), run("b", running("Watching the weather"))), 0))
         //When it's important, say which one starts first
         assertEquals("a", v.runKey)
-        assertEquals("Searching for toothpaste · 2 items in total", v.text)
+        assertEquals("Searching for toothpaste · 2 in total", v.text)
         assertEquals(0, v.needCount)
     }
 
@@ -162,7 +162,7 @@ class CapsuleModelTest {
             run("a", takeover, Takeover.Stage.HandedOver), run("b", TaskState.WaitingTakeover("login", "Log in"), Takeover.Stage.Waiting),
         ), 0))
         assertEquals(CapsuleKind.HandedOver, v.kind)
-        assertEquals("After you take care of this one, there's 1 more waiting for you", v.detail)
+        assertEquals("After this, 1 more is waiting for you", v.detail)
     }
 
     // ----------Pause at least 1.5 seconds for each sentence ----------
@@ -181,7 +181,7 @@ class CapsuleModelTest {
     @Test fun stateChangeSwitchesAtOnce() {
         model.update(inputs(run("a", running("one"))), 0)
         val v = shown(model.update(inputs(run("a", TaskState.WaitingInput("Which one do you want?"))), 100))
-        assertEquals("Mina asks you: Which one do you want?", v.text)
+        assertEquals("Mina asks: Which one do you want?", v.text)
     }
 
     // ----------Only widen but not narrow ----------
@@ -240,7 +240,7 @@ class CapsuleModelTest {
         assertTrue(!shown(model.update(inputs(run("a", ask)), 50)).pill)
         //I want another one from you too:Expand,Write "2 things I need you to deal with"
         val two = shown(model.update(inputs(run("a", ask), run("b", takeover, Takeover.Stage.Waiting)), 60))
-        assertEquals("2 items for you to deal with · 2 items in total" to true, two.text to two.pill)
+        assertEquals("2 need you · 2 in total" to true, two.text to two.pill)
     }
 
     @Test fun aNeedThatComesBackAfterBeingResolvedExpandsAgain() {
@@ -386,7 +386,7 @@ class CapsuleModelTest {
         model.update(inputs(run("new", TaskState.Failed("x", FailKind.Model)), run("r", running("")), run("q", TaskState.WaitingInput("Which one do you want?"))), 10)
         val rows = model.cardRuns()
         assertEquals(listOf("q", "r", "new", "old"), rows.map { it.run.key })
-        assertEquals(CapsuleKind.NeedAnswer to "Mina asks you: Which one do you want?", rows[0].kind to rows[0].line)
+        assertEquals(CapsuleKind.NeedAnswer to "Mina asks: Which one do you want?", rows[0].kind to rows[0].line)
         assertEquals(0L, rows[1].startedAt)
         assertNull(rows[0].startedAt)
         assertEquals(CapsuleKind.Failed, rows[2].kind)
@@ -421,7 +421,7 @@ class CapsuleModelTest {
 
     @Test fun barCountsWhoIsBehindInTheRealQueue() {
         val v = shown(model.update(inputs(queued("a", 0, 2, Takeover.Stage.HandedOver), queued("b", 1, 1)), 0))
-        assertEquals("After you take care of this one, there are 2 more waiting for you", v.detail)
+        assertEquals("After this, 2 more are waiting for you", v.detail)
     }
 
     @Test fun afterHandBackTheNextOneNeedsYouAtOnce() {
@@ -448,10 +448,10 @@ class CapsuleModelTest {
     // ----------read screen ----------
 
     @Test fun ballDescribesItsStatus() {
-        assertEquals("Mina is working: Searching for toothpaste · 2 items in total, click to see details", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Running, "Searching for toothpaste · 2 items in total", count = 2)))
-        assertEquals("You need to agree: send, click to process", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.NeedConfirm, "Ask for your consent: send")))
-        assertEquals("Mina, wait a minute: Queuing, click to see details", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Held, "Wait first: Queuing up")))
-        assertEquals("Mina is done · Click to see the results", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Done, "Done · Click to see the results")))
+        assertEquals("Mina is working: Searching for toothpaste · 2 in total, tap for details", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Running, "Searching for toothpaste · 2 in total", count = 2)))
+        assertEquals("Ask for your consent: send, tap to handle", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.NeedConfirm, "Ask for your consent: send")))
+        assertEquals("Mina: Wait first: Queuing up, tap for details", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Held, "Wait first: Queuing up")))
+        assertEquals("Mina Done · Click to see the results", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Done, "Done · Click to see the results")))
         assertEquals(CapsuleCopy.IDLE, CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Idle, "")))
     }
 }

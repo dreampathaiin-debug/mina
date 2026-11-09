@@ -14,7 +14,7 @@ class FileOutboxStoreTest {
         try {
             val file = dir.resolve("outbox.json")
             val peer = ChannelPeer("local", "owner", "thread")
-            val delivery = Delivery.Result("result:1", "thread", "回答", title = "任务完成")
+            val delivery = Delivery.Result("result:1", "thread", "回答", title = "Task done")
             FileOutboxStore(file).save(DeliveryRecord(peer, delivery, DeliveryState.Attempting))
             val restored = FileOutboxStore(file).get("result:1")
             assertEquals(DeliveryRecord(peer, delivery, DeliveryState.Attempting), restored)

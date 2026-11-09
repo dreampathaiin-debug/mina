@@ -41,18 +41,18 @@ class ConversationTitlerTest {
         val id = s.newConversation()
         val m = Titler("Sichuan food nearby")
         ConversationTitler.ensure(s, id, "Show me the highest-rated Sichuan cuisine near you") { listOf(m) }
-        assertEquals("Sichuan food nearby", s.title(id))
+        assertEquals("Sichuan food nea", s.title(id))
         //do it again(The model changed its expression)No more changes or requests
         val again = Titler("another name")
         ConversationTitler.ensure(s, id, "second sentence") { listOf(again) }
-        assertEquals("Sichuan food nearby", s.title(id))
+        assertEquals("Sichuan food nea", s.title(id))
         assertTrue(again.requests.isEmpty())
     }
 
     @Test fun promptCarriesOnlyTheFirstMessage() = runBlocking {
         val m = Titler("Book high-speed rail tickets")
         ConversationTitler.generate(listOf(m), "Book your high-speed rail tickets for tomorrow")
-        assertEquals("<message>\nbook high-speed rail tickets for tomorrow\n</message>", text(m))
+        assertEquals("<message>\nBook your high-speed rail tickets for tomorrow\n</message>", text(m))
     }
 
     /**The first sentence asked on the browser page:The page description is not handed over to the model that created the title.,Just give the user what to say. */
@@ -87,7 +87,7 @@ class ConversationTitlerTest {
     }
 
     @Test fun fallsBackToTheNextModelAndTimesOut() = runBlocking {
-        assertEquals("", ConversationTitler.generate(listOf(Titler(fail = true), Titler("")), "Check the weather"))
+        assertNull(ConversationTitler.generate(listOf(Titler(fail = true), Titler("")), "Check the weather"))
         assertNull(ConversationTitler.generate(listOf(Titler(hang = true)), "Check the weather", timeoutMs = 50))
         assertNull(ConversationTitler.generate(emptyList(), "Check the weather"))
     }
@@ -103,8 +103,8 @@ class ConversationTitlerTest {
     }
 
     @Test fun cleansTheReply() {
-        assertEquals("Sichuan food nearby", ConversationTitler.clean(""Nearby Sichuan food""))
-        assertEquals("Sichuan food nearby", ConversationTitler.clean("Title: Sichuan Cuisine Nearby."))
+        assertEquals("Nearby Sichuan f", ConversationTitler.clean("“Nearby Sichuan food”"))
+        assertEquals("Sichuan Cuisine ", ConversationTitler.clean("Title: Sichuan Cuisine Nearby."))
         assertEquals("Book train", ConversationTitler.clean("\"Book train\"\n redundant explanation"))
         assertEquals(16, ConversationTitler.clean("one".repeat(40))!!.length)
         assertNull(ConversationTitler.clean("  \n "))

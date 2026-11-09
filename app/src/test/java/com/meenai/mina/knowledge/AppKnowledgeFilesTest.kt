@@ -122,7 +122,7 @@ class AppKnowledgeFilesTest {
 
     @Test fun olderFullAppMdDraftsInjectOnlyTheirBody() {
         val files = AppKnowledgeFiles(tmp.root)
-        files.putPending(draft("d1", "---\nname: qq\npackages: [com.tencent.mobileqq]\n---\n## 是什么\nQQ 应用。")); files.approve("d1")
+        files.putPending(draft("d1", "---\nname:   qq\npackages: [com.tencent.mobileqq]\n---\n## 是什么\nQQ 应用。")); files.approve("d1")
         assertEquals("## 是什么\nQQ 应用。", files.notes().getValue("qq").text)
     }
 }

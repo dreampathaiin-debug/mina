@@ -154,9 +154,9 @@ class RunStoreTest {
         val h = s.open("g")
         val written = listOf(
             RunEvent.TaskStarted(1, "g", "m"),
-            RunEvent.ToolResult(2, 1, "phone_tap", "{\"ok\":true,\"note\":\"换行\\n也行\"}", true, null),
+            RunEvent.ToolResult(2, 1, "phone_tap", "{\"ok\":  true,\"note\":\"换行\\\n也行\"}", true, null),
             RunEvent.Takeover(3, "login", "handed_back", 1200, 4),
-            RunEvent.TaskEnded(4, "failed", "没办成"),
+            RunEvent.TaskEnded(4, "failed", "Didn’t work out"),
         )
         written.forEach(h::event)
         h.close()

@@ -1,6 +1,6 @@
 package com.meenai.mina.task
 
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.chat.ConversationStore
 import com.meenai.mina.core.agent.Turn
 import com.meenai.mina.core.run.Channel
@@ -24,7 +24,7 @@ import org.junit.rules.TemporaryFolder
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class RunRecoveryTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @get:Rule val tmp = TemporaryFolder()
 
@@ -147,6 +147,6 @@ class RunRecoveryTest {
         assertEquals(1, turns.size)
         assertEquals("failed", turns.single().status)
         assertEquals("目标 a", turns.single().userText)
-        assertEquals("任务中断了，可以重新发起。", turns.single().outcome)
+        assertEquals("The task was interrupted. You can start it again.", turns.single().outcome)
     }
 }

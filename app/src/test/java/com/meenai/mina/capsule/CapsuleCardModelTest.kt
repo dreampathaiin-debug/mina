@@ -1,7 +1,7 @@
 package com.meenai.mina.capsule
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.cap.web.KeptPage
 import com.meenai.mina.confirm.ConfirmationNotifier
 import com.meenai.mina.core.agent.FailKind
@@ -19,7 +19,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CapsuleCardModelTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private fun card(
         key: String, state: TaskState, kind: CapsuleKind = CapsuleKind.Running, line: String = "", ahead: Int = 0, behind: Int = 0,
@@ -123,8 +123,8 @@ class CapsuleCardModelTest {
         val s = TaskState.WaitingTakeover("payment", "Please enter payment password", item = "toothpaste", amount = "¥19.9", address = "Home")
         val first = CapsuleCards.content(card("a", s, CapsuleKind.NeedTakeover, "Needed from you: Payment", behind = 2)) as CardContent.Takeover
         assertEquals("Needed from you: Payment", first.need)
-        assertEquals("Please enter payment password\ngoods:toothpaste\namount:¥19.9\naddress:Home", first.body)
-        assertEquals("After you take care of this one, there are 2 more waiting for you", first.queueLine)
+        assertEquals("Please enter payment password\nItem: toothpaste\nAmount: ¥19.9\nAddress: Home", first.body)
+        assertEquals("After this, 2 more are waiting for you", first.queueLine)
         assertTrue(first.canTakeOver)
         val queued = CapsuleCards.content(card("b", s, CapsuleKind.NeedTakeover, ahead = 1)) as CardContent.Takeover
         assertEquals(CapsuleCards.QUEUED_AHEAD, queued.queueLine)
@@ -139,14 +139,14 @@ class CapsuleCardModelTest {
         //I can agree even if I haven’t answered this question yet.:The number is the same as that used for conversation pages and notifications.
         val raw = CapsuleCards.content(card("a", s, CapsuleKind.NeedConfirm)) as CardContent.Confirm
         assertEquals(ConfirmationNotifier.requestKey(s), raw.key)
-        assertTrue(raw.body.contains("Amount:¥19.9"))
+        assertTrue(raw.body.contains("Amount: ¥19.9"))
     }
 
     @Test fun questionHeldAndResults() {
-        assertEquals(CardContent.Question("Which one do you want?", listOf("big", "Small")), CapsuleCards.content(card("a", TaskState.WaitingInput(" ", listOf("big", "", "Small")))))
+        assertEquals(CardContent.Question("Which one do you want?", listOf("big", "Small")), CapsuleCards.content(card("a", TaskState.WaitingInput("Which one do you want?", listOf("big", "", "Small")))))
         assertEquals(CardContent.Question("What time is it?", emptyList()), CapsuleCards.content(card("a", TaskState.WaitingInput("What time is it?"))))
         assertEquals(CardContent.Held("Queuing", true), CapsuleCards.content(card("a", TaskState.Held(GateReason("q", "Queuing", resumable = true)))))
-        assertEquals(CardContent.Held("Wait first", false), CapsuleCards.content(card("a", TaskState.Held(GateReason("q")))))
+        assertEquals(CardContent.Held("On hold", false), CapsuleCards.content(card("a", TaskState.Held(GateReason("q")))))
         assertEquals(CardContent.Result(CapsuleKind.Done), CapsuleCards.content(card("a", TaskState.Succeeded("Placed an order"))))
         assertEquals(CardContent.Result(CapsuleKind.Failed), CapsuleCards.content(card("a", TaskState.Failed("not found", FailKind.GaveUp))))
         assertEquals(CardContent.Result(CapsuleKind.Cancelled), CapsuleCards.content(card("a", TaskState.Cancelled)))
@@ -156,7 +156,7 @@ class CapsuleCardModelTest {
         val ex = Exchange("g", (1..80).map { StepRow(1, "No. $it step", "", StepState.Ok) }, ExchangeStatus.Working, live = true)
         val steps = CapsuleCards.steps(ex, "Thinking about the next step")
         assertEquals(CapsuleCards.STEPS, steps.size)
-        assertEquals("Step 32", steps.first())
+        assertEquals("No. 32 step", steps.first())
         assertEquals("Thinking about the next step", steps.last())
     }
 

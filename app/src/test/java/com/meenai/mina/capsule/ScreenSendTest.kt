@@ -1,7 +1,7 @@
 package com.meenai.mina.capsule
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.agent.TaskState
 import com.meenai.mina.ui.ScreenCopy
 import org.junit.Assert.assertEquals
@@ -12,7 +12,7 @@ import org.junit.Test
 
 /**Double-click or single-click, which conversation should the screenshot be sent to, and if the screen is included, how should it be called in the list. */
 class ScreenSendTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     @Test fun secondTapWithinTimeoutIsDouble() {
         val t = DoubleTap(300)
@@ -72,7 +72,7 @@ class ScreenSendTest {
     }
 
     @Test fun plainTitles() {
-        assertEquals("Are there any pitfalls in Article 3??", ScreenCopy.plain("[[screen:s1]]\?"))
+        assertEquals("Are there any pitfalls in Article 3??", ScreenCopy.plain("[[screen:s1]]\nAre there any pitfalls in Article 3??"))
         assertEquals(ScreenCopy.TAG, ScreenCopy.plain("[[screen:s1]]"))
         assertEquals("an ordinary sentence", ScreenCopy.plain("an ordinary sentence"))
     }

@@ -1,7 +1,7 @@
 package com.meenai.mina.task
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import com.meenai.mina.core.agent.TaskState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +16,7 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskGateTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val locked = MutableStateFlow(false)
     private val shellUp = MutableStateFlow(true)

@@ -1,7 +1,7 @@
 package com.meenai.mina.browser
 
 import org.junit.Rule
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 class StartPageModelTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val zone = ZoneId.of("Asia/Shanghai")
     private fun at(y: Int, mo: Int, d: Int, h: Int, mi: Int) = LocalDateTime.of(y, mo, d, h, mi).atZone(zone).toInstant().toEpochMilli()
@@ -19,7 +19,7 @@ class StartPageModelTest {
     fun recentRowsShowSearchesAndPages() {
         val rows = StartPageModel.recentRows(
             listOf(
-                RecentPage(AddressInput.search(""), " -search", 3_000),
+                RecentPage(AddressInput.search("Where to go on the weekend"), " -search", 3_000),
                 RecentPage("https://shop.example.com/item/1", "Fresh mint toothpaste", 2_000),
                 RecentPage("https://news.example.org/a", "", 1_000),
             ),
@@ -49,14 +49,14 @@ class StartPageModelTest {
     fun suggestionsStartWithSearchThenMatchingRecent() {
         val recent = StartPageModel.recentRows(
             listOf(
-                RecentPage(AddressInput.search(""), "", 3_000),
+                RecentPage(AddressInput.search("Where to go on the weekend"), "", 3_000),
                 RecentPage("https://news.example.org/weekend", "Recommended weekend parent-child activities", 2_000),
                 RecentPage("https://shop.example.com/", "Shopping home page", 1_000),
             ),
             name,
         )
         val s = StartPageModel.suggestions("weekend", recent)
-        assertEquals(listOf("Search "weekend"", "Search: Where to go on the weekend", "Recommended weekend parent-child activities"), s.map { it.title })
+        assertEquals(listOf("Search “weekend”", "Search: Where to go on the weekend", "Recommended weekend parent-child activities"), s.map { it.title })
         assertEquals(listOf("Bing", "Recently opened", "Recently opened"), s.map { it.subtitle })
         assertTrue(s[0].search)
         assertEquals(AddressInput.search("weekend"), s[0].url)
@@ -65,7 +65,7 @@ class StartPageModelTest {
     @Test
     fun suggestionsMatchAddressIgnoringCase() {
         val recent = StartPageModel.recentRows(listOf(RecentPage("https://Shop.example.com/cart", "shopping cart", 1_000)), name)
-        assertEquals(listOf("Search "SHOP"", "shopping cart"),StartPageModel.suggestions("SHOP", recent).map { it.title })
+        assertEquals(listOf("Search “SHOP”", "shopping cart"),StartPageModel.suggestions("SHOP", recent).map { it.title })
     }
 
     @Test
@@ -88,12 +88,12 @@ class StartPageModelTest {
     fun relativeTime() {
         val now = at(2026, 10, 28, 11, 30)
         fun rel(t: Long) = StartPageModel.relativeTime(t, now, zone)
-        assertEquals("just", rel(now - 20_000))
+        assertEquals("Just now", rel(now - 20_000))
         assertEquals("10 minutes ago", rel(now - 10 * 60_000))
-        assertEquals("today 09:05", rel(at(2026, 10, 28, 9, 5)))
-        assertEquals("today 00:10", rel(at(2026, 10, 28, 0, 10)))
-        assertEquals("yesterday", rel(at(2026, 10, 27, 23, 50)))
-        assertEquals("October 21", rel(at(2026, 10, 21, 8, 0)))
-        assertEquals("December 31, 2025", rel(at(2025, 12, 31, 8, 0)))
+        assertEquals("Today 09:05", rel(at(2026, 10, 28, 9, 5)))
+        assertEquals("Today 00:10", rel(at(2026, 10, 28, 0, 10)))
+        assertEquals("Yesterday", rel(at(2026, 10, 27, 23, 50)))
+        assertEquals("Oct 21", rel(at(2026, 10, 21, 8, 0)))
+        assertEquals("Dec 31, 2025", rel(at(2025, 12, 31, 8, 0)))
     }
 }

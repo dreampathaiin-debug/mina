@@ -2,14 +2,14 @@ package com.meenai.mina.capsule
 
 import androidx.compose.ui.geometry.Rect
 import com.meenai.mina.cap.phone.a11y.HoldGesture
-import com.meenai.mina.i18n.ChineseTexts
+import com.meenai.mina.i18n.EnglishTexts
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
 /**Press and hold the capsule to speak:Which circle your finger falls on when you release it, how to distinguish between long pressing and dragging, and the sentence that flashes on the capsule after speaking. */
 class CapsuleVoiceTest {
-    @get:Rule val texts = ChineseTexts()
+    @get:Rule val texts = EnglishTexts()
 
     private val cancel = Rect(100f, 200f, 162f, 262f)
     private val edit = Rect(300f, 200f, 362f, 262f)
@@ -65,9 +65,9 @@ class CapsuleVoiceTest {
     }
 
     @Test fun sentNoteSaysWhatHappenedWithTheFirstWords() {
-        assertEquals("Interjected: I want a second-class seat after 3pm...", CapsuleVoice.sent(CardInputKind.Steer, "If you want to go after 3pm, the second class seat will be by the window."))
-        assertEquals("Answered: tomorrow morning", CapsuleVoice.sent(CardInputKind.Answer, "tomorrow morning"))
-        assertEquals("Sent: Check the weather", CapsuleVoice.sent(CardInputKind.Continue, "Check the weather"))
-        assertEquals("Sent: Check the weather", CapsuleVoice.sent(CardInputKind.Start, "Check the weather"))
+        assertEquals("Told the task: If you want …", CapsuleVoice.sent(CardInputKind.Steer, "If you want to go after 3pm, the second class seat will be by the window."))
+        assertEquals("Answered: tomorrow mor…", CapsuleVoice.sent(CardInputKind.Answer, "tomorrow mor…"))
+        assertEquals("Sent: Check the we…", CapsuleVoice.sent(CardInputKind.Continue, "Check the weather"))
+        assertEquals("Sent: Check the we…", CapsuleVoice.sent(CardInputKind.Start, "Check the weather"))
     }
 }

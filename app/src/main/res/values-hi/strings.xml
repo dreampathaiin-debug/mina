@@ -27,7 +27,7 @@
     <string name="confirmation_locked_hint">प्राप्तकर्ता और सामग्री देखने के लिए अनलॉक करें</string>
     <string name="action_reply">जवाब</string>
     <string name="reply_hint">अपना उत्तर टाइप करें</string>
-    <string name="ui_locale">एन</string>
+    <string name="ui_locale">hi</string>
     <string name="list_sep">", "</string>
     <string name="sentence_sep">" "</string>
     <string name="date_month_day">%2$s %3$d</string>

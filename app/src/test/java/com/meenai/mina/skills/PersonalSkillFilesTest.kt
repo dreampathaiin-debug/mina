@@ -41,7 +41,7 @@ class PersonalSkillFilesTest {
     @Test fun approveMovesDraftAndAppliesEdit() {
         val f = files()
         f.putPending("d1", skill("draft-one"))
-        val got = f.approve("d1", editedMarkdown = "---\nname: draft-one\n---\n改过的正文")!!
+        val got = f.approve("d1", editedMarkdown = "---\nname:   draft-one\n---\n改过的正文")!!
         assertEquals(SkillStatus.trial, got.status)
         assertEquals(listOf(got), files().list())
         assertEquals("---\nname: draft-one\n---\n改过的正文", files().get("draft-one")!!.markdown)
@@ -59,7 +59,7 @@ class PersonalSkillFilesTest {
         val f = files()
         f.put(skill("draft-one"))
         f.putPending("d2", skill("other-name", replaces = "draft-one"))
-        f.approve("d2", editedMarkdown = "---\nname: typed-by-user\n---\n改过")
+        f.approve("d2", editedMarkdown = "---\nname:   typed-by-user\n---\n改过")
         assertEquals("---\nname: draft-one\n---\n改过", files().get("draft-one")!!.markdown)
     }
 
