@@ -17,7 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 设置 › 恢复与修复:几项默认显示打开,拨动直接执行,不弹确认框。 */
+/**set up ›Restoration and Repair:Several displays are turned on by default,Toggle to execute directly,No confirmation box pops up. */
 @RunWith(AndroidJUnit4::class)
 class RecoverySectionTest {
 
@@ -35,7 +35,7 @@ class RecoverySectionTest {
     fun untouchedOnesShowOnWithTheirExplanation() {
         show(RecoveryConsent(), notes = mapOf(RecoveryCapability.Accessibility to RecoveryCopy.NEED_SETUP))
         RecoveryCapability.entries.forEach { compose.onNodeWithTag("recovery-${it.name}").assertIsOn() }
-        compose.onAllNodesWithText("默认打开").assertCountEquals(RecoveryCapability.entries.size)
+        compose.onAllNodesWithText("Open by default").assertCountEquals(RecoveryCapability.entries.size)
         compose.onNodeWithText(RecoveryCopy.switch(RecoveryCapability.BatteryWhitelist).explain).assertIsDisplayed()
         compose.onNodeWithText(RecoveryCopy.NEED_SETUP).assertIsDisplayed()
     }
@@ -48,7 +48,7 @@ class RecoverySectionTest {
         compose.onNodeWithTag(tag).performClick()
         compose.waitForIdle()
         assertEquals(listOf(RecoveryCapability.BatteryWhitelist to true), calls)
-        compose.onAllNodesWithText("取消").assertCountEquals(0)
+        compose.onAllNodesWithText("Cancel").assertCountEquals(0)
     }
 
     @Test

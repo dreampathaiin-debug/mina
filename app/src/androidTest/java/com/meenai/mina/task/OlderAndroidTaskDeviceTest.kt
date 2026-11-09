@@ -19,7 +19,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.UUID
 
-/** 安卓 11:不操作手机的任务不需要内置助手和无障碍服务。 */
+/**Android 11:Built-in assistants and accessibility services are not required for tasks that do not involve using your phone. */
 @RunWith(AndroidJUnit4::class)
 @SdkSuppress(minSdkVersion = 30, maxSdkVersion = 30)
 class OlderAndroidTaskDeviceTest {

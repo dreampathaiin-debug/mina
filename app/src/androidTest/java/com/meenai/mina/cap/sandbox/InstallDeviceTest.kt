@@ -15,7 +15,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 真安装(解自带的运行环境,不联网);装好后在沙箱里跑 Python、Node 与 `mina`。 */
+/**True installation(Understand the built-in operating environment,Not connected to the Internet);After installation, run Python, Node and `mina`. */
 @RunWith(AndroidJUnit4::class)
 class InstallDeviceTest {
     private val sb = AndroidSandbox(context, SandboxState.get(context))
@@ -30,11 +30,11 @@ class InstallDeviceTest {
         sh("node -e 'console.log(2+2)'").let { assertEquals(it.output, 0, it.exitCode); assertEquals("4", it.output.trim()) }
         sh("mina info").let { r ->
             assertEquals(r.output, 0, r.exitCode)
-            Json.parseToJsonElement(r.output.trim()).jsonObject // 是 JSON 对象
+            Json.parseToJsonElement(r.output.trim()).jsonObject //is a JSON object
         }
     }
 
-    /** 装的是自带的 Alpine;包都在 apk 的数据库里,数据库与文件一致(apk-tools 3 在 PRoot 下写不进数据库,所以用 3.22 的 apk-tools 2)。 */
+    /**It's installed by itself Alpine;The packages are all in the apk database,The database is consistent with the file(apk-tools3 Cannot write into the database under PRoot,So use 3.22 apk-tools 2). */
     @Test
     fun pinnedReleaseAndPackagesRecorded() {
         sh("cat /etc/alpine-release").let { assertEquals(it.output, BundledRuntime.VERSION.substringBefore('-'), it.output.trim()) }
@@ -43,8 +43,8 @@ class InstallDeviceTest {
             assertEquals(r.output, 0, r.exitCode)
             assertEquals(r.output, SANDBOX_PACKAGES.toSet(), r.output.lines().filter(String::isNotBlank).toSet())
         }
-        // 联网关着时 apk 会在标准错误抱怨读不到软件源缓存,只看标准输出
-        // 解包器不带扩展属性(设计如此),所以只差扩展属性的条目(代码 x)不算;内容、权限、属主有差仍然算
+        //When the Internet is turned off, the apk will complain on the standard error that the software source cache cannot be read.,Just look at standard output
+        //Unpacker without extended attributes(Designed like this),So only the entries for extended attributes are missing(code x)Doesn’t count;Differences in content, permissions, and ownership will still be counted.
         sh("apk audit --system 2>/dev/null").let { r ->
             assertEquals(r.output, 0, r.exitCode)
             val drift = r.output.lines().map(String::trim).filter { it.isNotEmpty() && !it.startsWith("x ") }

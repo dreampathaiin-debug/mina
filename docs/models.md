@@ -1,55 +1,55 @@
-# 模型与登录
+# Models and sign-in
 
-简体中文 | [English](models.en.md)
+[简体中文](models.md) | English
 
-Mina 不带模型，用你自己选的模型服务商：填一把 API Key，或者用账号登录。主模型要支持工具调用。
+Mina doesn't come with a model; it uses a model provider you choose. Enter an API key, or sign in with an account. The main model must support tool calling.
 
-## 添加模型
+## Add a model
 
-打开设置里的「模型」（第一次打开 App 时也会引导你）。内置了一批常见服务商的预设，清单见 [README](readme/README.zh-CN.md) 里「支持的模型服务商」；其他服务商选「自定义」，OpenAI 兼容、Anthropic、Gemini、OpenAI Responses 接口都能接。
+Open "Models" (模型) in Settings (the app also walks you through this on first launch). Presets for many common providers are built in; the list is under "Supported model providers" in the [README](../README.md). For any other provider pick Custom (自定义), which takes any OpenAI-compatible, Anthropic, Gemini or OpenAI Responses endpoint.
 
-1. 添加服务商：选一个预设，或选「自定义」填接口地址；填 API Key。Ollama、LM Studio 这类自己机器上跑的服务，地址预填了默认端口，改成那台机器的地址即可，Key 可不填。
-2. 点「测试并保存」，连上第一家时会自动选一个主模型。这家不提供模型列表、列表里没有你要的、或列模型出错时，点「手动填写模型名」填上服务商文档里的模型 ID，再点「测试并保存」：只用这个模型试调用一次，通了才保存。选用途时每家下面也都能手填，手填的标「手填」。实在连不上、又想先存下时，也可以点「不测试，直接保存」：只存地址和 Key，不列模型、不试调用，存下的这家标「没测试过」，之后在服务商页可以「重新测试」，或先刷新列出模型。没测过的模型不会自动当主模型，在这家选主模型时先试调用；主模型没测试通过、任务又因模型出错失败时，提示会指向这家的「重新测试」。
-3. 主模型要支持工具调用。可选：看图模型（看懂界面、看图找按钮）、轻量模型（便宜快的即可，处理判断结局、提取记忆等小事）、语音转文字（见下文）。
+1. Add a provider: pick a preset, or pick Custom and enter the endpoint URL; enter your API key. For servers you run yourself, such as Ollama or LM Studio, the address is prefilled with the default port; change it to that machine’s address, and the key is optional.
+2. Tap "Test and save" (测试并保存). When you connect your first provider, a main model is picked automatically. If the provider has no model list, the list lacks the model you want, or listing fails, tap "Enter a model name yourself", type the model ID from the provider's docs and tap "Test and save" again: only that model gets a test call, and the provider is saved only if it works. When picking a role you can also type a model name under any provider; typed models are tagged "Typed in". If the provider just will not connect and you want it saved anyway, tap "Don’t test, save anyway": it saves only the address and key, without listing models or making a test call. Such a provider is marked "not tested"; from its page you can test it again or refresh to list its models. An untested model never becomes the main model on its own: picking one as the main model on that provider tests it first, and if a task fails on a model error while the main model is still untested, the message points you to “Test again” on that provider.
+3. The main model must support tool calling. Optional: a vision model (understands the UI and finds buttons in screenshots), a light model (anything cheap and fast; handles small jobs like judging task outcomes and extracting memories) and speech to text (see below).
 
-前三个用途分别是：**主模型**（办事，要支持工具调用）、**看图模型**（描述界面、看图定位；新装默认不用，可选「用主模型」）、**轻量模型**（判断结局、提取记忆、理解意图等小事，默认用主模型）。「测试并保存」具体怎么试、模型列表上的能力标签怎么来，见[贡献指南里的模型配置细节](../.github/CONTRIBUTING.zh-CN.md#模型配置细节)。
+The first three roles: the **main model** (does the work; must support tool calling), the **vision model** (describes the UI and locates things in screenshots; off by default on a fresh install, or choose "use main model"), and the **light model** (small jobs like judging outcomes, extracting memories and understanding intent; defaults to the main model). For exactly what "Test and save" tries and where the capability tags on the model list come from, see [model configuration details](../.github/CONTRIBUTING.md#model-configuration-details) in the contributing guide.
 
-模型能不能看图：服务商的模型列表写了就照它，没写（不少中转、自建服务都不写）按预设初值，自定义服务商默认当它看不了。在服务商详情里点一个模型，面板下面有「能看图」开关，你说了算，列表写了的也能改。主模型能看图时，截图直接附给它看，不必另调一次看图模型；看图模型选的就是主模型（或选「用主模型」）也算你说了主模型能看图，换走了就恢复。
+Whether a model can see images: if the provider's model list says, Mina goes by that; if it doesn't (many relays and self-hosted services don't), the preset's initial value applies, and a custom provider is assumed not to see. Tap a model on the provider's page and the sheet has a "Can see images" switch: what you set wins, even over the list. When the main model can see, screenshots go straight to it instead of costing a separate vision call. Picking the main model itself as the vision model (or choosing "use main model") also counts as saying the main model can see; switching away undoes it.
 
-## 语音转文字
+## Speech to text
 
-按住说话时用的第四个用途，在「设置 › 模型 › 语音转文字」里选。默认用手机自带的语音识别，边说边出字，不花钱。手机没有、或认不准时，可以选服务商的语音模型：说完再转成字，用你的额度；列表里只列名字像语音模型的，没列出来的可以在每家下面手动填模型名。选的时候会先试转一小段静音，通了才选上，不通当场说原因。手机自带的识别如果按住后一直没有反应，Mina 会提示你来这里选一个，不会自己换成要花钱的模型。
+The fourth role, used when you hold to talk; pick it under Settings › Models › Speech to text. By default it uses the phone's built-in speech recognition, which shows words as you speak and costs nothing. If the phone has none, or it is not accurate enough, pick a provider's speech model: it transcribes after you finish speaking and uses your quota. The list only shows models whose names look like speech models; for anything else, type the model name in by hand under that provider. Picking runs a short test transcription of silence and only selects the model if it works; otherwise you see why right away. If the phone's recognizer never responds when you hold to talk, Mina tells you and points you here; it never switches to a paid model by itself.
 
-## 用账号登录（不用填 Key）
+## Sign in with an account (no key needed)
 
-添加服务商最上面是「用账号登录 · 不用填 Key」一组，点一家先看说明，再去浏览器里登录，登录后回到 Mina，能看到账号、可用的模型，可以直接设为主模型。
+At the top of "Add provider" is the group "Sign in with an account · no key needed". Tap one to read what happens, sign in in the browser, and come back to Mina to see the account and its models; you can set one as the main model right there.
 
-- **ChatGPT**（Plus 或 Pro，用你的套餐额度）：点「使用 ChatGPT 继续」，在浏览器里登录。
-- **xAI / Grok**（SuperGrok 或 X Premium+ 订阅）：浏览器里打开 xAI 的确认页，核对手机上显示的短码后同意。这项登录借用 xAI 官方命令行工具的公开登录入口，不是 xAI 专门给 Mina 开的，xAI 可能限制这种用法；有的订阅档位登录后仍不能调用（提示 403），那时改用 xAI 的 API Key。
-- **OpenRouter**：OpenRouter 官方给第三方应用的授权。同意后 OpenRouter 给 Mina 一把属于你的 Key（名字是 Mina），用量从你的 OpenRouter 余额里扣；不想用了，在 OpenRouter 的 Keys 页面删掉它。
+- **ChatGPT** (Plus or Pro, uses your plan's usage): tap "Continue with ChatGPT" and sign in in the browser.
+- **xAI / Grok** (SuperGrok or X Premium+ subscription): the browser opens xAI's confirmation page; check that it shows the same short code as your phone, then approve. This sign-in borrows the public sign-in entry of xAI's official command-line tool; xAI did not set it up for Mina and may restrict this use. Some subscription tiers still can't make calls after signing in (403); use an xAI API key in that case.
+- **OpenRouter**: OpenRouter's official authorization for third-party apps. Once you approve, OpenRouter gives Mina a key of your own (named "Mina"), paid from your OpenRouter balance; to stop, delete it on OpenRouter's Keys page.
 
-退出登录只清这台手机上的登录信息。
+Signing out only clears the sign-in on this phone.
 
-## 思考强度
+## Reasoning effort
 
-用 ChatGPT 登录、xAI 登录或 Responses 接口的模型，可在各用途卡片下调整「思考强度」；OpenAI 兼容、Anthropic Messages、Gemini 接口的模型，服务商在模型列表里写明了这个模型的档位时也可以调。默认用服务商默认值；选「用主模型」时也跟随它的强度，明确选同一个模型则可分别设置。档位优先采用服务商报告的列表（Anthropic 的模型列表逐个写明支持哪些档位，只能按预算思考的模型没有档位）；没报告时只有 Responses 一类提供手动选项，实际支持情况以服务端为准，OpenAI 兼容、Anthropic、Gemini 不猜。更高强度通常更慢、消耗更多 token。
+Models on ChatGPT sign-in, xAI sign-in, and the Responses API can adjust **Reasoning effort** below each role card; OpenAI-compatible, Anthropic Messages, and Gemini models can too when the provider's model list states the levels for that model. The default leaves the choice to the provider. "Use main model" inherits its effort; explicitly picking the same model lets each role use a different effort. Options come from the provider's model list when available (the Anthropic model list states each model's levels; models that only take a thinking budget get none). Without listed levels, only Responses models get generic manual options, subject to server support; OpenAI-compatible, Anthropic, and Gemini models are not guessed. Higher effort usually takes longer and uses more tokens.
 
-## 上下文窗口与压缩
+## Context window and compaction
 
-在「设置 › 模型」的用途卡片下打开「上下文与压缩」。窗口留空时沿用所选模型的窗口，压缩触发点留空时自动计算；也可以分别填入 token 数。触发点按整份请求计，包含系统提示词、工具定义和消息。比如窗口填 1,000,000 时，自动触发点为 967,000，也可以手填 600,000 提前压缩。输入时只写数字。界面显示允许范围和实际生效值，压缩后会留出一段余量再触发。
+Open **Context and compaction** under a role in **Settings › Models**. Leave the window blank to use the selected model’s window. Leave the trigger blank for automatic compaction, or enter an absolute token count. The trigger counts the whole request, including the system prompt, tools, and messages. A window of 1,000,000 tokens has an automatic trigger of 967,000. Enter 600,000 to compact earlier. Use digits only in the fields. The dialog shows the allowed range and effective values. After compaction, the request can grow by a margin before it triggers again.
 
-设置按服务商和模型保存，使用同一模型的各用途共享，下次任务生效。「重置」后保存即可恢复自动。以后重新选择模型导致窗口变小时，实际触发点会限制在新窗口的允许范围内。窗口覆盖只影响本地预算，服务端仍有自己的上下文上限。
+The settings apply on the next task and are shared by roles using the same provider and model. Choose **Reset** and save to restore both defaults. If reselecting a model gives it a smaller window, the effective trigger stays within its new bounds. A window override sets the local budget. The provider still enforces its own context limit.
 
-## 用自己电脑或局域网里跑的模型
+## Models on your own computer or LAN
 
-添加服务商时选「自定义」，接口地址填 `http://` 开头的也行，比如 `http://192.168.1.10:11434/v1`（手机和那台电脑在同一个 Wi-Fi 下）。本机和局域网的地址不加提示；不加密又不在局域网里的地址会提醒一句：API Key 和对话内容可能被同一网络里的人看到，能用 `https://` 就用。
+When adding a provider choose "Custom" (自定义); the base URL may start with `http://`, e.g. `http://192.168.1.10:11434/v1` (with the phone on the same Wi-Fi). Local and LAN addresses show no warning; an unencrypted address outside your LAN shows a short warning, since your API key and chats could be seen by others on the network. Use `https://` when you can.
 
-## 网络代理
+## Network proxy
 
-不想开全局 VPN、又需要代理才能连上模型服务时，在「设置 › 网络代理」填一个地址：`http://主机:端口` 或 `socks5://主机:端口`（`socks5h` 也行，域名都交给代理解析），需要账号密码时写成 `http://用户:密码@主机:端口`。地址加密保存在手机上，界面上只显示协议、主机和端口。
+If you need a proxy to reach a model service but don't want a system-wide VPN, enter an address in **Settings › Network proxy**: `http://host:port` or `socks5://host:port` (`socks5h` works too; host names are resolved by the proxy). For a proxy that needs a login, write `http://user:password@host:port`. The address is stored encrypted on the phone; the screen only shows the scheme, host and port.
 
-- 走这个代理的：调模型（对话、语音转文字、连接测试）、列模型、用账号登录时换令牌、在 App 里下载更新、内置浏览器，以及「文件与计算环境」里的命令（那里允许联网时）。
-- 始终直连的：这台手机和局域网里的地址（localhost、127.x、10.x、172.16–31.x、192.168.x、100.64–127.x、`.local`、`.lan` 结尾的名字、不带点的机器名），所以 Ollama、LM Studio 这类本地模型不受影响。
-- 连不上代理、或代理拒了账号密码时，会直接说是代理的问题，不会说成 Key 或模型不对。
-- `https://` 开头的代理（先和代理本身建加密连接）只有「文件与计算环境」里的命令用得上，Mina 自己的连接照旧直连；想全部走代理请用 `http://` 或 `socks5://`。
-- 内置浏览器要手机的 WebView 支持单独设代理才会走它；带账号密码的 SOCKS 代理浏览器用不了。这两种情况设置页那一行会写明浏览器直连。
+- Goes through the proxy: model requests (chat, speech to text, connection tests), model lists, token exchange when you sign in with an account, in-app update downloads, the in-app browser, and commands in Files & computing environment (while network access is on there).
+- Always direct: addresses on this phone or your LAN (localhost, 127.x, 10.x, 172.16–31.x, 192.168.x, 100.64–127.x, names ending in `.local` or `.lan`, and single-word machine names), so local models such as Ollama or LM Studio keep working.
+- If the proxy can't be reached or rejects the user name or password, Mina says so instead of blaming your key or model.
+- `https://` proxies (an encrypted connection to the proxy itself) are only used by commands in Files & computing environment; Mina's own connections stay direct. Use `http://` or `socks5://` to cover everything.
+- The in-app browser uses the proxy only if the phone's WebView supports a per-app proxy, and it can't use a SOCKS proxy that needs a login. In those cases the settings row says the browser connects directly.

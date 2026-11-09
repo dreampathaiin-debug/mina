@@ -18,8 +18,8 @@ import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * 真机测试:任务刚开始建虚拟屏或网页显示就被取消,反复 20 次,收尾后系统里不留 Mina 的显示。
- * 取消的时机错开,落在建屏前后的不同位置。需要内置助手在运行、Mina 无障碍服务已开启。
+ *Real machine test:The task was canceled just after building the virtual screen or web page display.,Repeat 20 times,After the completion, Mina will not be displayed in the system.
+ *The timing of cancellation is staggered,Falling in different positions before and after building the screen. Requires the built-in assistant to be running and the Mina accessibility service to be turned on.
  */
 @RunWith(AndroidJUnit4::class)
 class CancelLeakDeviceTest {
@@ -51,9 +51,9 @@ class CancelLeakDeviceTest {
     fun quickCancelLeavesNoDisplay() {
         repeat(ROUNDS) { i ->
             val model = models[i]
-            TaskService.start(context, "测试任务 $i")
+            TaskService.start(context, "Test tasks $i")
             assertEquals(1, model.awaitCall().number)
-            // 轮流建虚拟屏、网页显示
+            //Take turns to build virtual screens and web page displays
             if (i % 2 == 0) model.feed("phone_launch_app", """{"package":"$SETTINGS"}""")
             else model.feed("web_navigate", """{"url":"https://example.com/"}""")
             Thread.sleep((i / 2 % 5) * 40L)

@@ -54,7 +54,7 @@ class BridgeProtocolTest {
         val big = req("progress", buildJsonObject { put("text", "x".repeat(70_000)) })
         val r = handle(big)
         assertEquals("too_large", r.s("error")); assertTrue(r.close)
-        // 读的时候就截住:超过 64 KB 不再往下读
+        //Stop when reading:Exceed 64KB No more reading
         val line = BridgeProtocol.readLine(ByteArrayInputStream(ByteArray(70_000) { 'a'.code.toByte() } + "\n".toByteArray()))
         assertEquals(BridgeProtocol.Line.TooLarge, line)
         val ok = BridgeProtocol.readLine(ByteArrayInputStream("ab\ncd\n".toByteArray()))
@@ -65,12 +65,12 @@ class BridgeProtocolTest {
     @Test fun progressRateLimited() {
         var now = 10_000L
         val gate = ProgressGate(1_000) { now }
-        assertEquals("true", handle(req("progress", buildJsonObject { put("text", "第1步") }), gate = gate).s("shown"))
+        assertEquals("true", handle(req("progress", buildJsonObject { put("text", "Step 1") }), gate = gate).s("shown"))
         now += 400
-        assertEquals("false", handle(req("progress", buildJsonObject { put("text", "第2步") }), gate = gate).s("shown"))
+        assertEquals("false", handle(req("progress", buildJsonObject { put("text", "Step 2") }), gate = gate).s("shown"))
         now += 700
-        assertEquals("true", handle(req("progress", buildJsonObject { put("text", "第3步\u0007\n") }), gate = gate).s("shown"))
-        assertEquals(listOf("第1步", "第3步"), progressed)
+        assertEquals("true", handle(req("progress", buildJsonObject { put("text", "Step 3\u0007\n") }), gate = gate).s("shown"))
+        assertEquals(listOf("Step 1", "Step 3"), progressed)
         assertEquals("bad_params", handle(req("progress")).s("error"))
     }
 
@@ -93,7 +93,7 @@ class BridgeProtocolTest {
     @Test fun phoneRequestUsesCurrentTaskHandler() = runBlocking {
         val params = buildJsonObject {
             put("tool", "query")
-            put("args", buildJsonObject { put("text", "设置") })
+            put("args", buildJsonObject { put("text", "set up") })
         }
         val calls = mutableListOf<Pair<String, JsonObject>>()
         val ok = BridgeProtocol.handle(req("phone", params), token,
@@ -105,7 +105,7 @@ class BridgeProtocolTest {
         assertEquals("true", ok.s("ok"))
         assertEquals("1", ok.s("matches"))
         assertEquals("query", calls.single().first)
-        assertEquals("设置", calls.single().second["text"]!!.jsonPrimitive.content)
+        assertEquals("set up", calls.single().second["text"]!!.jsonPrimitive.content)
 
         val denied = BridgeProtocol.handle(req("phone", params, tok = "wrong"), token,
             progress = { true }, share = { _, _ -> "" }, info = { JsonObject(emptyMap()) },
@@ -116,12 +116,12 @@ class BridgeProtocolTest {
     }
 
     @Test fun shareGoesThroughCallbackAndMapsErrors() {
-        val ok = handle(req("share", buildJsonObject { put("path", "/workspace/out/a.png"); put("name", "图.png") }))
+        val ok = handle(req("share", buildJsonObject { put("path", "/workspace/out/a.png"); put("name", "picture.png") }))
         assertEquals("Download/Mina/a.png", ok.s("savedAs"))
-        assertEquals(listOf("/workspace/out/a.png" to "图.png"), shared)
+        assertEquals(listOf("/workspace/out/a.png" to "picture.png"), shared)
         shareResult = { throw SandboxError("share_unavailable", "not yet") }
         assertEquals("share_unavailable", handle(req("share", buildJsonObject { put("path", "/workspace/a") })).s("error"))
-        // 意外的失败只回错误码,不把内部信息交给沙箱
+        //Unexpected failure only returns error code,Do not hand over internal information to the sandbox
         shareResult = { throw IllegalStateException("/data/user/0/secret path") }
         val failed = handle(req("share", buildJsonObject { put("path", "/workspace/a") }))
         assertEquals("share_failed", failed.s("error"))

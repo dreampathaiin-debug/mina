@@ -37,6 +37,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import com.meenai.mina.ui.components.floatShadow
+import com.meenai.mina.ui.theme.MinaIcons
+import com.meenai.mina.ui.theme.MinaTheme
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -122,16 +133,12 @@ fun BrowserScreen(browser: UserBrowser, onBack: () -> Unit) {
         } else {
             val host = WebUrlPolicy.host(p.url)
             val loginBanner = p.loginFor != null && !BrowserFavorites.loggedIn(registry, p.loginFor)
-            Column(Modifier.fillMaxSize()) {
-                BrowserPageBar(
-                    p, host?.let(face),
-                    onClose = browser::closePage,
-                    onSubmit = { input -> browser.submit(input)?.let(toast) },
-                    onReload = browser::reload, onStop = browser::stop,
-                )
-                if (loginBanner) LoginBanner(desktop = p.desktop, onDone = browser::confirmLogin)
-                val mode = chat.mode
-                Box(Modifier.weight(1f).fillMaxWidth()) {
+            // 窗口大小:平常 / 全屏(只剩网页)/ 最小化(右下角小卡片);最小化时网页照常跑
+            var windowMode by rememberSaveable { mutableStateOf("normal") }
+            val mode = chat.mode
+            /** 网页视图那一块:[m] 由调用处给大小;[overlay] 平时带着问问面板,全屏和最小化时不带。 */
+            val pageView: @Composable (Modifier, Boolean) -> Unit = { m, overlay ->
+                Box(m) {
                     // 网页视图由 UserBrowser 放进这个容器(换了标签也放进同一个);手指按下告诉借着页面的任务,选中文字时菜单里有「问 Mina」
                     AndroidView(
                         factory = { ctx ->
@@ -145,15 +152,56 @@ fun BrowserScreen(browser: UserBrowser, onBack: () -> Unit) {
                         modifier = Modifier.fillMaxSize().testTag("browser-page"),
                         onRelease = { browser.setContainer(place, null) },
                     )
-                    PageAskOverlay(chat, site = host?.let { face(it).name } ?: p.url, pageTitle = p.title)
+                    if (overlay) PageAskOverlay(chat, site = host?.let { face(it).name } ?: p.url, pageTitle = p.title)
                 }
-                if (mode == PageAskMode.Bar && p.loginFor == null) PageAskBar(chat, Modifier.imePadding())
-                BrowserToolbar(
-                    p, onBackPage = browser::back, onForward = browser::forward, onHome = browser::closePage,
-                    onShare = { share(context, p.url, p.title)?.let(toast) },
-                    onMore = { moreOpen = true },
-                )
             }
+            when (windowMode) {
+                "full" -> {
+                    Box(Modifier.fillMaxSize()) {
+                        pageView(Modifier.fillMaxSize(), false)
+                        Box(
+                            Modifier.align(Alignment.TopEnd).padding(12.dp).size(36.dp)
+                                .floatShadow(MinaTheme.colors, CircleShape).background(MinaTheme.colors.glass, CircleShape).clip(CircleShape)
+                                .clickable(onClickLabel = tr(R.string.browser_fullscreen_exit)) { windowMode = "normal" }
+                                .testTag("browser-fullscreen-exit"),
+                            contentAlignment = Alignment.Center,
+                        ) { Icon(MinaIcons.Shrink, tr(R.string.browser_fullscreen_exit), Modifier.size(16.dp), tint = MinaTheme.colors.ink) }
+                    }
+                }
+                "mini" -> {
+                    Box(Modifier.fillMaxSize()) {
+                        pageView(Modifier.align(Alignment.BottomEnd).padding(12.dp).size(width = 176.dp, height = 264.dp), false)
+                        Box(
+                            Modifier.align(Alignment.TopEnd).padding(12.dp).size(36.dp)
+                                .floatShadow(MinaTheme.colors, CircleShape).background(MinaTheme.colors.glass, CircleShape).clip(CircleShape)
+                                .clickable(onClickLabel = tr(R.string.browser_restore)) { windowMode = "normal" }
+                                .testTag("browser-restore"),
+                            contentAlignment = Alignment.Center,
+                        ) { Icon(MinaIcons.Expand, tr(R.string.browser_restore), Modifier.size(16.dp), tint = MinaTheme.colors.ink) }
+                    }
+                }
+                else -> {
+                    Column(Modifier.fillMaxSize()) {
+                        BrowserPageBar(
+                            p, host?.let(face),
+                            onClose = browser::closePage,
+                            onSubmit = { input -> browser.submit(input)?.let(toast) },
+                            onReload = browser::reload, onStop = browser::stop,
+                        )
+                        if (loginBanner) LoginBanner(desktop = p.desktop, onDone = browser::confirmLogin)
+                        pageView(Modifier.weight(1f).fillMaxWidth(), true)
+                        if (mode == PageAskMode.Bar && p.loginFor == null) PageAskBar(chat, Modifier.imePadding())
+                        BrowserToolbar(
+                            p, onBackPage = browser::back, onForward = browser::forward, onHome = browser::closePage,
+                            onShare = { share(context, p.url, p.title)?.let(toast) },
+                            onMore = { moreOpen = true },
+                            onMinimize = { windowMode = "mini" },
+                            onFullscreen = { windowMode = "full" },
+                        )
+                    }
+                }
+            }
+
             if (moreOpen) {
                 val favorite = host != null && BrowserFavorites.contains(favorites, host)
                 BrowserMoreSheet(

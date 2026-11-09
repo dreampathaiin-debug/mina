@@ -9,7 +9,7 @@ import org.junit.Test
 
 class SystemIntentsTest {
     @Test fun alarmSkipsTheClockScreenAndCarriesEveryField() {
-        val s = SystemIntents.spec(SystemAction.SetAlarm(9, 40, "开会", listOf(2, 6), vibrate = false))
+        val s = SystemIntents.spec(SystemAction.SetAlarm(9, 40, "meeting", listOf(2, 6), vibrate = false))
         assertEquals("android.intent.action.SET_ALARM", s.action)
         assertNull(s.data)
         assertEquals(
@@ -17,7 +17,7 @@ class SystemIntentsTest {
                 "android.intent.extra.alarm.HOUR" to 9,
                 "android.intent.extra.alarm.MINUTES" to 40,
                 "android.intent.extra.alarm.SKIP_UI" to true,
-                "android.intent.extra.alarm.MESSAGE" to "开会",
+                "android.intent.extra.alarm.MESSAGE" to "meeting",
                 "android.intent.extra.alarm.DAYS" to arrayListOf(2, 6),
                 "android.intent.extra.alarm.VIBRATE" to false,
             ),
@@ -31,11 +31,11 @@ class SystemIntentsTest {
     }
 
     @Test fun timerSkipsTheClockScreen() {
-        val s = SystemIntents.spec(SystemAction.SetTimer(600, "泡面"))
+        val s = SystemIntents.spec(SystemAction.SetTimer(600, "instant noodles"))
         assertEquals("android.intent.action.SET_TIMER", s.action)
         assertEquals(600, s.extras["android.intent.extra.alarm.LENGTH"])
         assertEquals(true, s.extras["android.intent.extra.alarm.SKIP_UI"])
-        assertEquals("泡面", s.extras["android.intent.extra.alarm.MESSAGE"])
+        assertEquals("instant noodles", s.extras["android.intent.extra.alarm.MESSAGE"])
     }
 
     @Test fun showAlarmsIsJustTheAction() {
@@ -43,12 +43,12 @@ class SystemIntentsTest {
     }
 
     @Test fun calendarEventOpensTheInsertScreenWithAnExplicitType() {
-        val s = SystemIntents.spec(SystemAction.AddCalendarEvent("体检", 1_000L, 2_000L, allDay = false, location = "医院", description = null))
+        val s = SystemIntents.spec(SystemAction.AddCalendarEvent("Physical examination", 1_000L, 2_000L, allDay = false, location = "Hospital", description = null))
         assertEquals("android.intent.action.INSERT", s.action)
         assertEquals("content://com.android.calendar/events", s.data)
         assertEquals("vnd.android.cursor.dir/event", s.type)
-        assertEquals(mapOf("title" to "体检", "beginTime" to 1_000L, "endTime" to 2_000L, "eventLocation" to "医院"), s.extras)
-        val allDay = SystemIntents.spec(SystemAction.AddCalendarEvent("假期", 1_000L, allDay = true))
+        assertEquals(mapOf("title" to "Physical examination", "beginTime" to 1_000L, "endTime" to 2_000L, "eventLocation" to "Hospital"), s.extras)
+        val allDay = SystemIntents.spec(SystemAction.AddCalendarEvent("holiday", 1_000L, allDay = true))
         assertEquals(true, allDay.extras["allDay"])
     }
 
@@ -68,7 +68,7 @@ class SystemIntentsTest {
         val other = SystemIntents.Handler("com.example.other", "Set", system = false)
         assertNull(SystemIntents.choose(emptyList(), null))
         assertEquals(other, SystemIntents.choose(listOf(other), null))
-        // 用户设了默认的用默认的;没设(系统解析出来的是选择器)先挑系统自带的
+        //If the user sets the default, use the default;Not set(What the system parses is the selector)First choose the one that comes with the system
         assertEquals(other, SystemIntents.choose(listOf(clock, other), "com.example.other"))
         assertEquals(clock, SystemIntents.choose(listOf(other, clock), "android"))
         assertEquals(other, SystemIntents.choose(listOf(other, other.copy(className = "B")), null))

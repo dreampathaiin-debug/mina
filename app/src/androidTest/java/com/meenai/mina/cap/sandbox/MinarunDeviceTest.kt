@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 /**
- * 启动器 minarun 的真机用例:退出码、超时、断网、清场(脱离父进程的后代、Mina 被杀)。
- * 根文件系统与 SandboxSmokeTest 共用。
+ *Real device use case of launcher minarun:Exit code, timeout, disconnection, clearing(The descendant of the parent process, Mina, is killed.).
+ *Root file system with SandboxSmokeTestshared.
  */
 @RunWith(AndroidJUnit4::class)
 class MinarunDeviceTest {
@@ -51,7 +51,7 @@ class MinarunDeviceTest {
     fun parentDeathKillsWholeTree() {
         val marker = "1002"
         val inner = (launcher("--timeout", "600") + proot("/bin/sleep", marker)).joinToString(" ") { shQuote(it) }
-        // 「假父进程」:先报自己的 PID,再在后台起启动器并等它
+        //"Fake parent process":Pay your own first PID,Then start the launcher in the background and wait for it
         val p = start(listOf("/system/bin/sh", "-c", "echo \$\$; $inner & wait"))
         try {
             val fakeParent = p.inputStream.bufferedReader().readLine().trim().toInt()
@@ -82,7 +82,7 @@ class MinarunDeviceTest {
                 val args = cmdline(it)
                 args.firstOrNull()?.endsWith("libminarun.so") == true && script in args
             }
-            // 启动器来不及清场:靠 PRoot 的 PDEATHSIG 与 PTRACE_O_EXITKILL 带走全部沙箱进程
+            //The launcher was too late to clear the site:Relying on PRoot PDEATHSIGand PTRACE_O_EXITKILLTake away all sandbox processes
             Os.kill(launcherPid, OsConstants.SIGKILL)
             assertEquals("leftover sleep processes", emptyList<Int>(), awaitGone(marker, 3_000))
         } finally {
@@ -99,8 +99,8 @@ class MinarunDeviceTest {
 
     @Test
     fun netOffAllowsUnixSocket() {
-        // busybox 的 nc 不支持 AF_UNIX;改用 syslogd(在 /dev/log 上 bind)与 logger(connect)互通。
-        // /dev/log 绑到缓存目录里的一个文件,syslogd 会把它换成套接字。
+        //nc of busybox is not supported AF_UNIX;Use instead syslogd(exist /dev/log on bind)and logger(connect)Interoperability.
+        // /dev/log is tied to a file in the cache directory,syslogd will replace it with a socket.
         val devLog = File(SandboxSmokeTest.prootTmp.parentFile, "minarun-test-devlog").apply { delete(); writeText("") }
         val script = "syslogd -n -O /tmp/minarun-unix.log & sleep 1; logger -t minaprobe hello-unix; sleep 1; " +
             "kill \$!; cat /tmp/minarun-unix.log; rm -f /tmp/minarun-unix.log"
@@ -180,7 +180,7 @@ class MinarunDeviceTest {
         return Result(p.exitValue(), out, elapsedMs)
     }
 
-    /** 本 App 身份能看到的、命令行参数里有一项恰好等于 marker 的进程。 */
+    /**The identity of this app can see that there is a process in the command line parameter that is exactly equal to marker. */
     private fun findProcesses(marker: String): List<Int> =
         File("/proc").listFiles().orEmpty().mapNotNull { dir ->
             dir.name.toIntOrNull()?.takeIf { cmdline(it).contains(marker) }

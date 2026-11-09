@@ -19,7 +19,7 @@ import org.junit.Test
 class CapsuleModelTest {
     @get:Rule val texts = ChineseTexts()
 
-    private val model = CapsuleModel(reasonLabel = { if (it == "payment") "付款" else null })
+    private val model = CapsuleModel(reasonLabel = { if (it == "payment") "Payment" else null })
 
     private fun inputs(
         vararg runs: CapsuleRun,
@@ -31,56 +31,56 @@ class CapsuleModelTest {
         kept: KeptPage? = null,
     ) = CapsuleInputs(runs.toList(), mode, foreground, interactive, service, cardOpen, kept)
 
-    private val kept = KeptPage(1, "c-k", "r-k", "把这门课点开,挂着别关", "course.example.com", null, null, 0, 7_200_000)
+    private val kept = KeptPage(1, "c-k", "r-k", "Open this course,Don't close it", "course.example.com", null, null, 0, 7_200_000)
 
     private fun run(key: String, state: TaskState, stage: Takeover.Stage = Takeover.Stage.None) = CapsuleRun(key, "c-$key", state, stage)
     private fun running(said: String? = null, step: Int = 3, reason: String? = null, progress: RunProgress? = null) =
         TaskState.Running(step, "note", "tap", progress, reason, narration = said)
-    private val takeover = TaskState.WaitingTakeover("payment", "请输入支付密码")
-    private val confirm = TaskState.WaitingConfirmation(ConfirmationRequest(IrrevAction.send, "张三", "明天见", null, "com.chat"))
+    private val takeover = TaskState.WaitingTakeover("payment", "Please enter payment password")
+    private val confirm = TaskState.WaitingConfirmation(ConfirmationRequest(IrrevAction.send, "Zhang San", "See you tomorrow", null, "com.chat"))
 
     private fun shown(v: CapsuleView): CapsuleView.Shown = v as? CapsuleView.Shown ?: error("expected shown, got $v")
 
-    // ---------- 什么时候不显示 ----------
+    // ----------when not to show ----------
 
     @Test fun hiddenWhenOffForegroundLockedOrNoService() {
-        val r = run("a", running("在搜牙膏"))
+        val r = run("a", running("Searching for toothpaste"))
         assertEquals(CapsuleView.Hidden, model.update(inputs(r, mode = CapsuleMode.Off), 0))
         assertEquals(CapsuleView.Hidden, model.update(inputs(r, foreground = true), 0))
         assertEquals(CapsuleView.Hidden, model.update(inputs(r, interactive = false), 0))
         assertEquals(CapsuleView.Hidden, model.update(inputs(r, service = false), 0))
-        assertEquals("在搜牙膏", shown(model.update(inputs(r), 0)).text)
+        assertEquals("Searching for toothpaste", shown(model.update(inputs(r), 0)).text)
     }
 
     @Test fun noTasksHiddenDuringTasksIdleIconWhenAlways() {
         assertEquals(CapsuleView.Hidden, model.update(inputs(), 0))
         assertEquals(CapsuleKind.Idle, shown(model.update(inputs(mode = CapsuleMode.Always), 0)).kind)
-        // 一直显示也照样在 Mina 界面里、锁屏时不显示
+        //Even if it is always displayed, it will still be displayed in the Mina interface and will not be displayed when the screen is locked.
         assertEquals(CapsuleView.Hidden, model.update(inputs(mode = CapsuleMode.Always, foreground = true), 0))
         assertEquals(CapsuleView.Hidden, model.update(inputs(mode = CapsuleMode.Always, interactive = false), 0))
     }
 
-    // ---------- 留在后台运行的那一页 ----------
+    // ----------The page left running in the background ----------
 
     @Test fun keptPageStaysShownWhenNoTaskRuns() {
-        // 没有任务:展开成「后台网页运行中」,说的是它来自的对话;「一直显示」时也是它,不是空闲图标
+        //no task:Expand to "Backend web page is running",talking about the dialogue it comes from;This is also the case when "always displayed",Not an idle icon
         for (mode in listOf(CapsuleMode.DuringTasks, CapsuleMode.Always)) {
             val v = shown(model.update(inputs(mode = mode, kept = kept), 0))
             assertEquals(CapsuleKind.KeptPage, v.kind)
-            assertEquals("后台网页运行中", v.text)
+            assertEquals("The background web page is running", v.text)
             assertEquals("c-k", v.conversationId)
             assertTrue(v.pill)
         }
-        // 开关是「从不显示」、在 Mina 里、锁屏时照样不显示(靠通知)
+        //The switch is "never show". In Mina, it is still not displayed when the screen is locked.(Rely on notification)
         assertEquals(CapsuleView.Hidden, model.update(inputs(mode = CapsuleMode.Off, kept = kept), 0))
         assertEquals(CapsuleView.Hidden, model.update(inputs(foreground = true, kept = kept), 0))
         assertEquals(CapsuleView.Hidden, model.update(inputs(interactive = false, kept = kept), 0))
     }
 
     @Test fun runningTaskAndFreshResultComeBeforeKeptPage() {
-        assertEquals(CapsuleKind.Running, shown(model.update(inputs(run("a", running("在搜")), kept = kept), 0)).kind)
-        // 刚办完的结果先停一会儿,停完才是留着的那一页
-        val done = run("a", TaskState.Succeeded("好了"))
+        assertEquals(CapsuleKind.Running, shown(model.update(inputs(run("a", running("")), kept = kept), 0)).kind)
+        //I’ll just stop for a moment to finish the results.,The page that remains after you stop it
+        val done = run("a", TaskState.Succeeded("alright"))
         assertEquals(CapsuleKind.Done, shown(model.update(inputs(done, kept = kept), 10)).kind)
         assertEquals(CapsuleKind.KeptPage, shown(model.update(inputs(done, kept = kept), 10 + CapsuleModel.LINGER_MS)).kind)
         assertTrue(!CapsuleKind.KeptPage.active && !CapsuleKind.KeptPage.needsYou)
@@ -92,63 +92,63 @@ class CapsuleModelTest {
         CapsuleMode.entries.forEach { assertEquals(it, CapsuleMode.parse(it.name)) }
     }
 
-    // ---------- 那一行字 ----------
+    // ----------that line ----------
 
     @Test fun runningTextNarrationThenReasonThenFallback() {
-        assertEquals("在搜 牙膏", CapsuleModel.runningText(running("  在搜\n牙膏 ", reason = "找搜索框")))
-        assertEquals("找搜索框", CapsuleModel.runningText(running(" ", reason = "找搜索框")))
+        assertEquals("Searching toothpaste", CapsuleModel.runningText(running("Searching\nToothpaste ", reason = "Find the search box")))
+        assertEquals("Find the search box", CapsuleModel.runningText(running(" ", reason = "Find the search box")))
         assertEquals(CapsuleModel.THINKING, CapsuleModel.runningText(running()))
         assertEquals(CapsuleModel.PREPARING, CapsuleModel.runningText(running(step = 0)))
-        assertEquals("照着路线做 3/7", CapsuleModel.runningText(running("在搜牙膏", progress = RunProgress.Replay(3, 7))))
-        assertEquals("一次做 4 步", CapsuleModel.runningText(running(progress = RunProgress.Batch(4))))
+        assertEquals("follow the route 3/7", CapsuleModel.runningText(running("Searching for toothpaste", progress = RunProgress.Replay(3, 7))))
+        assertEquals("Do 4 steps at a time", CapsuleModel.runningText(running(progress = RunProgress.Batch(4))))
     }
 
     @Test fun eachStateHasItsLine() {
         fun line(state: TaskState, stage: Takeover.Stage = Takeover.Stage.None) =
-            shown(CapsuleModel(reasonLabel = { if (it == "payment") "付款" else null }).update(inputs(run("a", state, stage)), 0))
-        assertEquals(CapsuleKind.NeedTakeover to "需要你：付款", line(takeover, Takeover.Stage.Waiting).let { it.kind to it.text })
-        assertEquals("需要你：请登录", line(TaskState.WaitingTakeover("login", "请登录"), Takeover.Stage.Waiting).text)
-        assertEquals(CapsuleKind.NeedConfirm to "要你同意：发送", line(confirm).let { it.kind to it.text })
-        assertEquals(CapsuleKind.NeedAnswer to "Mina 问你：要哪个颜色？", line(TaskState.WaitingInput("要哪个颜色？")).let { it.kind to it.text })
-        assertEquals(CapsuleKind.Held to "先等等：你打开了这个 App", line(TaskState.Held(GateReason("paused", "你打开了这个 App"))).let { it.kind to it.text })
-        // 要你在手机上动一下手(在系统的选择框里选一个):算要你处理
-        val pick = line(TaskState.Held(GateReason("waiting_user", "「聊天」在问用哪个，请在屏幕上选一下", needsYou = true)))
-        assertEquals(CapsuleKind.NeedStep to "需要你：「聊天」在问用哪个，请在屏幕上选一下", pick.kind to pick.text)
+            shown(CapsuleModel(reasonLabel = { if (it == "payment") "Payment" else null }).update(inputs(run("a", state, stage)), 0))
+        assertEquals(CapsuleKind.NeedTakeover to "Needed from you: Payment", line(takeover, Takeover.Stage.Waiting).let { it.kind to it.text })
+        assertEquals("Need you: please log in", line(TaskState.WaitingTakeover("login", "Please log in"), Takeover.Stage.Waiting).text)
+        assertEquals(CapsuleKind.NeedConfirm to "Ask for your consent: send", line(confirm).let { it.kind to it.text })
+        assertEquals(CapsuleKind.NeedAnswer to "Mina asks you: Which color do you want?", line(TaskState.WaitingInput("Which color do you want?")).let { it.kind to it.text })
+        assertEquals(CapsuleKind.Held to "Wait a minute: you opened this App", line(TaskState.Held(GateReason("paused", "you opened this App"))).let { it.kind to it.text })
+        //I want you to move your hands on your phone(Select one in the system selection box):It's up to you to handle it
+        val pick = line(TaskState.Held(GateReason("waiting_user", ""Chat" is asking which one to use, please select it on the screen.", needsYou = true)))
+        assertEquals(CapsuleKind.NeedStep to "Need you: "Chat" is asking which one to use, please choose on the screen", pick.kind to pick.text)
         assertTrue(pick.kind.needsYou)
-        assertEquals("先等等", line(TaskState.Held(GateReason("waiting_unlock"))).text)
+        assertEquals("Wait first", line(TaskState.Held(GateReason("waiting_unlock"))).text)
         val bar = line(takeover, Takeover.Stage.HandedOver)
         assertEquals(CapsuleKind.HandedOver, bar.kind)
         assertEquals(CapsuleModel.HANDED_OVER, bar.text)
-        assertEquals("付款 · 弄好后点右边", bar.detail)
-        // 已交还、循环还没往下走:不再要你
+        assertEquals("Payment·Click on the right after completion", bar.detail)
+        //It has been handed back, and the cycle has not gone down yet.:no longer want you
         assertEquals(CapsuleKind.Running, line(takeover).kind)
     }
 
-    // ---------- 优先级与件数 ----------
+    // ----------Priority and number of pieces ----------
 
     @Test fun highestPriorityWinsAndCountsTasks() {
-        val v = shown(model.update(inputs(run("a", running("在搜牙膏")), run("b", TaskState.WaitingInput("要哪个？"))), 0))
+        val v = shown(model.update(inputs(run("a", running("Searching for toothpaste")), run("b", TaskState.WaitingInput("Which one do you want?"))), 0))
         assertEquals(CapsuleKind.NeedAnswer, v.kind)
         assertEquals("b", v.runKey)
         assertEquals("c-b", v.conversationId)
         assertEquals(2, v.count)
         assertEquals(1, v.needCount)
-        assertEquals("1 件要你处理 · 共 2 件", v.text)
+        assertEquals("1 item for you to handle · 2 items in total", v.text)
     }
 
     @Test fun severalRunningAddCount() {
-        val v = shown(model.update(inputs(run("a", running("在搜牙膏")), run("b", running("在看天气"))), 0))
-        // 一样要紧时说先开始的那件
+        val v = shown(model.update(inputs(run("a", running("Searching for toothpaste")), run("b", running("Watching the weather"))), 0))
+        //When it's important, say which one starts first
         assertEquals("a", v.runKey)
-        assertEquals("在搜牙膏 · 共 2 件", v.text)
+        assertEquals("Searching for toothpaste · 2 items in total", v.text)
         assertEquals(0, v.needCount)
     }
 
     @Test fun priorityOrder() {
-        val held = TaskState.Held(GateReason("paused", "等一下"))
+        val held = TaskState.Held(GateReason("paused", "Wait a moment"))
         val all = listOf(
             run("run", running("x")), run("held", held), run("ask", TaskState.WaitingInput("?")), run("ok", confirm),
-            run("need", takeover, Takeover.Stage.Waiting), run("hand", TaskState.WaitingTakeover("login", "登录"), Takeover.Stage.HandedOver),
+            run("need", takeover, Takeover.Stage.Waiting), run("hand", TaskState.WaitingTakeover("login", "Log in"), Takeover.Stage.HandedOver),
         )
         val expected = listOf("hand", "need", "ok", "ask", "held", "run")
         for (i in expected.indices) {
@@ -159,55 +159,55 @@ class CapsuleModelTest {
 
     @Test fun handedOverBarSaysWhoIsWaitingBehind() {
         val v = shown(model.update(inputs(
-            run("a", takeover, Takeover.Stage.HandedOver), run("b", TaskState.WaitingTakeover("login", "登录"), Takeover.Stage.Waiting),
+            run("a", takeover, Takeover.Stage.HandedOver), run("b", TaskState.WaitingTakeover("login", "Log in"), Takeover.Stage.Waiting),
         ), 0))
         assertEquals(CapsuleKind.HandedOver, v.kind)
-        assertEquals("处理好这件后，还有 1 件等你", v.detail)
+        assertEquals("After you take care of this one, there's 1 more waiting for you", v.detail)
     }
 
-    // ---------- 每句至少停 1.5 秒 ----------
+    // ----------Pause at least 1.5 seconds for each sentence ----------
 
     @Test fun sentenceStaysAtLeastMinimumAndLatestWins() {
-        assertEquals("一", shown(model.update(inputs(run("a", running("一"))), 0)).text)
-        assertEquals("一", shown(model.update(inputs(run("a", running("二"))), 500)).text)
-        val v = shown(model.update(inputs(run("a", running("三"))), 900))
-        assertEquals("一", v.text)
+        assertEquals("one", shown(model.update(inputs(run("a", running("one"))), 0)).text)
+        assertEquals("one", shown(model.update(inputs(run("a", running("two"))), 500)).text)
+        val v = shown(model.update(inputs(run("a", running("three"))), 900))
+        assertEquals("one", v.text)
         assertEquals(CapsuleModel.MIN_SENTENCE_MS, model.nextChangeAt)
-        // 到时候换成那时最新的一句,中间那句不出现
-        assertEquals("三", shown(model.update(inputs(run("a", running("三"))), CapsuleModel.MIN_SENTENCE_MS)).text)
+        //Then replace it with the latest sentence at that time,The sentence in the middle does not appear
+        assertEquals("three", shown(model.update(inputs(run("a", running("three"))), CapsuleModel.MIN_SENTENCE_MS)).text)
         assertNull(model.nextChangeAt)
     }
 
     @Test fun stateChangeSwitchesAtOnce() {
-        model.update(inputs(run("a", running("一"))), 0)
-        val v = shown(model.update(inputs(run("a", TaskState.WaitingInput("要哪个？"))), 100))
-        assertEquals("Mina 问你：要哪个？", v.text)
+        model.update(inputs(run("a", running("one"))), 0)
+        val v = shown(model.update(inputs(run("a", TaskState.WaitingInput("Which one do you want?"))), 100))
+        assertEquals("Mina asks you: Which one do you want?", v.text)
     }
 
-    // ---------- 只变宽不变窄 ----------
+    // ----------Only widen but not narrow ----------
 
     @Test fun widthEpochHoldsWithinStateAndRenewsOnChange() {
-        val first = shown(model.update(inputs(run("a", running("一"))), 0)).widthEpoch
-        assertEquals(first, shown(model.update(inputs(run("a", running("长一点的一句话"))), 2_000)).widthEpoch)
-        assertEquals(first, shown(model.update(inputs(run("a", running("短"))), 4_000)).widthEpoch)
+        val first = shown(model.update(inputs(run("a", running("one"))), 0)).widthEpoch
+        assertEquals(first, shown(model.update(inputs(run("a", running("a longer sentence"))), 2_000)).widthEpoch)
+        assertEquals(first, shown(model.update(inputs(run("a", running("short"))), 4_000)).widthEpoch)
         val need = shown(model.update(inputs(run("a", TaskState.WaitingInput("?"))), 5_000)).widthEpoch
         assertNotEquals(first, need)
-        val back = shown(model.update(inputs(run("a", running("一"))), 6_000)).widthEpoch
+        val back = shown(model.update(inputs(run("a", running("one"))), 6_000)).widthEpoch
         assertNotEquals(need, back)
-        // 换了一件事也重新定宽
-        assertNotEquals(back, shown(model.update(inputs(run("b", running("一"))), 7_000)).widthEpoch)
+        //Change one thing and reset the width
+        assertNotEquals(back, shown(model.update(inputs(run("b", running("one"))), 7_000)).widthEpoch)
     }
 
-    // ---------- 一颗还是展开 ----------
+    // ----------One is still unfolding ----------
 
     @Test fun runningRestsAsBallAndStepsNeverExpandIt() {
-        val first = shown(model.update(inputs(run("a", running("在搜牙膏"))), 0))
+        val first = shown(model.update(inputs(run("a", running("Searching for toothpaste"))), 0))
         assertEquals(CapsuleKind.Running to false, first.kind to first.pill)
-        // 换了好几步:还是一颗
-        for ((t, said) in listOf(2_000L to "在比价", 4_000L to "在看运费", 6_000L to "在下单")) {
+        //Changed several steps:Still one
+        for ((t, said) in listOf(2_000L to "Comparing prices", 4_000L to "Looking at shipping costs", 6_000L to "Placing an order")) {
             assertTrue(!shown(model.update(inputs(run("a", running(said))), t)).pill)
         }
-        assertTrue(!shown(model.update(inputs(run("a", TaskState.Held(GateReason("paused", "等一下")))), 7_000)).pill)
+        assertTrue(!shown(model.update(inputs(run("a", TaskState.Held(GateReason("paused", "Wait a moment")))), 7_000)).pill)
     }
 
     @Test fun severalRunsCountOnTheBall() {
@@ -220,10 +220,10 @@ class CapsuleModelTest {
         model.update(inputs(run("a", running("x"))), 0)
         val need = shown(model.update(inputs(run("a", confirm)), 100))
         assertEquals(CapsuleKind.NeedConfirm to true, need.kind to need.pill)
-        // 不会自己缩回,也不排下一次变化
+        //Will not retract on its own,I don’t plan the next change either.
         assertNull(model.nextChangeAt)
         assertTrue(shown(model.update(inputs(run("a", confirm)), 600_000)).pill)
-        // 打开卡片看过了,收起后是一颗(还是橙的)
+        //Opened the card and read it,After being folded, there is one(Still orange)
         model.update(inputs(run("a", confirm), cardOpen = true), 600_100)
         val ball = shown(model.update(inputs(run("a", confirm)), 600_200))
         assertEquals(CapsuleKind.NeedConfirm to false, ball.kind to ball.pill)
@@ -233,14 +233,14 @@ class CapsuleModelTest {
         model.update(inputs(run("a", confirm)), 0)
         model.update(inputs(run("a", confirm), cardOpen = true), 10)
         assertTrue(!shown(model.update(inputs(run("a", confirm)), 20)).pill)
-        // 同一件事换成了另一个等待:展开
-        val ask = TaskState.WaitingInput("要哪个颜色？")
+        //The same thing is replaced by another wait:Expand
+        val ask = TaskState.WaitingInput("Which color do you want?")
         assertTrue(shown(model.update(inputs(run("a", ask)), 30)).pill)
         model.update(inputs(run("a", ask), cardOpen = true), 40)
         assertTrue(!shown(model.update(inputs(run("a", ask)), 50)).pill)
-        // 另一件也要你:展开,写「2 件要你处理」
+        //I want another one from you too:Expand,Write "2 things I need you to deal with"
         val two = shown(model.update(inputs(run("a", ask), run("b", takeover, Takeover.Stage.Waiting)), 60))
-        assertEquals("2 件要你处理 · 共 2 件" to true, two.text to two.pill)
+        assertEquals("2 items for you to deal with · 2 items in total" to true, two.text to two.pill)
     }
 
     @Test fun aNeedThatComesBackAfterBeingResolvedExpandsAgain() {
@@ -250,15 +250,15 @@ class CapsuleModelTest {
         assertTrue(shown(model.update(inputs(run("a", confirm)), 30)).pill)
     }
 
-    // ---------- 办完之后 ----------
+    // ----------After finishing ----------
 
     @Test fun doneExpandsThenBallWithBadgeThenGone() {
         model.update(inputs(run("a", running("x"))), 0)
-        val done = shown(model.update(inputs(run("a", TaskState.Succeeded("好了"))), 1_000))
+        val done = shown(model.update(inputs(run("a", TaskState.Succeeded("alright"))), 1_000))
         assertEquals(CapsuleKind.Done to true, done.kind to done.pill)
         assertEquals("c-a", done.conversationId)
         assertEquals(1_000 + CapsuleModel.PILL_MS, model.nextChangeAt)
-        // 任务已从列表里拿掉,模型自己记着;缩回一颗,还是办好了(角标)
+        //The task has been removed from the list,The model remembers itself;retract one,It's still done(corner mark)
         val ball = shown(model.update(inputs(), 1_000 + CapsuleModel.PILL_MS))
         assertEquals(CapsuleKind.Done to false, ball.kind to ball.pill)
         assertEquals(1_000 + CapsuleModel.LINGER_MS, model.nextChangeAt)
@@ -266,28 +266,28 @@ class CapsuleModelTest {
     }
 
     @Test fun afterLingerAlwaysModeReturnsToIdle() {
-        model.update(inputs(run("a", TaskState.Failed("没找到", FailKind.GaveUp)), mode = CapsuleMode.Always), 0)
+        model.update(inputs(run("a", TaskState.Failed("not found", FailKind.GaveUp)), mode = CapsuleMode.Always), 0)
         assertEquals(CapsuleKind.Idle, shown(model.update(inputs(mode = CapsuleMode.Always), CapsuleModel.LINGER_MS)).kind)
     }
 
     @Test fun endedRunStaysGoneThoughStillListed() {
-        // 任务列表没再变时,调用方一直列着那件停掉的任务
+        //The task list has not changed anymore,The caller keeps listing the stopped task
         val a = run("a", TaskState.Cancelled)
         assertTrue(shown(model.update(inputs(a), 0)).pill)
         assertEquals(CapsuleView.Hidden, model.update(inputs(a), CapsuleModel.LINGER_MS))
-        // 进 Mina 再出来:不再展开「已停止」
+        //Enter Mina and come out:Do not expand "Stopped" again
         assertEquals(CapsuleView.Hidden, model.update(inputs(a, foreground = true), CapsuleModel.LINGER_MS + 1_000))
         assertEquals(CapsuleView.Hidden, model.update(inputs(a), CapsuleModel.LINGER_MS + 2_000))
         assertNull(model.nextChangeAt)
     }
 
     @Test fun endedWhileHiddenCountsItsTimeToo() {
-        // 在 Mina 里结束、过了 10 秒才回到别的 App:不再出现
-        val a = run("a", TaskState.Succeeded("好了"))
+        //It ended in Mina and it took 10 seconds to return to other App:Never appear again
+        val a = run("a", TaskState.Succeeded("alright"))
         assertEquals(CapsuleView.Hidden, model.update(inputs(a, foreground = true), 0))
         assertEquals(CapsuleView.Hidden, model.update(inputs(a), 60_000))
         assertEquals(CapsuleView.Hidden, model.update(inputs(a), 60_100))
-        // 熄屏或锁屏时结束的也一样
+        //It ends the same when the screen is turned off or locked.
         val b = run("b", TaskState.Cancelled)
         assertEquals(CapsuleView.Hidden, model.update(inputs(b, interactive = false), 100_000))
         assertEquals(CapsuleView.Hidden, model.update(inputs(b), 200_000))
@@ -297,29 +297,29 @@ class CapsuleModelTest {
     @Test fun failedAndCancelledHaveTheirLines() {
         assertEquals(CapsuleKind.Failed, shown(CapsuleModel().update(inputs(run("a", TaskState.Failed("x", FailKind.Model))), 0)).kind)
         val stopped = shown(CapsuleModel().update(inputs(run("a", TaskState.Cancelled)), 0))
-        assertEquals(CapsuleKind.Cancelled to "已停止", stopped.kind to stopped.text)
+        assertEquals(CapsuleKind.Cancelled to "Stopped", stopped.kind to stopped.text)
     }
 
     @Test fun activeTaskOutranksLingeringDone() {
-        model.update(inputs(run("a", TaskState.Succeeded("好了"))), 0)
-        val v = shown(model.update(inputs(run("b", running("在看天气"))), 100))
+        model.update(inputs(run("a", TaskState.Succeeded("alright"))), 0)
+        val v = shown(model.update(inputs(run("b", running("Watching the weather"))), 100))
         assertEquals(CapsuleKind.Running, v.kind)
         assertEquals("b", v.runKey)
-        // 结束的不算在「共 N 件」里
+        //The finished ones are not included in the "total N items"
         assertEquals(1, v.count)
     }
 
-    // ---------- 卡片展开时 ----------
+    // ----------When the card is expanded ----------
 
     @Test fun openCardStopsTheClockForEndedRuns() {
         model.update(inputs(run("a", running("x"))), 0)
-        model.update(inputs(run("a", TaskState.Succeeded("好了")), cardOpen = true), 1_000)
-        // 展开着:过了很久也不消失,也不排下一次变化
+        model.update(inputs(run("a", TaskState.Succeeded("alright")), cardOpen = true), 1_000)
+        //unfolding:It doesn’t disappear even after a long time,I don’t plan the next change either.
         val v = shown(model.update(inputs(cardOpen = true), 100_000))
         assertEquals(CapsuleKind.Done, v.kind)
         assertNull(model.nextChangeAt)
         assertEquals(listOf("a"), model.cardRuns().map { it.run.key })
-        // 收起后:看过了,直接是一颗带着角标,接着走剩下的时间
+        //After retracting:Saw it,It's just a star with a corner mark,Then walk the rest of the time
         val after = shown(model.update(inputs(), 200_000))
         assertEquals(CapsuleKind.Done to false, after.kind to after.pill)
         assertEquals(200_000 + CapsuleModel.LINGER_MS, model.nextChangeAt)
@@ -327,12 +327,12 @@ class CapsuleModelTest {
     }
 
     @Test fun openCardKeepsAlreadyLingeringRunsUntilClosed() {
-        model.update(inputs(run("a", TaskState.Succeeded("好了"))), 0)
+        model.update(inputs(run("a", TaskState.Succeeded("alright"))), 0)
         model.update(inputs(cardOpen = true), 5_000)
         assertEquals(1, model.cardRuns().size)
         model.update(inputs(cardOpen = true), 1_000_000)
         assertEquals(1, model.cardRuns().size)
-        // 展开前已过的时间照算:收起后只剩 LINGER_MS - 5_000
+        //The time that has passed before expansion will be counted.:After being put away, only LINGER_MS - 5_000
         assertTrue(!shown(model.update(inputs(), 1_000_000)).pill)
         assertEquals(CapsuleView.Hidden, model.update(inputs(), 1_000_000 + CapsuleModel.LINGER_MS - 5_000))
     }
@@ -341,28 +341,28 @@ class CapsuleModelTest {
         val a = run("a", TaskState.Cancelled)
         model.update(inputs(a, mode = CapsuleMode.Always), 0)
         assertEquals(CapsuleKind.Idle, shown(model.update(inputs(a, mode = CapsuleMode.Always), CapsuleModel.LINGER_MS)).kind)
-        // 调用方还列着那件停掉的任务时点开空闲图标:是空闲卡片,不是那件任务
+        //The caller clicks the idle icon while the stopped task is still listed.:It's a free card,Not that mission
         val v = shown(model.update(inputs(a, mode = CapsuleMode.Always, cardOpen = true), CapsuleModel.LINGER_MS + 60_000))
         assertEquals(CapsuleKind.Idle, v.kind)
-        val idle = CardView.Chat("c-b", title = "订票")
+        val idle = CardView.Chat("c-b", title = "Book tickets")
         assertEquals(idle, CapsuleCards.of(model.cardRuns(), idle = idle))
     }
 
     @Test fun deletedConversationsEndedRunsLeaveAtOnce() {
         val a = run("a", TaskState.Cancelled)
-        val a2 = CapsuleRun("a2", "c-a", TaskState.Succeeded("好了"))
-        val b = run("b", TaskState.Succeeded("好了"))
-        val r = run("r", running("在搜"))
+        val a2 = CapsuleRun("a2", "c-a", TaskState.Succeeded("alright"))
+        val b = run("b", TaskState.Succeeded("alright"))
+        val r = run("r", running(""))
         model.update(inputs(a, a2, b, r), 0)
-        // 这个对话里已结束的几件都拿掉
+        //Remove all items that have ended in this conversation.
         model.forget("c-a")
-        // 进行中的照旧
+        //Ongoing business as usual
         model.forget("c-r")
-        // 调用方还列着也不回来
+        //The caller is still listed and has not returned.
         model.update(inputs(a, a2, b, r), 100)
         assertEquals(listOf("r", "b"), model.cardRuns().map { it.run.key })
         model.forget("c-b")
-        // 删的时候还在进行的,之后结束照常显示(删对话等不到它收尾时,它收尾存进的那一轮会把对话重新建起来)
+        //It was still in progress when I deleted it.,After that, it ends and displays as usual.(Delete the conversation and wait until it is finished,The round it ends up re-establishing the conversation)
         val v = shown(model.update(inputs(a, a2, b, run("r", TaskState.Cancelled)), 200))
         assertEquals(CapsuleKind.Cancelled to "c-r", v.kind to v.conversationId)
         assertEquals(listOf("r"), model.cardRuns().map { it.run.key })
@@ -372,7 +372,7 @@ class CapsuleModelTest {
         val a = run("a", TaskState.Cancelled)
         model.update(inputs(a), 0)
         model.update(inputs(a, cardOpen = true), 1_000)
-        // 卡片展开着(停表)时删掉:马上拿掉,收起后也不回来
+        //(stop watch)Delete when:Take it off immediately,I won’t come back even after I put it away.
         model.forget("c-a")
         assertTrue(model.cardRuns().isEmpty())
         model.update(inputs(a, cardOpen = true), 1_100)
@@ -382,11 +382,11 @@ class CapsuleModelTest {
     }
 
     @Test fun cardRunsActiveByPriorityThenEndedNewestFirst() {
-        model.update(inputs(run("old", TaskState.Succeeded("a")), run("r", running("在搜"))), 0)
-        model.update(inputs(run("new", TaskState.Failed("x", FailKind.Model)), run("r", running("在搜")), run("q", TaskState.WaitingInput("要哪个？"))), 10)
+        model.update(inputs(run("old", TaskState.Succeeded("a")), run("r", running(""))), 0)
+        model.update(inputs(run("new", TaskState.Failed("x", FailKind.Model)), run("r", running("")), run("q", TaskState.WaitingInput("Which one do you want?"))), 10)
         val rows = model.cardRuns()
         assertEquals(listOf("q", "r", "new", "old"), rows.map { it.run.key })
-        assertEquals(CapsuleKind.NeedAnswer to "Mina 问你：要哪个？", rows[0].kind to rows[0].line)
+        assertEquals(CapsuleKind.NeedAnswer to "Mina asks you: Which one do you want?", rows[0].kind to rows[0].line)
         assertEquals(0L, rows[1].startedAt)
         assertNull(rows[0].startedAt)
         assertEquals(CapsuleKind.Failed, rows[2].kind)
@@ -398,18 +398,18 @@ class CapsuleModelTest {
         val rows = model.cardRuns().associateBy { it.run.key }
         assertEquals(0 to 1, rows.getValue("a").ahead to rows.getValue("a").behind)
         assertEquals(1 to 0, rows.getValue("b").ahead to rows.getValue("b").behind)
-        // 前面那件交还了:后面的排到最前
-        model.update(inputs(run("a", running("接着做")), run("b", takeover, Takeover.Stage.Waiting)), 20)
+        //I handed back the previous one.:Those at the back go to the front
+        model.update(inputs(run("a", running("")), run("b", takeover, Takeover.Stage.Waiting)), 20)
         assertEquals(0, model.cardRuns().first { it.run.key == "b" }.ahead)
     }
 
-    // ---------- 接管队列 ----------
+    // ----------Take over queue ----------
 
     private fun queued(key: String, ahead: Int, behind: Int, stage: Takeover.Stage = Takeover.Stage.Waiting) =
         run(key, takeover, stage).copy(queueAhead = ahead, queueBehind = behind)
 
     @Test fun realQueueOrderBeatsFirstSeen() {
-        // a 先出现,但队里 b 在前:胶囊和卡片都先说 b
+        //a appears first,:Let’s talk about capsules and cards first b
         model.update(inputs(queued("a", 1, 0)), 0)
         val v = shown(model.update(inputs(queued("a", 1, 0), queued("b", 0, 1)), 10))
         assertEquals("b", v.runKey)
@@ -421,37 +421,37 @@ class CapsuleModelTest {
 
     @Test fun barCountsWhoIsBehindInTheRealQueue() {
         val v = shown(model.update(inputs(queued("a", 0, 2, Takeover.Stage.HandedOver), queued("b", 1, 1)), 0))
-        assertEquals("处理好这件后，还有 2 件等你", v.detail)
+        assertEquals("After you take care of this one, there are 2 more waiting for you", v.detail)
     }
 
     @Test fun afterHandBackTheNextOneNeedsYouAtOnce() {
         model.update(inputs(queued("a", 0, 1, Takeover.Stage.HandedOver), queued("b", 1, 0)), 0)
-        // a 交还、接着做:b 排到最前,马上成为「需要你」(不等换句的节流)
-        val v = shown(model.update(inputs(run("a", running("接着做")), queued("b", 0, 0)), 100))
+        //a hand it over and continue doing it:b to the front,Become "Need You" Now(throttling without waiting for another sentence)
+        val v = shown(model.update(inputs(run("a", running("")), queued("b", 0, 0)), 100))
         assertEquals(CapsuleKind.NeedTakeover to "b", v.kind to v.runKey)
         assertEquals(0, model.cardRuns().first { it.run.key == "b" }.ahead)
     }
 
-    // ---------- 半透明 ----------
+    // ----------translucent ----------
 
     @Test fun ballFadesAfterIdleButNeverWhenNeedingYouOrExpanded() {
         assertEquals(1f, CapsuleFade.alpha(CapsuleKind.Running, 0, pill = false, idleFor = CapsuleFade.IDLE_MS - 1))
         assertEquals(CapsuleFade.BALL, CapsuleFade.alpha(CapsuleKind.Running, 0, pill = false, idleFor = CapsuleFade.IDLE_MS))
         assertEquals(CapsuleFade.BALL, CapsuleFade.alpha(CapsuleKind.Done, 0, pill = false, idleFor = 60_000))
-        // 展开着、要你处理、别的几件里有要你处理的、「你来处理」那一条:不淡
+        //:Not light
         assertEquals(1f, CapsuleFade.alpha(CapsuleKind.Done, 0, pill = true, idleFor = 60_000))
         assertEquals(1f, CapsuleFade.alpha(CapsuleKind.NeedConfirm, 1, pill = false, idleFor = 60_000))
         assertEquals(1f, CapsuleFade.alpha(CapsuleKind.Running, 1, pill = false, idleFor = 60_000))
         assertEquals(1f, CapsuleFade.alpha(CapsuleKind.HandedOver, 0, pill = false, idleFor = 60_000))
     }
 
-    // ---------- 读屏 ----------
+    // ----------read screen ----------
 
     @Test fun ballDescribesItsStatus() {
-        assertEquals("Mina 在干活：在搜牙膏 · 共 2 件，点开看详情", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Running, "在搜牙膏 · 共 2 件", count = 2)))
-        assertEquals("要你同意：发送，点开处理", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.NeedConfirm, "要你同意：发送")))
-        assertEquals("Mina 先等等：排队中，点开看详情", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Held, "先等等：排队中")))
-        assertEquals("Mina 办好了 · 点开看结果", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Done, "办好了 · 点开看结果")))
+        assertEquals("Mina is working: Searching for toothpaste · 2 items in total, click to see details", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Running, "Searching for toothpaste · 2 items in total", count = 2)))
+        assertEquals("You need to agree: send, click to process", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.NeedConfirm, "Ask for your consent: send")))
+        assertEquals("Mina, wait a minute: Queuing, click to see details", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Held, "Wait first: Queuing up")))
+        assertEquals("Mina is done · Click to see the results", CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Done, "Done · Click to see the results")))
         assertEquals(CapsuleCopy.IDLE, CapsuleCopy.describe(CapsuleView.Shown(CapsuleKind.Idle, "")))
     }
 }

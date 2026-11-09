@@ -16,14 +16,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * 真机测试:测试包临时登记成账号认证器(见 TestAuthenticatorService,清单里默认关着,这里打开、测完关掉),
- * 测试包没有桌面图标,就和系统的账号登录服务一样。它的整屏登录页没有对话框主题、没有密码框、也没有
- * excludeFromRecents,形状上和普通 App 页面一样;只有「所在的包是没有桌面图标的账号认证器」这条能认出它
- * 要用户亲手处理,应该留在主屏,不能被挪到 Mina 的屏上。
+ *Real machine test:The test package is temporarily registered as an account authenticator(See TestAuthenticatorService,It is turned off by default in the list.,Turn it on here and turn it off after testing.),
+ *Test package has no desktop icon,It’s the same as the system’s account login service. Its full-screen login page has no dialog theme, no password box, and no
+ * excludeFromRecents,The shape is the same as a normal App page;Only the article "The package is an account authenticator without a desktop icon" can recognize it.
+ *Users need to handle it manually,Should stay on home screen,Cannot be moved to Mina's screen.
  */
 @RunWith(AndroidJUnit4::class)
 class AuthSpillDeviceTest {
-    // 和任务里一样,屏的尺寸、密度同主屏:挪过来的页面不必因尺寸变了重建
+    //Same as in mission,The screen size and density are the same as the main screen:The moved pages do not need to be rebuilt due to size changes.
     private val agent = run {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val m = android.util.DisplayMetrics().also {
@@ -43,7 +43,7 @@ class AuthSpillDeviceTest {
     fun tearDown() {
         val main = shell.topTaskId(Display.DEFAULT_DISPLAY)
         if (main >= 0 && shell.packageOfTask(main) == DeviceSupport.TEST_PACKAGE) DeviceSupport.sh("input keyevent 4")
-        // 关回去,等它从认证器表里下去:别的挪回测试里测试包的页面不能被当成账号登录页
+        //Shut back,Wait for it to go down from the authenticator table:Other pages moved back to the test package in the test cannot be used as account login pages.
         DeviceSupport.sh("pm disable $authenticatorService")
         DeviceSupport.pollUntil(10_000) { (!testAuthenticatorListed()).takeIf { it } }
         agent.release()
@@ -54,13 +54,13 @@ class AuthSpillDeviceTest {
         return runCatching { am.authenticatorTypes.any { it.packageName == DeviceSupport.TEST_PACKAGE } }.getOrDefault(false)
     }
 
-    /** 打开测试包的认证器,等它出现在系统的账号认证器表里,这条用例才有意义。 */
+    /**Open the authenticator for the test package,Wait for it to appear in the system's account authenticator table,This use case only makes sense. */
     private fun registerTestAuthenticator(): Boolean {
         DeviceSupport.sh("pm enable $authenticatorService")
         return DeviceSupport.pollUntil(10_000) { testAuthenticatorListed().takeIf { it } } == true
     }
 
-    /** 测试包没有 LAUNCHER 入口(清单里没有),判据要的正是这一条。 */
+    /**The test package does not have a LAUNCHER entry(Not in the list),This is what the criterion requires. */
     private fun testPackageHasNoLauncher(): Boolean {
         val pm = InstrumentationRegistry.getInstrumentation().targetContext.packageManager
         val launcher = android.content.Intent(android.content.Intent.ACTION_MAIN)
@@ -88,7 +88,7 @@ class AuthSpillDeviceTest {
         val r = screen.tapRef(button.ref, s.snapshotId)
         println("tap result: $r")
 
-        // 服务的进程可能是冷的,弹窗会晚一两秒才出来;等它进了助手的记录
+        //The service's process may be cold,The pop-up window will appear a second or two later.;Wait until it enters the assistant's record
         val b = DeviceSupport.pollUntil(5_000) {
             val arr = shell.mainArrivals(since)
             val pkgs = arr?.getStringArray(MainScreenWatch.KEY_PACKAGE)

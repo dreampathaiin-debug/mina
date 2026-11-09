@@ -24,8 +24,8 @@ import java.util.Collections
 import java.util.UUID
 
 /**
- * 桥的真机用例:沙箱里的 `mina` 命令经抽象套接字回调 Mina。用装好的沙箱(python3 与 mina 客户端都是安装时放的);
- * 没装好就跳过。
+ *Real machine use case of bridge:in the sandbox `mina`The command is called back to Mina via an abstract socket. Use the installed sandbox(python3 and mina client are both installed during installation.);
+ *Skip if not installed.
  */
 @RunWith(AndroidJUnit4::class)
 class BridgeDeviceTest {
@@ -36,27 +36,27 @@ class BridgeDeviceTest {
     private fun sh(command: String): CommandResult =
         runBlocking { sb.run("bridge-ws", listOf("/bin/sh", "-lc", command), null, 30_000) { progress += it } }
 
-    // 用装好的沙箱(装的时候装了 python3 和 mina 客户端);没装好就跳过,测试不自己解根文件系统
+    //Use the installed sandbox(I installed it when I was pretending. python3 and mina client);Skip if not installed properly,Testing without unblocking the root file system yourself
     @Before fun needsInstalledSandbox() {
         assumeTrue("sandbox not installed", SandboxState.get(context).status.value is SandboxStatus.Ready)
         assumeTrue("python3 not installed in the rootfs",
             Files.exists(File(SandboxDirs(context).rootfs, "usr/bin/python3").toPath(), LinkOption.NOFOLLOW_LINKS))
     }
 
-    // 导出到「下载/Mina」的测试文件删掉,不留在用户的下载目录里
+    //Export to "Download/Mina's test files are deleted,Not left in the user's download directory
     @After fun deleteExported() {
         for (f in shared) runCatching { context.contentResolver.delete(Uri.parse(f.uri), null, null) }
         SandboxDirs(context).workspace("bridge-ws").deleteRecursively()
     }
 
     @Test fun progressReachesCallback() {
-        val r = sh("mina progress 第1步")
+        val r = sh("minaprogress step 1")
         assertEquals(r.output, 0, r.exitCode)
-        assertEquals(listOf("第1步"), progress.toList())
+        assertEquals(listOf("Step 1"), progress.toList())
     }
 
     @Test fun shareCallsExporter() {
-        // 名字带随机串,下载目录里不会撞名;工作区外的文件先被路径规则拒掉
+        //Name with random string,There will be no name collision in the download directory;Files outside the workspace are first rejected by path rules
         val name = "mina-bridge-test-${UUID.randomUUID().toString().take(8)}.txt"
         val r = sh("echo hi > $name; mina share $name; echo rc=$?; mina share /etc/passwd; echo rc=$?")
         assertTrue(r.output, r.output.contains("\"savedAs\":\"Download/Mina/$name\""))

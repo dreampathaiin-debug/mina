@@ -111,6 +111,8 @@ fun AgentPip(
     onAttention: () -> Unit,
     onClose: () -> Unit = {},
     onReopen: () -> Unit = {},
+    /** 网页任务跑着时小画面上的「接管」按钮;非网页或不要按钮时为 null。 */
+    onTakeControl: (() -> Unit)? = null,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val fade = if (reduceMotion) tween<Float>(150) else tween(300)
@@ -130,7 +132,7 @@ fun AgentPip(
                 pip, frame, webContent, reduceMotion,
                 areaWidth = constraints.maxWidth.toFloat(), areaHeight = constraints.maxHeight.toFloat(),
                 topInset = topInset, bottomInset = bottomInset, onExpand = onExpand, onCollapse = onCollapse, onAttention = onAttention,
-                onClose = onClose,
+                onClose = onClose, onTakeControl = onTakeControl,
             )
         }
     }
@@ -180,6 +182,7 @@ private fun PipWindow(
     onCollapse: () -> Unit,
     onAttention: () -> Unit,
     onClose: () -> Unit,
+    onTakeControl: (() -> Unit)? = null,
 ) {
     val density = LocalDensity.current
     val sizeSpec = if (reduceMotion) snap() else tween<androidx.compose.ui.unit.Dp>(350, easing = Ease)
@@ -337,6 +340,21 @@ private fun PipWindow(
                         .clickable(onClickLabel = stringResource(R.string.collapse), onClick = onCollapse),
                     contentAlignment = Alignment.Center,
                 ) { Icon(MinaIcons.Close, stringResource(R.string.collapse), Modifier.size(12.dp), tint = MinaTheme.colors.ink) }
+            }
+            if (onTakeControl != null && pip.mode == PipMode.Running && webContent && frame != null) {
+                Row(
+                    Modifier.align(Alignment.BottomCenter).padding(bottom = 10.dp)
+                        .floatShadow(MinaTheme.colors, RoundedCornerShape(50)).background(MinaTheme.colors.glass, RoundedCornerShape(50))
+                        .border(0.5.dp, MinaTheme.colors.glassEdge, RoundedCornerShape(50)).clip(RoundedCornerShape(50))
+                        .clickable(onClickLabel = stringResource(R.string.pip_take_control), onClick = onTakeControl)
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .testTag("pip-take-control"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(MinaIcons.Screens, stringResource(R.string.pip_take_control), Modifier.size(11.dp), tint = MinaTheme.colors.ink)
+                    Text(stringResource(R.string.pip_take_control), style = MinaType.Hint, color = MinaTheme.colors.ink)
+                }
             }
         }
         // 边框光画在玻璃框外沿

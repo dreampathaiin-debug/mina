@@ -24,8 +24,8 @@ import org.junit.runner.RunWith
 import kotlin.coroutines.resume
 
 /**
- * 真机测试:网页在 App 自建的私有虚拟显示上后台渲染。不需要内置助手,也不碰主屏。
- * 夹具在测试包的 assets 里,经 WebViewAssetLoader 以 https 地址提供,不依赖外网。
+ *Real machine test:The web page is rendered in the background on the private virtual display built by the App. No built-in helper required,Don’t touch the home screen either.
+ *The fixture is in the assets of the test package,through WebViewAssetLoaderServed at https address,Does not rely on external networks.
  */
 @RunWith(AndroidJUnit4::class)
 class WebHostTest {
@@ -42,7 +42,7 @@ class WebHostTest {
         val dpi = ctx.resources.displayMetrics.densityDpi
         instr.runOnMainSync {
             host = WebHost(ctx, bounds.width(), bounds.height(), dpi)
-            // 夹具在测试包里,所以用测试包的 context 读 assets
+            //The fixture is in the test bag,So read using the context of the test package assets
             val loader = WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(instr.context))
                 .build()
@@ -72,7 +72,7 @@ class WebHostTest {
     private fun topResumed(): String? {
         val lines = DeviceSupport.sh("dumpsys activity activities").lines().map { it.trim() }
         return lines.firstOrNull { it.startsWith("topResumedActivity") || it.startsWith("mTopResumedActivity") }
-            // 有的安卓 11、12 系统只在摘要里给出当前前台的 Activity
+            //Some Android 11 and 12 systems only give the current foreground information in the summary. Activity
             ?: lines.firstOrNull { it.startsWith("ResumedActivity:") }
     }
 
@@ -114,7 +114,7 @@ class WebHostTest {
     @Test
     fun touchProducesTrustedClick() = runBlocking<Unit> {
         assertTrue(tab.load(fixture))
-        // CSS 像素 × (视图宽 / innerWidth) = WebView 视图像素(桌面版仿真把 1280 CSS 像素缩进视图宽度,不能用 devicePixelRatio)
+        //CSS pixels × (View width / innerWidth) =WebView view pixels( 1280CSS pixel indent view width,The ____ does not work devicePixelRatio)
         val viewW = withContext(Dispatchers.Main) { tab.view.width }
         val c = js(
             "(function(){var r=document.getElementById('btn').getBoundingClientRect();" +

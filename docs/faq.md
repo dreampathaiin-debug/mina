@@ -1,56 +1,56 @@
-# 常见问题
+# FAQ
 
-简体中文 | [English](faq.en.md)
+[简体中文](faq.md) | English
 
-README 里只放了最常被问到的几条，这里是完整的问答。手机操作设置中每一步的具体报错，见[设置指南的「遇到问题」](setup-guide.md#遇到问题)。
+The README keeps only the most common questions; this page has all of them. For specific errors at each step of phone-control setup, see [Troubleshooting](setup-guide.en.md#troubleshooting) in the setup guide.
 
-## 安装与上手
+## Installing and getting started
 
-**只想聊天、上网、处理文件，也要配对无线调试吗？**
-不用。配对无线调试只是为了操作手机 App；只聊天、用内置浏览器、在沙箱里处理文件，装好、连上模型就能用，安卓 11 也行。
+**Do I need to pair wireless debugging if I only want to chat, browse and work with files?**
+No. Pairing wireless debugging is only needed to operate phone apps. Chat, the built-in browser and working with files in the sandbox work as soon as the app is installed and a model is added, on Android 11 as well.
 
-**为什么推荐安卓 14？旧系统能用吗？**
-Mina 在一块单独的后台屏上操作 App，安卓 12 起可以使用手机操作能力；安卓 12、13 上操作后台屏可能影响主屏焦点。安卓 14 起后台屏有自己的焦点，不会影响你在主屏打字，所以更推荐。只用网页、沙箱和聊天，安卓 11 也能用。
+**Why recommend Android 14? What about older systems?**
+Mina operates apps on a separate background screen. Phone control is available from Android 12, but background work can affect main-screen focus on Android 12–13. From Android 14 the background screen has its own focus and does not interfere with your typing on the main screen, so it is recommended. Web, sandbox and chat also work on Android 11.
 
-**不确定自己的手机行不行？**
-设置 › 恢复与修复 › 兼容性自检，一分钟跑完，结果可以一键用[设备报告](https://github.com/wangzan101/Mina/issues/new?template=device-report.yml)反馈给我们。
+**Not sure whether your phone works?**
+Run Settings › Recovery & repair › Compatibility self-check. It takes about a minute, and you can send the result to us with one tap as a [device report](https://github.com/wangzan101/Mina/issues/new?template=device-report.yml).
 
-**APK 更新从哪来？**
-只从本仓库的 [GitHub Releases](https://github.com/wangzan101/Mina/releases) 发布。每个版本改了什么，都写在那个版本的发布说明里。App 里「关于 › 检查更新」也能直接下载安装。
+**Where do APK updates come from?**
+Only from this repository's [GitHub Releases](https://github.com/wangzan101/Mina/releases). Each release's notes list what changed. In the app, About › Check for updates can also download and install it directly.
 
-## 手机操作
+## Phone control
 
-**无线调试自己关掉了？**
-安卓原版在 Wi-Fi 断开、手机重启后会关掉无线调试。设置里的「恢复与修复」中「自动打开无线调试」默认开着：需要时 Mina 会自己打开它再连接（要你允许 Mina 修改系统设置）。第一次在某个 Wi-Fi 上，系统会问是否允许，请手动打开一次并勾选「始终允许使用此网络」。如果还是连不上，回到设置里的「设置手机操作」向导重新配对即可。
+**Wireless debugging turned itself off?**
+Stock Android turns off wireless debugging when Wi-Fi disconnects or the phone reboots. "Turn on Wireless debugging automatically" (自动打开无线调试) under "Recovery & repair" (恢复与修复) in Settings is on by default: when needed, Mina turns it on and reconnects (this requires allowing Mina to modify system settings). The first time on a given Wi-Fi network, the system asks for permission; turn it on manually once and check "Always allow on this network". If it still cannot connect, go back to the "Set up phone control" (设置手机操作) wizard in Settings and pair again.
 
-**系统里找不到无线调试？**
-有的手机系统去掉了这一项。可以用一台装了 adb 的电脑，经 USB 数据线启动手机助手，见[设置指南的「用电脑启动」](setup-guide.md#另一种办法用电脑启动usb-数据线)。
+**Can't find wireless debugging on my phone?**
+Some phone systems leave it out. You can start the phone helper from a computer with adb over a USB cable instead; see [Start it from a computer](setup-guide.en.md#another-way-start-it-from-a-computer-usb-cable) in the setup guide.
 
-**无障碍服务被关掉了？**
-系统有时会停掉无障碍服务（比如进程被清理后）。「替我打开无障碍」默认开着，Mina 会自己把它重新打开；修不好时设置页会提示你手动打开。
+**The accessibility service got turned off?**
+The system sometimes stops accessibility services (e.g. after the process is cleaned up). "Turn on accessibility for me" (替我打开无障碍) is on by default, so Mina turns it back on itself; if that fails, the Settings page prompts you to turn it on manually.
 
-**有的 App 页面读不到、截不到？**
-有些页面（比如付款、输密码）禁止截屏，Mina 看不到画面，也不会去识别上面的字。这类页面需要你接管处理，处理好交还给 Mina。
+**Some app screens cannot be read or captured?**
+Some screens (e.g. payment or password entry) block screenshots, so Mina cannot see them and will not try to read text on them. You need to take over on those screens and hand back to Mina when done.
 
-## 模型
+## Models
 
-**能用自己电脑或局域网里跑的模型吗？**
-可以，服务商选「自定义」，填局域网地址即可，见[模型与登录](models.md#用自己电脑或局域网里跑的模型)。
+**Can I use a model running on my own computer or LAN?**
+Yes: pick "Custom" as the provider and enter its address on your local network; see [Models and sign-in](models.en.md#models-on-your-own-computer-or-lan).
 
-**没有 API Key 能用吗？**
-可以用 ChatGPT（Plus / Pro）、xAI / Grok、OpenRouter 账号登录，见[模型与登录](models.md#用账号登录不用填-key)。
+**Can I use Mina without an API key?**
+Yes, sign in with a ChatGPT (Plus / Pro), xAI / Grok or OpenRouter account; see [Models and sign-in](models.en.md#sign-in-with-an-account-no-key-needed).
 
-## 电脑上使用
+## Using it from a computer
 
-**能从电脑上给 Mina 派任务吗？**
-可以，电脑上的 AI 工具通过 CLI + Skill 或 MCP 都行，通常选一种，见[从电脑使用 Mina](computer.md)。
+**Can I hand tasks to Mina from my computer?**
+Yes. AI tools on your computer can use either CLI + Skill or MCP; normally you pick one. See [Use Mina from a computer](computer.en.md).
 
-## 语言
+## Language
 
-**App 有哪些语言？**
-界面有简体中文、繁體中文、英文、日语、韩语、西班牙语、葡萄牙语、俄语和印尼语，跟随系统语言（系统语言不在其中时用英文），也可以在 设置 › 语言 里切换。内置的 App、网站知识用中文写成，不影响用别的语言和 Mina 说话。
+**Is the app in English?**
+Yes. The app UI comes in English, Simplified Chinese, Traditional Chinese, Japanese, Korean, Spanish, Portuguese, Russian and Indonesian, follows your system language (English when your system language isn't one of them), and can be switched in Settings › Language. The built-in app and website knowledge is written in Chinese, but that doesn't limit you: the model reads it fine, and you can talk to Mina in your own language.
 
-## 隐私
+## Privacy
 
-**我的数据发到哪？**
-没有 Mina 服务器：你的话、屏幕内容只发给你自己配置的模型服务商；API Key、记忆加密保存在手机上，对话、运行记录只存在本机。详见[免责声明与数据隐私](disclaimer.md)。
+**Where does my data go?**
+There is no Mina server: what you say and what's on your screen go only to the model provider you set up. API keys and memories are stored encrypted on the phone; conversations and run records stay on the device. See the [disclaimer and data privacy](disclaimer.en.md).

@@ -41,8 +41,8 @@ import java.io.File
 import java.util.UUID
 
 /**
- * 侧栏长按一条对话在原地弹出菜单(置顶、改名、删除,点外面收起):删除先确认、删掉、列表当场更新;改名后列表换成新名字;置顶后排到最上面带图钉。
- * 还有对话页里长按回答、用户的话弹出复制 / 引用 / 选择文字:选择文字后能选中,引用随下一句话发出去。不用真机的任务环境。
+ *(Pin, rename, delete,Click outside to close):;After renaming, the list will be replaced by the new name.;Pin the top row to the top.
+ *There is also a long press on the conversation page to answer, and the user's words will pop up to copy. /Quote /Select text:Can be selected after selecting text,The quote goes out with the next sentence. A task environment that does not require a real machine.
  */
 @RunWith(AndroidJUnit4::class)
 class ChatDeleteAndSelectTest {
@@ -89,164 +89,164 @@ class ChatDeleteAndSelectTest {
     }
 
     @Test fun longPressARowAsksThenDeletes() {
-        store.append("a", Turn("查天气", "晴", "succeeded"))
-        store.setTitle("a", "天气")
-        store.append("b", Turn("订票", "好了", "succeeded"))
+        store.append("a", Turn("Check the weather", "", "succeeded"))
+        store.setTitle("a", "")
+        store.append("b", Turn("Book tickets", "alright", "succeeded"))
         val vm = vm(DeleteImpact(runningTask = true, schedules = 2))
         show(vm, drawerOpen = true)
 
-        compose.onNodeWithText("天气").performTouchInput { longClick() }
+        compose.onNodeWithText("").performTouchInput { longClick() }
         compose.onNodeWithTag("drawer-menu-delete").performClick()
-        compose.onNodeWithText("删除这个对话？").assertExists()
+        compose.onNodeWithText("Delete this conversation?").assertExists()
         val body = compose.onNodeWithTag("delete-conversation-body").fetchSemanticsNode().config
             .getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)?.joinToString { it.text }.orEmpty()
-        assertTrue(body, "天气" in body && "停止" in body && "2" in body)
+        assertTrue(body, "" in body && "stop" in body && "2" in body)
 
-        // 取消:什么都不删
-        compose.onNodeWithText("取消").performClick()
+        //Cancel:delete nothing
+        compose.onNodeWithText("Cancel").performClick()
         compose.waitForIdle()
         assertTrue(removed.isEmpty())
 
-        compose.onNodeWithText("天气").performTouchInput { longClick() }
+        compose.onNodeWithText("").performTouchInput { longClick() }
         compose.onNodeWithTag("drawer-menu-delete").performClick()
         compose.onNodeWithTag("confirm-delete-conversation").performClick()
         compose.waitForIdle()
         compose.waitUntil(5_000) { removed.isNotEmpty() }
         assertEquals(listOf("a"), removed)
-        assertEquals(0, compose.onAllNodesWithText("天气").fetchSemanticsNodes().size)
-        compose.onNodeWithText("订票").assertExists()
+        assertEquals(0, compose.onAllNodesWithText("").fetchSemanticsNodes().size)
+        compose.onNodeWithText("Book tickets").assertExists()
     }
 
-    /** 长按在原地弹出菜单:抬起的那一行(还是那个标题)和三项置顶、改名、删除;只是打开菜单什么都不改。 */
+    /**Long press to pop up the menu in place:the raised row(Still the same title)and three items: pin, rename, delete;Just opening the menu changes nothing. */
     @Test fun longPressShowsTheThreeActions() {
-        store.append("a", Turn("查天气", "晴", "succeeded"))
-        store.setTitle("a", "天气")
+        store.append("a", Turn("Check the weather", "", "succeeded"))
+        store.setTitle("a", "")
         show(vm(), drawerOpen = true)
 
-        compose.onNodeWithText("天气").performTouchInput { longClick() }
+        compose.onNodeWithText("").performTouchInput { longClick() }
         compose.onNodeWithTag("drawer-menu").assertExists()
-        compose.onNodeWithTag("drawer-menu-pin").assert(hasText("置顶"))
-        compose.onNodeWithTag("drawer-menu-rename").assert(hasText("改名"))
-        compose.onNodeWithTag("drawer-menu-delete").assert(hasText("删除"))
-        compose.onNodeWithText("取消置顶").assertDoesNotExist()
-        // 菜单开着时后面的内容不给无障碍读,只剩抬起的那一行
-        assertEquals(1, compose.onAllNodesWithText("天气").fetchSemanticsNodes().size)
-        assertEquals("天气", store.title("a"))
+        compose.onNodeWithTag("drawer-menu-pin").assert(hasText("pin to top"))
+        compose.onNodeWithTag("drawer-menu-rename").assert(hasText("Change name"))
+        compose.onNodeWithTag("drawer-menu-delete").assert(hasText("delete"))
+        compose.onNodeWithText("Unpin").assertDoesNotExist()
+        //When the menu is open, the content behind it is not accessible.,Only the lifted line remains
+        assertEquals(1, compose.onAllNodesWithText("").fetchSemanticsNodes().size)
+        assertEquals("", store.title("a"))
         assertEquals(null, store.pinnedAt("a"))
     }
 
-    /** 点菜单外面收起菜单,什么都不改;侧栏里那一行还在。 */
+    /**Order outside the menuCollapse menu,Don't change anything;The row in the sidebar is still there. */
     @Test fun tappingOutsideClosesTheMenu() {
-        store.append("a", Turn("查天气", "晴", "succeeded"))
-        store.setTitle("a", "天气")
+        store.append("a", Turn("Check the weather", "", "succeeded"))
+        store.setTitle("a", "")
         show(vm(), drawerOpen = true)
 
-        compose.onNodeWithText("天气").performTouchInput { longClick() }
+        compose.onNodeWithText("").performTouchInput { longClick() }
         compose.onNodeWithTag("drawer-menu-pin").assertExists()
-        // 右下角:菜单靠左接在那一行下面,碰不到
+        //lower right corner:The menu is on the left below that line,out of reach
         compose.onNodeWithTag("drawer-menu").performTouchInput { click(percentOffset(0.95f, 0.95f)) }
         compose.waitForIdle()
         compose.onNodeWithTag("drawer-menu").assertDoesNotExist()
         compose.onNodeWithTag("drawer-menu-pin").assertDoesNotExist()
-        compose.onNodeWithText("天气").assertExists()
+        compose.onNodeWithText("").assertExists()
         assertTrue(removed.isEmpty())
-        assertEquals("天气", store.title("a"))
+        assertEquals("", store.title("a"))
         assertEquals(null, store.pinnedAt("a"))
     }
 
-    /** 改名:输入框里是现在的标题,换成新的保存;列表当场换名字,存下的也是新的。 */
+    /**Change name:The input box is the current title,Replace with new save;Change the name of the list on the spot,What is saved is also new. */
     @Test fun renameUpdatesTheRow() {
-        store.append("a", Turn("查天气", "晴", "succeeded"))
-        store.setTitle("a", "天气")
+        store.append("a", Turn("Check the weather", "", "succeeded"))
+        store.setTitle("a", "")
         show(vm(), drawerOpen = true)
 
-        compose.onNodeWithText("天气").performTouchInput { longClick() }
+        compose.onNodeWithText("").performTouchInput { longClick() }
         compose.onNodeWithTag("drawer-menu-rename").performClick()
-        compose.onNodeWithTag("rename-conversation-field").assert(hasText("天气"))
+        compose.onNodeWithTag("rename-conversation-field").assert(hasText(""))
         compose.onNodeWithTag("rename-conversation-field").performTextReplacement("   ")
         compose.onNodeWithTag("confirm-rename-conversation").assertIsNotEnabled()
-        compose.onNodeWithTag("rename-conversation-field").performTextReplacement("上海出行")
+        compose.onNodeWithTag("rename-conversation-field").performTextReplacement("Travel in Shanghai")
         compose.onNodeWithTag("confirm-rename-conversation").performClick()
         compose.waitForIdle()
-        compose.waitUntil(5_000) { compose.onAllNodesWithText("上海出行").fetchSemanticsNodes().isNotEmpty() }
-        assertEquals(0, compose.onAllNodesWithText("天气").fetchSemanticsNodes().size)
-        assertEquals("上海出行", store.title("a"))
-        // 之后才到的起好的标题不盖掉
-        assertTrue(!store.setTitle("a", "天气"))
+        compose.waitUntil(5_000) { compose.onAllNodesWithText("Travel in Shanghai").fetchSemanticsNodes().isNotEmpty() }
+        assertEquals(0, compose.onAllNodesWithText("").fetchSemanticsNodes().size)
+        assertEquals("Travel in Shanghai", store.title("a"))
+        //The title I came up with later will not be overwritten.
+        assertTrue(!store.setTitle("a", ""))
     }
 
-    /** 置顶:排到「置顶」一段最上面、带图钉;再取消置顶回到「最近」。 */
+    /**pin to top:Arrange to the top of the "Top" section, with a thumbtack;Then unpin it and return to "Recent". */
     @Test fun pinMovesTheRowToTheTop() {
-        store.append("a", Turn("查天气", "晴", "succeeded"))
-        store.setTitle("a", "天气")
-        store.append("b", Turn("订票", "好了", "succeeded"))
+        store.append("a", Turn("Check the weather", "", "succeeded"))
+        store.setTitle("a", "")
+        store.append("b", Turn("Book tickets", "alright", "succeeded"))
         show(vm(), drawerOpen = true)
         compose.onAllNodesWithTag("conversation-pin", useUnmergedTree = true).assertCountEquals(0)
 
-        compose.onNodeWithText("天气").performTouchInput { longClick() }
-        compose.onNodeWithTag("drawer-menu-pin").assert(hasText("置顶")).performClick()
+        compose.onNodeWithText("").performTouchInput { longClick() }
+        compose.onNodeWithTag("drawer-menu-pin").assert(hasText("pin to top")).performClick()
         compose.waitForIdle()
         compose.waitUntil(5_000) { compose.onAllNodesWithTag("conversation-pin", useUnmergedTree = true).fetchSemanticsNodes().size == 1 }
-        compose.onNodeWithText("置顶").assertExists()
-        compose.onAllNodesWithTag("conversation-row")[0].assert(hasText("天气"))
+        compose.onNodeWithText("pin to top").assertExists()
+        compose.onAllNodesWithTag("conversation-row")[0].assert(hasText(""))
         assertTrue(store.pinnedAt("a") != null)
 
-        compose.onNodeWithText("天气").performTouchInput { longClick() }
-        compose.onNodeWithTag("drawer-menu-pin").assert(hasText("取消置顶")).performClick()
+        compose.onNodeWithText("").performTouchInput { longClick() }
+        compose.onNodeWithTag("drawer-menu-pin").assert(hasText("Unpin")).performClick()
         compose.waitForIdle()
         compose.waitUntil(5_000) { compose.onAllNodesWithTag("conversation-pin", useUnmergedTree = true).fetchSemanticsNodes().isEmpty() }
-        compose.onNodeWithText("置顶").assertDoesNotExist()
+        compose.onNodeWithText("pin to top").assertDoesNotExist()
         assertEquals(null, store.pinnedAt("a"))
     }
 
-    // 长按消息弹出菜单;选「选择文字」后那条换回系统的长按选中,侧栏不跟着打开
+    //Long press the message to pop up the menu;After selecting "Select Text", the text will be returned to the system's long-press selection.,The sidebar does not open
     @Test fun answerAndUserTextAreSelectableFromTheMenu() {
-        store.append("s", Turn("今天天气怎么样", "上海今天**晴**,详见 [天气](https://example.com)", "succeeded"))
+        store.append("s", Turn("How is the weather today?", "Shanghai today****,See details [](https://example.com)", "succeeded"))
         val vm = vm()
         compose.runOnUiThread { vm.openConversation("s") }
         show(vm, drawerOpen = false)
 
-        compose.onNode(hasText("上海今天", substring = true) and hasAnyAncestor(hasTestTag("selectable-answer"))).assertDoesNotExist()
-        compose.onNodeWithText("上海今天", substring = true).performTouchInput { longClick() }
-        compose.onNodeWithTag("message-menu-select").assert(hasText("选择文字")).performClick()
+        compose.onNode(hasText("Shanghai today", substring = true) and hasAnyAncestor(hasTestTag("selectable-answer"))).assertDoesNotExist()
+        compose.onNodeWithText("Shanghai today", substring = true).performTouchInput { longClick() }
+        compose.onNodeWithTag("message-menu-select").assert(hasText("Select text")).performClick()
         compose.waitForIdle()
-        val answer = compose.onNode(hasText("上海今天", substring = true) and hasAnyAncestor(hasTestTag("selectable-answer")))
+        val answer = compose.onNode(hasText("Shanghai today", substring = true) and hasAnyAncestor(hasTestTag("selectable-answer")))
         answer.assertExists()
         answer.performTouchInput { longClick() }
         compose.waitForIdle()
         compose.onNodeWithTag("message-menu").assertDoesNotExist()
         compose.onNodeWithTag("drawer").assertIsNotDisplayed()
 
-        compose.onNodeWithText("今天天气怎么样").performTouchInput { longClick() }
+        compose.onNodeWithText("How is the weather today?").performTouchInput { longClick() }
         compose.onNodeWithTag("message-menu-select").performClick()
         compose.waitForIdle()
-        compose.onNode(hasText("今天天气怎么样") and hasAnyAncestor(hasTestTag("selectable-user"))).assertExists()
+        compose.onNode(hasText("How is the weather today?") and hasAnyAncestor(hasTestTag("selectable-user"))).assertExists()
     }
 
-    // 长按回答选「引用」:输入框上方出现引用小条,写一句发出去,引用跟着这句话交给任务,小条消失;气泡上方显示引的那条
+    //Long press the answer and select "Quote":A reference bar appears above the input box,Write a sentence and send it out,Quote and follow this sentence to give the task,The strip disappears;The line above the bubble shows the quote
     @Test fun longPressQuoteThenSend() {
-        store.append("q", Turn("今天天气怎么样", "上海今天**晴**", "succeeded"))
+        store.append("q", Turn("How is the weather today?", "Shanghai today****", "succeeded"))
         val vm = vm()
         compose.runOnUiThread { vm.openConversation("q") }
         show(vm, drawerOpen = false)
 
-        compose.onNodeWithText("上海今天晴").performTouchInput { longClick() }
-        compose.onNodeWithTag("message-menu-copy").assert(hasText("复制"))
-        compose.onNodeWithTag("message-menu-quote").assert(hasText("引用")).performClick()
+        compose.onNodeWithText("It’s sunny in Shanghai today").performTouchInput { longClick() }
+        compose.onNodeWithTag("message-menu-copy").assert(hasText("copy"))
+        compose.onNodeWithTag("message-menu-quote").assert(hasText("Quote")).performClick()
         compose.waitForIdle()
         compose.waitUntil(5_000) { compose.onAllNodesWithTag("message-menu").fetchSemanticsNodes().isEmpty() }
         compose.onNodeWithTag("quote-chip").assertExists()
 
-        compose.onNodeWithTag("composer-field").performTextReplacement("那明天呢")
-        compose.onNodeWithContentDescription("发送").performClick()
+        compose.onNodeWithTag("composer-field").performTextReplacement("What about tomorrow?")
+        compose.onNodeWithContentDescription("").performClick()
         compose.waitForIdle()
-        assertEquals(listOf("> [Quoting your earlier reply]\n> 上海今天晴\n\n那明天呢"), started)
+        assertEquals(listOf("> [Quoting your earlier reply]\n>It’s sunny in Shanghai today\n\nWhat about tomorrow?"), started)
         compose.onNodeWithTag("quote-chip").assertDoesNotExist()
         compose.onNodeWithTag("sent-quote").assertExists()
 
-        // × 去掉引用
-        compose.runOnUiThread { vm.quote(QuoteMessage.From.You, "今天天气怎么样") }
-        compose.onNodeWithContentDescription("去掉引用").performClick()
+        // ×Remove quotes
+        compose.runOnUiThread { vm.quote(QuoteMessage.From.You, "How is the weather today?") }
+        compose.onNodeWithContentDescription("Remove quotes").performClick()
         compose.onNodeWithTag("quote-chip").assertDoesNotExist()
     }
 }

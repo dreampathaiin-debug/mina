@@ -9,9 +9,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * 网页里的富文本编辑区(contenteditable),很多 App 的笔记、评论框是这样做的。
- * 编辑器只认浏览器的 input 事件:上方文字显示收到的 input 事件次数和当前内容,测试据此判断编辑器是否真的收到了输入。
- * 测试 APK 单独运行在自己的进程里、不带 Kotlin 标准库,所以这个页面用 Java 写。
+ *Rich text editing area in web pages(contenteditable),Many apps have note and comment boxes that do this.
+ *The editor only recognizes the browser's input event:The text above displays the number of input events received and the current content.,The test uses this to determine whether the editor actually received the input.
+ *The test APK runs in its own process without the Kotlin standard library,So this page is written in Java.
  */
 public class WebEditorTestActivity extends Activity {
     private TextView status;
@@ -27,7 +27,7 @@ public class WebEditorTestActivity extends Activity {
         web.getSettings().setJavaScriptEnabled(true);
         web.addJavascriptInterface(new Bridge(), "bridge");
         web.loadDataWithBaseURL(null,
-            "<html><body><div id=\"ed\" contenteditable=\"true\" aria-label=\"正文\" style=\"min-height:200px;border:1px solid #888\"></div>"
+            "<html><body><div id=\"ed\" contenteditable=\"true\" aria-label=\"text\" style=\"min-height:200px;border:1px solid #888\"></div>"
                 + "<script>var n=0;document.getElementById('ed').addEventListener('input',function(e){n++;bridge.report(n,e.target.innerText);});</script>"
                 + "</body></html>",
             "text/html", "utf-8", null);

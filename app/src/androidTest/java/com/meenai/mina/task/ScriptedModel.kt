@@ -15,7 +15,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.atomic.AtomicInteger
 
-/** 真机测试用的脚本模型:每次 complete 先报到(第几次、收到的历史),再等测试喂下一步工具调用。 */
+/**Script model for real machine testing:Complete first every time(How many times and history of receipt),Wait for the test to be fed to the next tool call. */
 class ScriptedModel : ChatModel {
     class Call(val number: Int, val messages: List<Message>)
 
@@ -23,21 +23,21 @@ class ScriptedModel : ChatModel {
     private val calls = Channel<Call>(Channel.UNLIMITED)
     private val replies = Channel<List<Part>>(Channel.UNLIMITED)
     private val n = AtomicInteger()
-    /** 收到的完成前核查请求次数。 */
+    /**The number of pre-completion verification requests received. */
     val verifierRequests = AtomicInteger()
-    /** 停止后写交代的请求次数;回 [stopSummary](默认空白,交代按记录直接拼),不占脚本也不计次。 */
+    /**The number of requests to write an account after stopping;return [stopSummary](Default blank,Explain and spell directly according to the record),It does not account for scripts and does not count. */
     val summaryRequests = AtomicInteger()
     @Volatile var stopSummary: String = ""
-    /** 核查的固定回答;默认通过。 */
+    /**Verified fixed answer;Passed by default. */
     @Volatile var verdict: String = PASS
     /**
-     * 从界面发起的任务在提议第一个工具调用时,会另问一次模型「用户是在讨论、要读还是要操作」;没配轻量模型时问的就是这个模型。
-     * 设了它,这一问固定这样回答(ACT / READ / DISCUSS),不占脚本也不计次;为 null 时这一问和别的调用一样要测试来喂。
+     *Tasks initiated from the interface when proposing the first tool call,The model will be asked another time "Is the user discussing, reading or operating?";This is the model that is asked when there is no lightweight model.
+     *set it,This question is always answered like this(ACT / READ / DISCUSS),It does not account for scripts and does not count.;When it is null, this question needs to be tested like other calls.
      */
     @Volatile var intent: String? = null
 
     override suspend fun complete(system: String, messages: List<Message>, tools: List<ToolSpec>): ModelReply {
-        // 回答交出前的核查:固定回答,不占脚本也不计次
+        //Verification before submission of answers:Fixed answer,It does not account for scripts and does not count.
         if (system == Verifier.PROMPT) {
             verifierRequests.incrementAndGet()
             return ModelReply(listOf(Part.Text(verdict)), StopReason.EndTurn, null)
@@ -46,27 +46,27 @@ class ScriptedModel : ChatModel {
             summaryRequests.incrementAndGet()
             return ModelReply(listOf(Part.Text(stopSummary)), StopReason.EndTurn, null)
         }
-        // 给新对话起标题:固定回答,不占脚本也不计次
-        if (system == TITLE_PROMPT) return ModelReply(listOf(Part.Text("测试对话")), StopReason.EndTurn, null)
+        //Give new conversation a title:Fixed answer,It does not account for scripts and does not count.
+        if (system == TITLE_PROMPT) return ModelReply(listOf(Part.Text("test conversation")), StopReason.EndTurn, null)
         intent?.let { if (system == INTENT_PROMPT) return ModelReply(listOf(Part.Text(it)), StopReason.EndTurn, null) }
         calls.send(Call(n.incrementAndGet(), messages))
         val parts = replies.receive()
         return ModelReply(parts, if (parts.any { it is Part.ToolCall }) StopReason.ToolUse else StopReason.EndTurn, null)
     }
 
-    /** [say] 是模型在这一步顺带说的话(界面上显示在步骤下面)。 */
+    /** [say]It’s what the model said incidentally at this step.(Displayed on the interface below the steps). */
     fun feed(name: String, args: String = "{}", say: String? = null) =
         replies.trySend(listOfNotNull(say?.let { Part.Text(it) }, Part.ToolCall("c${n.get()}", name, args)))
 
-    /** 不带调用的回复:交给用户的最终回答,任务就此结束(核对没对上时会被退回一次)。 */
+    /**Reply without call:Final answer to the user,The mission ends here(If the verification fails, it will be returned once.). */
     fun answer(text: String) = replies.trySend(listOf(Part.Text(text)))
 
     companion object {
         private val INTENT_PROMPT by lazy { Prompts.role("intent_gate") }
         private val SUMMARY_PROMPT by lazy { Prompts.role("stop_summary") }
         private val TITLE_PROMPT by lazy { Prompts.role("conversation_title") }
-        const val PASS = """{"checks": [{"criterion": "屏幕上显示了要的结果", "status": "met", "quote": null}], "verdict": "pass", "reason": "脚本"}"""
-        const val CANNOT_VERIFY = """{"checks": [{"criterion": "屏幕上显示了要的结果", "status": "unknown", "quote": null}], "verdict": "cannot_verify", "reason": "脚本:看不到结果"}"""
+        const val PASS = """{"checks": [{"criterion": "The desired result is displayed on the screen", "status": "met", "quote": null}], "verdict": "pass", "reason": "script"}"""
+        const val CANNOT_VERIFY = """{"checks": [{"criterion": "The desired result is displayed on the screen", "status": "unknown", "quote": null}], "verdict": "cannot_verify", "reason": "script:Can't see results"}"""
     }
 
     fun awaitCall(): Call = runBlocking {

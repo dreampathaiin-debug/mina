@@ -64,7 +64,7 @@ class SettingsScreenTest {
         }
     }
 
-    /** 页面是一整列滚动内容:先把这一行滚进视口再断言或点击。 */
+    /**The page is an entire column of scrolling content:Scroll this row into the viewport before asserting or clicking. */
     private fun scrollTo(text: String) {
         compose.awaitOne(text).performScrollTo()
         compose.waitForIdle()
@@ -73,11 +73,11 @@ class SettingsScreenTest {
     @Test
     fun homeShowsGroupsStatusAndValues() {
         home()
-        compose.onNodeWithText("一切就绪").assertIsDisplayed()
-        compose.onNodeWithText("基本").assertIsDisplayed()
-        // 首页一屏放不下(多了「语言」一行后更长):每个值先滚进视口再看。
-        // 依次是模型、手机操作、通知、网站登录、操作路线、计算环境、关于
-        for (v in listOf("DeepSeek", "可用", "正常", "3 个", "8 条", "已就绪", "0.1.0")) {
+        compose.onNodeWithText("Everything is ready").assertIsDisplayed()
+        compose.onNodeWithText("basic").assertIsDisplayed()
+        //The homepage does not fit on one screen(It will be longer after adding the "language" line.):Each value is first scrolled into the viewport and then viewed.
+        //In order, they are model, mobile phone operation, notification, website login, operation route, computing environment, and about
+        for (v in listOf("DeepSeek", "Available", "normal", "3", "8 items", "Ready", "0.1.0")) {
             scrollTo(v)
             compose.onNodeWithText(v).assertIsDisplayed()
         }
@@ -87,14 +87,14 @@ class SettingsScreenTest {
     fun homeRowsOpenTheirPages() {
         val opened = mutableListOf<String>()
         home(opened = opened)
-        for (t in listOf("模型", "Token 用量", "手机操作", "干活时", "悬浮胶囊", "通知", "记忆与技能", "网站登录", "文件与计算环境", "记住的操作路线", "恢复与修复", "开发者选项", "关于 Mina")) {
+        for (t in listOf("Model", "Token usage", "Mobile phone operation", "while working", "", "notify", "memory and skills", "Website login", "Documentation and Computing Environment", "Memorized operating routes", "Restoration and Repair", "Developer options", "about Mina")) {
             scrollTo(t)
             compose.onNodeWithText(t).performClick()
         }
         assertEquals(listOf("models", "usage", "phone", "work", "capsule", "notifications", "memory", "web", "sandbox", "routes", "recovery", "dev", "about"), opened)
     }
 
-    /** 「Token 用量」写近 7 天的合计;一点没有时写「还没有」,还没统计出来时不显示这一行。 */
+    /**"Token Usage" writes the total of the past 7 days;When not at all, write "not yet",This line is not displayed when statistics have not yet been calculated. */
     @Test
     fun usageRowShowsWeekTotal() {
         var tokens by mutableStateOf<Long?>(123_000)
@@ -104,22 +104,22 @@ class SettingsScreenTest {
                 usageTokens = tokens,
             )
         }
-        compose.onNodeWithText("近 7 天 12.3 万").assertIsDisplayed()
+        compose.onNodeWithText("123,000 in the last 7 days").assertIsDisplayed()
         tokens = 0
-        compose.awaitOne("还没有").assertIsDisplayed()
+        compose.awaitOne("not yet").assertIsDisplayed()
         tokens = null
         compose.waitForIdle()
-        compose.onAllNodesWithText("Token 用量").assertCountEquals(0)
+        compose.onAllNodesWithText("Token usage").assertCountEquals(0)
     }
 
-    /** 发布版不显示开发者选项。 */
+    /**Release builds don't show developer options. */
     @Test
     fun developerRowHiddenInRelease() {
         home(showDeveloper = false)
-        compose.onAllNodesWithText("开发者选项").assertCountEquals(0)
+        compose.onAllNodesWithText("Developer options").assertCountEquals(0)
     }
 
-    /** 有问题时状态卡变成提示,按钮把问题交给 onProblem。 */
+    /**The status card turns into a prompt when there is a problem,button to submit the question to onProblem. */
     @Test
     fun statusCardTurnsIntoFixPrompt() {
         val clicked = mutableListOf<Problem>()
@@ -127,21 +127,21 @@ class SettingsScreenTest {
             SystemStatus(34, BuiltinShellStatus.WirelessDebuggingOff, AccessibilityState.On, notificationsAllowed = true),
             onProblem = { clicked += it },
         )
-        compose.onNodeWithText("无线调试关着").assertIsDisplayed()
-        compose.onAllNodesWithText("一切就绪").assertCountEquals(0)
-        compose.onNodeWithText("需要处理").assertIsDisplayed()
-        compose.awaitOne("去打开").performClick()
+        compose.onNodeWithText("Wireless debugging is off").assertIsDisplayed()
+        compose.onAllNodesWithText("Everything is ready").assertCountEquals(0)
+        compose.onNodeWithText("Need to be processed").assertIsDisplayed()
+        compose.awaitOne("to open").performClick()
         assertEquals(listOf<Problem>(Problem.PhoneHelper(BuiltinShellStatus.WirelessDebuggingOff)), clicked)
     }
 
     @Test
     fun noModelAndOldSystem() {
         home(SystemStatus(30, BuiltinShellStatus.Running, AccessibilityState.EnabledNotRunning, notificationsAllowed = false), mainModel = null)
-        compose.onNodeWithText("手机操作不可用").assertIsDisplayed()
-        compose.onNodeWithText("未设置").assertIsDisplayed()
-        compose.onNodeWithText("不支持").assertIsDisplayed()
-        // 安卓 12 以下手机操作不可用:不给恢复与修复
-        compose.onAllNodesWithText("恢复与修复").assertCountEquals(0)
+        compose.onNodeWithText("Mobile operation is not available").assertIsDisplayed()
+        compose.onNodeWithText("not set").assertIsDisplayed()
+        compose.onNodeWithText("Not supported").assertIsDisplayed()
+        //The operation is not available on mobile phones below Android 12:No recovery or repair
+        compose.onAllNodesWithText("Restoration and Repair").assertCountEquals(0)
     }
 
     @Test
@@ -153,18 +153,18 @@ class SettingsScreenTest {
                 "14", onProblem = {}, onOpenNotifications = {}, onRepair = { repaired++ }, onUnpair = {}, onBack = {},
             )
         }
-        compose.onNodeWithText("无障碍服务").assertIsDisplayed()
-        compose.onNodeWithText("已开启").assertIsDisplayed()
-        compose.onNodeWithText("无线调试已关").assertIsDisplayed()
-        compose.onNodeWithText("正常").assertIsDisplayed()
-        compose.onNodeWithText("安卓 14").assertIsDisplayed()
-        compose.onNodeWithText("满足").assertIsDisplayed()
+        compose.onNodeWithText("").assertIsDisplayed()
+        compose.onNodeWithText("Already turned on").assertIsDisplayed()
+        compose.onNodeWithText("Wireless debugging is turned off").assertIsDisplayed()
+        compose.onNodeWithText("normal").assertIsDisplayed()
+        compose.onNodeWithText("Android 14").assertIsDisplayed()
+        compose.onNodeWithText("satisfy").assertIsDisplayed()
         compose.onNodeWithText(PhoneSetupCopy.usageNote(HelperRestart.None)).assertExists()
         compose.onNodeWithText(PhoneSetupCopy.REPAIR).performClick()
         assertEquals(1, repaired)
     }
 
-    /** 手机操作页的「通知」一行显示总体状态,点它进通知页。 */
+    /**The "Notification" row on the mobile phone operation page displays the overall status,Click it to enter the notification page. */
     @Test
     fun phoneOpsNotificationRowOpensNotifications() {
         var opened = 0
@@ -174,12 +174,12 @@ class SettingsScreenTest {
                 onRepair = {}, onUnpair = {}, onBack = {},
             )
         }
-        compose.onNodeWithText("已关闭").assertIsDisplayed()
-        compose.onNodeWithText("通知").performClick()
+        compose.onNodeWithText("Closed").assertIsDisplayed()
+        compose.onNodeWithText("notify").performClick()
         assertEquals(1, opened)
     }
 
-    /** 通知页:总开关允许、一个频道被调低、进度被关时,各行显示状态,点各行交给 onFix。 */
+    /**notification page:When the master switch is enabled, a channel is turned down, or the progress is turned off,Display status of each row,Click each row to hand it over to onFix. */
     @Test
     fun notificationsPageShowsChannelsAndOpensThem() {
         val fixes = mutableListOf<Fix>()
@@ -188,25 +188,25 @@ class SettingsScreenTest {
                 ready.copy(attentionImportance = 4, resultImportance = 2, progressImportance = 0), onFix = { fixes += it }, onBack = {},
             )
         }
-        compose.onNodeWithText("已允许").assertIsDisplayed()
-        compose.onNodeWithText("需要你接管、确认、回答时").assertIsDisplayed()
-        compose.onNodeWithText("会弹出").assertIsDisplayed()
-        compose.onNodeWithText("只进通知栏").assertIsDisplayed()
-        compose.onNodeWithText("已关闭").assertIsDisplayed()
+        compose.onNodeWithText("allowed").assertIsDisplayed()
+        compose.onNodeWithText("When you need to take over, confirm, and answer").assertIsDisplayed()
+        compose.onNodeWithText("will pop up").assertIsDisplayed()
+        compose.onNodeWithText("Only enter the notification bar").assertIsDisplayed()
+        compose.onNodeWithText("Closed").assertIsDisplayed()
         compose.onNodeWithText(StatusCopy.NOTIF_FOOTER).assertExists()
-        compose.onNodeWithText("需要你处理").performClick()
-        compose.onNodeWithText("任务结果").performClick()
-        compose.onNodeWithText("任务进度").performClick()
+        compose.onNodeWithText("need you to deal with").performClick()
+        compose.onNodeWithText("Task results").performClick()
+        compose.onNodeWithText("Task progress").performClick()
         assertEquals(listOf(Fix.OpenAttentionChannel, Fix.OpenResultChannel, Fix.OpenProgressChannel), fixes)
     }
 
-    /** 总开关关着:给「去打开」,三个频道都显示已关闭。 */
+    /**The main switch is off:Give "go open",All three channels appear to be closed. */
     @Test
     fun notificationsPageWhenAppOff() {
         val fixes = mutableListOf<Fix>()
         compose.setContent { NotificationsScreen(ready.copy(notificationsAllowed = false), onFix = { fixes += it }, onBack = {}) }
-        compose.onAllNodesWithText("已关闭").assertCountEquals(3)
-        compose.onNodeWithText("去打开").performClick()
+        compose.onAllNodesWithText("Closed").assertCountEquals(3)
+        compose.onNodeWithText("to open").performClick()
         assertEquals(listOf(Fix.AllowNotifications), fixes)
     }
 
@@ -220,7 +220,7 @@ class SettingsScreenTest {
         assertEquals(1, unpaired)
     }
 
-    /** 并行开关打开、但设备不支持时:这一行灰掉,写明原因,不给加减。 */
+    /**When the parallel switch is turned on but the device does not support it:This line is grayed out,State the reason,No addition or subtraction. */
     @Test
     fun parallelDisabledShowsReason() {
         compose.setContent {
@@ -230,9 +230,9 @@ class SettingsScreenTest {
                 onParallelMax = {}, onBack = {},
             )
         }
-        compose.onNodeWithText("同时进行的任务").assertIsDisplayed()
-        compose.onNodeWithText("安卓 14 以上才支持同时进行多个任务").assertIsDisplayed()
-        compose.onNodeWithText("1 个").assertIsDisplayed()
+        compose.onNodeWithText("simultaneous tasks").assertIsDisplayed()
+        compose.onNodeWithText("Android 14 or above supports multiple tasks at the same time").assertIsDisplayed()
+        compose.onNodeWithText("1").assertIsDisplayed()
         compose.onNodeWithText("+").assertDoesNotExist()
     }
 
@@ -247,11 +247,11 @@ class SettingsScreenTest {
                 onParallelMax = { max = it; picked += it }, onBack = {},
             )
         }
-        compose.onNodeWithText("屏幕保持常亮").assertIsDisplayed()
-        compose.onNodeWithText("2 个").assertIsDisplayed()
+        compose.onNodeWithText("The screen stays on").assertIsDisplayed()
+        compose.onNodeWithText("2").assertIsDisplayed()
         compose.onNodeWithText("+").performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("3 个").assertIsDisplayed()
+        compose.onNodeWithText("3").assertIsDisplayed()
         compose.onNodeWithText("−").performClick()
         assertEquals(listOf(3, 2), picked)
     }
@@ -261,11 +261,11 @@ class SettingsScreenTest {
         compose.setContent {
             DuringWorkScreen(true, {}, true, {}, parallel = null, onParallelMax = {}, onBack = {})
         }
-        compose.onNodeWithText("被操作的 App 静音").assertIsDisplayed()
-        compose.onAllNodesWithText("同时进行的任务").assertCountEquals(0)
+        compose.onNodeWithText("The operated app is muted").assertIsDisplayed()
+        compose.onAllNodesWithText("simultaneous tasks").assertCountEquals(0)
     }
 
-    /** 「干活时」两项默认开着,用户可以关:点了开关回调新值。 */
+    /**"While working" two items are turned on by default,Users can turn off:When the switch is clicked, the new value is called back. */
     @Test
     fun duringWorkTogglesCanBeTurnedOff() {
         val changes = mutableListOf<String>()
@@ -281,86 +281,86 @@ class SettingsScreenTest {
         assertEquals(listOf("screen:false", "mute:false"), changes)
     }
 
-    /** 干活时 › 操作节奏:快、标准(默认)、像人三选一,点了回调新值。 */
+    /**while working ›operating rhythm:fast, standard(default), choose one of three like people,Click callback new value. */
     @Test
     fun operatingPaceIsOneChoiceOfThree() {
         val picked = mutableListOf<OperatingPace>()
         compose.setContent {
             DuringWorkScreen(true, {}, true, {}, parallel = null, onParallelMax = {}, onBack = {}, onOperatingPace = { picked += it })
         }
-        compose.onNodeWithText("操作节奏").assertIsDisplayed()
-        compose.onNodeWithText("快").assertIsDisplayed()
-        compose.onNodeWithText("标准（默认）").assertIsDisplayed()
-        compose.onNodeWithText("像人").performClick()
-        compose.onNodeWithText("快").performClick()
+        compose.onNodeWithText("operating rhythm").assertIsDisplayed()
+        compose.onNodeWithText("quick").assertIsDisplayed()
+        compose.onNodeWithText("Standard (default)").assertIsDisplayed()
+        compose.onNodeWithText("like people").performClick()
+        compose.onNodeWithText("quick").performClick()
         assertEquals(listOf(OperatingPace.HUMAN, OperatingPace.FAST), picked)
     }
 
-    /** 首页「悬浮胶囊」一行写着当前的选择。 */
+    /**The current selection is written on the "Suspended Capsule" line on the home page. */
     @Test
     fun capsuleRowShowsCurrentChoice() {
         compose.setContent {
             SettingsContent(status = ready, androidRelease = "14", mainModel = "m", onBack = {}, onProblem = {}, onOpenModels = {}, capsuleMode = CapsuleMode.Always)
         }
-        compose.awaitOne("一直显示").assertIsDisplayed()
+        compose.awaitOne("always shown").assertIsDisplayed()
     }
 
-    /** 悬浮胶囊子页三选一,选了回调新值;页脚说明用的是无障碍服务。 */
+    /**Suspended capsule sub-page choose one from three,Selected callback new value;The footer description uses accessibility services. */
     @Test
     fun capsulePageOffersThreeChoices() {
         var mode by mutableStateOf(CapsuleMode.DuringTasks)
         val picked = mutableListOf<CapsuleMode>()
         compose.setContent { CapsuleScreen(mode, onMode = { picked += it; mode = it }, onBack = {}) }
-        compose.awaitOne("有任务时显示").assertIsDisplayed()
-        compose.onNodeWithText("关闭").performScrollTo().assertIsDisplayed()
-        // 脚注在三个选项下面,矮屏或大字号时要滚一下才看得到
-        compose.onNodeWithText("无障碍服务", substring = true).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("一直显示").performScrollTo().performClick()
-        compose.onNodeWithText("关闭").performScrollTo().performClick()
+        compose.awaitOne("Displayed when there is a task").assertIsDisplayed()
+        compose.onNodeWithText("closure").performScrollTo().assertIsDisplayed()
+        //Footnotes below the three options,If the screen is short or the font size is large, you have to scroll to see it.
+        compose.onNodeWithText("", substring = true).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("always shown").performScrollTo().performClick()
+        compose.onNodeWithText("closure").performScrollTo().performClick()
         assertEquals(listOf(CapsuleMode.Always, CapsuleMode.Off), picked)
     }
 
-    /** 「全部清除」先问一句;确认后清空,条数变成 0、按钮消失;取消则不动。 */
+    /**"Clear all" first question;Clear after confirmation,The number of bars becomes 0 and the button disappears.;If cancelled, it will not move. */
     @Test
     fun clearRoutesAsksThenEmpties() {
         var routes by mutableStateOf(3)
         var cleared = 0
         compose.setContent { RoutesScreen(routes, onClear = { cleared++; routes = 0 }, onBack = {}) }
-        compose.onNodeWithText("已记住的操作路线").assertIsDisplayed()
-        compose.onNodeWithText("3 条", substring = true).assertIsDisplayed()
-        compose.onNodeWithText("全部清除").performClick()
-        compose.clickInDialog("取消")
+        compose.onNodeWithText("Memorized route").assertIsDisplayed()
+        compose.onNodeWithText("3 items", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("clear all").performClick()
+        compose.clickInDialog("Cancel")
         assertEquals(0, cleared)
-        compose.onNodeWithText("全部清除").performClick()
-        compose.awaitOne("清除全部已记住的操作路线?", inDialog = true).assertIsDisplayed()
-        compose.clickInDialog("清除")
+        compose.onNodeWithText("clear all").performClick()
+        compose.awaitOne("Clear all memorized operation routes?", inDialog = true).assertIsDisplayed()
+        compose.clickInDialog("")
         assertEquals(1, cleared)
-        compose.onNodeWithText("0 条", substring = true).assertIsDisplayed()
-        compose.onNodeWithText("全部清除").assertDoesNotExist()
+        compose.onNodeWithText("0 items", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("clear all").assertDoesNotExist()
     }
 
-    /** 开发者选项:八个开关分速度、实验两组,点一下打开对应那一项。 */
+    /**Developer options:The eight switches are divided into two groups: speed and experiment.,Click to open the corresponding item. */
     @Test
     fun developerOptionsHasTwoGroupsAndToggles() {
         val changed = mutableListOf<SpeedFlags>()
         var flags by mutableStateOf(SpeedFlags.OFF)
         compose.setContent { DeveloperOptionsScreen(flags, onSpeed = { flags = it; changed += it }, onBack = {}) }
-        compose.onNodeWithText("速度").assertIsDisplayed()
-        for (t in listOf("先读元素，必要时看图", "操作后带回屏幕变化", "有把握时连做几步", "直接打开要去的页面", "简单步骤交给轻量模型")) {
+        compose.onNodeWithText("speed").assertIsDisplayed()
+        for (t in listOf("Read the elements first, then look at the image if necessary", "Bring back screen changes after operation", "When you are confident, do a few steps in a row", "Directly open the page you want to go to", "Simple steps to lightweight models")) {
             scrollTo(t)
             compose.onNodeWithText(t).assertIsDisplayed()
         }
-        scrollTo("实验")
-        compose.onNodeWithText("实验").assertIsDisplayed()
-        scrollTo("照着上次的做法做")
-        compose.onNodeWithText("照着上次的做法做").performClick()
+        scrollTo("experiment")
+        compose.onNodeWithText("experiment").assertIsDisplayed()
+        scrollTo("Do as you did last time")
+        compose.onNodeWithText("Do as you did last time").performClick()
         assertEquals(listOf(SpeedFlags(replay = true)), changed)
-        scrollTo("不同对话同时进行")
-        scrollTo("长任务的摘要分条写")
-        compose.onNodeWithText("长任务的摘要分条写").assertIsDisplayed()
+        scrollTo("Different conversations taking place simultaneously")
+        scrollTo("Write summaries of long tasks in separate sections")
+        compose.onNodeWithText("Write summaries of long tasks in separate sections").assertIsDisplayed()
     }
 
-    /** 「自主模式」在开发者选项最前面,默认关;点开关或整行都切换。 */
+    /**"Autonomous Mode" is at the top of the developer options,Default off;Click the switch or toggle the entire row. */
     @Test
     fun autonomousSwitchComesFirstAndToggles() {
         val toggled = mutableListOf<Boolean>()
@@ -375,7 +375,7 @@ class SettingsScreenTest {
         assertEquals(listOf(true, false), toggled)
     }
 
-    /** 「看图定位已验证」挪到开发者选项:有看图模型才出现,点了切换。 */
+    /**"View image positioning has been verified" moved to developer options:Appears only after looking at the picture model,Clicked switch. */
     @Test
     fun groundingSwitchShowsOnlyWithVisionModel() {
         val toggled = mutableListOf<Boolean>()
@@ -407,29 +407,29 @@ class SettingsScreenTest {
 
     @Test
     fun unsupportedHidesAdvanced() {
-        advanced(SandboxStatus.Unsupported("此设备不支持(需要 arm64)"))
+        advanced(SandboxStatus.Unsupported("This device does not support(need arm64)"))
         compose.onAllNodesWithText(SandboxCopy.NETWORK_TITLE).assertCountEquals(0)
-        compose.onAllNodesWithText("重置运行环境").assertCountEquals(0)
+        compose.onAllNodesWithText("Reset the operating environment").assertCountEquals(0)
     }
 
     @Test
     fun advancedHasNoInstallOrSandboxWording() {
         advanced(SandboxStatus.NotInstalled)
         compose.onNodeWithText(SandboxCopy.NETWORK_TITLE).assertIsDisplayed()
-        compose.onNodeWithText("重置运行环境").assertIsDisplayed()
-        for (t in listOf("沙箱", "安装沙箱", "软件源", "清空工作区")) compose.onAllNodesWithText(t, substring = true).assertCountEquals(0)
+        compose.onNodeWithText("Reset the operating environment").assertIsDisplayed()
+        for (t in listOf("sandbox", "Install sandbox", "Software source", "Clear workspace")) compose.onAllNodesWithText(t, substring = true).assertCountEquals(0)
     }
 
     @Test
     fun resetAsksFirst() {
         val c = advanced(SandboxStatus.Ready(network = false))
-        compose.onNodeWithText("重置运行环境").performClick()
+        compose.onNodeWithText("Reset the operating environment").performClick()
         assertEquals(0, c.reset)
         compose.onNodeWithText(SandboxCopy.RESET_BODY).assertIsDisplayed()
-        compose.onNodeWithText("取消").performClick()
+        compose.onNodeWithText("Cancel").performClick()
         assertEquals(0, c.reset)
-        compose.onNodeWithText("重置运行环境").performClick()
-        compose.onNodeWithText("重置").performClick()
+        compose.onNodeWithText("Reset the operating environment").performClick()
+        compose.onNodeWithText("reset").performClick()
         assertEquals(1, c.reset)
     }
 
@@ -447,14 +447,14 @@ class SettingsScreenTest {
         assertTrue(c.network == listOf(true))
     }
 
-    /** 已用空间:每个对话的工作区一行;有任务在跑的写明不能清、点不动;清理先确认,确认后才回调。 */
+    /**Used space:One line per conversation in the workspace;If there are tasks running, please indicate that they cannot be cleared or clicked.;Confirm before cleaning,Call back after confirmation. */
     @Test
     fun usageClearsAWorkspaceOnlyAfterConfirming() {
         val usage = com.meenai.mina.cap.sandbox.SandboxUsage(
             runtime = 300L shl 20, skills = 2L shl 20,
             workspaces = listOf(
-                com.meenai.mina.cap.sandbox.WorkspaceUsage("c-a", "a", "查快递", 5L shl 20, busy = true),
-                com.meenai.mina.cap.sandbox.WorkspaceUsage("c-b", "b", "整理表格", 1L shl 20, busy = false),
+                com.meenai.mina.cap.sandbox.WorkspaceUsage("c-a", "a", "Check express delivery", 5L shl 20, busy = true),
+                com.meenai.mina.cap.sandbox.WorkspaceUsage("c-b", "b", "Organize tables", 1L shl 20, busy = false),
                 com.meenai.mina.cap.sandbox.WorkspaceUsage("c-gone", null, null, 1024, busy = false),
             ),
         )
@@ -470,11 +470,11 @@ class SettingsScreenTest {
             }
         }
         compose.onNodeWithText(SandboxCopy.USAGE_TITLE).assertExists()
-        compose.onNodeWithText("已删除的对话").assertExists()
-        compose.onNodeWithText("这个对话有任务在跑，暂时不能清理").assertExists()
-        compose.onNodeWithText("查快递").performScrollTo().performClick()
+        compose.onNodeWithText("Deleted conversation").assertExists()
+        compose.onNodeWithText("There is a task running in this conversation and it cannot be cleared at the moment.").assertExists()
+        compose.onNodeWithText("Check express delivery").performScrollTo().performClick()
         compose.onAllNodesWithText(SandboxCopy.CLEAR_TITLE).assertCountEquals(0)
-        compose.onNodeWithText("整理表格").performScrollTo().performClick()
+        compose.onNodeWithText("Organize tables").performScrollTo().performClick()
         compose.onNodeWithText(SandboxCopy.CLEAR_TITLE).assertIsDisplayed()
         assertEquals(emptyList<String>(), cleared)
         compose.onNodeWithText(SandboxCopy.CLEAR).performClick()

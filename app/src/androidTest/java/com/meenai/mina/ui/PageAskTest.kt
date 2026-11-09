@@ -31,8 +31,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * 浏览器页上「问 Mina」那一块的几种样子:平时的输入条 → 干活中的半屏面板(光边、步骤、停止)→ 你在页面上动手后收成小卡片、
- * 顶上一条「继续」;Mina 问你时面板自己打开。不跑任务,直接给状态。
+ *How does the "Ask Mina" section on the browser page look like?:Normal input bar →Half screen panel at work(light edge, step, stop)→After you do something on the page, you will receive a small card,
+ *Top post "Continue";Mina asked you as the panel opened on its own. Not running tasks,Give the status directly.
  */
 @RunWith(AndroidJUnit4::class)
 class PageAskTest {
@@ -43,8 +43,8 @@ class PageAskTest {
     private lateinit var chat: PageChat
     private val model = CapsuleModel()
 
-    private fun card(state: TaskState) = model.cardRunOf(CapsuleRun("run-1", "conv-1", state, goal = "挑一个评价最好的", onScreen = true))
-    private val thread = ChatThread(listOf(ThreadItem.User("u0", "挑一个评价最好的"), ThreadItem.Answer("a0", "好的，我先看一下这一页。")))
+    private fun card(state: TaskState) = model.cardRunOf(CapsuleRun("run-1", "conv-1", state, goal = "Pick the one with the best reviews", onScreen = true))
+    private val thread = ChatThread(listOf(ThreadItem.User("u0", "Pick the one with the best reviews"), ThreadItem.Answer("a0", "Okay, let me take a look at this page first.")))
 
     private fun start() {
         compose.setContent {
@@ -52,7 +52,7 @@ class PageAskTest {
                 val scope = rememberCoroutineScope()
                 chat = remember { PageChat(ctx, UserBrowser.of(ctx), scope) }
                 Column(Modifier.fillMaxSize()) {
-                    Box(Modifier.weight(1f).fillMaxWidth()) { PageAskOverlay(chat, site = "shop.example.com", pageTitle = "降噪耳机搜索结果") }
+                    Box(Modifier.weight(1f).fillMaxWidth()) { PageAskOverlay(chat, site = "shop.example.com", pageTitle = "Noise canceling headphones search results") }
                     if (chat.mode == PageAskMode.Bar) PageAskBar(chat)
                 }
             }
@@ -65,19 +65,19 @@ class PageAskTest {
         compose.onNodeWithTag("page-ask-bar").assertIsDisplayed()
         compose.onNodeWithText(PageAskCopy.HINT).assertIsDisplayed()
 
-        // 用户问了:面板打开,Mina 在干活,四周亮光边,输入框右边是停止键
+        //User asked:Panel opens,Mina is working,bright light all around,To the right of the input box is the stop key
         compose.runOnIdle {
-            chat.show("conv-1", card(TaskState.Running(2, "", reason = "正在点「加入购物车」")), thread)
+            chat.show("conv-1", card(TaskState.Running(2, "", reason = "Clicking "Add to Cart"")), thread)
             chat.open = true
         }
         compose.onNodeWithTag("page-panel").assertIsDisplayed()
         compose.onNodeWithTag("page-glow").assertExists()
         compose.onNodeWithText(PageAskCopy.FROM_PAGE, substring = true).assertIsDisplayed()
         compose.onNodeWithTag("page-panel-open-chat").assertIsDisplayed()
-        compose.onNodeWithText("好的，我先看一下这一页。").assertIsDisplayed()
+        compose.onNodeWithText("Okay, let me take a look at this page first.").assertIsDisplayed()
         compose.onNodeWithTag("capsule-stop").assertIsDisplayed()
 
-        // 你在页面上动手:收成小卡片,顶上一条「继续」,不再亮光边
+        //You do it on the page:Harvest small card,Top post "Continue",No more bright edges
         compose.runOnIdle { chat.show("conv-1", card(TaskState.Held(TaskGate.paused(TaskGate.USER_ON_PAGE))), thread) }
         compose.onNodeWithTag("page-card").assertIsDisplayed()
         compose.onNodeWithTag("page-paused-banner").assertIsDisplayed()
@@ -86,7 +86,7 @@ class PageAskTest {
         compose.onNodeWithTag("page-panel").assertDoesNotExist()
         compose.runOnIdle { assertEquals(PageAskMode.Card, chat.mode) }
 
-        // 点卡片展开回面板
+        //Click on the card to expand back to the panel
         compose.onNodeWithTag("page-card").performClick()
         compose.onNodeWithTag("page-panel").assertIsDisplayed()
         compose.onNodeWithTag("page-panel-collapse").performClick()
@@ -98,32 +98,32 @@ class PageAskTest {
         start()
         compose.runOnIdle { chat.show("conv-1", card(TaskState.Running(1, "")), thread) }
         compose.onNodeWithTag("page-card").assertIsDisplayed()
-        compose.runOnIdle { chat.show("conv-1", card(TaskState.WaitingInput("要哪个颜色？", listOf("午夜黑", "云白"))), thread) }
+        compose.runOnIdle { chat.show("conv-1", card(TaskState.WaitingInput("Which color do you want?", listOf("midnight black", "cloud white"))), thread) }
         compose.onNodeWithTag("page-panel").assertIsDisplayed()
-        compose.onNodeWithText("午夜黑").assertIsDisplayed()
-        // 结束了、收起来:回到输入条
+        compose.onNodeWithText("midnight black").assertIsDisplayed()
+        //It's over, put it away:Return to input bar
         compose.runOnIdle {
-            chat.show("conv-1", card(TaskState.Succeeded("加好了")), thread)
+            chat.show("conv-1", card(TaskState.Succeeded("Added")), thread)
             chat.open = false
         }
         compose.onNodeWithTag("page-ask-bar").assertIsDisplayed()
     }
 
-    /** 侧栏里从一页开始的对话:标题后面「网页」小标签,下面一行是网站;别的对话没有。 */
+    /**Conversations starting on one page in the sidebar:The small label "Web Page" behind the title,The next line is the website;There is no other dialogue. */
     @Test
     fun drawerRowShowsTheWebTagAndSite() {
         compose.setContent {
             MinaTheme {
                 Column {
-                    ConversationRowContent(DrawerConversation("a", "挑一个降噪耳机", "", false, false, true, site = "shop.example.com"))
-                    ConversationRowContent(DrawerConversation("b", "明早的闹钟", "", false, false, true))
+                    ConversationRowContent(DrawerConversation("a", "Pick out noise-canceling headphones", "", false, false, true, site = "shop.example.com"))
+                    ConversationRowContent(DrawerConversation("b", "Alarm clock for tomorrow morning", "", false, false, true))
                 }
             }
         }
         compose.onNodeWithTag("conversation-web").assertIsDisplayed()
         compose.onNodeWithText(PageAskCopy.WEB).assertIsDisplayed()
         compose.onNodeWithText("shop.example.com").assertIsDisplayed()
-        compose.onNodeWithText("明早的闹钟").assertIsDisplayed()
+        compose.onNodeWithText("Alarm clock for tomorrow morning").assertIsDisplayed()
         compose.onAllNodesWithTag("conversation-web").assertCountEquals(1)
     }
 }

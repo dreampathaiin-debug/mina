@@ -30,8 +30,8 @@ import com.meenai.mina.task.testTasks
 import com.meenai.mina.task.TaskEnvironment
 
 /**
- * 真机:脚本模型跑一个 3 步任务(打开设置、看屏幕、交结果),在结果卡片上点「查看过程」,
- * 时间线上应有 3 行,点有画面的那行能看到当时的缩略图。需要内置助手在运行、Mina 无障碍服务已开启。
+ *Real machine:Script model runs a 3-step task(Open settings, look at the screen, and submit the results),Click "View Process" on the results card,
+ *There should be 3 lines on the timeline,Click on the line with the image to see the thumbnail of that time. Requires the built-in assistant to be running and the Mina accessibility service to be turned on.
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -64,29 +64,29 @@ class RunTimelineDeviceTest {
 
     @Test
     fun opensFromTaskCard() {
-        compose.runOnUiThread { assertTrue(vm.send("设置首页有什么", Prerequisites.Check(emptyList()))) }
+        compose.runOnUiThread { assertTrue(vm.send("What’s included in setting the home page?", Prerequisites.Check(emptyList()))) }
         model.awaitCall()
-        model.feed("phone_launch_app", """{"package":"$SETTINGS"}""", say = "先打开系统设置")
+        model.feed("phone_launch_app", """{"package":"$SETTINGS"}""", say = "Open system settings first")
         model.awaitCall()
-        model.feed("phone_observe", say = "看看设置首页")
+        model.feed("phone_observe", say = "Take a look at the settings home page")
         model.awaitCall()
-        model.answer("脚本演示:设置首页有网络、电池等。")
+        model.answer("Script demo:The settings home page includes network, battery, etc.")
         assertNotNull(pollUntil(15_000) { DeviceTaskState.state.value as? TaskState.Succeeded })
         assertNotNull(pollUntil(15_000) { DeviceTaskState.busy.value.takeIf { !it } })
 
-        compose.waitUntil(10_000) { compose.onAllNodesWithText("查看过程").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("查看过程").performClick()
-        compose.waitUntil(10_000) { compose.onAllNodesWithText("第 1 步").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodesWithText("View process").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("View process").performClick()
+        compose.waitUntil(10_000) { compose.onAllNodesWithText("Step 1").fetchSemanticsNodes().isNotEmpty() }
 
-        compose.onNodeWithText("共 3 步").assertExists()
-        for (n in 1..3) compose.onNodeWithText("第 $n 步").assertExists()
-        compose.onNodeWithText("第 4 步").assertDoesNotExist()
-        compose.onNodeWithText("办成了").assertExists()
+        compose.onNodeWithText("3 steps in total").assertExists()
+        for (n in 1..3) compose.onNodeWithText("No. $n steps").assertExists()
+        compose.onNodeWithText("Step 4").assertDoesNotExist()
+        compose.onNodeWithText("Done").assertExists()
 
-        compose.onAllNodesWithText("看当时的画面")[0].performClick()
+        compose.onAllNodesWithText("Look at the scene at that time")[0].performClick()
         compose.waitUntil(10_000) {
-            compose.onAllNodes(hasContentDescription("的画面", substring = true)).fetchSemanticsNodes().size == 1
+            compose.onAllNodes(hasContentDescription("picture", substring = true)).fetchSemanticsNodes().size == 1
         }
-        compose.onAllNodes(hasText("收起画面")).fetchSemanticsNodes().let { assertTrue(it.size == 1) }
+        compose.onAllNodes(hasText("Close the screen")).fetchSemanticsNodes().let { assertTrue(it.size == 1) }
     }
 }

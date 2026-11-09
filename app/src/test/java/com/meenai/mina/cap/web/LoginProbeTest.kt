@@ -20,41 +20,41 @@ class LoginProbeTest {
 
     @Test fun signedOutSignals() {
         assertEquals(LoginState.SignedOut, state(pw = true))
-        assertEquals(LoginState.SignedOut, state("首页", "登录/注册"))
+        assertEquals(LoginState.SignedOut, state("front page", "Log in/register"))
         assertEquals(LoginState.SignedOut, state("Sign in"))
     }
 
     @Test fun signedInNeedsAProminentLogoutOrAccountEntry() {
-        assertEquals(LoginState.SignedIn, state("首页", "退出登录"))
+        assertEquals(LoginState.SignedIn, state("front page", "Log out"))
         assertEquals(LoginState.SignedIn, state("Log out"))
-        assertEquals(LoginState.SignedIn, state("退出"))
-        assertEquals(LoginState.SignedIn, state("个人中心"))
+        assertEquals(LoginState.SignedIn, state("quit"))
+        assertEquals(LoginState.SignedIn, state("Personal Center"))
         assertEquals(LoginState.SignedIn, state("Sign out ›"))
     }
 
     @Test fun helpAndLookalikeLinksAreNotLogout() {
-        // 注销账号的说明、帮助页,以及「退出」开头的别的意思
-        assertEquals(LoginState.Unknown, state("账号注销"))
-        assertEquals(LoginState.Unknown, state("注销说明"))
-        assertEquals(LoginState.Unknown, state("退出全屏"))
+        //Instructions and help pages for canceling your account,and other meanings starting with "exit"
+        assertEquals(LoginState.Unknown, state("Account logout"))
+        assertEquals(LoginState.Unknown, state("Logout instructions"))
+        assertEquals(LoginState.Unknown, state("Exit full screen"))
         assertEquals(LoginState.Unknown, state("How to log out"))
         assertEquals(LoginState.Unknown, state("Log out of every device you have ever used"))
     }
 
     @Test fun avatarsAloneNeverDecide() {
         assertEquals(LoginState.Unknown, state(avatars = 3))
-        // 头像只挡住「已退出」
-        assertEquals(LoginState.Unknown, state("登录", avatars = 1))
+        //The avatar only blocks "Exited"
+        assertEquals(LoginState.Unknown, state("Log in", avatars = 1))
     }
 
     @Test fun conflictsAndLoginPagesAreUnknown() {
         assertEquals(LoginState.Unknown, state())
-        // 改密码页:密码框和退出链接都在
-        assertEquals(LoginState.Unknown, state("退出登录", pw = true))
-        assertEquals(LoginState.Unknown, state("登录", "个人中心"))
-        // 单点登录、通行证跳转途中不下结论,哪怕有密码框
+        //Password change page:The password box and exit link are both there
+        assertEquals(LoginState.Unknown, state("Log out", pw = true))
+        assertEquals(LoginState.Unknown, state("Log in", "Personal Center"))
+        //Single sign-on and pass jump without drawing conclusions on the way,Even if there is a password box
         assertEquals(LoginState.Unknown, state(pw = true, url = "https://passport.example.com/login?return=/"))
-        assertEquals(LoginState.Unknown, state("退出登录", url = "https://example.com/sso/callback"))
+        assertEquals(LoginState.Unknown, state("Log out", url = "https://example.com/sso/callback"))
     }
 
     @Test fun loginUrlMatchesPathSegmentsOnly() {
@@ -67,11 +67,11 @@ class LoginProbeTest {
     }
 
     @Test fun parsesTheScriptResult() {
-        val inner = """{"url":"https://a.example.com/","pw":true,"account":["登录"],"avatars":2}"""
+        val inner = """{"url":"https://a.example.com/","pw":true,"account":["Log in"],"avatars":2}"""
         val s = LoginProbe.parse(JsonPrimitive(inner).toString())!!
         assertEquals("https://a.example.com/", s.url)
         assertTrue(s.passwordVisible)
-        assertEquals(listOf("登录"), s.account)
+        assertEquals(listOf("Log in"), s.account)
         assertEquals(2, s.avatars)
         assertNull(LoginProbe.parse("null"))
         assertNull(LoginProbe.parse(null))

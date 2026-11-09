@@ -18,7 +18,7 @@ import java.nio.file.Files
 import java.nio.file.LinkOption
 import java.security.MessageDigest
 
-/** 仓库里的自带运行环境与生成的常量、软件包清单、构建脚本彼此一致,并且真能解开。单元测试的工作目录是 app/。 */
+/**The built-in runtime environment in the warehouse is consistent with the generated constants, package lists, and build scripts.,And it can really be solved. The working directory for unit tests is app/. */
 class BundledRuntimeTest {
     @get:Rule val texts = ChineseTexts()
 

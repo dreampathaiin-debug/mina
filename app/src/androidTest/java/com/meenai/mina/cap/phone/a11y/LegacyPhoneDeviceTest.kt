@@ -22,7 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 
-/** 走一遍真实的内置助手、虚拟屏和无障碍路径,不用模型,也不往外发消息。 */
+/**Walk through real built-in assistants, virtual screens and accessible paths,No model required,No messages are sent out. */
 @RunWith(AndroidJUnit4::class)
 @SdkSuppress(minSdkVersion = 31, maxSdkVersion = 32)
 class LegacyPhoneDeviceTest {
@@ -59,16 +59,16 @@ class LegacyPhoneDeviceTest {
             }
             assertNotNull("test fields readable", snapshot)
             assertEquals(testPackage, snapshot!!.packageName)
-            val reveal = snapshot.elements.first { it.name == "假搜索框" && it.clickable }
+            val reveal = snapshot.elements.first { it.name == "fake search box" && it.clickable }
             val tapped = screen.tapRef(reveal.ref, snapshot.snapshotId)
             assertTrue("tap result: $tapped", tapped is ActionResult.Ok)
             val revealed = screen.snapshot()
-            val field = revealed.elements.first { it.editable && it.name == "真正的输入框" }
-            val typed = screen.typeText(field.ref, revealed.snapshotId, "Mina 兼容输入测试")
+            val field = revealed.elements.first { it.editable && it.name == "real input box" }
+            val typed = screen.typeText(field.ref, revealed.snapshotId, "Mina compatible input test")
             assertTrue("type result: $typed", typed is ActionResult.Ok)
             assertEquals(Verification.MATCH, (typed as ActionResult.Ok).verification)
             val after = screen.snapshot()
-            assertTrue(after.elements.any { it.editable && it.name == "Mina 兼容输入测试" })
+            assertTrue(after.elements.any { it.editable && it.name == "Mina compatible input test" })
         } finally {
             display.release()
         }

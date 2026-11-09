@@ -1,73 +1,73 @@
-# 电脑端 CLI / Skill：安装、升级和卸载
+# Computer CLI / Skill: install, update and remove
 
-[English](computer-install.en.md) · [连接与任务命令](cli.md) · [MCP 配置](mcp.md)
+[简体中文](computer-install.md) · [Connection and task commands](cli.en.md) · [MCP configuration](mcp.en.md)
 
-从电脑使用 Mina 的总入口是[从电脑使用 Mina](computer.md)：在那里选好用 CLI + Skill 还是 MCP、经 USB 还是 Wi-Fi / VPN 连接。这一页只讲 CLI 和 Skill 怎么装、怎么升级和卸载；用 MCP 客户端的不用看本文，按 [MCP 指南](mcp.md)配置。
+The starting point for using Mina from a computer is [Use Mina from a computer](computer.en.md): pick CLI + Skill or MCP there, and USB or Wi-Fi / VPN. This page only covers installing, updating and removing the CLI and the Skill; if you use an MCP client, skip it and follow the [MCP guide](mcp.en.md).
 
-Agent 想走固定的最短路径：见 [Agent 快速路径](agent-quickstart.md)。
+Agents wanting a fixed shortest path: see the [agent quick path](agent-quickstart.en.md).
 
-## 开始之前
+## Before you start
 
-- 让能执行命令、支持 Skill 的电脑 Agent 用 Mina：装 [Skill](#skill安装)，它自带 CLI 脚本，不必另装 CLI。
-- 在终端或脚本里派任务：装 [CLI](#cli安装)，使用 `mina` 命令。
+- To let a computer agent that can run commands and supports Skills use Mina, install the [Skill](#skill-install). It includes its own CLI script, so no separate CLI install is needed.
+- To submit tasks from a terminal or script, install the [CLI](#cli-install), which gives you the `mina` command.
 
-手机端的前提：装好 APK（[Releases](https://github.com/wangzan101/Mina/releases/latest)）、打开过一次 Mina、配好模型。**只让 Mina 聊天、上网和处理文件时，可以不开无障碍、不启动手机助手，安卓 11 也能用**；要操作手机 App，才需要按[设置指南](setup-guide.md)完成手机操作设置（安卓 12+）。电脑端工具的安装和升级不会安装或更新手机上的 APK。
+On the phone: install the APK ([Releases](https://github.com/wangzan101/Mina/releases/latest)), open Mina once and add a model. **If Mina only needs to chat, browse the web and work with files, you can skip accessibility and the phone helper, and Android 11 works**; only phone app control needs the phone-control setup in the [setup guide](setup-guide.en.md) (Android 12+). Installing or updating the computer tools does not install or update the APK on the phone.
 
-下文的 `<tag>` 指 [最新 release](https://github.com/wangzan101/Mina/releases/latest) 的版本标签（页面标题里的 `v0.1.x`）。电脑端和手机上的 APK 尽量用同一个版本。
+Below, `<tag>` means the version tag of the [latest release](https://github.com/wangzan101/Mina/releases/latest) (the `v0.1.x` in its title). Keep the computer tools and the phone APK on the same version where you can.
 
-## CLI：安装
+## CLI: install
 
-需要 Python 3.10+、Git 和 pipx；ADB 连接还需要 Android platform-tools。安装：
+Requires Python 3.10+, Git and pipx; ADB connections also need Android platform-tools. Install:
 
 ```bash
 pipx install 'git+https://github.com/wangzan101/Mina.git@<tag>#subdirectory=tools/mina'
 mina --version
 ```
 
-pipx 里的包名是 `mina-phone-cli`，命令是 `mina`。CLI 有自己的版本号，和 APK 版本不同。已有仓库检出时，也可以在仓库根目录 `pipx install ./tools/mina`，或者不安装、直接运行 `python3 tools/mina/scripts/mina_cli.py`（Windows 用 `py -3`）。
+The pipx package is `mina-phone-cli` and the command is `mina`. The CLI has its own version number, separate from the APK's. With a repository checkout you can also run `pipx install ./tools/mina` from the repository root, or skip installing and run `python3 tools/mina/scripts/mina_cli.py` directly (`py -3` on Windows).
 
-## CLI：升级、回退和卸载
+## CLI: update, roll back and remove
 
-升级换成新的 `<tag>`，回退换成原来的 `<tag>`，用 `--force` 覆盖安装：
+To update, use the new `<tag>`; to roll back, use the previous one; `--force` replaces the installed copy:
 
 ```bash
 pipx install --force 'git+https://github.com/wangzan101/Mina.git@<tag>#subdirectory=tools/mina'
 ```
 
-`pipx upgrade` 不会切换到别的 tag，换版本时用上面的命令。卸载：
+`pipx upgrade` does not move to another tag; use the command above to change versions. To remove:
 
 ```bash
 pipx uninstall mina-phone-cli
 ```
 
-## Skill：安装
+## Skill: install
 
-Skill 就是仓库里的 `tools/mina` 文件夹：`SKILL.md` 告诉 Agent 怎么用，`scripts/mina_cli.py` 是自带的 CLI，只依赖 Python 3.10+（ADB 连接另需 platform-tools）。
+The Skill is the repository's `tools/mina` folder: `SKILL.md` tells the agent how to use it, and `scripts/mina_cli.py` is the bundled CLI, which needs only Python 3.10+ (plus platform-tools for ADB connections).
 
-1. 在 [最新 release](https://github.com/wangzan101/Mina/releases/latest) 下载 **Source code (zip)** 并解压。
-2. 把其中**整个** `tools/mina` 文件夹复制到你的 Agent 的技能目录（位置见该 Agent 自己的说明）。结果应该是 `<技能目录>/mina/SKILL.md`，不要多嵌套一层 `mina`。
-3. 检查自带脚本能运行：
+1. From the [latest release](https://github.com/wangzan101/Mina/releases/latest), download **Source code (zip)** and extract it.
+2. Copy the **whole** `tools/mina` folder into your agent's skills directory (see that agent's own documentation for where it is). The result should be `<skills-directory>/mina/SKILL.md`, without an extra nested `mina` folder.
+3. Check that the bundled script runs:
 
    ```bash
-   python3 <技能目录>/mina/scripts/mina_cli.py --version   # Windows 用 py -3 代替 python3
+   python3 <skills-directory>/mina/scripts/mina_cli.py --version   # use py -3 instead of python3 on Windows
    ```
 
-4. 重开 Agent 会话，确认它能看到名为 `mina` 的 Skill。
+4. Start a new agent session and confirm it can see a Skill named `mina`.
 
-电脑上已有 `mina` 命令时，Skill 会优先用它；更新 Skill 不会更新全局 CLI，两者各自维护。
+If a `mina` command is already installed on the computer, the Skill uses it first. Updating the Skill does not update that CLI; maintain each separately.
 
-## Skill：升级、回退和卸载
+## Skill: update, roll back and remove
 
-- **升级或回退**：把旧的 `mina` 文件夹移到技能目录之外备份，再复制目标版本的整个 `tools/mina` 文件夹，不要在旧文件夹上合并复制。
-- **卸载**：只删除技能目录里的 `mina` 文件夹。
+- **Update or roll back**: move the old `mina` folder out of the skills directory as a backup, then copy the whole `tools/mina` folder of the target version. Do not copy over the old folder.
+- **Remove**: delete only the `mina` folder in the skills directory.
 
-改完都要重开 Agent 会话。
+Start a new agent session after any change.
 
-## 装好之后：连接检查
+## After installing: check the connection
 
-只装了 Skill 时，下面的 `mina` 换成 `python3 <技能目录>/mina/scripts/mina_cli.py`（Windows 用 `py -3`）。
+With only the Skill installed, replace `mina` below with `python3 <skills-directory>/mina/scripts/mina_cli.py` (`py -3` on Windows).
 
-经 USB 或已连接的无线 ADB：
+Over USB or connected wireless ADB:
 
 ```bash
 mina devices --json
@@ -75,21 +75,21 @@ mina connect --device SERIAL --json
 mina doctor --device SERIAL --json
 ```
 
-直接经 Wi-Fi／私有网络（先在手机的 设置 › 连接电脑 里开启网络访问）：
+Directly over Wi-Fi / a private network (first turn on network access in Settings › Connect a computer on the phone):
 
 ```bash
 mina --url http://PHONE:8765 --token-file /path/to/private-token-file doctor --json
 ```
 
-**`connect` 和 `doctor` 成功不等于任务做成。** 它们只说明接口连得上、能读到设备状态；`doctor` 把模型配置记为 unverified，也不说明 Agent 已加载 Skill。要验证真实任务，用 `mina task run` 派一个简单任务，再用 `mina task wait` 看到 `done` 并核对结果，见[任务命令](cli.md#任务命令)。
+**A successful `connect` or `doctor` does not mean a task gets done.** They only show that the API is reachable and device state is readable; `doctor` reports the model configuration as unverified, and neither shows that the agent has loaded the Skill. To verify a real task, submit a simple one with `mina task run`, then use `mina task wait` until it reports `done` and check the result; see [Task commands](cli.en.md#tasks).
 
-| 现象 | 处理 |
+| Symptom | What to do |
 | --- | --- |
-| `incompatible_api` | 手机上的 APK 太旧，不带任务 API v1，更新 APK。 |
-| `stale_connection` | 手机重启过，重新运行 `connect`。 |
-| `device_selection` | 不止一台手机在线，用 `mina devices` 查到序列号后加 `--device SERIAL`。 |
-| `connection_info` | 读不到 Mina 的连接信息（手机锁着、还没打开过 Mina 等）：解锁手机、打开一次 Mina 后再运行 `connect`。 |
-| `adb` / `adb_unavailable` | 确认 adb 在 PATH 里、手机在 `adb devices` 里显示为 `device`，在手机上打开一次 Mina 后再运行 `connect`。 |
-| Agent 看不到 Skill | 检查是否多嵌套了一层文件夹、`scripts/` 是否一起复制，然后重开会话。 |
+| `incompatible_api` | The APK on the phone is too old to include task API v1; update it. |
+| `stale_connection` | The phone has rebooted; run `connect` again. |
+| `device_selection` | More than one phone is online; find the serial with `mina devices` and add `--device SERIAL`. |
+| `connection_info` | Mina's connection information could not be read (the phone is locked, Mina hasn't been opened yet, and so on): unlock the phone, open Mina once, then run `connect` again. |
+| `adb` / `adb_unavailable` | Make sure adb is on PATH and the phone shows as `device` in `adb devices`, open Mina once on the phone, then run `connect` again. |
+| The agent does not see the Skill | Check for an extra nested folder and that `scripts/` was copied too, then start a new session. |
 
-卸载电脑端工具不会删除手机数据，也不会关闭手机上的电脑连接。要停止远程访问，在手机的 设置 › 连接电脑 里关闭对应开关。
+Removing the computer tools does not delete phone data or turn off computer access on the phone. To stop remote access, turn off the relevant switch in Settings › Connect a computer on the phone.

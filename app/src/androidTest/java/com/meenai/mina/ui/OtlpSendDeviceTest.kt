@@ -43,14 +43,14 @@ class OtlpSendDeviceTest {
                     compose.activityRule.scenario.onActivity { it.setContent { RunTimelineScreen(vm, onBack = {}) } }
                     compose.waitUntil(5_000) { compose.onAllNodes(hasScrollToIndexAction()).fetchSemanticsNodes().isNotEmpty() }
                     compose.onNode(hasScrollToIndexAction()).performScrollToKey("trace")
-                    compose.awaitOne("详细 Trace")
-                    if (compose.onAllNodesWithText("通过 OTLP/HTTP 发送").fetchSemanticsNodes().isEmpty())
-                        compose.onNodeWithText("详细 Trace").performScrollTo().performClick()
+                    compose.awaitOne("detailed Trace")
+                    if (compose.onAllNodesWithText("pass OTLP/HTTP send").fetchSemanticsNodes().isEmpty())
+                        compose.onNodeWithText("detailed Trace").performScrollTo().performClick()
                 }
-                fun toggle() = compose.awaitOne("详细 Trace").performScrollTo().performClick()
+                fun toggle() = compose.awaitOne("detailed Trace").performScrollTo().performClick()
                 showTimeline()
-                fun confirm() = compose.onNode(hasText("通过 OTLP/HTTP 发送") and hasClickAction() and hasAnyAncestor(isDialog()))
-                compose.onNodeWithText("通过 OTLP/HTTP 发送").performScrollTo().performClick()
+                fun confirm() = compose.onNode(hasText("pass OTLP/HTTP send") and hasClickAction() and hasAnyAncestor(isDialog()))
+                compose.onNodeWithText("pass OTLP/HTTP send").performScrollTo().performClick()
                 compose.onNodeWithTag("trace-endpoint").performTextReplacement("http://8.8.8.8/v1/traces")
                 confirm().assertIsNotEnabled()
                 compose.onNodeWithTag("trace-endpoint").performTextReplacement(receiver.url("/v1/traces").toString())
@@ -65,16 +65,16 @@ class OtlpSendDeviceTest {
                 // Hold the acknowledgement until the controls have left and re-entered composition.
                 toggle()
                 toggle()
-                compose.onNodeWithText("通过 OTLP/HTTP 发送").assertExists()
-                compose.onNode(hasText("通过 OTLP/HTTP 发送") and hasClickAction()).assertDoesNotExist()
+                compose.onNodeWithText("pass OTLP/HTTP send").assertExists()
+                compose.onNode(hasText("pass OTLP/HTTP send") and hasClickAction()).assertDoesNotExist()
                 compose.activityRule.scenario.recreate()
                 showTimeline()
-                compose.onNodeWithText("通过 OTLP/HTTP 发送").assertExists()
-                compose.onNode(hasText("通过 OTLP/HTTP 发送") and hasClickAction()).assertDoesNotExist()
+                compose.onNodeWithText("pass OTLP/HTTP send").assertExists()
+                compose.onNode(hasText("pass OTLP/HTTP send") and hasClickAction()).assertDoesNotExist()
                 receiver.enqueue(MockResponse().setHeader("Content-Type", "application/x-protobuf"))
-                compose.awaitOne("接收端已接受").assertExists()
+                compose.awaitOne("The receiving end has accepted").assertExists()
                 assertEquals(1, receiver.requestCount)
-                compose.onNodeWithText("通过 OTLP/HTTP 发送").performScrollTo().performClick()
+                compose.onNodeWithText("pass OTLP/HTTP send").performScrollTo().performClick()
                 compose.onNodeWithTag("trace-auth-value").assert(hasText(""))
             }
         } finally {

@@ -7,7 +7,7 @@ import com.meenai.mina.core.cap.sandbox.SandboxPort
 import org.junit.runner.RunWith
 import java.io.File
 
-/** 路径规则契约在真机的文件系统上跑(符号链接、canonicalFile 的行为以安卓为准)。 */
+/**The path rule contract runs on the file system of the real machine(symbolic link,canonicalFileThe behavior is based on Android). */
 @RunWith(AndroidJUnit4::class)
 class AndroidSandboxPathContractDeviceTest : SandboxPathContract() {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext

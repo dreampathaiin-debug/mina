@@ -1,0 +1,129 @@
+0		(user's answer, not recorded)
+1	KEEP
+2	// CNXN/AUTH etc. after the connection is set up are not handled
+3	Verifying results
+4	Unconfirmed:
+5	Cancelled
+6	Task aborted unexpectedly
+7	Via web
+8	Attachment:
+9	KEEP_REGEX
+10	Cancelled
+11	Do it the way it was done before
+12	Site 
+13	View installed apps
+14	Open app
+15	(another copy, user $it)
+16	PLACEHOLDER16
+17	Keep or close apps after the task
+18	Share text to an app
+19	PLACEHOLDER19
+20	Scroll to find
+21	Wait for a screen condition
+22	Wait for a screen event
+23	Extract screen data
+24	Check pop-ups
+25	Multi-touch gesture
+26	System command
+27	Find screen widgets
+28	Capture multi-screen content
+29	Run phone actions in sequence
+30	Turn the wheel
+31	Set alarm
+32	PLACEHOLDER32
+33	PLACEHOLDER33
+34	Set timer
+35	PLACEHOLDER35
+36	View alarms
+37	Add calendar event
+38	PLACEHOLDER38
+39	// "./" is dest itself
+40	// other unrecognized types
+41	// a non-empty dir throws IOException, left to the caller
+42	PLACEHOLDER42
+43	Work with files
+44	PLACEHOLDER44
+45	Run bundled script
+46	PLACEHOLDER46
+47	Read file
+48	Write file
+49	PLACEHOLDER49
+50	Search files
+51	Export file
+52	PLACEHOLDER52
+53	Keep the web page open
+54	Open web page
+55	PLACEHOLDER55
+56	Switch web tab
+57	PLACEHOLDER57
+58	Switch page version
+59	KEEP
+60	KEEP
+61	Read web page
+62	PLACEHOLDER62
+63	PLACEHOLDER63
+64	PLACEHOLDER64
+65	View downloads
+66	PLACEHOLDER66
+67	View data the page received
+68	PLACEHOLDER68
+69	Wait for page changes
+70	PLACEHOLDER70
+71	Read page data
+72	PLACEHOLDER72
+73	Run site command
+74	PLACEHOLDER74
+75	Upload file
+76	KEEP
+77	KEEP
+78	KEEP
+79	KEEP
+80	KEEP
+81	KEEP
+82	KEEP
+83	PLACEHOLDER83
+84	PLACEHOLDER84
+85	PLACEHOLDER85
+86	KEEP
+87	KEEP
+88	KEEP
+89	PLACEHOLDER89
+90	PLACEHOLDER90
+91	PLACEHOLDER91
+92	PLACEHOLDER92
+93	PLACEHOLDER93
+94	PLACEHOLDER94
+95	PLACEHOLDER95
+96	PLACEHOLDER96
+97	PLACEHOLDER97
+98	PLACEHOLDER98
+99	PLACEHOLDER99
+100	PLACEHOLDER100
+101	PLACEHOLDER101
+102	PLACEHOLDER102
+103	PLACEHOLDER103
+104	PLACEHOLDER104
+105	PLACEHOLDER105
+106	PLACEHOLDER106
+107	PLACEHOLDER107
+108	PLACEHOLDER108
+109	PLACEHOLDER109
+110	PLACEHOLDER110
+111	PLACEHOLDER111
+112	PLACEHOLDER112
+113	PLACEHOLDER113
+114	PLACEHOLDER114
+115	PLACEHOLDER115
+116	PLACEHOLDER116
+117	PLACEHOLDER117
+118	PLACEHOLDER118
+119	PLACEHOLDER119
+120	PLACEHOLDER120
+121	PLACEHOLDER121
+122	PLACEHOLDER122
+123	PLACEHOLDER123
+124	PLACEHOLDER124
+125	PLACEHOLDER125
+126	PLACEHOLDER126
+127	PLACEHOLDER127
+128	PLACEHOLDER128

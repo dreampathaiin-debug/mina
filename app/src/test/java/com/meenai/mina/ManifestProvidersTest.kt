@@ -7,7 +7,7 @@ import org.w3c.dom.Element
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
-/** 清单里会让进程一启动就崩的配置,在电脑上先拦住(真机才会暴露的那一类)。 */
+/**List of configurations that will cause the process to crash as soon as it starts,Block it on the computer first(The kind that only real machines will reveal). */
 class ManifestProvidersTest {
 
     private val androidNs = "http://schemas.android.com/apk/res/android"
@@ -29,7 +29,7 @@ class ManifestProvidersTest {
             if (!isFileProvider) continue
             fileProviders++
             val name = p.getAttributeNS(androidNs, "name")
-            // FileProvider.attachInfo 在 grantUriPermissions 不为 true 时抛 SecurityException,进程起不来
+            // FileProvider.attachInfoexist grantUriPermissionsThrows when not true SecurityException,The process cannot start
             assertEquals("$name grantUriPermissions", "true", p.getAttributeNS(androidNs, "grantUriPermissions"))
             assertEquals("$name exported", "false", p.getAttributeNS(androidNs, "exported"))
         }
@@ -43,13 +43,13 @@ class ManifestProvidersTest {
         val providers = doc.getElementsByTagName("provider")
         val p = (0 until providers.length).map { providers.item(it) as Element }
             .single { it.getAttributeNS(androidNs, "name") == ".shell.HelperHandoffProvider" }
-        // shell 要能调到它;普通 App 没有这个权限,连 provider 都拿不到
+        //The shell must be able to adjust it;Ordinary apps do not have this permission,Can’t even get the provider
         assertEquals("true", p.getAttributeNS(androidNs, "exported"))
         assertEquals("android.permission.INTERACT_ACROSS_USERS_FULL", p.getAttributeNS(androidNs, "permission"))
         assertEquals("\${applicationId}.helper", p.getAttributeNS(androidNs, "authorities"))
     }
 
-    /** 电脑连接的服务对外开放只为让 adb shell 起它:普通 App 没有这个权限,起不了、也开关不了 USB 方式。 */
+    /**Computer connection services are open to the public only to allow adbshell to start it:Ordinary apps do not have this permission,Can't turn on or off the USB mode. */
     @Test
     fun computerAccessServiceIsOnlyStartableWithShellLevelPermission() {
         val doc = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
@@ -60,11 +60,11 @@ class ManifestProvidersTest {
         assertEquals("true", s.getAttributeNS(androidNs, "exported"))
         assertEquals("android.permission.INTERACT_ACROSS_USERS_FULL", s.getAttributeNS(androidNs, "permission"))
         assertEquals("specialUse", s.getAttributeNS(androidNs, "foregroundServiceType"))
-        // 没有 intent-filter:只能按组件名显式起
+        //No intent-filter:Can only be started explicitly by component name
         assertEquals(0, s.getElementsByTagName("intent-filter").length)
     }
 
-    /** 清单里登记的组件都按全名找得到类(搬了代码的入口留着同名的薄壳)。 */
+    /**All components registered in the list can be found by class by full name.(The entrance where the code was moved remains a thin shell with the same name.). */
     @Test
     fun everyComponentClassExists() {
         val doc = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
@@ -81,8 +81,8 @@ class ManifestProvidersTest {
     }
 
     /**
-     * 测试 APK 清单里的页面、服务运行在测试包自己的进程里,那里没有 Kotlin 标准库(和 App 重复的依赖不打进测试 APK):
-     * 每个都要有同名的 Java 源文件。类名对不上、或写成 Kotlin,真机上一打开就崩,读屏只读到一块空屏。
+     *The pages and services in the test APK list run in the test package's own process.,There is no Kotlin standard library there(Dependencies that overlap with the App are not included in the test APK):
+     *Each must have a Java source file with the same name. The class name does not match or is written as Kotlin,The real phone crashes as soon as I turn it on.,Screen reading only reads a blank screen.
      */
     @Test
     fun testApkComponentsAreJavaClassesWithMatchingNames() {
@@ -100,8 +100,8 @@ class ManifestProvidersTest {
     }
 
     /**
-     * 拍照附件走系统相机:声明用到相机、但不是必需(没有相机的设备照常安装)。这条声明不能删:
-     * 有的系统按 APK 特征给应用分类,没有它时 Mina 可能被当成游戏、限制刷新率。
+     *Photo accessories for walking system cameras:Declares use of camera, but not required(Devices without cameras are installed as usual). This statement cannot be deleted:
+     *Some systems classify applications according to APK characteristics.,Without it Mina may be treated as a game, limiting the refresh rate.
      */
     @Test
     fun cameraIsDeclaredAsOptionalFeature() {
@@ -115,8 +115,8 @@ class ManifestProvidersTest {
     }
 
     /**
-     * 兼容性自检的测试页对外开放只为让内置助手(shell)开它:调用方必须持有 INTERACT_ACROSS_USERS_FULL,普通 App 打不开;
-     * 没有 intent-filter,只能按组件名开;单独一个任务、不进最近任务。助手认的类名和清单一致。
+     *The test page for compatibility self-test is open to the public only for the built-in assistant(shell)drive it:The caller must hold INTERACT_ACROSS_USERS_FULL,Ordinary apps cannot be opened;
+     *No intent-filter,Can only be opened by component name;A single task, do not enter the latest task. The class name recognized by the assistant is consistent with the list.
      */
     @Test
     fun selfCheckTargetIsOnlyStartableWithShellLevelPermission() {
@@ -134,7 +134,7 @@ class ManifestProvidersTest {
         assertEquals("", a.getAttributeNS(androidNs, "taskAffinity"))
     }
 
-    /** 内置助手进程按这个全名启动。 */
+    /**Built-in helper processes are started with this full name. */
     @Test
     fun helperEntryClassExists() {
         val c = Class.forName(com.meenai.mina.core.shell.HelperHandoff.HELPER_CLASS, false, javaClass.classLoader)

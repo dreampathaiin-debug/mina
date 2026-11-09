@@ -23,7 +23,7 @@ import java.nio.file.LinkOption
 import java.nio.file.attribute.PosixFilePermissions
 import java.security.MessageDigest
 
-/** 自带的运行环境换成用宿主 tar 现做、再用 xz 压的小包;不联网。 */
+/**The built-in running environment is replaced by a small package made by the host tar and compressed by xz.;Not connected to the Internet. */
 class RootfsInstallerTest {
     @get:Rule val texts = ChineseTexts()
 
@@ -88,7 +88,7 @@ class RootfsInstallerTest {
         expectFailure { installer(client = null).install { _, _ -> } }
         assertEquals(InstallStep.Extract, state.completedStep())
         assertTrue(state.status.value is SandboxStatus.Broken)
-        // 重新读状态(像进程重启那样)也不是就绪
+        //reread status(like process restart)Not ready either
         assertTrue(SandboxState(dirs, File(tmp, "files/sandbox-settings.json")) { listOf("arm64-v8a") }.status.value is SandboxStatus.Broken)
         val steps = mutableListOf<InstallStep>()
         installer().install { s, _ -> steps += s }
@@ -99,7 +99,7 @@ class RootfsInstallerTest {
 
     @Test
     fun interruptedExtractionStartsOver() = runBlocking {
-        // 像进程在解包中被杀那样:记录停在 Check,留下半个 rootfs.new
+        //Like process killed during unpacking:Recording stops at Check,Leave half rootfs.new
         installer().install { _, _ -> }
         state.markStep(InstallStep.Check)
         File(dirs.root, "rootfs.new/half").apply { parentFile?.mkdirs() }.writeText("x")
@@ -143,7 +143,7 @@ class RootfsInstallerTest {
         expectFailure { installer(free = 10L shl 20).install { _, _ -> } }
         assertEquals(0, opens)
         assertEquals(null, state.completedStep())
-        assertTrue((state.status.value as SandboxStatus.Broken).reason.contains("可用空间不足"))
+        assertTrue((state.status.value as SandboxStatus.Broken).reason.contains("Not enough free space"))
     }
 
     @Test
@@ -174,8 +174,8 @@ class RootfsInstallerTest {
     }
 
     /**
-     * 写 files/sandbox/ 的(技能同步、跑命令……)和重置互斥:重置等正在写的写完再删,删到一半没人往里建目录;
-     * 等许可期间被重置了的同步不再写(真机上 App 启动时的同步正撞上重置,最后的 rmdir 报 ENOTEMPTY)。
+     *Write files/sandbox/of(Skill synchronization, running commands...)Mutually exclusive with reset:Reset and wait until the writing is finished before deleting it.,Halfway through the deletion, no one created a directory in it.;
+     *Synchronizations that were reset while waiting for permission are no longer written.(The synchronization when the app is started on the real device is hitting the reset,Last rmdir report ENOTEMPTY).
      */
     @Test
     fun resetWaitsForWritersAndLateSyncSkips() = runBlocking {
@@ -192,7 +192,7 @@ class RootfsInstallerTest {
         }
         writing.await()
         val reset = launch(kotlinx.coroutines.Dispatchers.IO) { installer().reset() }
-        // 重置排着队时新来的写者也排在它后面
+        //When the queue is reset, new writers are also queued behind it.
         val late = launch(kotlinx.coroutines.Dispatchers.IO) {
             SkillsSync.sync(dirs, mapOf("skills/a/scripts/manifest.json" to "[]".toByteArray())) { state.status.value is SandboxStatus.Ready }
         }
@@ -233,7 +233,7 @@ class RootfsInstallerTest {
 
     private fun sha256(b: ByteArray) = MessageDigest.getInstance("SHA-256").digest(b).joinToString("") { "%02x".format(it) }
 
-    /** 小根文件系统:bin/sh、etc/marker、若干文件;宿主 tar 打包后用 xz 压。 */
+    /**small root file system:bin/sh,etc/marker, several files;After the host tar is packaged, use xz to compress it. */
     private fun makeBundle(marker: String): ByteArray {
         val src = Files.createTempDirectory(tmp.toPath(), "src").toFile()
         File(src, "bin").mkdirs()

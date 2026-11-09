@@ -12,12 +12,12 @@ import java.nio.file.Files
 import com.meenai.mina.core.workspace.SandboxPaths
 
 /**
- * 每个 [SandboxPort] 实现都要满足的路径规则:越界、符号链接逃逸、技能目录只读、完整输出落盘不出工作区。
- * 子类给出沙箱和一个在沙箱根目录之外的宿主目录(符号链接的目标)。
+ * Path rules every [SandboxPort] implementation must satisfy: escaping the root, symlink escapes, a read-only skills directory, and full output landing on disk without leaving the workspace.
+ * The subclass provides the sandbox and a host directory outside the sandbox root (the symlink target).
  */
 abstract class SandboxPathContract {
     protected abstract fun sandbox(): SandboxPort
-    /** 宿主上不属于任何工作区、也不属于技能目录的目录;测试只在里面建子目录。 */
+    /** A host directory belonging to no workspace and not the skills directory; the tests only create subdirectories inside it. */
     protected abstract fun outsideDir(): File
     protected open val workspace = "contract-ws"
 
@@ -62,10 +62,10 @@ abstract class SandboxPathContract {
     }
 
     @Test fun saveOutputStaysInWorkspace() {
-        val path = sb.saveOutput(workspace, "完整输出")
+        val path = sb.saveOutput(workspace, "full output")
         assertTrue(path, path.startsWith("/workspace/.mina/out-"))
-        assertEquals("完整输出", sb.hostPath(workspace, path, forWrite = false)!!.readText())
-        // .mina 被换成指到外面的链接:不写,抛异常
+        assertEquals("full output", sb.hostPath(workspace, path, forWrite = false)!!.readText())
+        // .mina was swapped for a link pointing outside: do not write, throw
         val out = freshOutside()
         val mina = File(wsRoot(), ".mina")
         mina.deleteRecursively()

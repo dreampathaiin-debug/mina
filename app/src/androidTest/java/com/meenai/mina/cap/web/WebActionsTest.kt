@@ -26,7 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.coroutines.resume
 
-/** 真机测试:网页上的点击、打字、清空、滚动、后退都走真实输入,并诚实回读。不需要内置助手,不碰主屏。 */
+/**Real machine test:Clicking, typing, clearing, scrolling, and backing up on the web page all use real input.,And read it back honestly. No built-in helper required,Don't touch the home screen. */
 @RunWith(AndroidJUnit4::class)
 class WebActionsTest {
     private val instr = InstrumentationRegistry.getInstrumentation()
@@ -118,7 +118,7 @@ class WebActionsTest {
         val r = screen.tapRef(target, s.snapshotId)
         assertTrue("$r", r is ActionResult.Ok)
         assertTrue((r as ActionResult.Ok).relocated)
-        assertEquals("目标按钮", r.relocatedTo)
+        assertEquals("target button", r.relocatedTo)
         assertEquals("1", js("window.targetClicks"))
     }
 
@@ -135,15 +135,15 @@ class WebActionsTest {
     fun editorReceivesRealInput() = runBlocking<Unit> {
         open("inputs.html")
         val s = screen.snapshot()
-        val r = screen.typeText(s.ref("#editor"), s.snapshotId, "你好 Mina") as ActionResult.Ok
+        val r = screen.typeText(s.ref("#editor"), s.snapshotId, "Hello Mina") as ActionResult.Ok
         assertEquals(Verification.MATCH, r.verification)
         val st = status()
         assertFalse(st, st.contains("inputs=0 "))
-        assertTrue(st, st.endsWith("text=你好 Mina\""))
-        // 再打一次是替换,不是接在后面
+        assertTrue(st, st.endsWith("text=Hello Mina\""))
+        //Hit it again to replace,Not at the back
         val s2 = screen.snapshot()
-        assertEquals(Verification.MATCH, (screen.typeText(s2.ref("#editor"), s2.snapshotId, "第二次") as ActionResult.Ok).verification)
-        assertTrue(status().endsWith("text=第二次\""))
+        assertEquals(Verification.MATCH, (screen.typeText(s2.ref("#editor"), s2.snapshotId, "second time") as ActionResult.Ok).verification)
+        assertTrue(status().endsWith("text=second time\""))
     }
 
     @Test
@@ -160,7 +160,7 @@ class WebActionsTest {
     fun typingRefusesWhenPageStealsFocus() = runBlocking<Unit> {
         open("inputs.html")
         val s = screen.snapshot()
-        assertEquals(ActionResult.Failed("focus_moved"), screen.typeText(s.ref("#thief"), s.snapshotId, "不该落到别处"))
+        assertEquals(ActionResult.Failed("focus_moved"), screen.typeText(s.ref("#thief"), s.snapshotId, "Shouldn't fall somewhere else"))
         assertEquals("\"\"", js("document.getElementById('plain').value"))
         assertEquals("\"\"", js("document.getElementById('thief').value"))
         assertEquals(ActionResult.Failed("focus_moved"), screen.clearText(s.ref("#thief"), s.snapshotId))
@@ -192,7 +192,7 @@ class WebActionsTest {
     fun clearTextReadsBackEmpty() = runBlocking<Unit> {
         open("inputs.html")
         val s = screen.snapshot()
-        screen.typeText(s.ref("#plain"), s.snapshotId, "要清掉的字")
+        screen.typeText(s.ref("#plain"), s.snapshotId, "words to be cleared")
         val s2 = screen.snapshot()
         val r = screen.clearText(s2.ref("#plain"), s2.snapshotId)
         assertTrue("$r", r is ActionResult.Ok)
@@ -263,7 +263,7 @@ class WebActionsTest {
         assertEquals(fixture("inputs.html"), s.web!!.url)
         assertEquals("inputs", s.web!!.title)
         assertEquals("t1", s.web!!.tabId)
-        // 端口自己为核实读的屏不登记编号,模型手里的编号仍可用
+        //The port itself does not register the screen number for verification reading,The number in the hands of the model is still available
         screen.peek()
         assertTrue(screen.tapRef(s.ref("#noop"), s.snapshotId) is ActionResult.Ok)
     }

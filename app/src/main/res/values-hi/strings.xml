@@ -70,4 +70,10 @@
     <string name="speech_doubao_plan">बिलिंग</string>
     <string name="speech_doubao_duration_note">मान्यता समय के अनुसार बिल किया गया</string>
     <string name="speech_doubao_concurrent_note">एक साथ कनेक्शन द्वारा बिल भेजा गया</string>
+    <string name="browser_fullscreen">पूरी स्क्रीन</string>
+    <string name="browser_fullscreen_exit">पूरी स्क्रीन बंद करें</string>
+    <string name="browser_minimize">छोटा करें</string>
+    <string name="browser_restore">वापस खोलें</string>
+    <string name="pip_take_control">कंट्रोल लो</string>
+    <string name="take_control_message">अब तुम चला रहे हो, Mina रुक गया है। काम पूरा हो जाए तो Hand back दबाओ।</string>
 </resources>

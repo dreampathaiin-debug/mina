@@ -18,7 +18,7 @@ import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 真机测试:不重要节点能读到、焦点变化算变化、提示语有标记、输入控件被换掉后仍能核实。 */
+/**Real machine test:Unimportant nodes can be read, focus changes are counted as changes, prompts are marked, and input controls can still be verified after being replaced. */
 @RunWith(AndroidJUnit4::class)
 class ScreenAccuracyTest {
     private val agent = DeviceSupport.newAgent()
@@ -62,48 +62,48 @@ class ScreenAccuracyTest {
     @Test
     fun focusingAFieldCountsAsChange() = runBlocking<Unit> {
         val s = openFields()
-        val r = ok(screen.tapRef(s.named("空输入框").ref, s.snapshotId))
+        val r = ok(screen.tapRef(s.named("Empty input box").ref, s.snapshotId))
         assertEquals(true, r.changed)
     }
 
     @Test
     fun hintTextIsMarked() = runBlocking<Unit> {
         val s = openFields()
-        val field = s.named("热词示例")
+        val field = s.named("Hot word examples")
         assertTrue("$field", field.editable && field.hint)
         assertFalse(s.named("7").hint)
-        assertEquals(Verification.MATCH, ok(screen.typeText(field.ref, s.snapshotId, "咖啡")).verification)
-        val after = snapUntil { snap -> snap.elements.any { it.name == "咖啡" } }
-        assertFalse(after.named("咖啡").hint)
+        assertEquals(Verification.MATCH, ok(screen.typeText(field.ref, s.snapshotId, "coffee")).verification)
+        val after = snapUntil { snap -> snap.elements.any { it.name == "coffee" } }
+        assertFalse(after.named("coffee").hint)
     }
 
     @Test
     fun readbackFollowsAReplacedInputView() = runBlocking<Unit> {
         val s = openFields()
-        val r = ok(screen.typeText(s.named("会换的框").ref, s.snapshotId, "天气"))
+        val r = ok(screen.typeText(s.named("Frame that can be changed").ref, s.snapshotId, "weather"))
         assertEquals(Verification.MATCH, r.verification)
     }
 
     @Test
     fun typingIntoAFakeSearchBarTapsItAndUsesTheFocusedField() = runBlocking<Unit> {
         val s = openFields()
-        val fake = s.named("假搜索框")
+        val fake = s.named("fake search box")
         assertFalse(fake.editable)
-        val r = ok(screen.typeText(fake.ref, s.snapshotId, "咖啡"))
+        val r = ok(screen.typeText(fake.ref, s.snapshotId, "coffee"))
         assertEquals(Verification.MATCH, r.verification)
         assertTrue("${r.hint}", r.hint?.contains("tapped") == true)
-        snapUntil { snap -> snap.elements.any { it.editable && it.name == "咖啡" } }
+        snapUntil { snap -> snap.elements.any { it.editable && it.name == "coffee" } }
     }
 
     @Test
     fun typingIntoAButtonDoesNotTapIt() = runBlocking<Unit> {
         val s = openFields()
-        assertEquals(ActionResult.Failed("not_editable"), screen.typeText(s.named("7").ref, s.snapshotId, "咖啡"))
-        // 没有点下去:结果仍是 0
+        assertEquals(ActionResult.Failed("not_editable"), screen.typeText(s.named("7").ref, s.snapshotId, "coffee"))
+        //Didn't click on it:The result is still 0
         assertTrue(screen.snapshot().elements.any { it.name == "0" })
     }
 
-    /** scroll down 要看到更下面的内容:设置首页原来最下面那一项往上挪(或出现了原来没有的项)。 */
+    /** scrolldown to see more below:Set the original bottom item on the home page to move up.(Or an item that wasn’t there originally appears.). */
     @Test
     fun scrollDownShowsContentFurtherDown() = runBlocking<Unit> {
         ok(screen.openApp(DeviceSupport.SETTINGS, cold = true))
@@ -119,7 +119,7 @@ class ScreenAccuracyTest {
         assertTrue("content did not move up: new=$newNames", newNames.isNotEmpty() && (wlan == null || wlan.centerY < wlanBefore.centerY))
     }
 
-    /** 系统计算器(按 AOSP 的计算器类别找,没有就跳过):按数字后读得到显示区的值。只在虚拟屏上用。 */
+    /**System Calculator(Find by AOSP calculator category,If not, skip it):Press the number to read the value in the display area. Only used on virtual screens. */
     @Test
     fun calculatorDisplayIsRead() = runBlocking<Unit> {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
@@ -128,7 +128,7 @@ class ScreenAccuracyTest {
         assumeTrue("no calculator app", pkg != null)
         ok(screen.openApp(pkg!!, cold = true))
         var s = snapUntil(8_000) { snap -> snap.elements.any { it.clickable && it.name == "1" } }
-        // 计算器会保留上次的输入,只要求按完后出现一个以 123 结尾、之前没有的显示值
+        //The calculator will retain the last input,It only requires that after pressing, a display value ending with 123 that did not exist before appears.
         val before = s.elements.map { it.name }.toSet()
         for (digit in listOf("1", "2", "3")) {
             val key = s.elements.first { it.clickable && it.name == digit }
@@ -136,7 +136,7 @@ class ScreenAccuracyTest {
             assertEquals("tap $digit", true, r.changed)
             s = screen.snapshot()
         }
-        // 显示区可能带千分位等格式,只比数字
+        //The display area may have formats such as thousandths and so on.,Just compare numbers
         snapUntil { snap -> snap.elements.any { e -> e.name !in before && e.name.filter(Char::isDigit).endsWith("123") } }
     }
 }

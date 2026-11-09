@@ -33,15 +33,15 @@ import kotlin.math.roundToInt
 import com.meenai.mina.cap.phone.PhoneServices
 
 /**
- * 真机测试:有 DevTools 会话时点击、悬停、拖动、下拉选择、组合键、插入文字都是可信的鼠标键盘事件;
- * 会话强制为空时退回原生输入,原有行为照旧(触摸带手指类型,悬停、拖动、下拉报 devtools_unavailable)。
- * 有会话的几项要等连接接入(devtools.provider)后才跑,没有会话时跳过。
+ *Real machine test:When you have a DevTools session, clicks, hovers, drags, drop-down selections, key combinations, and text insertion are all trusted mouse and keyboard events.;
+ *Return native input when session is forced to be empty,Original behavior remains the same(Touch belt finger type,Hover, drag, drop down report devtools_unavailable).
+ *There are several sessions that need to wait for connection access.(devtools.provider)Then ran away,Skip if there is no session.
  */
 @RunWith(AndroidJUnit4::class)
 class CdpInputDeviceTest {
     private val instr = InstrumentationRegistry.getInstrumentation()
     private val ctx = instr.targetContext
-    /** 本测试自己的一份:换会话来源、连法都不影响别的测试。 */
+    /**Ben tests his own copy:Changing the session source and connection method will not affect other tests. */
     private val devtools = WebDevtools(PhoneServices.of(InstrumentationRegistry.getInstrumentation().targetContext).hub::openDevtoolsSocket)
     private lateinit var host: WebHost
     private lateinit var tab: WebTab
@@ -80,7 +80,7 @@ class CdpInputDeviceTest {
         return e!!.ref
     }
 
-    /** 连接是异步建的:等一会儿;等不到就跳过需要会话的测试。 */
+    /**The connection is established asynchronously:wait a while;Skip tests that require sessions if you can't wait. */
     private suspend fun requireSession(): CdpSession {
         val s = withTimeoutOrNull(10_000) {
             var s: CdpSession? = null
@@ -93,7 +93,7 @@ class CdpInputDeviceTest {
 
     private fun noSession() { devtools.provider = { null } }
 
-    /** 元素中心的 view 像素(页面 CSS 像素 × view 宽 ÷ 视口宽),给按坐标的落点用。 */
+    /**The view pixel at the center of the element(Page CSS Pixels ×view width ÷Viewport width),Used for the drop point according to the coordinates. */
     private suspend fun viewCenter(id: String, dx: Double = 0.0): WebPoint.Xy {
         val r = js("(function(){var b=document.getElementById('$id').getBoundingClientRect();return [b.left+b.width/2,b.top+b.height/2,innerWidth].join(',')})()")
             .trim('"').split(',').map(String::toDouble)
@@ -101,11 +101,11 @@ class CdpInputDeviceTest {
         return WebPoint.Xy(((r[0] + dx) * k).roundToInt(), (r[1] * k).roundToInt())
     }
 
-    /** 页面脚本没把滑块列成元素时按坐标。 */
+    /**The page script does not list the slider as an element by coordinates. */
     private suspend fun knob(s: ScreenSnapshot): WebPoint =
         s.elements.firstOrNull { it.resourceId == "#knob" }?.let { WebPoint.Ref(it.ref, s.snapshotId) } ?: viewCenter("knob")
 
-    // ---------- 有会话 ----------
+    // ----------There is a conversation ----------
 
     @Test
     fun clickIsATrustedMouseClick() = runBlocking<Unit> {
@@ -116,7 +116,7 @@ class CdpInputDeviceTest {
         assertEquals("1", js("window.clicks"))
         assertEquals("true", js("window.lastTrusted"))
         assertEquals("\"mouse\"", js("window.lastPointer"))
-        // 按坐标点也一样
+        //The same is true for coordinate points
         assertTrue(screen.tapXY(viewCenter("btn").x, viewCenter("btn").y) is ActionResult.Ok)
         assertEquals("2", js("window.clicks"))
     }
@@ -137,15 +137,15 @@ class CdpInputDeviceTest {
     fun selectPicksTheOptionWithTrustedChange() = runBlocking<Unit> {
         requireSession()
         val s = screen.snapshot()
-        val r = screen.selectOption(s.ref("#city"), s.snapshotId, "上海")
+        val r = screen.selectOption(s.ref("#city"), s.snapshotId, "Shanghai")
         assertTrue("$r", r is ActionResult.Ok)
         assertEquals(Verification.MATCH, (r as ActionResult.Ok).verification)
         assertEquals("\"sh\"", js("document.getElementById('city').value"))
         assertEquals("\"sh:true\"", js("window.change"))
         val s2 = screen.snapshot()
-        val missing = screen.selectOption(s2.ref("#city"), s2.snapshotId, "广州")
+        val missing = screen.selectOption(s2.ref("#city"), s2.snapshotId, "Guangzhou")
         assertEquals("no_such_option", (missing as ActionResult.Failed).reason)
-        assertTrue(missing.hint!!, missing.hint!!.contains("北京"))
+        assertTrue(missing.hint!!, missing.hint!!.contains("Beijing"))
         assertEquals("not_a_select", (screen.selectOption(s2.ref("#btn"), s2.snapshotId, "x") as ActionResult.Failed).reason)
     }
 
@@ -153,9 +153,9 @@ class CdpInputDeviceTest {
     fun typingAndKeyCombos() = runBlocking<Unit> {
         requireSession()
         val s = screen.snapshot()
-        val r = screen.typeText(s.ref("#text"), s.snapshotId, "hello 你好")
+        val r = screen.typeText(s.ref("#text"), s.snapshotId, "hello hello")
         assertEquals(Verification.MATCH, (r as ActionResult.Ok).verification)
-        assertEquals("\"hello 你好\"", js("document.getElementById('text').value"))
+        assertEquals("\"hello hello\"", js("document.getElementById('text').value"))
         assertTrue(screen.pressCombo(CdpKeys.parseCombo("Control+A")!!) is ActionResult.Ok)
         assertTrue(screen.pressCombo(CdpKeys.parseCombo("Backspace")!!) is ActionResult.Ok)
         assertEquals("\"\"", js("document.getElementById('text').value"))
@@ -175,7 +175,7 @@ class CdpInputDeviceTest {
         assertTrue(js("window.dragX"), js("window.dragX").toDouble() > 150)
     }
 
-    // ---------- 没有会话:老路 ----------
+    // ----------no session:old road ----------
 
     @Test
     fun withoutSessionTapsAreFingerTouches() = runBlocking<Unit> {
@@ -193,7 +193,7 @@ class CdpInputDeviceTest {
         val s = screen.snapshot()
         assertEquals(DEVTOOLS_UNAVAILABLE, (screen.hover(WebPoint.Ref(s.ref("#menu"), s.snapshotId)) as ActionResult.Failed).reason)
         assertEquals(DEVTOOLS_UNAVAILABLE, (screen.drag(knob(s), viewCenter("knob", 200.0), 5) as ActionResult.Failed).reason)
-        assertEquals(DEVTOOLS_UNAVAILABLE, (screen.selectOption(s.ref("#city"), s.snapshotId, "上海") as ActionResult.Failed).reason)
+        assertEquals(DEVTOOLS_UNAVAILABLE, (screen.selectOption(s.ref("#city"), s.snapshotId, "Shanghai") as ActionResult.Failed).reason)
         assertEquals("\"\"", js("document.getElementById('city').value"))
     }
 
@@ -201,7 +201,7 @@ class CdpInputDeviceTest {
     fun withoutSessionTypingAndCombosUseNativeKeys() = runBlocking<Unit> {
         noSession()
         val s = screen.snapshot()
-        val r = screen.typeText(s.ref("#text"), s.snapshotId, "hello 你好")
+        val r = screen.typeText(s.ref("#text"), s.snapshotId, "hello hello")
         assertEquals(Verification.MATCH, (r as ActionResult.Ok).verification)
         assertTrue(screen.pressCombo(CdpKeys.parseCombo("Control+A")!!) is ActionResult.Ok)
         assertTrue(screen.pressCombo(CdpKeys.parseCombo("Backspace")!!) is ActionResult.Ok)

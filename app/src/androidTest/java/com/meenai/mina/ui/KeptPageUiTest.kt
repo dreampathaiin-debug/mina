@@ -21,13 +21,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 留在后台运行的那一页在界面上:对话里那一行、胶囊、展开的卡片(实时画面、剩余时间、来源对话、两个按钮)。 */
+/**The page left running in the background is on the interface:line of dialogue, capsule, unfolded card(Live view, remaining time, source dialogue, two buttons). */
 @RunWith(AndroidJUnit4::class)
 class KeptPageUiTest {
 
     @get:Rule val compose = createComposeRule()
 
-    private val page = KeptPage(1, "c1", "r1", "把这门课点开,从第 3 节开始播,挂着别关", "course.example.com", null, "第 3 节",
+    private val page = KeptPage(1, "c1", "r1", "Open this course,Start playing from episode 3,Don't close it", "course.example.com", null, "Section 3",
         System.currentTimeMillis(), System.currentTimeMillis() + 2 * 3_600_000L - 30_000)
     private val calls = mutableListOf<String>()
     private val actions = object : CardActions {
@@ -53,8 +53,8 @@ class KeptPageUiTest {
     @Test fun chatRowShowsHostTimeAndCloses() {
         var closed = 0
         compose.setContent { MinaTheme(dark = false, reduceMotion = true) { KeptLine(page) { closed++ } } }
-        compose.onNodeWithText("这一页保持在后台运行").assertIsDisplayed()
-        compose.onNodeWithText("course.example.com · 2 小时后自动关").assertIsDisplayed()
+        compose.onNodeWithText("This page remains running in the background").assertIsDisplayed()
+        compose.onNodeWithText("course.example.com · Automatically shut down after 2 hours").assertIsDisplayed()
         compose.onNodeWithTag("kept-close").performClick()
         assertEquals(1, closed)
     }
@@ -62,10 +62,10 @@ class KeptPageUiTest {
     @Test fun capsuleSaysBackgroundPageRunning() {
         compose.setContent {
             MinaTheme(dark = false, reduceMotion = true) {
-                CapsuleContent(CapsuleView.Shown(CapsuleKind.KeptPage, "后台网页运行中", conversationId = "c1", pill = true), onTap = {}, onStop = {}, onHandBack = {})
+                CapsuleContent(CapsuleView.Shown(CapsuleKind.KeptPage, "The background web page is running", conversationId = "c1", pill = true), onTap = {}, onStop = {}, onHandBack = {})
             }
         }
-        compose.onNodeWithText("后台网页运行中").assertIsDisplayed()
+        compose.onNodeWithText("The background web page is running").assertIsDisplayed()
         compose.onNodeWithTag("capsule-live-dot", useUnmergedTree = true).assertIsDisplayed()
     }
 
@@ -76,13 +76,13 @@ class KeptPageUiTest {
                 CapsuleCard(CardView.Kept(page), frame, zoomed = false, actions = actions, elapsed = { null }, height = 520.dp)
             }
         }
-        compose.onNodeWithText("后台网页").assertIsDisplayed()
-        compose.onNodeWithText("还剩 2 小时").assertIsDisplayed()
+        compose.onNodeWithText("Backend web page").assertIsDisplayed()
+        compose.onNodeWithText("2 hours left").assertIsDisplayed()
         compose.onNodeWithTag("kept-live").assertIsDisplayed()
         compose.onNodeWithText("course.example.com").assertIsDisplayed()
-        compose.onNodeWithText("来自对话「把这门课点开", substring = true).assertIsDisplayed()
-        compose.onNodeWithText("实时画面", substring = true).assertIsDisplayed()
-        compose.onNodeWithText("打开对话").performClick()
+        compose.onNodeWithText("From the conversation "Click on this course", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("real time picture", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Open conversation").performClick()
         compose.onNodeWithTag("kept-close").performClick()
         assertEquals(listOf("open c1", "closeKept"), calls)
     }

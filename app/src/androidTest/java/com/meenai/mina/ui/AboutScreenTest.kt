@@ -36,7 +36,7 @@ class AboutScreenTest {
     @get:Rule val compose = createComposeRule()
 
     private val r020 = ReleaseInfo(
-        "0.2.0", "Mina 0.2.0", "### 新增\n- 附件面板", "2026-11-05",
+        "0.2.0", "Mina 0.2.0", "###New\n-accessory panel", "2026-11-05",
         "https://github.com/wangzan101/Mina/releases/tag/v0.2.0", "https://github.com/x/mina-0.2.0.apk",
     )
 
@@ -47,7 +47,7 @@ class AboutScreenTest {
         var licenses = 0
     }
 
-    private val sampleDiagnostics = "Mina 诊断信息 / Mina diagnostics\n\n[App]\nversion: 0.1.0 (build abc1234)\n"
+    private val sampleDiagnostics = "Mina diagnostic information / Mina diagnostics\n\n[App]\nversion: 0.1.0 (build abc1234)\n"
 
     private fun about(update: UpdateState = UpdateState()): Calls {
         val calls = Calls()
@@ -74,21 +74,21 @@ class AboutScreenTest {
         about()
         compose.onNodeWithText("Mina").assertIsDisplayed()
         compose.onNodeWithText(AboutCopy.TAGLINE).assertIsDisplayed()
-        compose.onNodeWithText("版本 0.1.0").assertIsDisplayed()
+        compose.onNodeWithText("Version 0.1.0").assertIsDisplayed()
         compose.onNodeWithText("Beta").assertIsDisplayed()
-        compose.onNodeWithText("· 构建 abc1234").assertIsDisplayed()
-        for (t in listOf("检查更新", "更新记录", "联系作者", "反馈问题", "关注作者", "开源仓库", "使用说明与参与方式", AboutCopy.DATA_NOTE, AboutCopy.AUTHOR)) {
+        compose.onNodeWithText("· Build abc1234").assertIsDisplayed()
+        for (t in listOf("Check for updates", "Update record", "Contact the author", "Feedback question", "Follow the author", "Open source warehouse", "Instructions for use and how to participate", AboutCopy.DATA_NOTE, AboutCopy.AUTHOR)) {
             scrollTo(t)
             compose.onNodeWithText(t).assertIsDisplayed()
         }
-        // 许可证只在页脚,不再单独一行
-        compose.onAllNodesWithText("开源许可").assertCountEquals(0)
+        //License only in footer,no longer alone line
+        compose.onAllNodesWithText("Open source license").assertCountEquals(0)
     }
 
     @Test
     fun externalRowsOpenLinks() {
         val calls = about()
-        for (t in listOf("关注作者", "开源仓库", "使用说明与参与方式")) {
+        for (t in listOf("Follow the author", "Open source warehouse", "Instructions for use and how to participate")) {
             scrollTo(t)
             compose.onNodeWithText(t).performClick()
         }
@@ -105,23 +105,23 @@ class AboutScreenTest {
     @Test
     fun feedbackSheetHasThreeOptions() {
         val calls = about()
-        compose.onNodeWithText("反馈问题").performClick()
+        compose.onNodeWithText("Feedback question").performClick()
         compose.awaitOne(AboutCopy.FEEDBACK_SHEET_SUB)
         compose.onAllNodesWithTag("feedback-option").assertCountEquals(3)
-        compose.onNodeWithText("复制诊断信息").assertIsDisplayed()
-        compose.onNodeWithText("在微信或 X 群聊里说").assertIsDisplayed()
+        compose.onNodeWithText("Copy diagnostic information").assertIsDisplayed()
+        compose.onNodeWithText("Say it in WeChat or X group chat").assertIsDisplayed()
         compose.onNodeWithText(AboutCopy.FEEDBACK_GITHUB).performClick()
         compose.waitForIdle()
         assertEquals(listOf("issue://prefilled"), calls.urls)
     }
 
-    /** 「复制诊断信息」先打开预览:整段文字看得见,点「复制」才进剪贴板。 */
+    /**"Copy diagnostic information" opens the preview first:The entire text is visible,Click "Copy" to enter the clipboard. */
     @Test
     fun feedbackDiagnosticsPreviewsThenCopies() {
         about()
-        compose.onNodeWithText("反馈问题").performClick()
-        compose.awaitOne("复制诊断信息").performClick()
-        compose.awaitOne("不包含 API Key、聊天内容和屏幕内容")
+        compose.onNodeWithText("Feedback question").performClick()
+        compose.awaitOne("Copy diagnostic information").performClick()
+        compose.awaitOne("Not included APIKey, chat content and screen content")
         compose.waitUntil(5_000) { compose.onAllNodesWithText(sampleDiagnostics).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("diagnostics-text").assertIsDisplayed()
         compose.onNodeWithTag("diagnostics-share").assertExists()
@@ -138,39 +138,39 @@ class AboutScreenTest {
     @Test
     fun feedbackGroupOpensGroupSheet() {
         val calls = about()
-        compose.onNodeWithText("反馈问题").performClick()
-        compose.awaitOne("在微信或 X 群聊里说").performClick()
+        compose.onNodeWithText("Feedback question").performClick()
+        compose.awaitOne("Say it in WeChat or X group chat").performClick()
         compose.awaitOne(AboutCopy.GROUP_SHEET_SUB)
         compose.onNodeWithTag("wechat-qr").assertExists()
         compose.onNodeWithText(AboutCopy.SAVE_QR).performClick()
         assertEquals(1, calls.saves)
     }
 
-    /** 联系作者面板:作者微信码、保存按钮,下面「不用微信？」接 X 群聊。 */
+    /**Contact author panel:Author WeChat code, save button,Next "Don't use WeChat?" and answer the X group chat. */
     @Test
     fun groupRowOpensGroupSheet() {
         val calls = about()
-        compose.onNodeWithText("联系作者").performClick()
+        compose.onNodeWithText("Contact the author").performClick()
         compose.awaitOne(AboutCopy.GROUP_SHEET_SUB).assertIsDisplayed()
         compose.onNodeWithTag("wechat-qr").assertExists()
         compose.onNodeWithText(AboutCopy.GROUP_HINT).assertExists()
         compose.onNodeWithText(AboutCopy.SAVE_QR).assertExists()
-        compose.onNodeWithText("不用微信？").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Don’t use WeChat?").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("group-join-x").performScrollTo().assertIsDisplayed()
-        // 中文界面微信在前
+        //Chinese interface WeChat first
         assertTrue(top("wechat-qr") < top("group-join-x"))
         compose.onNodeWithTag("group-join-x").performClick()
         compose.waitForIdle()
         assertEquals(listOf(MinaLinks.X_GROUP), calls.urls)
     }
 
-    /** 英文界面([GroupSheet] 的 xFirst):X 群聊按钮在微信码上面,不再写「不用微信？」。 */
+    /**English interface([GroupSheet]of xFirst):X group chat button is above the WeChat code,No more writing “Don’t use WeChat?”. */
     @Test
     fun groupSheetPutsXFirstWhenAsked() {
         compose.setContent { MinaTheme { GroupSheet(xFirst = true, onSave = {}, onJoinX = {}, onDismiss = {}) } }
         compose.awaitOne(AboutCopy.GROUP_SHEET_SUB)
         assertTrue(top("group-join-x") < top("wechat-qr"))
-        compose.onAllNodesWithText("不用微信？").assertCountEquals(0)
+        compose.onAllNodesWithText("Don’t use WeChat?").assertCountEquals(0)
     }
 
     private fun top(tag: String) = compose.onNodeWithTag(tag).getUnclippedBoundsInRoot().top
@@ -179,7 +179,7 @@ class AboutScreenTest {
     fun checkRowStartsCheckWhenNoUpdate() {
         val calls = about(UpdateState(latest = r020.copy(version = "0.1.0")))
         compose.onNodeWithText(AboutCopy.UP_TO_DATE).assertIsDisplayed()
-        compose.onNodeWithText("检查更新").performClick()
+        compose.onNodeWithText("Check for updates").performClick()
         assertEquals(1, calls.checks)
         compose.onAllNodesWithTag("update-dot", useUnmergedTree = true).assertCountEquals(0)
     }
@@ -199,13 +199,13 @@ class AboutScreenTest {
     @Test
     fun updateRowOpensUpdateSheet() {
         val calls = about(UpdateState(latest = r020, update = r020, status = CheckStatus.Done))
-        compose.onNodeWithText("0.2.0 可更新").assertIsDisplayed()
+        compose.onNodeWithText("0.2.0 can be updated").assertIsDisplayed()
         compose.onNodeWithTag("update-dot", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("检查更新").performClick()
-        compose.awaitOne("发现新版本 0.2.0")
-        compose.onNodeWithText("当前 0.1.0 Beta · 2026-11-05 发布").assertExists()
-        compose.onNodeWithText("以后再说").assertExists()
-        compose.onNodeWithText("下载更新").assertExists()
+        compose.onNodeWithText("Check for updates").performClick()
+        compose.awaitOne("new version found 0.2.0")
+        compose.onNodeWithText("current 0.1.0Beta · 2026-11-05 Release").assertExists()
+        compose.onNodeWithText("Talk about it later").assertExists()
+        compose.onNodeWithText("Download updates").assertExists()
         compose.waitForIdle()
         assertEquals(0, calls.checks)
         assertTrue(calls.urls.isEmpty())
@@ -215,8 +215,8 @@ class AboutScreenTest {
     fun updateWithoutApkStillOpensReleasePage() {
         val r = r020.copy(apkUrl = null)
         val calls = about(UpdateState(latest = r, update = r))
-        compose.onNodeWithText("检查更新").performClick()
-        compose.awaitOne("从 GitHub 下载").performClick()
+        compose.onNodeWithText("Check for updates").performClick()
+        compose.awaitOne("Download from GitHub").performClick()
         assertEquals(listOf(r.pageUrl), calls.urls)
     }
 
@@ -232,8 +232,8 @@ class AboutScreenTest {
                 }
             }
         }
-        compose.onNodeWithText("安装更新").performClick()
-        compose.onNodeWithText("删除下载").performClick()
+        compose.onNodeWithText("Install updates").performClick()
+        compose.onNodeWithText("Delete download").performClick()
         assertEquals(1, installs)
         assertEquals(1, deletes)
     }
@@ -249,8 +249,8 @@ class AboutScreenTest {
                 }
             }
         }
-        compose.onNodeWithText("正在下载 50%").assertIsNotEnabled()
-        compose.onNodeWithText("删除下载").performClick()
+        compose.onNodeWithText("Downloading 50%").assertIsNotEnabled()
+        compose.onNodeWithText("Delete download").performClick()
         assertEquals(1, deletes)
     }
 
@@ -265,14 +265,14 @@ class AboutScreenTest {
                 }
             }
         }
-        compose.onNodeWithText("重新下载").performClick()
+        compose.onNodeWithText("Download again").performClick()
         assertEquals(1, retries)
     }
 
     @Test
     fun changelogSheetShowsLatestNotes() {
         val calls = about(UpdateState(latest = r020))
-        compose.onNodeWithText("更新记录").performClick()
+        compose.onNodeWithText("Update record").performClick()
         compose.awaitOne(AboutCopy.CHANGELOG_ALL)
         compose.onNodeWithText("0.2.0 · 2026-11-05").assertExists()
         compose.onNodeWithText(AboutCopy.CHANGELOG_ALL).performClick()
@@ -280,7 +280,7 @@ class AboutScreenTest {
         assertEquals(listOf(MinaLinks.RELEASES), calls.urls)
     }
 
-    /** 侧栏最底下一行两个:设置靠左、关于 Mina 靠右(红点在最右边);有新版时关于带红点。 */
+    /**Two in the bottom row of the sidebar:Settings on the left, About Mina on the right(The red dot is on the far right);When there is a new version, there will be a red dot. */
     @Test
     fun drawerFooterHasSettingsAndAbout() {
         val calls = mutableListOf<String>()
@@ -294,21 +294,21 @@ class AboutScreenTest {
                 )
             }
         }
-        compose.onNodeWithText("设置").assertIsDisplayed()
-        compose.onNodeWithText("关于 Mina").assertIsDisplayed()
+        compose.onNodeWithText("set up").assertIsDisplayed()
+        compose.onNodeWithText("about Mina").assertIsDisplayed()
         compose.onNodeWithTag("update-dot", useUnmergedTree = true).assertExists()
         val footer = compose.onNodeWithTag("drawer-footer").getUnclippedBoundsInRoot()
-        // 量文字本身(未合并的树):合并后的可点行节点比文字宽,量它判断不了左右半边
-        val settings = compose.onNodeWithText("设置", useUnmergedTree = true).getUnclippedBoundsInRoot()
-        val about = compose.onNodeWithText("关于 Mina", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        //measure the text itself(unmerged tree):Merged clickable line nodes are wider than text,You can't judge the left and right halves by measuring it.
+        val settings = compose.onNodeWithText("set up", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val about = compose.onNodeWithText("about Mina", useUnmergedTree = true).getUnclippedBoundsInRoot()
         val dot = compose.onNodeWithTag("update-dot", useUnmergedTree = true).getUnclippedBoundsInRoot()
         val mid = (footer.left + footer.right) / 2
         assertTrue(settings.right < mid)
         assertTrue(about.left > mid)
-        // 关于那一项贴着右边:红点离行的右边只隔两层内边距(行 12dp + 项 12dp)
+        //Which item is posted on the right?:The red dot is only separated from the right side of the line by two layers of padding.(OK 12dp +item 12dp)
         assertTrue(footer.right - dot.right <= 25.dp)
-        compose.onNodeWithText("设置").performClick()
-        compose.onNodeWithText("关于 Mina").performClick()
+        compose.onNodeWithText("set up").performClick()
+        compose.onNodeWithText("about Mina").performClick()
         assertEquals(listOf("settings", "about"), calls)
     }
 
@@ -322,11 +322,11 @@ class AboutScreenTest {
                 )
             }
         }
-        compose.onNodeWithText("关于 Mina").assertIsDisplayed()
+        compose.onNodeWithText("about Mina").assertIsDisplayed()
         compose.onAllNodesWithTag("update-dot", useUnmergedTree = true).assertCountEquals(0)
     }
 
-    /** 设置首页「关于 Mina」一行:有新版写「x 可更新」带红点。 */
+    /**Set up the "About Mina" line on the homepage:There is a new version that says "x can be updated" with a red dot. */
     @Test
     fun settingsAboutRowShowsUpdate() {
         compose.setContent {
@@ -338,8 +338,8 @@ class AboutScreenTest {
                 )
             }
         }
-        scrollTo("0.2.0 可更新")
-        compose.onNodeWithText("0.2.0 可更新").assertIsDisplayed()
+        scrollTo("0.2.0 can be updated")
+        compose.onNodeWithText("0.2.0 can be updated").assertIsDisplayed()
         compose.onNodeWithTag("update-dot", useUnmergedTree = true).assertExists()
     }
 }

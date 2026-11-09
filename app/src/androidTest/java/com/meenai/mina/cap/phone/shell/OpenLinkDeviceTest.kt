@@ -14,7 +14,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 真机:白名单里的设置页都能在 Agent 的屏上打开,主屏不受影响;没有 App 能打开的链接返回 5。 */
+/**Real machine:All settings pages in the whitelist can be opened on the Agent's screen.,Home screen is not affected;Links that no app can open return 5. */
 @RunWith(AndroidJUnit4::class)
 class OpenLinkDeviceTest {
     private val agent = DeviceSupport.newAgent()
@@ -32,7 +32,7 @@ class OpenLinkDeviceTest {
         for (action in LinkPolicy.SETTINGS_ACTIONS.sorted()) {
             val uri = if (action == LinkPolicy.APP_DETAILS) "package:${DeviceSupport.TEST_PACKAGE}" else null
             val r = agent.screen.openLink(action, uri, null)
-            // 某些系统拿掉了个别原版设置页:解析不到算降级,不算失败;打开了就必须落在系统设置里
+            //Some systems have removed individual original settings pages:Failure to parse is considered a downgrade,Not considered a failure;Once turned on, it must be placed in the system settings.
             if (r is ActionResult.Failed && r.reason == "link_unresolved") continue
             val top = agent.screen.snapshot().packageName
             if (r !is ActionResult.Ok || top != settings) failed += "$action -> $r on $top"
@@ -47,7 +47,7 @@ class OpenLinkDeviceTest {
         val id = agent.display.displayId
         assertEquals(ShellService.START_UNRESOLVED, shell.startView(id, null, "mina-no-such-scheme://page/1", null))
         assertEquals(ShellService.START_UNRESOLVED, shell.startView(id, null, "https://example.com/", "com.meenai.mina.no.such.app"))
-        // 外壳侧再查一次:绕过分发器直接调也打不开
+        //Check again on the shell side:
         assertEquals(ShellService.START_INVALID_LINK, shell.startView(id, null, "tel:10086", null))
         val r = runBlocking { agent.screen.openLink(null, "mina-no-such-scheme://page/1", null) }
         assertEquals(ActionResult.Failed("link_unresolved"), r)

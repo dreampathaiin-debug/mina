@@ -1,51 +1,51 @@
-# 从电脑使用 Mina
+# Use Mina from a computer
 
-简体中文 | [English](computer.en.md)
+[简体中文](computer.md) | English
 
-电脑上的 AI 工具（或者你自己在终端里）可以把一件事交给手机上的 Mina，查进度、回答追问，拿回结果。电脑说「要办成什么」，怎么做由手机上的 Mina 决定。这一页帮你选入口、选连法，然后指向具体的步骤。
+AI tools on your computer (or you, in a terminal) can hand a job to Mina on your phone, check progress, answer its follow-up questions and get the result back. The computer says what to get done; Mina on the phone decides how. This page helps you pick an entry point and a connection, then points you to the step-by-step guides.
 
-AI Agent 请直接看 [Agent 快速路径](agent-quickstart.md)。
+AI agents: go straight to the [agent quick path](agent-quickstart.en.md).
 
-手机端的前提：装好 APK（[Releases](https://github.com/wangzan101/Mina/releases/latest)）、打开过一次 Mina、配好模型。只让 Mina 聊天、上网、处理文件时，安卓 11 就行；要它操作手机 App，还要按[设置指南](setup-guide.md)完成手机操作设置（安卓 12+）。
+On the phone: install the APK ([Releases](https://github.com/wangzan101/Mina/releases/latest)), open Mina once and add a model. If Mina only needs to chat, browse the web and work with files, Android 11 is enough; to let it operate phone apps, also finish the phone-control setup in the [setup guide](setup-guide.en.md) (Android 12+).
 
-## 第一步：选入口（CLI + Skill 或 MCP）
+## Step 1: pick an entry point (CLI + Skill or MCP)
 
-两种入口接的是手机上同一份任务服务，**通常选一种就够了**；要同时接入不同的客户端时，也可以并用。
+Both entry points reach the same task service on the phone. **Normally one is enough**; you can use both if you need to connect different clients.
 
-| 你的情况 | 选 | 去看 |
+| Your situation | Pick | Read |
 | --- | --- | --- |
-| 电脑上的 Agent 能执行命令、支持 Skill | **Skill**：自带 CLI 脚本，不用另装 CLI，也不用配 MCP | [安装 Skill](computer-install.md#skill安装) |
-| 想在终端或脚本里派任务 | **CLI**：`mina` 命令 | [安装 CLI](computer-install.md#cli安装)，[连接与任务命令](cli.md) |
-| 用的是支持 MCP 的客户端 | **MCP**：Mina 当 MCP 服务器 | [电脑连接（MCP）](mcp.md) |
+| Your computer agent can run commands and supports Skills | **Skill**: includes its own CLI script, so no separate CLI install and no MCP configuration | [Install the Skill](computer-install.en.md#skill-install) |
+| You want to submit tasks from a terminal or script | **CLI**: the `mina` command | [Install the CLI](computer-install.en.md#cli-install), [connection and task commands](cli.en.md) |
+| You use a client that speaks MCP | **MCP**: Mina acts as an MCP server | [Computer access (MCP)](mcp.en.md) |
 
-拿不准时：Agent 支持 Skill 就用 Skill，否则用 MCP。
+Not sure? If your agent supports Skills, use the Skill; otherwise use MCP.
 
-## 第二步：选连法（USB 或 Wi-Fi / VPN）
+## Step 2: pick a connection (USB or Wi-Fi / VPN)
 
-两种入口都能用这两种连法。在手机的 设置 › 连接电脑 里，「CLI / Skill」和「MCP」共用同一个连接方式选择。
+Both entry points work over either connection. In Settings › Connect a computer on the phone, "CLI / Skill" and "MCP" share the same connection selector.
 
-| | USB（推荐） | Wi-Fi / 私有 VPN |
+| | USB (recommended) | Wi-Fi / private VPN |
 | --- | --- | --- |
-| 什么时候用 | 手机用数据线连着电脑 | 不想插线，或者人不在手机旁边（远程用） |
-| 怎么打开 | 电脑上一条命令，不用碰手机；CLI 的 `connect` 会替你打开 | 在手机的 设置 › 连接电脑 里打开「网络访问」，默认关着 |
-| 电脑上要有 | adb（Android platform-tools），手机在 `adb devices` 里显示为 `device` | 和手机在同一个 Wi-Fi，或同一个私有 VPN 网络里 |
-| 监听在哪 | 只在手机本机上，Wi-Fi 上连不到 | 只接受局域网、私有 VPN 网络的地址，公网和移动数据不接受 |
+| When | The phone is on a cable to the computer | No cable, or you're away from the phone (remote use) |
+| How to turn it on | One command on the computer, without touching the phone; the CLI's `connect` does it for you | Turn on "network access" in Settings › Connect a computer on the phone; off by default |
+| The computer needs | adb (Android platform-tools), with the phone listed as `device` in `adb devices` | To be on the same Wi-Fi as the phone, or in the same private VPN network |
+| Where it listens | On the phone itself only; not reachable over Wi-Fi | Accepts only LAN and private VPN addresses; public addresses and mobile data are refused |
 
-两种连法各有自己的开关和令牌，可以都开。连接是明文 HTTP，只在自己信任的网络里用；令牌别发给别人。付款、需要你同意的操作只能在手机上处理，电脑交来的任务不会替你点。
+Each connection has its own switch and token, and both can be on at once. The connection is plain HTTP, so use it only on networks you trust, and don't share the token. Payments and anything that needs your consent can only be handled on the phone; tasks from the computer never approve them for you.
 
-## 第三步：照着做
+## Step 3: follow the guide
 
-- **CLI 或 Skill**：先按[安装、升级和卸载](computer-install.md)装好，再看[连接与任务命令](cli.md)。
-- **MCP**：按[电脑连接（MCP）](mcp.md)，USB 和 Wi-Fi / VPN 两种连法都有一步步的说明。
-- **让电脑上的 AI 助手替你装**：手机经 USB 连着电脑时，把[用电脑上的 AI 助手安装](install-with-agent.md)这份说明交给它：它先把 Mina 装到手机上；你也要电脑访问的话，它会按你选的入口接着配好。
+- **CLI or Skill**: install it with [install, update and remove](computer-install.en.md), then read [connection and task commands](cli.en.md).
+- **MCP**: follow [Computer access (MCP)](mcp.en.md), which covers both USB and Wi-Fi / VPN step by step.
+- **Let an AI agent on your computer set it up**: with the phone connected over USB, give it [Install with an AI agent on your computer](install-with-agent.en.md). It installs Mina on the phone first; if you also want computer access, it then sets up the entry point you chose.
 
-## 电脑任务台（`mina ui`）
+## Task desk (`mina ui`)
 
-不想敲命令时，连好手机后运行 `mina ui`，电脑浏览器会打开一个任务台：派任务、看步骤进度、回答追问、追加要求、取消任务，其他入口派的近期任务也会列出来。页面在后台时暂停读取，切回来再更新；需要接管的步骤要在手机上处理。界面按浏览器语言显示简体中文或英文。
+If you would rather not type commands, connect the phone and run `mina ui`. Your browser opens a task desk where you can start tasks, follow their steps, answer questions, add instructions and cancel tasks; recent tasks started from other entry points show up too. Reads pause while the tab is hidden and resume when you come back; steps that need you still have to be handled on the phone. The desk follows the browser's language: Simplified Chinese or English.
 
-左侧把最近 50 个远程任务按对话归组。中央按轮次显示要求和答复。一轮结束后，在底部继续输入会沿用同一对话。点某一轮的「查看过程」，手机状态和本页观察到的进展会在这一轮的答复上方展开。点「收起过程」即可合上。底部输入框保留当前草稿。需要另起一段时，点「新对话」。
+The sidebar groups the latest 50 remote tasks by conversation. Read each turn in the center and use the composer to continue after a turn ends. Select **View process** to expand the phone’s report and the updates observed in this tab above that turn’s reply. Select **Hide process** to collapse it. The composer keeps your current draft. Select **New chat** to start a separate conversation.
 
-- 多台 ADB 设备时，在页面里选一台，或启动时用 `mina ui --device SERIAL` 指定；Wi-Fi / 私有 VPN 连接沿用 `--url` 和 `--token-file`。
-- 只装了 Skill 时用 `python3 <技能目录>/mina/scripts/mina_cli.py ui`（Windows 用 `py -3`）。
-- 浏览器没自动打开时加 `--no-open`，把终端打出的链接复制到本机浏览器。
-- 任务台只监听本机 `127.0.0.1` 的随机端口，每次启动生成新的链接；链接里的密钥就是使用权，不要发给别人。终端按 Ctrl+C 关掉任务台，已经交给手机的任务照常运行。
+- With several ADB devices, choose one in the page or start with `mina ui --device SERIAL`; Wi-Fi / private VPN connections use the usual `--url` and `--token-file`.
+- With only the Skill installed, run `python3 <skills-directory>/mina/scripts/mina_cli.py ui`.
+- If no browser opens, add `--no-open` and open the printed link in a browser on this computer.
+- The desk listens only on `127.0.0.1` on a random port and prints a new link on every start. The secret in the link is what grants access, so keep it to yourself. Ctrl+C in the terminal closes the desk; tasks already on the phone keep running.

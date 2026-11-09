@@ -12,7 +12,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 设置页「网站登录」:列表、单站退出(带「可能仍在」提示)、全部退出要二次确认。 */
+/**Settings page "Website login":List, single station exit(With "maybe still" prompt), All exits require a second confirmation. */
 @RunWith(AndroidJUnit4::class)
 class WebSitesSectionTest {
 
@@ -47,25 +47,25 @@ class WebSitesSectionTest {
     fun logoutOneSiteWarnsItMayPersist() {
         show()
         compose.awaitOne("shop.example.com").performClick()
-        compose.clickInDialog("退出这个网站")
+        compose.clickInDialog("Exit this website")
         assertEquals(listOf("logout shop.example.com"), calls)
-        compose.onNodeWithText("已退出 shop.example.com。$WEB_LOGOUT_PARTIAL").assertIsDisplayed()
+        compose.onNodeWithText("Exited shop.example.com.$WEB_LOGOUT_PARTIAL").assertIsDisplayed()
     }
 
     @Test
     fun openLoginFromTheSiteDialog() {
         show()
         compose.awaitOne("news.example.org").performClick()
-        compose.clickInDialog("打开登录")
+        compose.clickInDialog("Open login")
         assertEquals(listOf("open news.example.org"), calls)
     }
 
     @Test
     fun logoutAllNeedsConfirmation() {
         show()
-        compose.awaitOne("全部退出并清除网页数据").performClick()
+        compose.awaitOne("Exit all and clear web data").performClick()
         assertEquals(emptyList<String>(), calls)
-        compose.clickInDialog("全部退出")
+        compose.clickInDialog("Exit all")
         assertEquals(listOf("all"), calls)
     }
 }

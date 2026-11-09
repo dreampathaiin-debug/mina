@@ -10,7 +10,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 浮层窗口根上的长按:按着不动到点交给长按,里面的按钮收到取消;长按中途被拿掉时通知取消,之后抬起不再算数。 */
+/**Long press on the root of the floating layer window:Press and hold until the point is reached and then press and hold.,;Notification of cancellation when long press is removed midway,Lifting up after that no longer counts. */
 @RunWith(AndroidJUnit4::class)
 class OverlayFrameHoldTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -40,7 +40,7 @@ class OverlayFrameHoldTest {
     private fun ev(action: Int) = MotionEvent.obtain(downAt, SystemClock.uptimeMillis(), action, 50f, 50f, 0)
         .also { frame.dispatchTouchEvent(it); it.recycle() }
 
-    /** 按下,等过长按的时限(主线程空着,计时能到)。 */
+    /**press,Waited longer than the long press time limit(main thread empty,The time is up). */
     private fun pressAndWait() {
         instrumentation.runOnMainSync {
             frame = OverlayFrame(context).apply {
@@ -89,7 +89,7 @@ class OverlayFrameHoldTest {
     @Test fun settingTheSameHoldAgainKeepsTheGesture() {
         pressAndWait()
         instrumentation.runOnMainSync {
-            // 每次重画都会再装一次同一个长按:不该打断正在进行的这一次
+            //Every time you redraw, the same long press will be installed again.:Shouldn't interrupt what's going on this time
             frame.setHold(hold, HOLD_MS)
             ev(MotionEvent.ACTION_UP)
         }

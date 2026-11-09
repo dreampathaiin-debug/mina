@@ -20,9 +20,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * 真机:把兼容性自检完整跑一遍,和设置里点「开始自检」走的是同一个 [AndroidSelfCheck]。
- * 要内置助手在运行、Mina 的无障碍开着;报告打在 logcat(标签 MinaSelfCheck)。默认只要求跑完、每项都有结论;
- * 带 `-e selfcheck.strict true` 时还要求没有一项失败。
+ *Real machine:Run the complete compatibility self-check,It’s the same as clicking “Start Self-Test” in the settings. [AndroidSelfCheck].
+ *Make sure the built-in assistant is running and Mina’s accessibility is on.;Report hit logcat(Label MinaSelfCheck). By default, it only requires running to completion and each item to have a conclusion.;
+ *bring `-e selfcheck.strict true`It is also required that none of them fail.
  */
 @RunWith(AndroidJUnit4::class)
 class SelfCheckDeviceTest {
@@ -31,7 +31,7 @@ class SelfCheckDeviceTest {
 
     @Test
     fun wholeSelfCheckCompletes() = runBlocking<Unit> {
-        // 和别的真机测试一样先占住共用的助手连接、促使无障碍重绑(启动测试时系统会强停 App)
+        //Like other real-device tests, the shared assistant connection is first occupied to facilitate barrier-free reconnection.(The system will be forced to stop when starting the test. App)
         DeviceSupport.shell()
         DeviceSupport.service()
         val monitor = SystemStatusMonitor(context, PhoneServices.of(context).shellControl)

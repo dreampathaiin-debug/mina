@@ -45,32 +45,32 @@ class MemoryScreenTest {
 
     @Test fun addEditDeleteRoundTrip() {
         show()
-        compose.onNodeWithText("手写一条").performClick()
-        compose.onNodeWithTag("memory-content").performTextInput("用户住在张江")
+        compose.onNodeWithText("").performClick()
+        compose.onNodeWithTag("memory-content").performTextInput("The user lives in Zhangjiang")
         compose.onNodeWithTag("memory-save").performClick()
-        // 点一行升起操作面板,选「改一改」
-        compose.onNodeWithText("用户住在张江").performClick()
-        compose.onNodeWithText("改一改").performClick()
+        //Click a line to raise the operation panel,Select "Change"
+        compose.onNodeWithText("The user lives in Zhangjiang").performClick()
+        compose.onNodeWithText("Change it").performClick()
         compose.onNodeWithTag("memory-content").performTextClearance()
-        compose.onNodeWithTag("memory-content").performTextInput("用户住在张江高科")
+        compose.onNodeWithTag("memory-content").performTextInput("The user lives in Zhangjiang Hi-Tech")
         compose.onNodeWithTag("memory-save").performClick()
         compose.waitForIdle()
-        assertEquals("用户住在张江高科", store.items.value.single().content)
-        compose.onNodeWithText("用户住在张江高科").performClick()
-        compose.onNodeWithText("删除").performClick()
+        assertEquals("The user lives in Zhangjiang Hi-Tech", store.items.value.single().content)
+        compose.onNodeWithText("The user lives in Zhangjiang Hi-Tech").performClick()
+        compose.onNodeWithText("delete").performClick()
         compose.waitForIdle()
         assertTrue(store.items.value.isEmpty())
     }
 
     @Test fun approveProcedure() {
-        store.add(MemoryKind.procedure, "点外卖先比价", emptyList(), MemorySource("user_said", "以后点外卖先比价", atMs = 1)).getOrThrow()
+        store.add(MemoryKind.procedure, "Order takeout and compare prices first", emptyList(), MemorySource("user_said", "Compare prices first when ordering takeout next time", atMs = 1)).getOrThrow()
         show()
         compose.onNodeWithTag("segment-Pending").performClick()
-        compose.onNodeWithText("好").performClick()
+        compose.onNodeWithText("good").performClick()
         compose.waitForIdle()
         assertEquals(MemoryStatus.active, store.items.value.single().status)
-        // 批准后从「待确认」里拿走,出现在记忆列表里
-        compose.onNodeWithText("没有等你确认的东西").assertExists()
+        //After approval, take it from "Pending Confirmation",appear in memory list
+        compose.onNodeWithText("Nothing waiting for your confirmation").assertExists()
         compose.onNodeWithTag("segment-Memories").performClick()
         assertEquals(1, compose.onAllNodesWithTag("memory-row").fetchSemanticsNodes().size)
     }

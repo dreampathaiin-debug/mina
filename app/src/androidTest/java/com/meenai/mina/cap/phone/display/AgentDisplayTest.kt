@@ -27,10 +27,10 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 真机测试:需要内置助手在运行(已配对、无线调试开着)。 */
+/**Real machine test:Requires the built-in assistant to be running(Paired, wireless debugging is on). */
 @RunWith(AndroidJUnit4::class)
 class AgentDisplayTest {
-    // 整个测试类共用一条连接,与 App 里长期持有一条连接的用法一致
+    //The entire test class shares a connection,It is consistent with the usage of holding a connection for a long time in the App.
     companion object {
         private const val SETTINGS = "com.android.settings"
         private const val SHELL_PROCESS = "com.meenai.mina:helper"
@@ -97,7 +97,7 @@ class AgentDisplayTest {
             assertEquals("main screen top task changed", mainTop, shell.topTaskId(Display.DEFAULT_DISPLAY))
             assertEquals(-1, shell.topTaskId(d.displayId))
         } finally {
-            // 测试自己在主屏打开的设置:回桌面并结束它,免得收尾动画期间仍算「主屏可见」影响后面的用例
+            //Test the settings you open on the home screen:Go back to desktop and end it,In order to prevent the "home screen being visible" during the ending animation from affecting subsequent use cases.
             shellCommand("input -d 0 keyevent KEYCODE_HOME")
             shellCommand("am force-stop $SETTINGS")
         }
@@ -109,7 +109,7 @@ class AgentDisplayTest {
         shell.startApp(d.displayId, SETTINGS)
         val png = pollUntil(2_000) { d.latestFramePng() }
         assertNotNull(png)
-        // PNG 文件头
+        //PNG file header
         assertEquals(0x89.toByte(), png!![0])
         assertEquals('P'.code.toByte(), png[1])
     }
@@ -136,7 +136,7 @@ class AgentDisplayTest {
         val d = newDisplay()
         shell.startApp(d.displayId, SETTINGS)
         val task = pollUntil(5_000) { shell.topTaskId(d.displayId).takeIf { it != -1 } }!!
-        // 在两块虚拟屏之间挪,不碰用户的主屏
+        //Move between two virtual screens,Don’t touch the user’s home screen
         val other = AgentDisplay(shell, 720, 1600, 320)
         try {
             assertTrue(shell.moveTask(task, other.displayId))
@@ -150,14 +150,14 @@ class AgentDisplayTest {
     @Test
     fun coldStartDoesNotKillAppWithTaskOnAnotherScreen() {
         val d = newDisplay()
-        // 用另一块虚拟屏代表「Mina 屏以外的任务」,不碰用户的主屏
+        //Use another virtual screen to represent "tasks outside the Mina screen",Don’t touch the user’s home screen
         val other = AgentDisplay(shell, 720, 1600, 320)
         try {
             assertEquals(ShellService.START_OK, shell.startApp(other.displayId, SETTINGS))
             assertNotNull(pollUntil(5_000) { shell.topTaskId(other.displayId).takeIf { it != -1 } })
             val pid = pollUntil(3_000) { shellCommand("pidof $SETTINGS").trim().takeIf { it.isNotEmpty() } }
             assertNotNull(pid)
-            // 另一块屏也是 Mina 的屏(代表另一个任务):直接拒绝、不强停,返回「被别的任务占用」
+            //The other screen is also Mina’s screen(represents another task):Directly refuse, do not force stop,Return to "Occupied by other tasks"
             assertEquals(ShellService.START_IN_USE_BY_OTHER, shell.restartApp(d.displayId, SETTINGS))
             assertEquals("settings process was killed", pid, shellCommand("pidof $SETTINGS").trim())
         } finally {
@@ -194,7 +194,7 @@ class AgentDisplayTest {
         assertEquals(before, shellCommand("appops get $SETTINGS PLAY_AUDIO").trim())
     }
 
-    /** 助手进程被杀后,看门狗重起助手,连接拿到可用的新服务。 */
+    /**After the helper process is killed,watchdog reboot assistant,Connect to get new services as they become available. */
     @Test
     fun reconnectsAfterShellProcessDies() {
         val before = shell
@@ -220,7 +220,7 @@ class AgentDisplayTest {
         return ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().use { it.readText() }
     }
 
-    /** 等画面静止(相隔 500ms 的两帧一样),返回该帧。 */
+    /**Wait for the screen to freeze(separated 500The two frames of ms are the same),Return the frame. */
     private fun stableFrame(d: AgentDisplay): ByteArray {
         var last = pollUntil(2_000) { d.latestFramePng() }!!
         repeat(10) {
@@ -232,7 +232,7 @@ class AgentDisplayTest {
         return last
     }
 
-    // Display.FLAG_TRUSTED 是隐藏常量(1 shl 7),反射取不到时用其数值
+    // Display.FLAG_TRUSTEDis a hidden constant(1 shl 7),When reflection cannot be obtained, its value is used.
     private fun displayFlagTrusted(): Int =
         runCatching { Display::class.java.getField("FLAG_TRUSTED").getInt(null) }.getOrDefault(1 shl 7)
 

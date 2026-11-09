@@ -42,7 +42,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 真实对话页与任务服务;脚本模型延迟取消收尾,让消息稳定停在尚未交给模型的阶段。 */
+/**Real conversation page and task service;Script model delayed cancellation closing,Let the message stay stable until it is handed over to the model. */
 @RunWith(AndroidJUnit4::class)
 class SteerEditingDeviceTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
@@ -77,7 +77,7 @@ class SteerEditingDeviceTest {
         app.tasks.evalHooks.rememberMemory = false
         app.tasks.evalHooks.learnSkills = false
         conversation = app.conversations.newConversation()
-        app.conversations.setTitle(conversation, "插话撤回与编辑验证")
+        app.conversations.setTitle(conversation, "Interjection withdrawal and edit verification")
         compose.runOnUiThread { vm.switchTo(conversation) }
         compose.waitForIdle()
         compose.runOnUiThread {
@@ -99,11 +99,11 @@ class SteerEditingDeviceTest {
     }
 
     @Test fun withdrawalRemovesOnlyThatMessageBeforeModelPickup() {
-        send("请核对今天的资料")
+        send("Please check today's information")
         script.awaitCall()
         val runId = app.taskState.run(conversation)!!.key
-        send("撤回这条补充")
-        send("保留这条补充")
+        send("Withdraw this addition")
+        send("Keep this addition")
         compose.waitUntil(5_000) { vm.ui.value.exchanges.single().steers.size == 2 && vm.ui.value.exchanges.single().steers.all { it.state == SteerState.Received } }
         val (withdraw, keep) = vm.ui.value.exchanges.single().steers
         openSteer(withdraw.id)
@@ -124,30 +124,30 @@ class SteerEditingDeviceTest {
     }
 
     @Test fun editRestoresTheQuoteAndProcessedMessagesHaveNoEditActions() {
-        send("请核对今天的资料")
+        send("Please check today's information")
         script.awaitCall()
         val runId = app.taskState.run(conversation)!!.key
         compose.onNodeWithTag("message-u0").performTouchInput { longClick() }
         compose.onNodeWithTag("message-menu-quote").performClick()
         waitMenuClosed()
-        send("顺便整理总结")
+        send("To summarize")
         compose.waitUntil(5_000) { vm.ui.value.exchanges.single().steers.singleOrNull()?.state == SteerState.Received }
         val old = vm.ui.value.exchanges.single().steers.single()
         openSteer(old.id)
         compose.onNodeWithTag("message-menu-edit").performClick()
         waitMenuClosed()
-        compose.onNodeWithTag("composer-field").assertTextEquals("顺便整理总结")
+        compose.onNodeWithTag("composer-field").assertTextEquals("To summarize")
         compose.onNodeWithTag("quote-chip").assertExists()
-        assertEquals(QuoteMessage.Quote(QuoteMessage.From.You, "请核对今天的资料"), vm.ui.value.quote)
+        assertEquals(QuoteMessage.Quote(QuoteMessage.From.You, "Please check today's information"), vm.ui.value.quote)
         compose.onNodeWithTag("message-m0-${old.id}").assertDoesNotExist()
         shot("edit-draft")
         compose.onNodeWithTag("composer-field").performTextClearance()
-        send("只整理一句总结")
+        send("Just make a summary")
         compose.waitUntil(5_000) { vm.ui.value.exchanges.single().steers.last().state == SteerState.Received }
         release.complete(Unit)
         val next = script.awaitCall().messages.toString()
-        assertFalse(next.contains("顺便整理总结"))
-        assertTrue(next.contains("只整理一句总结"))
+        assertFalse(next.contains("To summarize"))
+        assertTrue(next.contains("Just make a summary"))
         assertTrue(next.contains("Quoting my earlier message"))
         compose.waitUntil(5_000) { vm.ui.value.exchanges.single().steers.last().state == SteerState.Joined }
         assertEquals(runId, app.taskState.run(conversation)!!.key)
@@ -158,12 +158,12 @@ class SteerEditingDeviceTest {
         shot("processed-menu")
     }
 
-    // 电脑追加的插话只归当前任务:手机上长按只有复制、引用、选择文字,撤回也被拒,照常交给模型
+    //Interruptions added by the computer only belong to the current task:Long press on mobile phone can only copy, quote and select text.,Withdrawal was also rejected,Hand over to model as usual
     @Test fun remoteSteersOfferNoWithdrawOrEdit() {
-        val started = app.remoteTasks.start("请核对今天的资料", conversation)
+        val started = app.remoteTasks.start("Please check today's information", conversation)
         val task = (started as com.meenai.mina.core.remote.StartOutcome.Started).task
         script.awaitCall()
-        val id = checkNotNull(app.remoteTasks.steer(task.id, "电脑追加的要求"))
+        val id = checkNotNull(app.remoteTasks.steer(task.id, "Additional computer requirements"))
         compose.waitUntil(5_000) { vm.ui.value.exchanges.lastOrNull()?.steers?.any { it.id == id && it.state == SteerState.Received } == true }
         openSteer(id)
         compose.onNodeWithTag("message-menu-copy").assertExists()
@@ -172,12 +172,12 @@ class SteerEditingDeviceTest {
         shot("remote-menu")
         assertFalse(app.taskState.run(conversation)!!.withdrawSteer(id))
         release.complete(Unit)
-        assertTrue(script.awaitCall().messages.toString().contains("电脑追加的要求"))
+        assertTrue(script.awaitCall().messages.toString().contains("Additional computer requirements"))
     }
 
     private fun send(text: String) {
         compose.onNodeWithTag("composer-field").performTextInput(text)
-        compose.onNodeWithContentDescription("发送").assertIsEnabled().performClick()
+        compose.onNodeWithContentDescription("").assertIsEnabled().performClick()
     }
 
     private fun openSteer(id: String) {

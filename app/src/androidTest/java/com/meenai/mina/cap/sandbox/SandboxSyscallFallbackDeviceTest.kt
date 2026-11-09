@@ -12,10 +12,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * 有的安卓版本给 App 装的 seccomp 策略对新系统调用(io_uring、clone3、faccessat2、epoll_pwait2、rseq……)
- * 发 SIGSYS,有的直接放行。两种平台上沙箱里的程序都不能被信号杀掉:被拦下的调用收到「不支持」(ENOSYS)
- * 走自己的退路,放行的调用拿到内核自己的结果;带路径的调用无论哪种都必须按沙箱内的路径判断。
- * 全部经产品路径 AndroidSandbox.run → minarun → PRoot。
+ *Some Android versions install the seccomp policy for the App to call the new system(io_uring,clone3,faccessat2.epoll_pwait2.rseq……)
+ *hair SIGSYS,Some are released directly. Programs in the sandbox cannot be killed by signals on both platforms:Blocked calls received "Not Supported"(ENOSYS)
+ *Take your own retreat,Released calls get the kernel's own results;Any call with a path must be judged according to the path in the sandbox.
+ *All via product path AndroidSandbox.run → minarun →PRoot.
  */
 @RunWith(AndroidJUnit4::class)
 class SandboxSyscallFallbackDeviceTest {
@@ -45,7 +45,7 @@ class SandboxSyscallFallbackDeviceTest {
         assertEquals("read:written", r.output.trim())
     }
 
-    /** musl 的 faccessat(…, AT_EACCESS) 先试 faccessat2;答案必须和真实权限一致。 */
+    /**Musl's faccessat(…, AT_EACCESS)Try first faccessat2;The answer must be consistent with the real permissions. */
     @Test fun effectiveAccessChecks() {
         val script = """
             import os
@@ -66,11 +66,11 @@ class SandboxSyscallFallbackDeviceTest {
     }
 
     /**
-     * 进程活着,每个调用都返回 -1:平台拦下的答 ENOSYS;平台放行的由内核按这里的无效参数报错(EINVAL)。
-     * io_uring_setup 由 PRoot 自己答 ENOSYS(io_uring 的路径操作不经系统调用,PRoot 无法转换),与平台无关。
+     *process alive,Each call returns -1:Answer blocked by the platform ENOSYS;If the platform releases it, the kernel will report an error based on the invalid parameters here.(EINVAL).
+     * io_uring_setupAnswered by PRoot himself ENOSYS(io_uringPath operations without system calls,PRoot cannot be converted),Platform agnostic.
      */
     @Test fun trappedSyscallsReturnEnosys() {
-        // io_uring_setup, clone3, epoll_pwait2, rseq(arm64 编号)
+        // io_uring_setup, clone3, epoll_pwait2, rseq(arm64 number)
         val script = """
             import ctypes, errno
             libc = ctypes.CDLL(None, use_errno=True)

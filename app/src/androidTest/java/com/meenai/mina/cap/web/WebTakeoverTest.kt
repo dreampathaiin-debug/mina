@@ -29,7 +29,7 @@ import org.junit.runner.RunWith
 import java.util.Collections
 import kotlin.coroutines.resume
 
-/** 真机测试:网页接管把同一个 WebView 拿到主屏、再放回后台宿主,页面状态不丢。 */
+/**Real machine test:Web page takeover takes the same WebView to the main screen and then returns it to the background host,The page status is not lost. */
 @RunWith(AndroidJUnit4::class)
 class WebTakeoverTest {
 
@@ -98,9 +98,9 @@ class WebTakeoverTest {
         instr.runOnMainSync { b!!.performClick() }
     }
 
-    /** 测试自己当任务服务:按钮记下来,交回类的结束这次接管。 */
+    /**Test yourself as a task service:button to write down,Handing back the end of the class takes over this time. */
     private fun showTask(reason: String = "login") = instr.runOnMainSync {
-        assertTrue(WebHandover.show(ctx, tab, host, reason, "请登录示例商城", waitKey = 7, taskId = "task", onAction = { a ->
+        assertTrue(WebHandover.show(ctx, tab, host, reason, "Please log in to the sample mall", waitKey = 7, taskId = "task", onAction = { a ->
             actions += a
             when (a) {
                 WebHandover.Action.HandBack, WebHandover.Action.FinishedMyself, WebHandover.Action.Done -> WebHandover.end(loggedIn = true, registry = registry)
@@ -114,7 +114,7 @@ class WebTakeoverTest {
         val screen = WebScreen({ tab }, host, SystemClock::uptimeMillis)
         val s = screen.snapshot()
         val plain = s.elements.first { it.resourceId == "#plain" }
-        assertTrue(screen.typeText(plain.ref, s.snapshotId, "填了一半") is ActionResult.Ok)
+        assertTrue(screen.typeText(plain.ref, s.snapshotId, "half filled") is ActionResult.Ok)
     }
 
     @Test
@@ -122,11 +122,11 @@ class WebTakeoverTest {
         openForm()
         showTask()
         awaitOnMain()
-        assertEquals("\"填了一半\"", js("document.getElementById('plain').value"))
-        click("处理好了")
+        assertEquals("\"half filled\"", js("document.getElementById('plain').value"))
+        click("Dealt with it")
         awaitBackHome()
         assertEquals(listOf(WebHandover.Action.HandBack), actions.toList())
-        assertEquals("\"填了一半\"", js("document.getElementById('plain').value"))
+        assertEquals("\"half filled\"", js("document.getElementById('plain').value"))
         assertNull(WebHandover.session.value)
     }
 
@@ -161,7 +161,7 @@ class WebTakeoverTest {
             instr.sendPointerSync(MotionEvent.obtain(t, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, x, y, 0))
         }
         DeviceSupport.pollUntil(3_000) { WebHandover.session.value?.title?.takeIf { it == "inputs" } }
-        click("处理好了")
+        click("Dealt with it")
         awaitBackHome()
         assertTrue("inputs=${counted.inputCount}", counted.inputCount >= 3)
         assertEquals("inputs", counted.stoppedAt)
@@ -174,9 +174,9 @@ class WebTakeoverTest {
         val login = DeviceSupport.pollUntil(5_000) { WebHandover.session.value?.tab }
         assertNotNull(login)
         DeviceSupport.pollUntil(5_000) { buttons(login!!).takeIf { it.isNotEmpty() } }
-        assertEquals(listOf("完成"), buttons(login!!).map { it.text.toString() })
+        assertEquals(listOf("Finish"), buttons(login!!).map { it.text.toString() })
         DeviceSupport.pollUntil(5_000) { WebHandover.session.value?.url }
-        // buttons() 自己在主线程上取;点击另起一次主线程调用(不能嵌套)
+        // buttons()Get it yourself on the main thread;Click to start another main thread call(Cannot be nested)
         val doneButton = buttons(login).single()
         instr.runOnMainSync { doneButton.performClick() }
         assertNotNull(DeviceSupport.pollUntil(5_000) { done.firstOrNull() })
@@ -201,7 +201,7 @@ class WebTakeoverTest {
                 onAction = { actions += it }, currentKey = { 8 }))
         }
         awaitOnMain()
-        click("处理好了")
+        click("Dealt with it")
         instr.waitForIdleSync()
         assertTrue(actions.isEmpty())
         assertNotNull(WebHandover.session.value)
@@ -215,7 +215,7 @@ class WebTakeoverTest {
                 onAction = { actions += it }, currentKey = { 8 }))
         }
         awaitOnMain()
-        click("取消任务")
+        click("Cancel task")
         instr.waitForIdleSync()
         assertEquals(listOf(WebHandover.Action.Cancel), actions.toList())
     }
@@ -257,7 +257,7 @@ class WebTakeoverTest {
         showTask()
         awaitOnMain()
         DeviceSupport.pollUntil(3_000) { WebHandover.session.value?.url }
-        click("我自己做完了")
+        click("I finished it myself")
         awaitBackHome()
         val e = registry.list().single()
         assertEquals("appassets.androidplatform.net", e.host)

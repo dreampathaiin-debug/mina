@@ -2,7 +2,7 @@ package com.meenai.mina
 
 import androidx.test.platform.app.InstrumentationRegistry
 
-/** 设备测试从 App 持有的 TaskCenter 读取状态；TaskService 只负责 Android 宿主。 */
+/**Device Test held from App TaskCenterread status;TaskServiceOnly responsible for Android hosting. */
 object DeviceTaskState {
     private val center get() = (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as MinaApp).taskState
     val state get() = center.state

@@ -1,122 +1,122 @@
-# Mina 能做什么：详细说明
+# What Mina can do, in detail
 
-简体中文 | [English](features.en.md)
+[简体中文](features.md) | English
 
-你用一句话交代一件事，Mina 在手机上替你办。这里是 [README](readme/README.zh-CN.md) 里「能做什么」每一项的细节。
+Tell Mina what you want in one sentence, and it gets it done on your phone. This page has the details behind each item under "What it can do" in the [README](../README.md).
 
-## 操作任何 App，不占你的屏幕
+## Operates any app without taking over your screen
 
-手机上装的 App 都能操作，不用事先适配：Mina 像人一样看屏幕、找按钮、点击输入，看得到就能操作。
+Any app installed on your phone works, with no per-app integration: Mina looks at the screen, finds buttons, taps and types like a person would. If it can see it, it can operate it.
 
-- 在一块单独的后台屏上打开 App、读界面、点击、输入、滚动，你照常用手机；对话页上的小画面实时显示它在做什么；不想看可以把这个任务的小画面关掉，只留右下角一个小按钮，要你处理时它会变橙色。
-- 几个任务同时在跑时，侧栏「进行中」旁边的「后台屏」页列出每个任务正在用哪个 App、做到哪了，点开能看它的实时画面，再点放大到整屏、双指缩放。
-- 两个任务要用同一个 App 时，后来的那个可以等前一个用完再接着做（最多等几分钟，界面上写「等另一个任务用完某 App」），两个任务互相等的情况会当场认出来，不会一直卡着。
-- 能逐屏读长列表和聊天记录，比如「帮我总结一下某个群今天都聊了些啥」。
-- 界面读不出来的 App（自己画界面、控件没有名字）也能用：Mina 用随 APK 自带的文字识别读屏上的字；配了能看图的模型时，还能看图找按钮和输入框。
-- 能把一段文字直接分享进某个 App（发消息、记笔记），收件人和发送仍由 Mina 在那一页上点。
-- 系统问「用哪个 App 打开」、装了两份的 App 问「打开哪一个」、一个 App 打开另一个 App（比如跳到付款页）时，Mina 认得出来：能处理的接着做，要你选或要你亲手处理的，会停下来请你在屏幕上操作。
-- 需要你亲手处理的事（登录、验证码、付款）会发通知请你接管：App 挪到主屏，你处理完交还，Mina 重新核实再继续。
-- 做完以后，Mina 打开的 App 默认留在后台、停在它做完的那一页：在最近任务里能找到，下次 Mina 再打开它也接着这一页，不会跳到你眼前。做完时正在放声音或视频的 App 会关掉；你说「让音乐接着放」或「做完就关掉」，Mina 照你说的办。
+- Opens apps on a separate background screen and reads, taps, types and scrolls there while you keep using your phone. A small live view in the chat shows what it is doing; you can close it for the current task, leaving a small button at the bottom right that turns orange when Mina needs you.
+- When several tasks run at once, “Background screens” next to “Running” in the side menu lists which app each task is using and how far it got; open one to watch its live screen, tap to enlarge it and pinch to zoom.
+- When two tasks need the same app, the later one can wait until the other is done with it (up to a few minutes; it shows “Waiting for another task to finish with …”). Two tasks waiting on each other are caught at once instead of hanging.
+- Reads long lists and chat histories screen by screen, e.g. "summarize what my group chat talked about today".
+- Works even with apps whose UI cannot be read directly (custom-drawn UI, unlabeled controls): Mina reads on-screen text with the text recognition bundled in the APK, and with a vision-capable model it can also find buttons and input fields from screenshots.
+- Can share a piece of text straight into an app (to send a message or save a note); Mina still picks the recipient and taps send on that page itself.
+- Recognizes the system asking "open with which app", a dual-installed app asking "which one", and one app opening another (e.g. jumping to a payment page). It carries on when it can, and stops to let you act on screen when you need to choose or handle it yourself.
+- Things only you should do (logging in, verification codes, payment) trigger a notification asking you to take over: the app moves to your main screen, you finish and hand it back, and Mina re-checks before continuing.
+- When a task is done, the apps Mina opened stay in the background on the page where it finished: you find them in recent apps, and the next time Mina opens one it continues from there. They never jump in front of what you are doing. An app that is playing sound or video at that moment is closed; say "keep the music playing" or "close it when you're done" and Mina does that instead.
 
-## 内置浏览器
+## Built-in browser
 
-- 任何网站都能打开：在后台打开网页，用真实的点击和键盘输入操作页面，默认按电脑版网页打开。
-- 能读页面正文，也能读页面自己收到的数据；支持下载、上传。
-- 登录过的网站保持登录；侧栏「浏览器」里可以自己浏览，在这里登录的网站 Mina 办事时也能直接用。
-- 翻页有节奏：同一个网站连着换页会停一停，对限制浏览快慢的网站停得更久；认得出风控拦截页，交给你处理而不是硬闯。
+- Opens any website in the background and operates the page with real clicks and keyboard input. Pages open in desktop mode by default.
+- Reads the page text as well as the data the page itself receives; supports downloads and uploads.
+- Logins persist. You can browse yourself from "Browser" (浏览器) in the side drawer, and sites you log into there are available to Mina too.
+- Paces itself: consecutive page loads on the same site are spaced out, longer on sites that limit browsing speed. It recognizes anti-bot block pages and hands them to you instead of forcing through.
 
-## 此刻的屏幕
+## The screen you are looking at
 
-- 你在别的 App 里时，屏幕边上有一颗 Mina 悬浮胶囊，显示后台任务的进展、要你处理的事和结果，点开可以插话、回答、同意或停止。
-- **双击胶囊**，把你正在看的这一屏发给 Mina，比如「这个怎么回」「帮我记下来」；也可以在卡片里截屏、补一句话再发。
+- While you are in another app, a floating Mina capsule at the screen edge shows background task progress, things that need you, and results. Tap it to add a message, answer, approve or stop.
+- **Double-tap the capsule** to send the screen you are looking at to Mina, e.g. "how should I reply to this" or "note this down". You can also take a screenshot from the card and add a line before sending.
 
-## 定时与条件任务
+## Scheduled and conditional tasks
 
-- 「明早 9 点提醒我」「每天早上看看天气，下雨才告诉我」「每周五做某件事」。
-- 到点在原对话里执行，结果送回来；定时任务页可以暂停、改时间、立即执行、删除。
+- "Remind me at 9 tomorrow morning", "check the weather every morning and tell me only if it will rain", "do X every Friday".
+- Runs at the scheduled time in the original conversation and sends the result back. The scheduled tasks page lets you pause, reschedule, run now or delete.
 
-## 随时插话、随时停
+## Interrupt or stop anytime
 
-- 任务进行中可以继续说话，补充或更正要求，Mina 在下一步之前读到。
-- 对话里的每一步都能点开，看这一步具体点了什么、输入了什么、结果怎样。
-- 任务还在跑也能进「运行过程」，每一步按时间往下长。
-- 长按任务中已发送、模型还没处理的消息，可以撤回或取回编辑；编辑会保留原来的引用，输入框已有草稿时不提供编辑；带着屏幕或网页上选中文字的消息不提供编辑。
-- 按停止后，Mina 会补几行交代：做了什么、看到了什么、发出了几次、哪些没做完。下次说「继续」它知道从哪接着做。
+- Keep talking while a task runs to add to or correct your request; Mina reads it before its next step.
+- Every step in the chat can be opened to see exactly what it tapped or typed and how that turned out.
+- “View process” works while the task is still running; new steps keep arriving as it goes.
+- Long-press a message sent during a task to withdraw or edit it before the model picks it up. Editing restores its quote too and is available when the composer has no draft; a message that carries a screen or text selected on a web page cannot be edited.
+- When you press stop, Mina adds a short wrap-up: what it did, what it saw, how many times it sent something, and what is left. Say "continue" next time and it knows where to pick up.
 
-## 按住说话
+## Hold to talk
 
-- 对话页输入框没在打字时，按住说话，松开后字填进输入框，改了再发，不会自动发出；任务在跑时发出去就是插话。按着往上滑到「松开 取消」再松开，这段就不要了。
-- 在别的 App 里，长按悬浮胶囊说话，松开直接发给 Mina（任务在跑时是插话，它在问你时是回答）；松在「改一改」上会打开卡片，字放在输入框里给你改。
-- 默认用手机自带的语音识别，边说边出字，不花钱。手机没有、或认不准时，在「设置 › 模型 › 语音转文字」选一个服务商的语音模型，见[模型与登录](models.md#语音转文字)。
+- When you are not typing, hold the chat input to speak. When you let go the words land in the input for you to edit; nothing is sent by itself. While a task runs, sending it adds to the task. Slide up until it says "Let go to cancel" and let go to throw that take away.
+- In other apps, long-press the floating capsule to speak and let go to send it straight to Mina (it adds to a running task, or answers when Mina is asking you). Let go on "Edit" to open the card with the words in its input.
+- By default it uses the phone's built-in speech recognition, which shows words as you speak and costs nothing. If the phone has none, or it is not accurate enough, pick a provider's speech model under Settings › Models › Speech to text; see [models and sign-in](models.en.md#speech-to-text).
 
-## 询问 / 自主
+## Ask / Autonomous
 
-- 默认是**询问**：只有花钱（下单、付款）先问你，发消息、提交、删除这些都直接做完。也可以换成**自主**，连付款也不先问。详见[询问与自主](modes.md)。
+- The default is **Ask**: only spending money (placing orders, paying) is confirmed with you first; sending messages, submitting and deleting are done directly. You can switch to **Autonomous**, which does not ask even before paying. See [Ask and Autonomous](modes.en.md).
 
-## 记忆
+## Memory
 
-- 记住你明确说过的事实、偏好和做事方式（做事方式要你批准），可以查看、修改、删除；只从你自己说的话里记，密码、验证码、卡号这类不记。记忆加密保存在手机上。
+- Remembers facts, preferences and ways of doing things that you state explicitly (ways of doing things need your approval). You can view, edit and delete them. It only learns from what you yourself say, and never stores passwords, verification codes, card numbers and the like. Memory is stored encrypted on the phone.
 
-## 熟悉的 App 和网站，做得更快更稳
+## Faster and steadier on familiar apps and websites
 
-没有任何说明，Mina 也能看着屏幕把事办成。有些 App 和网站另外写了使用知识（入口在哪、常见做法、要注意什么），Mina 用到时自动查阅，少走弯路。比如进了聊天 App 直接知道怎么找联系人、翻聊天记录；打开招聘网站知道怎么筛岗位、打招呼。另有几类事情的通用做法。
+Even without any instructions, Mina can get things done by looking at the screen. For some apps and websites there is extra usage knowledge (where things are, common ways to do things, what to watch out for), which Mina looks up automatically when it needs it, so it takes fewer wrong turns. For example, in a chat app it already knows how to find a contact and scroll through chat history; on a job site it knows how to filter jobs and greet recruiters. There are also general how-to skills for a few kinds of tasks.
 
-已经写了使用知识的 App 和网站，清单见 [README](readme/README.zh-CN.md) 里「能做什么」下面的折叠段（没写到的照样能用）。知识持续增加，人人可以补充：它们是放在 [`core/src/main/resources/knowledge/`](../core/src/main/resources/knowledge/) 和 [`core/src/main/resources/skills/`](../core/src/main/resources/skills/) 下的纯文本文件，[欢迎补充](../.github/CONTRIBUTING.zh-CN.md)。
+The apps and websites that already have usage knowledge are listed in the collapsed section under "What it can do" in the [README](../README.md) (anything not listed still works). The knowledge keeps growing and anyone can add to it: it is plain text under [`core/src/main/resources/knowledge/`](../core/src/main/resources/knowledge/) and [`core/src/main/resources/skills/`](../core/src/main/resources/skills/). [Contributions welcome](../.github/CONTRIBUTING.md).
 
-## 成批的事
+## Batch jobs
 
-- 成批做事（比如逐个打招呼、投递）直接开始，不用先跟你确认名单；每两次之间隔开一段随机时间，做到网站自己说「到上限了」就停下告诉你。
+- Batch work (e.g. greeting or applying one by one) starts right away without asking you to confirm the list first. It waits a random interval between items, and stops and tells you when the site itself says you have hit a limit.
 
-## 过程可查
+## Everything is traceable
 
-- 回答下面列出来源（读过的页面、截图）；每次任务都有可回看的过程记录。
-- 每次任务一行小结：总用时、和模型来回几次、用了多少 Token、多久看到第一次反馈；设置里的「Token 用量」按天、按服务商、按模型统计。
+- Answers list their sources (pages read, screenshots), and every task has a step-by-step record you can review.
+- Each task ends with a one-line summary: total time, model round trips, tokens used, and time to first feedback. "Token usage" (Token 用量) in Settings breaks usage down by day, provider and model.
 
-## Linux 沙箱
+## Linux sandbox
 
-- 每个对话一个工作区，可以跑 Python、Node 和 shell 命令，处理你发来的文件，把结果存到手机的「下载/Mina」。
-- 默认断网，需要时在设置里的「文件与计算环境」打开「允许脚本联网」。只支持 arm64 设备；其他设备照常安装，沙箱显示「此设备不支持」。
-- 联网时这些命令也走「设置 › 网络代理」（和 Mina 自己调模型、下更新、内置浏览器用的是同一个，见[模型与登录](models.md#网络代理)）。
-- 同一页能看到沙箱占了多少空间，按对话清理工作区里的文件；有任务在跑的对话不清。
+- Each conversation gets a workspace that can run Python, Node and shell commands, process files you send, and save results to your phone's Download/Mina folder.
+- Offline by default; when needed, turn on "Allow scripts to go online" (允许脚本联网) under "Files & computing environment" (文件与计算环境) in Settings. arm64 devices only; on other devices the app installs normally and the sandbox shows "not supported on this device".
+- When it is online these commands also use **Settings › Network proxy** (the same proxy Mina uses for model calls, updates and the in-app browser; see [Models and sign-in](models.en.md#network-proxy)).
+- The same page shows how much space the sandbox uses and lets you clear a conversation's workspace files; conversations with a running task are skipped.
 
-## 电脑上的 AI 工具也能用（CLI / MCP）
+## AI tools on your computer can use it (CLI / MCP)
 
-电脑上的 AI 工具可以通过 **CLI + Skill 或 MCP** 把任务交给 Mina、查进度并拿回结果，通常选一种即可，无需两套都配置；需要同时接入不同客户端时，也可以并用。手机 APK 是两者的共同前提，两种入口共用手机任务服务。怎么选、怎么连见[从电脑使用 Mina](computer.md)。
+Computer AI tools can use **CLI + Skill or MCP** to hand Mina tasks, check progress and get results. Normally choose one; you don't need both, though you can use both to connect different clients. Both require the phone APK and use the same phone task service. For how to choose and connect, see [Use Mina from a computer](computer.en.md).
 
-- **CLI + Skill**：适合支持 Skill、能执行命令的电脑 Agent。Skill 自带 CLI 脚本，无需另装全局 CLI 或配置 MCP；只在终端或脚本里使用时，单独装 CLI 即可。安装、升级和卸载见[电脑端 CLI / Skill 指南](computer-install.md)。
-- **MCP**：有 USB 快速连接（经 ADB 转发并使用令牌验证），以及需要在手机上另行开启的 Wi-Fi／私有网络连接，见[电脑连接说明](mcp.md)。付款这类确认仍只能在手机上处理。
+- **CLI + Skill** suits computer agents that support Skills and can run commands. The Skill includes its own CLI script, so you do not need a separate global CLI installation or MCP configuration. For terminal or script use alone, install just the CLI. See the [computer CLI / Skill guide](computer-install.en.md) for installation, updates and removal.
+- **MCP** offers a quick USB connection (ADB forwarding with token authentication) and direct Wi-Fi / private-network access, which must be enabled separately on the phone; see the [computer access guide](mcp.en.md). Confirmations such as payments still have to be handled on the phone.
 
-### 让电脑上的 AI 助手帮你安装
+### Let an AI agent on your computer install Mina
 
-手机用数据线连上电脑，在手机上打开 USB 调试（开发者选项里别的开关不要动，除非 AI 助手请你打开；有的会清除手机数据），然后把下面这句话发给电脑上能执行命令的 AI 助手：
+Connect the phone to your computer with a USB cable, turn on USB debugging on the phone (don't change other switches in Developer options unless the agent asks you to: some can erase the phone), and send this sentence to an AI agent on the computer that can run commands:
 
 ```
-请按 https://github.com/wangzan101/Mina/blob/main/docs/install-with-agent.md 的步骤，帮我把 Mina 安装到通过 USB 连着的安卓手机上。
+Follow https://github.com/wangzan101/Mina/blob/main/docs/install-with-agent.en.md to install Mina on the Android phone connected over USB.
 ```
 
-它会检查手机、下载安装、打开需要的权限，需要你在手机上点的时候会停下来告诉你。API Key 由你自己在 Mina 里填，不经过它。如果你也要求电脑访问，AI 助手会按你选择的接入方式继续配置。步骤见[用电脑上的 AI 助手安装](install-with-agent.md)。
+It checks the phone, downloads and installs Mina, turns on the permissions it needs, and stops to tell you whenever something needs a tap on the phone. You enter your API key in Mina yourself; it never goes through the agent. If you also ask for computer access, the agent configures the access method you choose. The steps are in [Installing Mina with an AI agent](install-with-agent.en.md).
 
-## 系统要求
+## Requirements
 
-| 项目 | 要求 |
+| Item | Requirement |
 |---|---|
-| 安装、聊天、网页与沙箱任务 | 安卓 11 及以上（沙箱仅支持 arm64） |
-| 操作手机 App | 安卓 12 及以上；安卓 12、13 上后台操作可能影响主屏焦点 |
-| 推荐 | 安卓 14 及以上：后台屏有自己的焦点，不影响你在主屏打字；不同对话的任务同时进行也需要它 |
-| Linux 沙箱 | 仅 arm64 设备；其他设备照常安装，沙箱显示「此设备不支持」 |
-| 模型 | 支持工具调用的模型，可通过服务商 API、本地服务或账号登录配置，见[模型与登录](models.md) |
+| Install, chat, web and sandbox tasks | Android 11 or later (sandbox requires arm64) |
+| Phone app control | Android 12 or later; background work may affect main-screen focus on Android 12–13 |
+| Recommended | Android 14 or later: the background screen has its own focus, so it does not interfere with your typing on the main screen; running tasks from different conversations at the same time also needs it |
+| Linux sandbox | arm64 devices only; on other devices the app installs normally and the sandbox shows "not supported on this device" |
+| Model | A model that supports tool calling, configured through a provider API, a local service or account sign-in; see [Models and sign-in](models.en.md) |
 
-操作手机 App 要先在「设置手机操作」向导里配对一次无线调试（也可以用电脑经 USB 启动手机助手），每一步见[手机操作设置指南](setup-guide.md)。无障碍不用手动去开：配对成功后 Mina 会自己把它打开；从 GitHub 下载安装的 App，手动打开无障碍时常被系统拦下（提示「受限制的设置」），让 Mina 自己开能省掉这个麻烦。
+Phone app control needs wireless debugging paired once in the "Set up phone control" (设置手机操作) wizard (or the phone helper started from a computer over USB); every step is in the [phone control setup guide](setup-guide.en.md). You don't need to turn on accessibility by hand: once pairing succeeds, Mina turns it on by itself. For apps installed from GitHub rather than an app store, Android often blocks turning accessibility on manually ("Restricted setting"), and letting Mina do it avoids that.
 
-## 试一试
+## Try it
 
-空对话里有几条示例，点一下就能改了再发。也可以这样说：
+An empty conversation shows a few examples you can tap, edit and send. Or try something like:
 
-- 「帮我总结一下微信群今天都聊了些啥」
-- 「打开小红书，帮我总结一下某个博主最近发的内容」
-- 「帮我订明天早上 9:40、9:50、10:00 的闹钟」
-- 「每天早上 8 点看看天气，下雨才告诉我」
+- "Summarize what my WeChat group talked about today"
+- "Open Xiaohongshu and summarize what this creator posted recently"
+- "Set alarms for 9:40, 9:50 and 10:00 tomorrow morning"
+- "Check the weather at 8 every morning and tell me only if it will rain"
 
-## 常见问题
+## FAQ
 
-常见问题单独放在了[常见问题](faq.md)里。手机操作方面的问题，见[手机操作设置指南的「遇到问题」](setup-guide.md#遇到问题)。
+The FAQ now has its own page: [FAQ](faq.en.md). For phone control, see [Troubleshooting](setup-guide.en.md#troubleshooting) in the setup guide.

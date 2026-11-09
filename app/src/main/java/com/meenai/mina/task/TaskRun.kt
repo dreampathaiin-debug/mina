@@ -278,17 +278,57 @@ class TaskRun(
     }
 
     fun resume() {
+        // 用户接管开着时,「继续」先把标签放回后台、结束接管,任务照常往下走
+        if (userControl) endUserControl(resume = false)
         val g = gate ?: return
         val wasOnPage = g.userOnPagePending
         g.resume()
         // 用户在页面上操作的那种暂停:循环可能还没走到关卡(还在想),按它此刻的状态重新显示,不再写着暂停
         if (wasOnPage) loop?.state?.value?.takeIf { it is TaskState.Running }?.let(::publish)
     }
-    fun takeOver(waitKey: Int?) { takeover?.let { t -> scope.launch { t.handOver(waitKey) } } }
-    fun handBack(waitKey: Int?) { takeover?.let { t -> scope.launch { t.handBack(waitKey) } } }
-    fun finishedMyself(waitKey: Int?) { takeover?.let { t -> scope.launch { t.finishedMyself(waitKey) } } }
+    /** 用户主动接管开着(不是 Agent 请求的那种);[userControlKey] 是这次接管的编号,界面按钮带着它。 */
+    @Volatile private var userControl = false
+    @Volatile private var userControlKey = 0
+    /** 网页栈是 execute() 里第一次开网页时才建的;这里的类方法用它就要留个引用。 */
+    @Volatile private var webStackRef: WebStack? = null
+
+    fun takeOver(waitKey: Int?) {
+        val t = takeover
+        if (t != null && t.stage.value != Takeover.Stage.None) { scope.launch { t.handOver(waitKey) }; return }
+        userTakeOver()
+    }
+
+    /** 用户主动接管:任务先在下个会改动屏幕的工具前停住(没在跑就不动),当前网页标签拿到主屏的接管界面交给用户;交回后继续。 */
+    private fun userTakeOver() {
+        if (userControl || webStackRef == null) return
+        val s = _state.value
+        val running = s is TaskState.Running
+        if (!running && !(s is TaskState.Held && gate?.userOnPagePending == true)) return
+        scope.launch {
+            val k = ++userControlKey
+            userControl = true
+            if (running) userOnPage()
+            val shown = withContext(Dispatchers.Main) {
+                webStackRef?.showForTakeover("user_take_control", tr(R.string.take_control_message), k,
+                    WebHandover.taskActions(service, k, key)) { userControlKey }
+            } ?: false
+            if (!shown) userControl = false
+        }
+    }
+
+    /** 结束用户的接管:标签放回后台并解锁;[resume] 时连任务一起继续。 */
+    private fun endUserControl(resume: Boolean) {
+        if (!userControl) return
+        userControl = false
+        scope.launch {
+            withContext(Dispatchers.Main) { webStackRef?.returnFromTakeover(false) }
+            if (resume) this@TaskRun.resume()
+        }
+    }
+    fun handBack(waitKey: Int?) { if (userControl) { endUserControl(resume = true); return }; takeover?.let { t -> scope.launch { t.handBack(waitKey) } } }
+    fun finishedMyself(waitKey: Int?) { if (userControl) { endUserControl(resume = true); return }; takeover?.let { t -> scope.launch { t.finishedMyself(waitKey) } } }
     fun skip(waitKey: Int?) { takeover?.let { t -> scope.launch { t.skip(waitKey) } } }
-    fun putAside(waitKey: Int?) { takeover?.let { t -> scope.launch { t.putAside(waitKey) } } }
+    fun putAside(waitKey: Int?) { if (userControl) { endUserControl(resume = false); return }; takeover?.let { t -> scope.launch { t.putAside(waitKey) } } }
 
     /** 回答提问;已经不在等(超时后才答、已答过)时调 [tooLate] 告诉用户这条回答没用上。 */
     fun answer(text: String, tooLate: () -> Unit) {
@@ -643,6 +683,7 @@ class TaskRun(
                         workspace = SandboxDirs(service).let { d -> WebStack.Workspace(d.workspace(conversationId), d.gate, d.tree) },
                     ) }
                 webStack = stack
+                webStackRef = stack
                 // 模型用 web_keep_open 标过的那一页,任务结束时留在后台,记在这一轮名下(对话里那一轮下面显示、关了补一句)
                 stack.keepOrigin = { KeptOrigin(conversationId, _runId.value, goal) }
                 side.launch {

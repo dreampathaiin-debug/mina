@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class CapsuleDockTest {
-    // 1000×2000 的屏幕,状态栏 80,底部手势条 40;看得见的胶囊离边 30,离上下 20,阴影边 10
+    // 1000×2000 screen,status bar 80,Bottom gesture bar 40;Visible capsule off the edge 30,away from the upper and lower 20,shadow edge 10
     private val area = DockArea.of(OverlayArea(1000, 2000, insetTop = 80, insetBottom = 40), margin = 30, gap = 20, room = 10)
 
     @Test fun areaAvoidsBarsAndKeepsMargins() {
@@ -17,7 +17,7 @@ class CapsuleDockTest {
         assertEquals(1850, CapsuleDocking.y(1f, area, 100))
         assertEquals(970, CapsuleDocking.y(0.5f, area, 100))
         assertEquals(0.5f, CapsuleDocking.fraction(970, area, 100), 0.001f)
-        // 超出范围的夹住
+        //Clamping out of range
         assertEquals(0f, CapsuleDocking.fraction(-500, area, 100))
         assertEquals(1f, CapsuleDocking.fraction(5000, area, 100))
         assertEquals(90, CapsuleDocking.y(-3f, area, 100))
@@ -27,18 +27,18 @@ class CapsuleDockTest {
         val landscape = DockArea.of(OverlayArea(2000, 1000, insetLeft = 80, insetTop = 40), margin = 30, gap = 20, room = 10)
         val f = CapsuleDocking.fraction(CapsuleDocking.y(0.25f, area, 100), area, 100)
         val y = CapsuleDocking.y(f, landscape, 100)
-        // 横屏:上 50、下 990,范围 840 的四分之一
+        //Horizontal screen:Up 50, Down 990,One quarter of range 840
         assertEquals(50 + 210, y)
-        // 刘海在左边:左边停靠时让开它
+        //Bangs on the left:Get out of the way when parked on the left
         assertEquals(100, CapsuleDocking.dockedX(DockSide.Left, landscape, 200))
         assertEquals(1780, CapsuleDocking.dockedX(DockSide.Right, landscape, 200))
     }
 
     @Test fun tallerWindowMovesUpToFit() {
-        // 卡片 600 高,从胶囊的高度往下放不下
+        //Card 600 high,It cannot be lowered from the height of the capsule
         assertEquals(1950 - 600, CapsuleDocking.fitY(CapsuleDocking.y(1f, area, 100), area, 600))
         assertEquals(500, CapsuleDocking.fitY(500, area, 600))
-        // 比整个范围还高:贴着顶
+        //higher than the entire range:Stick to the top
         assertEquals(90, CapsuleDocking.fitY(500, area, 5000))
     }
 
@@ -54,62 +54,62 @@ class CapsuleDockTest {
         assertEquals(DockSide.Left, CapsuleDocking.release(380, 500, 200, 100, area).side)
         assertEquals(20, CapsuleDocking.dockedX(DockSide.Left, area, 200))
         assertEquals(780, CapsuleDocking.dockedX(DockSide.Right, area, 200))
-        // 刘海在左边时两侧让开的宽度不同:左边 100,右边 20
+        //When the bangs are on the left, the width of the two sides is different.:left 100,right 20
         val lopsided = DockArea.of(OverlayArea(2000, 1000, insetLeft = 80, insetTop = 40), margin = 30, gap = 20, room = 10)
         assertEquals(100, CapsuleDocking.edgeOffset(DockSide.Left, lopsided))
         assertEquals(20, CapsuleDocking.edgeOffset(DockSide.Right, lopsided))
     }
 
     @Test fun keyboardPushesTheRangeUp() {
-        // 输入法上边在 1200:看得见的部分离它 20
+        //The input method is above 1200:The visible part separates it 20
         val up = area.above(1200, gap = 20, room = 10)
         assertEquals(1190, up.bottom)
         assertEquals(1190 - 600, CapsuleDocking.fitY(CapsuleDocking.y(1f, area, 100), up, 600))
         assertEquals(area, area.above(null, 20, 10))
-        // 输入法比可摆范围还高:不越过顶
+        //The input method is higher than the swingable range:not over the top
         assertEquals(area.top, area.above(10, 20, 10).bottom)
     }
 
-    // ---------- 卡片 ----------
+    // ----------card ----------
 
-    /** 最高的卡片(看得见 1160 高)连同上下阴影边的窗口高。 */
+    /**highest card(Visible 1160 high)Together with the upper and lower shadow edges the window height. */
     private val full = 1160 + 20
 
     @Test fun cardCapIsAShareOfTheScreen() {
-        // 2000 高的屏幕:最高 58%,放得下就是它(对话卡片就这么高,任务卡片最多这么高)
+        //2000 high screen:Highest 58%,That's it if you can let it go(Dialogue cards are so high,The maximum number of task cards is this high)
         assertEquals(1160, CardDocking.maxHeight(2000, area, room = 10))
-        // 输入法弹出(上边 1200):收到它上面,中间那段变矮
+        //Input method pop-up(above 1200):receive it above,The middle section becomes shorter
         val up = area.above(1200, gap = 20, room = 10)
         assertEquals(1190 - 90 - 20, CardDocking.maxHeight(2000, up, room = 10))
-        // 横屏:按横屏的高度算
+        //Horizontal screen:Calculated according to the height of the horizontal screen
         val landscape = DockArea.of(OverlayArea(2000, 1000, insetLeft = 80, insetTop = 40), margin = 30, gap = 20, room = 10)
         assertEquals(580, CardDocking.maxHeight(1000, landscape, room = 10))
     }
 
     @Test fun cardTopFollowsItsFraction() {
-        // 上边在 90..(1950 - 最高的卡片) 之间按比例摆:最高的卡片正中、顶、底
+        //Above is 90..(1950 -highest card)in proportion to:The highest card in the middle, top and bottom
         assertEquals(90 + 340, CardDocking.y(0.5f, area, area, full, full))
         assertEquals(90, CardDocking.y(0f, area, area, full, full))
         assertEquals(1950 - full, CardDocking.y(1f, area, area, full, full))
-        // 转屏后同一个比例
+        //Same ratio after screen rotation
         val landscape = DockArea.of(OverlayArea(2000, 1000, insetLeft = 80, insetTop = 40), margin = 30, gap = 20, room = 10)
         assertEquals(50 + 170, CardDocking.y(0.5f, landscape, landscape, 600, 600))
     }
 
     @Test fun shorterTaskCardSharesTheTopWithTheChatCard() {
-        // 任务卡片按内容只有 500 高:上边和同一比例的对话卡片一样,往下短一截
+        //Task cards are only 500 high by content:The top is the same as the dialogue card of the same proportion.,Shorter down
         for (f in listOf(0f, 0.3f, 0.5f, 1f)) {
             assertEquals(CardDocking.y(f, area, area, full, full), CardDocking.y(f, area, area, full, 500))
         }
-        // 以前按固定高卡片记的比例当作上边的比例读:对话卡片摆回原处
+        //In the past, the fixed high card recording ratio was read as the above ratio.:Dialogue cards return to their original positions
         assertEquals(CapsuleDocking.y(0.7f, area, full), CardDocking.y(0.7f, area, area, full, full))
     }
 
     @Test fun switchingCardsKeepsTheTopAndShiftsUpOnlyWhenItOverflows() {
         val top = CardDocking.y(1f, area, area, full, 500)
-        // 任务卡片换成对话卡片:放得下,上边不动,往下长
+        //Replace task cards with conversation cards:,The top doesn't move,grow downward
         assertEquals(top, CardDocking.y(1f, area, area, full, full))
-        // 输入法弹出(上边 1200):短的卡片放得下就不动,对话卡片(收矮到 1100 + 阴影边)往上挪到刚好放下
+        //Input method pop-up(above 1200):The short card won't move even if it's placed down,conversation cards(Received short 1100 +shadow edge)Move it up until you just put it down
         val up = area.above(1200, gap = 20, room = 10)
         val shortTop = CardDocking.y(0f, area, up, full, 500)
         assertEquals(90, shortTop)
@@ -122,14 +122,14 @@ class CapsuleDockTest {
         assertEquals(90, CardDocking.dragY(430, -1000f, area, area, full, full))
         assertEquals(1950 - full, CardDocking.dragY(430, 2000f, area, area, full, full))
         assertEquals(530, CardDocking.dragY(430, 100f, area, area, full, full))
-        // 短的任务卡片往下拖到底:上边停在对话卡片也放得下的地方,记下的比例不出范围
+        //Drag short task cards all the way down:It stops at a place where conversation cards can also be placed.,The proportions noted down are within the range.
         assertEquals(1950 - full, CardDocking.dragY(430, 2000f, area, area, full, 500))
         assertEquals(1f, CardDocking.release(1950 - full, area, full))
         assertEquals(0.5f, CardDocking.release(430, area, full), 0.001f)
-        // 按没让输入法的范围记:输入法收起后还在原处,换成别的高度上边也一样
+        //Press to disable the range of the input method.:The input method remains in the same place after being folded,It's the same if it's at another height.
         assertEquals(430, CardDocking.y(CardDocking.release(430, area, full), area, area, full, full))
         assertEquals(430, CardDocking.y(CardDocking.release(430, area, full), area, area, full, 500))
-        // 输入法弹出时拖:整张不出它上面
+        //Drag when input method pops up:The whole picture does not appear above it
         val up = area.above(1200, gap = 20, room = 10)
         assertEquals(1190 - 500, CardDocking.dragY(430, 2000f, area, up, full, 500))
     }

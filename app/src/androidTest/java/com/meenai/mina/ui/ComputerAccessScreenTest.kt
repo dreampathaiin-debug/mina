@@ -67,36 +67,36 @@ class ComputerAccessScreenTest {
     @Test fun remoteOnlyStartupFailureIsShownUntilTheRelayStarts() {
         page(example.copy(networkEnabled = false, usbEnabled = false,
             server = McpServerState.Failed("test-start-denied"), relayEnabled = true, relayState = RelayState.Off))
-        compose.onNodeWithText("没能开启:test-start-denied").assertIsDisplayed()
-        compose.onNodeWithText("正在连接远程网关…").assertDoesNotExist()
+        compose.onNodeWithText("Failed to open:test-start-denied").assertIsDisplayed()
+        compose.onNodeWithText("Connecting to remote gateway...").assertDoesNotExist()
         compose.runOnIdle { state.value = state.value.copy(relayState = RelayState.Online) }
-        compose.onNodeWithText("等待电脑连接").assertIsDisplayed()
-        compose.onNodeWithText("没能开启:test-start-denied").assertDoesNotExist()
+        compose.onNodeWithText("Wait for computer to connect").assertIsDisplayed()
+        compose.onNodeWithText("Failed to open:test-start-denied").assertDoesNotExist()
     }
 
     @Test fun remoteConnectionWaitsForActualRequestAndShowsRevocation() {
         page(example.copy(networkEnabled = false, server = McpServerState.Off, relayEnabled = true, relayState = RelayState.Online))
-        compose.onNodeWithText("等待电脑连接").assertIsDisplayed()
+        compose.onNodeWithText("Wait for computer to connect").assertIsDisplayed()
         compose.runOnIdle { state.value = state.value.copy(activity = RemoteActivity(1, 1_700_000_000_000)) }
-        compose.onNodeWithText("已收到电脑请求").assertIsDisplayed()
+        compose.onNodeWithText("Computer request received").assertIsDisplayed()
         compose.runOnIdle { state.value = state.value.copy(relayState = RelayState.Unauthorized) }
-        compose.onNodeWithText("配对已失效或被撤销，请重新配对网关").assertIsDisplayed()
+        compose.onNodeWithText("The pairing has expired or been revoked. Please pair the gateway again.").assertIsDisplayed()
     }
 
     @Test fun cliIsDefaultAndSelectionDoesNotChangeAccessPermissions() {
         page(example.copy(networkEnabled = false, server = McpServerState.Off))
-        compose.onNodeWithText("1. 准备电脑端工具").assertIsDisplayed()
+        compose.onNodeWithText("1. Prepare computer tools").assertIsDisplayed()
         compose.onNodeWithTag("mcp-enabled").assertDoesNotExist()
         compose.onNodeWithText("Device settings slot").assertDoesNotExist()
-        tap("复制安装指引")
-        compose.onAllNodesWithText("复制命令")[0].performScrollTo().performClick()
+        tap("Copy installation instructions")
+        compose.onAllNodesWithText("copy command")[0].performScrollTo().performClick()
         compose.onNodeWithText("mina doctor").assertDoesNotExist()
         assertTrue(copied[0].contains("docs/cli.md"))
         assertEquals(listOf("mina connect"), copied.drop(1))
         networkGuide()
         assertTrue(networkChanges.isEmpty())
         assertTrue(usbChanges.isEmpty())
-        tap("开启网络访问")
+        tap("Enable network access")
         assertEquals(listOf(true), networkChanges)
     }
 
@@ -121,29 +121,29 @@ class ComputerAccessScreenTest {
 
     @Test fun advancedSettingsAreHiddenUntilOpenedAndKeepExplicitControls() {
         page()
-        tap("高级设置")
+        tap("Advanced settings")
         compose.onNodeWithText("Device settings slot").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("mcp-usb").performScrollTo().performClick()
         compose.onNodeWithTag("mcp-enabled").performScrollTo().performClick()
         assertEquals(listOf(true), usbChanges)
         assertEquals(listOf(false), networkChanges)
-        tap("收起高级设置")
+        tap("Collapse advanced settings")
         compose.onNodeWithTag("mcp-enabled").assertDoesNotExist()
         compose.onNodeWithText("Device settings slot").assertDoesNotExist()
     }
 
     @Test fun listeningWaitsForARequestAndOffOrFailureOverridesOldActivity() {
         page()
-        compose.onNodeWithText("等待电脑连接").assertIsDisplayed()
-        compose.onNodeWithText("已收到电脑请求").assertDoesNotExist()
+        compose.onNodeWithText("Wait for computer to connect").assertIsDisplayed()
+        compose.onNodeWithText("Computer request received").assertDoesNotExist()
         compose.runOnIdle { state.value = example.copy(activity = RemoteActivity(1, 1_700_000_000_000)) }
-        compose.onNodeWithText("已收到电脑请求").assertIsDisplayed()
-        compose.onNodeWithText("上次请求", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Computer request received").assertIsDisplayed()
+        compose.onNodeWithText("last request", substring = true).assertIsDisplayed()
         compose.runOnIdle { state.value = state.value.copy(networkEnabled = false) }
-        compose.onNodeWithText("电脑访问未开启").assertIsDisplayed()
+        compose.onNodeWithText("Computer access is not enabled").assertIsDisplayed()
         compose.runOnIdle { state.value = state.value.copy(networkEnabled = true, server = McpServerState.Failed("port busy")) }
         compose.onNodeWithText("port busy", substring = true).assertIsDisplayed()
-        compose.onNodeWithText("已收到电脑请求").assertDoesNotExist()
+        compose.onNodeWithText("Computer request received").assertDoesNotExist()
     }
 
     @Test fun networkConfigMasksPreviewButCopiesTokenAndSelectedAddress() {
@@ -151,7 +151,7 @@ class ComputerAccessScreenTest {
         networkGuide()
         compose.onNodeWithTag("computer-config-preview").assertDoesNotExist()
         tap("http://100.64.0.2:8765/mcp")
-        tap("查看配置")
+        tap("View configuration")
         compose.onNodeWithText(example.token!!, substring = true).assertDoesNotExist()
         compose.onNodeWithText("<token>", substring = true).assertExists()
         compose.onNodeWithTag("computer-copy-config").performScrollTo().performClick()
@@ -170,9 +170,9 @@ class ComputerAccessScreenTest {
     @Test fun usbGuideCopiesBootstrapAndForwardWithoutNetworkCredentials() {
         page()
         compose.onNodeWithTag("computer-mcp").performClick()
-        compose.onAllNodesWithText("复制命令")[0].performScrollTo().performClick()
-        compose.onAllNodesWithText("复制命令")[1].performScrollTo().performClick()
-        tap("复制设置说明")
+        compose.onAllNodesWithText("copy command")[0].performScrollTo().performClick()
+        compose.onAllNodesWithText("copy command")[1].performScrollTo().performClick()
+        tap("Copy setup instructions")
         assertEquals(example.usbCommand, copied[0])
         assertEquals("adb forward tcp:8765 tcp:8765", copied[1])
         assertTrue(copied[2].contains("http://127.0.0.1:8765/mcp"))

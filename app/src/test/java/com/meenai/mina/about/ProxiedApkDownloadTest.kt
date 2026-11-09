@@ -15,7 +15,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
-/** 设了网络代理时更新包由 Mina 自己经代理下:请求确实发给代理,下完整才留下文件,出错不留半截。 */
+/**When a network proxy is set up, the update package will be downloaded by Mina herself through the proxy.:The request is indeed sent to the agent,Download complete files before leaving them,Don't leave any mistakes unturned. */
 class ProxiedApkDownloadTest {
     private lateinit var proxy: MockWebServer
     private val dir: File = Files.createTempDirectory("apk").toFile()

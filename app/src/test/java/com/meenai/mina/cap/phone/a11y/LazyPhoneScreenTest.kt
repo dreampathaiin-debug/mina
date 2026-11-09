@@ -9,7 +9,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.lang.reflect.Proxy
 
-/** 没有内置助手/无障碍时:不用手机的步骤照常,用到手机才报 phone_unavailable(带怎么弄好),之后还能再试。 */
+/**No built-in helper/When accessible:Steps as usual without using a mobile phone,Use your mobile phone to report phone_unavailable(How to get it done),You can try again later. */
 class LazyPhoneScreenTest {
     private var attempts = 0
     private var available = false
@@ -21,7 +21,7 @@ class LazyPhoneScreenTest {
 
     private val screen = LazyPhoneScreen(1080, 2400, listApps = { listOf("a.b" to "A") }) {
         attempts++
-        if (!available) throw PhoneUnavailable("手机操作助手没在运行")
+        if (!available) throw PhoneUnavailable("Mobile operation assistant is not running")
         real
     }
 
@@ -49,7 +49,7 @@ class LazyPhoneScreenTest {
     }
 
     @Test fun launchingAnAppConnectsOrSaysWhy() = runTest {
-        assertEquals(ActionResult.Failed(LazyPhoneScreen.PHONE_UNAVAILABLE, "手机操作助手没在运行"), screen.openApp("a.b"))
+        assertEquals(ActionResult.Failed(LazyPhoneScreen.PHONE_UNAVAILABLE, "Mobile operation assistant is not running"), screen.openApp("a.b"))
         assertFalse(screen.acquired)
         available = true
         assertTrue(screen.openApp("a.b") is ActionResult.Ok)

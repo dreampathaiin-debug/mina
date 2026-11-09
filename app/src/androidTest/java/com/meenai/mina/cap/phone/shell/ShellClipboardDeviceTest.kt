@@ -10,7 +10,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 在真实 shell uid 下调用生产代码;不依赖已运行的助手是否还是旧版本。 */
+/**in reality shellCall production code under uid;It does not depend on whether the running assistant is still an old version. */
 @RunWith(AndroidJUnit4::class)
 @SdkSuppress(minSdkVersion = 31)
 class ShellClipboardDeviceTest {
@@ -19,13 +19,13 @@ class ShellClipboardDeviceTest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val classpath = listOf(instrumentation.targetContext, instrumentation.context)
             .joinToString(":") { it.applicationInfo.sourceDir }
-        // executeShellCommand 不经过 shell:环境变量用 env 传,不能写 VAR=… 和重定向
+        // executeShellCommandnot pass shell:Environment variables are passed using env,Can't write VAR=…and redirect
         val output = sh("env CLASSPATH=$classpath app_process / ${ShellClipboardProbe::class.java.name}")
         assertTrue(output, output.lineSequence().any { it == ShellClipboardProbe.PASSED })
     }
 }
 
-/** app_process 从被测 APK 加载生产代码,不依赖已运行的助手是否还是旧版本。 */
+/** app_processLoad production code from the APK under test,It does not depend on whether the running assistant is still an old version. */
 object ShellClipboardProbe {
     const val PASSED = "shell-clipboard-passed"
 
@@ -38,18 +38,18 @@ object ShellClipboardProbe {
             val originalText = clipboard.primaryClip?.getItemAt(0)?.text?.toString()
             val shell = ShellService(ShellContext.SHELL_UID)
             try {
-                val text = "Mina 中文输入回归"
+                val text = "Mina Chinese input regression"
                 val result = shell.setClipText(text)
                 check(result == ShellService.CLIP_SET) { "setClipText returned $result" }
                 check(clipboard.primaryClip?.getItemAt(0)?.text?.toString() == text)
             } finally {
-                // 复用生产代码的保存/还原,不输出用户剪贴板内容。
+                //Preservation of reused production code/reduction,Do not output user clipboard contents.
                 shell.restoreClip()
             }
             check(clipboard.primaryClip?.getItemAt(0)?.text?.toString() == originalText)
             println(PASSED)
             System.out.flush()
-            // 不走 System.exit:剪贴板服务留下的线程会让它卡住不退,测试就一直等着
+            //Not leaving System.exit:The thread left by the clipboard service will make it stuck.,Just waiting for the test
             Runtime.getRuntime().halt(0)
         } catch (t: Throwable) {
             t.printStackTrace()

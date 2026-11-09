@@ -21,7 +21,7 @@ class SiteRegistryTest {
         r.visited("c.example.net"); now += 10
         r.markLoggedIn("a.example.com")
         val hosts = r.list().map { it.host }
-        // 登录过的在前,再按最近访问
+        //Logged in first,Click on recent visits
         assertEquals(listOf("a.example.com", "c.example.net", "b.example.org"), hosts)
         val again = registry().list()
         assertEquals(hosts, again.map { it.host })
@@ -84,13 +84,13 @@ class SiteRegistryTest {
         val r = registry()
         assertTrue(r.loginObserved("a.example.com", LoginState.SignedIn))
         assertTrue(registry().list().single().loggedInByUser)
-        // 看不出的不动,同样的结果不重写
+        //Invisibly motionless,The same result is not rewritten
         assertFalse(r.loginObserved("a.example.com", LoginState.Unknown))
         assertFalse(r.loginObserved("a.example.com", LoginState.SignedIn))
-        // 会话过期:看出已退出就去掉
+        //session expired:If you see that you have exited, remove it.
         assertTrue(r.loginObserved("a.example.com", LoginState.SignedOut))
         assertFalse(registry().list().single().loggedInByUser)
-        // 没登记过的站点看出已退出不新建
+        //Sites that have not been registered will show that they have been exited and will not be created.
         assertFalse(r.loginObserved("b.example.com", LoginState.SignedOut))
         assertEquals(listOf("a.example.com"), r.list().map { it.host })
     }
@@ -100,7 +100,7 @@ class SiteRegistryTest {
         val r = registry()
         r.markLoggedIn("shop.example.com")
         r.challenged("shop.example.com", "access_blocked")
-        // 跨重启保留,登录状态与访问时间不受影响
+        //Preserved across reboots,Login status and access time are not affected
         val e = registry().list().single()
         assertTrue(e.challenged(now))
         assertEquals("access_blocked", e.challenge)
@@ -108,14 +108,14 @@ class SiteRegistryTest {
         now += 10
         r.visited("shop.example.com")
         assertEquals(setOf("shop.example.com"), registry().challengedSites())
-        // 登录核实不清掉它
+        //Can't clear it after logging in to verify
         r.markLoggedIn("shop.example.com")
         assertEquals(setOf("shop.example.com"), r.challengedSites())
-        // 过期后不再算
+        //It will no longer be counted after expiration
         now += SiteRegistry.CHALLENGE_TTL_MS
         assertTrue(r.challengedSites().isEmpty())
         assertFalse(r.list().single().challenged(now))
-        // 再碰到一次重新算;清除该站数据(从登记表去掉)后没有了
+        //Calculate again if you encounter it again;Clear site data(Remove from registration list)No more after
         r.challenged("shop.example.com", "captcha")
         assertEquals(setOf("shop.example.com"), r.challengedSites())
         r.remove("shop.example.com")
@@ -131,7 +131,7 @@ class SiteRegistryTest {
         now += SiteRegistry.CHALLENGE_REFRESH_MS - 1
         r.challenged("shop.example.com", "captcha")
         assertEquals(first, file.readText())
-        // 换了种类、或过了刷新时间才重写
+        //Rewrite after changing the type or after the refresh time.
         r.challenged("shop.example.com", "access_blocked")
         assertEquals("access_blocked", registry().list().single().challenge)
         now += SiteRegistry.CHALLENGE_REFRESH_MS

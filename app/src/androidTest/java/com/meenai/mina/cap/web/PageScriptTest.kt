@@ -30,7 +30,7 @@ import org.junit.runner.RunWith
 import kotlin.coroutines.resume
 import kotlin.math.abs
 
-/** 真机测试:页面脚本读元素树、读页、核对输入。夹具经 WebViewAssetLoader 从测试包提供,第二个主机名用来造跨源框架。 */
+/**Real machine test:The page script reads the element tree, reads the page, and verifies input. Fixture WebViewAssetLoaderSupplied from test package,The second hostname is used to create cross-origin frameworks. */
 @RunWith(AndroidJUnit4::class)
 class PageScriptTest {
     private val instr = InstrumentationRegistry.getInstrumentation()
@@ -88,20 +88,20 @@ class PageScriptTest {
     fun rolesAndAccessibleNames() = runBlocking<Unit> {
         open("elements.html")
         val expected = mapOf(
-            "b1" to ("button" to "外部标签"),
-            "b2" to ("button" to "区域标签"),
-            "i3" to ("textbox" to "关联标签"),
-            "img4" to ("image" to "替代文字"),
-            "b5" to ("button" to "提示标题"),
-            "i6" to ("textbox" to "占位文字"),
-            "b7" to ("button" to "按钮文字"),
-            "a8" to ("link" to "链接文字"),
-            "s9" to ("combobox" to "选项一"),
-            "c10" to ("checkbox" to "勾选"),
-            "h11" to ("heading" to "三级标题"),
-            "d12" to ("button" to "可点区域"),
-            "ce13" to ("textbox" to "编辑区：已有内容"),
-            "file14" to ("file" to "选择文件"),
+            "b1" to ("button" to "external label"),
+            "b2" to ("button" to "area label"),
+            "i3" to ("textbox" to "associated tags"),
+            "img4" to ("image" to "alt text"),
+            "b5" to ("button" to "prompt title"),
+            "i6" to ("textbox" to "placeholder text"),
+            "b7" to ("button" to "button text"),
+            "a8" to ("link" to "link text"),
+            "s9" to ("combobox" to "Option one"),
+            "c10" to ("checkbox" to "Check"),
+            "h11" to ("heading" to "Level 3 headings"),
+            "d12" to ("button" to "Clickable area"),
+            "ce13" to ("textbox" to "Editing area: existing content"),
+            "file14" to ("file" to "Select file"),
         )
         val els = tree().els().associateBy { it.str("id") }
         for ((id, rn) in expected) {
@@ -121,7 +121,7 @@ class PageScriptTest {
         val els = tree().els().associateBy { it.str("id") }
         assertEquals("1", els["i6"]!!.str("f"))
         assertNull(els["b7"]!!["f"])
-        assertEquals("占位文字", els["i6"]!!.str("ph"))
+        assertEquals("placeholder text", els["i6"]!!.str("ph"))
         assertNull(els["b7"]!!["ph"])
     }
 
@@ -137,7 +137,7 @@ class PageScriptTest {
     fun coveredElementExcluded() = runBlocking<Unit> {
         open("elements.html")
         assertNull(byId("under"))
-        assertTrue(tree().els().any { it.str("n") == "遮罩层" })
+        assertTrue(tree().els().any { it.str("n") == "mask layer" })
     }
 
     @Test
@@ -162,7 +162,7 @@ class PageScriptTest {
     fun crossOriginFrameListedAsFrame() = runBlocking<Unit> {
         open("frames.html")
         val frame = pollTree { it.els().firstOrNull { e -> e.str("r") == "frame" } }
-        assertEquals("内嵌页面:fixtures2.androidplatform.net", frame.str("n"))
+        assertEquals("embedded page:fixtures2.androidplatform.net", frame.str("n"))
     }
 
     @Test
@@ -171,7 +171,7 @@ class PageScriptTest {
         val raw = page.tree()
         assertFalse(raw.contains("secret123"))
         assertFalse("role override must not expose the value", raw.contains("hunter22"))
-        assertEquals("密码：已填 9 位", byId("pw")!!.str("n"))
+        assertEquals("Password: 9 digits filled in", byId("pw")!!.str("n"))
         assertEquals(FieldValue.Password(9), page.fieldValue(refOf("pw")))
         js("document.getElementById('pw').focus()")
         assertEquals(FieldValue.Password(9), page.fieldValue(null))
@@ -205,15 +205,15 @@ class PageScriptTest {
         open("elements.html")
         val p = Json.parseToJsonElement(page.readPage(12_000, 0)).jsonObject
         val text = p.str("text")!!
-        assertTrue(text, text.lines().contains("# 主标题"))
-        assertTrue(text, text.lines().contains("## 小节标题"))
-        assertTrue(text, text.contains("正文第一段"))
-        assertFalse(text, text.contains("导航链接"))
-        assertFalse(text, text.contains("页脚文字"))
+        assertTrue(text, text.lines().contains("#main title"))
+        assertTrue(text, text.lines().contains("##Section title"))
+        assertTrue(text, text.contains("First paragraph of text"))
+        assertFalse(text, text.contains("Navigation links"))
+        assertFalse(text, text.contains("footer text"))
         val links = p["links"]!!.jsonArray.map { it.jsonObject }
-        assertTrue("$links", links.any { it.str("text") == "正文链接" && it.str("url") == fixture("long.html") })
+        assertTrue("$links", links.any { it.str("text") == "Text link" && it.str("url") == fixture("long.html") })
         val images = p["images"]!!.jsonArray.map { it.jsonObject }
-        assertTrue("$images", images.any { it.str("alt") == "正文图片" })
+        assertTrue("$images", images.any { it.str("alt") == "Text picture" })
         assertFalse(p["truncated"]!!.jsonPrimitive.boolean)
     }
 
@@ -335,18 +335,18 @@ class PageScriptTest {
         val raw = page.tree()
         assertFalse(raw.contains("card-secret-6"))
         assertFalse(raw.contains("otp-secret-4"))
-        assertEquals("已填 13 位", byId("card")!!.str("n"))
-        assertEquals("已填 12 位", byId("otp")!!.str("n"))
-        // textarea 里的字就是它的值:名字、读页、摘要里都不带(包着它的 label 没有别的字)
+        assertEquals("13 digits filled", byId("card")!!.str("n"))
+        assertEquals("12 digits filled", byId("otp")!!.str("n"))
+        //The words in textarea are its values:Name, reading page, and abstract are not included.(The label that wraps it has no other words)
         assertFalse(raw.contains("otp-area-secret-9"))
-        assertEquals("已填 17 位", byId("otparea")!!.str("n"))
+        assertEquals("17 digits filled", byId("otparea")!!.str("n"))
         val read = page.readPage(12_000, 0, scroll = false)
-        assertTrue(read, read.contains("正文一段"))
+        assertTrue(read, read.contains("text paragraph"))
         assertFalse(read, read.contains("otp-area-secret-9"))
         val digest = page.digest()!!.toString()
-        assertTrue(digest, digest.contains("正文一段"))
+        assertTrue(digest, digest.contains("text paragraph"))
         assertFalse(digest, digest.contains("otp-area-secret-9"))
-        // 打字后的核对照旧读值比对(只在 App 里,不交给模型)
+        //Verification after typing and comparison of old readings(Only in the App,Not handed over to the model)
         assertEquals(FieldValue.Text("card-secret-6"), page.fieldValue(refOf("card")))
     }
 

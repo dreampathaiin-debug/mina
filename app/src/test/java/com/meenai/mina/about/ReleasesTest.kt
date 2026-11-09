@@ -13,7 +13,7 @@ class ReleasesTest {
           "html_url": "https://github.com/wangzan101/Mina/releases/tag/v0.2.0",
           "published_at": "2026-11-05T08:30:00Z",
           "prerelease": false,
-          "body": "### 新增\r\n- 附件面板\r\n",
+          "body": "###New\r\n-accessory panel\r\n",
           "assets": [
             {"name": "mina-0.2.0-gpl-sources.tar.gz", "browser_download_url": "https://github.com/x/src.tar.gz"},
             {"name": "mina-0.2.0.apk", "browser_download_url": "https://github.com/x/mina-0.2.0.apk", "size": 12345, "digest": "sha256:abc"}
@@ -32,7 +32,7 @@ class ReleasesTest {
         assertEquals(r.apkUrl, r.downloadUrl)
         assertEquals(12345L, r.apkSize)
         assertEquals("sha256:abc", r.apkDigest)
-        assertTrue(r.notes.contains("附件面板"))
+        assertTrue(r.notes.contains("accessory panel"))
     }
 
     @Test

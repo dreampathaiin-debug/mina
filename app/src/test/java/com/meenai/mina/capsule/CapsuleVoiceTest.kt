@@ -7,7 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-/** 胶囊长按说话:松开时手指落在哪个圆上、长按和拖动怎么分、发出后胶囊上闪的那句。 */
+/**Press and hold the capsule to speak:Which circle your finger falls on when you release it, how to distinguish between long pressing and dragging, and the sentence that flashes on the capsule after speaking. */
 class CapsuleVoiceTest {
     @get:Rule val texts = ChineseTexts()
 
@@ -19,14 +19,14 @@ class CapsuleVoiceTest {
     }
 
     @Test fun justOutsideCancelCircleStillCancels() {
-        // 圆外 10px,外扩 14px 以内
+        //Outside the circle 10px,Expansion 14Within px
         assertEquals(CapsuleVoice.Drop.Cancel, CapsuleVoice.drop(90f, 230f, cancel, edit, slopPx = 14))
         assertEquals(CapsuleVoice.Drop.Cancel, CapsuleVoice.drop(130f, 272f, cancel, edit, slopPx = 14))
     }
 
     @Test fun farFromBothCirclesIsSend() {
         assertEquals(CapsuleVoice.Drop.Send, CapsuleVoice.drop(230f, 900f, cancel, edit, slopPx = 14))
-        // 两个圆中间、都不够近
+        //The middle of the two circles is not close enough.
         assertEquals(CapsuleVoice.Drop.Send, CapsuleVoice.drop(231f, 230f, cancel, edit, slopPx = 14))
     }
 
@@ -35,7 +35,7 @@ class CapsuleVoiceTest {
     }
 
     @Test fun circlesNotLaidOutYetMeanSend() {
-        // 面板还没排好版(圆的位置还没报上来)时不会误判成取消
+        //The panel has not been laid out yet(The position of the circle has not been reported yet.)will not be mistakenly judged as cancellation.
         assertEquals(CapsuleVoice.Drop.Send, CapsuleVoice.drop(0f, 0f, Rect.Zero, Rect.Zero, slopPx = 14))
     }
 
@@ -44,7 +44,7 @@ class CapsuleVoiceTest {
         assertEquals(HoldGesture.Kind.Tap, g.down())
         assertEquals(HoldGesture.Kind.Tap, g.move(5f))
         assertEquals(HoldGesture.Kind.Hold, g.timeout())
-        // 长按以后再怎么移都还是长按,不变成拖
+        //After long pressing, no matter how you move, it will still be long pressed.,Don't turn into a drag
         assertEquals(HoldGesture.Kind.Hold, g.move(200f))
     }
 
@@ -65,9 +65,9 @@ class CapsuleVoiceTest {
     }
 
     @Test fun sentNoteSaysWhatHappenedWithTheFirstWords() {
-        assertEquals("已插话：要下午三点以后的，二等座…", CapsuleVoice.sent(CardInputKind.Steer, "要下午三点以后的，二等座靠窗"))
-        assertEquals("已回答：明天上午", CapsuleVoice.sent(CardInputKind.Answer, "明天上午"))
-        assertEquals("已发出：查一下天气", CapsuleVoice.sent(CardInputKind.Continue, "查一下天气"))
-        assertEquals("已发出：查一下天气", CapsuleVoice.sent(CardInputKind.Start, "查一下天气"))
+        assertEquals("Interjected: I want a second-class seat after 3pm...", CapsuleVoice.sent(CardInputKind.Steer, "If you want to go after 3pm, the second class seat will be by the window."))
+        assertEquals("Answered: tomorrow morning", CapsuleVoice.sent(CardInputKind.Answer, "tomorrow morning"))
+        assertEquals("Sent: Check the weather", CapsuleVoice.sent(CardInputKind.Continue, "Check the weather"))
+        assertEquals("Sent: Check the weather", CapsuleVoice.sent(CardInputKind.Start, "Check the weather"))
     }
 }

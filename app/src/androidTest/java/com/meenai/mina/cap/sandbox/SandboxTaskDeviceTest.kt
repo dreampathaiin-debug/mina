@@ -33,8 +33,8 @@ import com.meenai.mina.task.testTasks
 import com.meenai.mina.task.TaskEnvironment
 
 /**
- * 沙箱接进任务:脚本模型在任务里写文件、跑命令、跑技能脚本。需要沙箱已装好(设置 → 沙箱 → 安装),没装就跳过。
- * 真模型的一次(-e liveSandbox 1,用已配置的模型)记录它有没有用 run_command。
+ *Sandbox entry mission:The script model writes files, runs commands, and runs skill scripts in tasks. The sandbox needs to be installed(set up →sandbox →Install),Skip if not installed.
+ *A real model(-e liveSandbox 1,Use configured model)Is it useful to record it? run_command.
  */
 @RunWith(AndroidJUnit4::class)
 class SandboxTaskDeviceTest {
@@ -71,7 +71,7 @@ class SandboxTaskDeviceTest {
         pollUntil(timeoutMs) { DeviceTaskState.state.value.takeIf { it is TaskState.Succeeded || it is TaskState.Failed || it is TaskState.Cancelled } }
 
     @Test fun scriptedModelRunsCommandInTask() {
-        TaskService.start(context, "把 1 到 10 加起来", "sandbox-task-${UUID.randomUUID()}")
+        TaskService.start(context, "Add up 1 to 10", "sandbox-task-AZZ")
         model.awaitCall()
         model.feed("write_file", """{"path":"sum.py","content":"print(sum(range(1, 11)))\n"}""")
         model.awaitCall()
@@ -82,24 +82,24 @@ class SandboxTaskDeviceTest {
         model.answer("55")
         val end = awaitEnd()
         assertTrue("$end", end is TaskState.Succeeded && "55" in end.answer)
-        // 任务卡片上显示过沙箱这一步
-        assertTrue(states.toString(), states.any { it is TaskState.Running && it.note.startsWith("正在处理文件:python3 sum.py") })
+        //The sandbox step is shown on the task card
+        assertTrue(states.toString(), states.any { it is TaskState.Running && it.note.startsWith("Processing file:python3 sum.py") })
     }
 
     @Test fun scriptArgsWithSpacesReachScript() {
-        // 测试技能经「打包的那份」加进去:清单和脚本核对都以打包的为准,直接写进沙箱目录的会被换回去
+        //The test skills are added by "the packaged copy":The list and script verification are subject to the packaged version.,Anything written directly into the sandbox directory will be replaced.
         SkillsSync.extraForTests = mapOf(
             "skills/mina-device-test/scripts/manifest.json" to """[{"file":"scripts/echo.py","runnable":true}]""".toByteArray(),
             "skills/mina-device-test/scripts/echo.py" to "import sys\nfor a in sys.argv[1:]:\n    print(a)\n".toByteArray(),
         )
         try {
-            TaskService.start(context, "回显参数", "sandbox-args-${UUID.randomUUID()}")
+            TaskService.start(context, "Echo parameters", "sandbox-args-AZZ")
             model.awaitCall()
-            model.feed("run_bundled_script", """{"source":"skills/mina-device-test","script":"scripts/echo.py","args":["报表 (1).csv","a;rm -rf /","\"q\""]}""")
+            model.feed("run_bundled_script", """{"source":"skills/mina-device-test","script":"scripts/echo.py","args":["Report (1).csv","a;rm -rf /","\"q\""]}""")
             val result = lastToolResult(model.awaitCall())
             assertTrue(result, result.contains("\"exitCode\":0"))
-            assertTrue(result, result.contains("报表 (1).csv\\na;rm -rf /\\n\\\"q\\\"\\n"))
-            model.answer("好了")
+            assertTrue(result, result.contains("Report (1).csv\\na;rm -rf /\\n\\\"q\\\"\\n"))
+            model.answer("alright")
             assertNotNull(awaitEnd())
         } finally {
             SkillsSync.extraForTests = emptyMap()
@@ -107,12 +107,12 @@ class SandboxTaskDeviceTest {
         }
     }
 
-    /** 真模型(已在 App 里配好的那个):算 1 到 100 的平方和,记下有没有用沙箱。只在 -e liveSandbox 1 时跑。 */
+    /**real model(The one already configured in the App):Find the sum of squares from 1 to 100,Make note of whether or not a sandbox is used. only in -e liveSandbox1 hour run. */
     @Test fun liveModelUsesSandboxForArithmetic() {
         assumeTrue("pass -e liveSandbox 1 to run", args.getString("liveSandbox") == "1")
         testTasks.modelFactory = TaskEnvironment.defaultModelFactory
         testTasks.lightModelFactory = TaskEnvironment.defaultLightModelFactory
-        TaskService.start(context, "把 1 到 100 的平方和算出来", "sandbox-live-${UUID.randomUUID()}")
+        TaskService.start(context, "Find the sum of the squares from 1 to 100", "sandbox-live-AZZ")
         val end = awaitEnd(300_000)
         val tools = states.mapNotNull { (it as? TaskState.Running)?.tool }.distinct()
         Log.i(TAG, "live sandbox run: end=$end tools=$tools usedRunCommand=${"run_command" in tools}")

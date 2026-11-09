@@ -33,13 +33,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 对话页的附件:「＋」面板开关、面板里的照片、输入框上方待发的那一排、发出去的消息怎么画。 */
+/**Attachments to conversation pages:「＋"How to draw the panel switches, the photos in the panel, the row above the input box to be sent, and the messages to be sent. */
 @RunWith(AndroidJUnit4::class)
 class ChatAttachmentsTest {
 
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
-    /** 假的图:每张都是一块 40×30 的空图,不读手机。 */
+    /**fake picture: 40×Empty picture of 30,Doesn’t read the phone. */
     private val images = AttachImages { _, _ -> ImageBitmap(40, 30) }
 
     private fun composer(attachments: List<PendingAttachment> = emptyList(), text: String = "", onSend: () -> Unit = {}) = compose.setContent {
@@ -64,7 +64,7 @@ class ChatAttachmentsTest {
         compose.onAllNodesWithTag("panel-body").assertCountEquals(0)
         compose.onNodeWithContentDescription(AttachCopy.ADD).performClick()
         compose.onNodeWithTag("panel-body").assertIsDisplayed()
-        // 再点(这时是 ×)收起
+        //Order again( ×)
         compose.onNodeWithContentDescription(AttachCopy.CLOSE).performClick()
         waitGone("panel-body")
         compose.onNodeWithContentDescription(AttachCopy.ADD).assertIsDisplayed()
@@ -93,22 +93,22 @@ class ChatAttachmentsTest {
             listOf(
                 PendingAttachment("content://m/1", "a.jpg", 1000),
                 PendingAttachment("content://m/2", "b.png", 1000),
-                PendingAttachment("content://f/1", "租房合同.pdf", 1200 * 1024),
+                PendingAttachment("content://f/1", "rental contract.pdf", 1200 * 1024),
             ),
             onSend = { sent++ },
         )
         compose.onAllNodesWithTag("tray-photo").assertCountEquals(2)
         compose.onAllNodesWithTag("tray-file").assertCountEquals(1)
-        compose.onNodeWithText("租房合同.pdf").assertIsDisplayed()
+        compose.onNodeWithText("rental contract.pdf").assertIsDisplayed()
         compose.onNodeWithText("1.2 MB").assertIsDisplayed()
         compose.onNodeWithContentDescription(AttachCopy.remove("a.jpg")).assertIsDisplayed()
-        compose.onNodeWithContentDescription("发送").assertIsEnabled().performClick()
+        compose.onNodeWithContentDescription("").assertIsEnabled().performClick()
         assertEquals(1, sent)
     }
 
     @Test fun sendIsOffWithNothingToSend() {
         composer()
-        compose.onNodeWithContentDescription("发送").assertIsNotEnabled()
+        compose.onNodeWithContentDescription("").assertIsNotEnabled()
     }
 
     @Test fun removingFromTheTrayCallsBack() {
@@ -172,27 +172,27 @@ class ChatAttachmentsTest {
 
     @Test fun sentMessageShowsPhotosFilesAndWordsButNoPaths() {
         bubble(
-            "帮我看看这些\n附件:/workspace/inbox/a.jpg(1 KB)\n附件:/workspace/inbox/b.jpg(1 KB)\n" +
-                "附件:/workspace/inbox/c.webp(1 KB)\n附件:/workspace/inbox/租房合同 (1).pdf(48 KB)",
+            "Look at these for me\nAttachments:/workspace/inbox/a.jpg(1 KB)\nAttachments:/workspace/inbox/b.jpg(1 KB)\n" +
+                "appendix:/workspace/inbox/c.webp(1 KB)\nAttachments:/workspace/inbox/rental contract (1).pdf(48 KB)",
         )
         compose.onAllNodesWithTag("sent-photo").assertCountEquals(3)
         compose.onAllNodesWithTag("sent-file").assertCountEquals(1)
-        compose.onNodeWithText("租房合同 (1).pdf").assertIsDisplayed()
+        compose.onNodeWithText("rental contract (1).pdf").assertIsDisplayed()
         compose.onNodeWithText("48 KB").assertIsDisplayed()
-        compose.onNodeWithText("帮我看看这些").assertIsDisplayed()
+        compose.onNodeWithText("Look at these for me").assertIsDisplayed()
         compose.onAllNodesWithText("/workspace", substring = true).assertCountEquals(0)
-        compose.onAllNodesWithText("附件:", substring = true).assertCountEquals(0)
+        compose.onAllNodesWithText("appendix:", substring = true).assertCountEquals(0)
     }
 
     @Test fun singlePhotoAloneHasNoWordsBubble() {
-        bubble("附件:/workspace/inbox/a.jpg(1 KB)")
+        bubble("appendix:/workspace/inbox/a.jpg(1 KB)")
         compose.onAllNodesWithTag("sent-photo").assertCountEquals(1)
-        compose.onAllNodesWithText("附件", substring = true).assertCountEquals(0)
+        compose.onAllNodesWithText("appendix", substring = true).assertCountEquals(0)
     }
 
     @Test fun plainMessageIsUnchanged() {
-        bubble("明天早上 8 点提醒我带伞")
-        compose.onNodeWithText("明天早上 8 点提醒我带伞").assertIsDisplayed()
+        bubble("Remind me to bring an umbrella at 8 o'clock tomorrow morning")
+        compose.onNodeWithText("Remind me to bring an umbrella at 8 o'clock tomorrow morning").assertIsDisplayed()
         compose.onAllNodesWithTag("sent-photo").assertCountEquals(0)
         compose.onAllNodesWithTag("sent-file").assertCountEquals(0)
     }

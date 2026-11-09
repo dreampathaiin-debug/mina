@@ -47,7 +47,7 @@ class UpdateCheckerTest {
     )
 
     private fun release(tag: String) =
-        MockResponse().setBody("""{"tag_name":"$tag","name":"Mina $tag","body":"- 新东西","html_url":"https://github.com/wangzan101/Mina/releases/tag/$tag","assets":[]}""")
+        MockResponse().setBody("""{"tag_name":"$tag","name":"Mina $tag","body":"-new stuff","html_url":"https://github.com/wangzan101/Mina/releases/tag/$tag","assets":[]}""")
 
     @Test
     fun newerReleaseFromGitHubShowsUpdate() = runTest {
@@ -75,7 +75,7 @@ class UpdateCheckerTest {
         assertEquals("0.1.0", c.state.value.latest?.version)
     }
 
-    /** GitHub 限流(403)就是这次没查到:只问 GitHub 一次,不去别处找。 */
+    /**GitHub current limit(403)Just didn't find it this time:Just ask GitHub once,Don't look elsewhere. */
     @Test
     fun gitHubRateLimitIsAFailure() = runTest {
         github = MockResponse().setResponseCode(403).setBody("""{"message":"API rate limit exceeded"}""")
@@ -95,7 +95,7 @@ class UpdateCheckerTest {
         assertNull(c.state.value.update)
     }
 
-    /** 自动检查失败不改界面上的状态;每次打开都查,只挡住两分钟内连着来的。 */
+    /**If the automatic check fails, the status on the interface will not be changed.;Check every time you open it,It only blocks those that come within two minutes. */
     @Test
     fun autoCheckIsSilentAndRunsOnEveryOpenButNotInBursts() = runTest {
         val c = checker()
@@ -113,7 +113,7 @@ class UpdateCheckerTest {
         assertEquals(CheckStatus.Idle, c.state.value.status)
     }
 
-    /** 查到的版本存盘:重开 App 不联网也有红点;装上新版后红点消失;上次自动检查的时间也记着。 */
+    /**Save the found version to disk:There are red spots even when you reopen the app and you are not connected to the Internet.;After installing the new version, the red dot disappears;The time of the last automatic check is also remembered. */
     @Test
     fun foundUpdateSurvivesRestart() = runTest {
         github = release("v0.2.0")
@@ -131,7 +131,7 @@ class UpdateCheckerTest {
         assertNotNull(upgraded.state.value.latest)
     }
 
-    /** 同时进来的两次自动检查(查还没完)只真的查一次;隔十分钟再打开照样查。 */
+    /**Two automatic checks coming in at the same time(The investigation is not over yet)Only really check once;Open it again after ten minutes and check again. */
     @Test
     fun concurrentAutoChecksHitGitHubOnce() = runTest {
         github = release("v0.2.0")

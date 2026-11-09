@@ -30,16 +30,16 @@ import com.meenai.mina.task.testTasks
 import com.meenai.mina.task.TaskEnvironment
 
 /**
- * 真机测试:脚本模型在虚拟屏的设置里申报一次花钱的操作(只是申报,从不真的去做;只有花钱要同意,申报都带金额),
- * 检查高优先级通知的标题、正文和「同意」「不同意」按钮,以及不同意、同意、评测自动拒绝三条路。
- * 需要内置助手在运行、Mina 无障碍服务已开启。
+ *Real machine test:The script model declares a money-spending operation in the virtual screen settings.(Just declare,never actually do it;Agree only if you pay money,All declarations include the amount),
+ *Check the title, body, and Agree or Disagree buttons of high-priority notifications,There are three ways to disagree, agree, and comment and automatically reject.
+ *Requires the built-in assistant to be running and the Mina accessibility service to be turned on.
  */
 @RunWith(AndroidJUnit4::class)
 class ConfirmationDeviceTest {
 
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private lateinit var shell: IMinaShell
-    // 界面发起的任务在第一个工具调用前另问一次意图(没配轻量模型时问的就是这个模型):固定答 ACT,不占脚本
+    //Tasks initiated by the interface will ask for the intention again before the first tool is called.(This is the model you ask when you don’t have a lightweight model.):Fixed answer ACT,Does not occupy script
     private val model = ScriptedModel().apply { intent = "ACT" }
     private var appTask = -1
 
@@ -77,14 +77,14 @@ class ConfirmationDeviceTest {
     private fun lastToolResult(call: ScriptedModel.Call): String =
         call.messages.last { it.role == Role.Tool }.parts.filterIsInstance<Part.ToolResult>().single().content
 
-    /** 在虚拟屏上打开设置,然后申报「下单」;返回时任务正等用户同意。 */
+    /**Open settings on virtual screen,Then report "Place an order";The task is waiting for user consent when returned. */
     private fun startAndRequest() {
-        TaskService.start(context, "测试确认关卡")
+        TaskService.start(context, "Test confirmation level")
         assertEquals(1, model.awaitCall().number)
         model.feed("phone_launch_app", """{"package":"$SETTINGS"}""")
         assertEquals(2, model.awaitCall().number)
         appTask = shell.topTaskId(testTasks.agentDisplayId.value)
-        model.feed("request_confirmation", """{"action":"order","target":"测试项","content":"买测试项\n第二行","amount":"¥25","app":"$SETTINGS"}""")
+        model.feed("request_confirmation", """{"action":"order","target":"Test items","content":"Buy test items\nSecond line","amount":"¥25","app":"$SETTINGS"}""")
         awaitState { it is TaskState.WaitingConfirmation }
     }
 
@@ -92,25 +92,25 @@ class ConfirmationDeviceTest {
     fun notificationHasApproveDecline() {
         startAndRequest()
         val n = pollUntil(5_000) { attention()?.takeIf { it.actions?.size == 2 } } ?: error("no confirmation notification")
-        assertEquals("要你同意:下单", n.extras.getCharSequence(Notification.EXTRA_TITLE).toString())
+        assertEquals("I want your consent:Place an order", n.extras.getCharSequence(Notification.EXTRA_TITLE).toString())
         val text = n.extras.getCharSequence(Notification.EXTRA_TEXT).toString()
-        assertTrue(text, text.startsWith("在 ") && "对象:测试项" in text && "内容:买测试项 第二行" in text && "金额:¥25" in text)
-        assertEquals(listOf("同意", "不同意"), n.actions.map { it.title.toString() })
-        // 和接管同一个频道。建频道时是高优先级;用户或系统之后可能调低(App 改不回来),这里只要求不低于默认,并记下实际级别
+        assertTrue(text, text.startsWith("exist ") && "object:Test items" in text && "content:Buy test item second line" in text && "Amount:¥25" in text)
+        assertEquals(listOf("agree", "disagree"), n.actions.map { it.title.toString() })
+        //and take over the same channel. High priority when creating a channel;The user or system may later adjust the(App cannot be changed back),The only requirement here is to be no lower than the default,and note the actual level
         assertEquals(TaskService.CHANNEL_ATTENTION, n.channelId)
         val importance = context.getSystemService(NotificationManager::class.java).getNotificationChannel(TaskService.CHANNEL_ATTENTION).importance
         Log.i("ConfirmationDeviceTest", "attention channel importance $importance")
         assertTrue("importance $importance", importance >= NotificationManager.IMPORTANCE_DEFAULT)
-        // 锁屏上只露出动作,不露对象和内容
+        //Only actions are shown on the lock screen,Keep objects and content private
         assertEquals(Notification.VISIBILITY_PRIVATE, n.visibility)
-        // 通用提示里本来就有「对象」两个字,要查的是具体的对象和内容没露出来
+        //The general prompt originally contains the word "object",What we want to check is that the specific objects and contents have not been revealed.
         val publicText = n.publicVersion.extras.getCharSequence(Notification.EXTRA_TEXT).toString()
-        assertTrue(publicText, "测试项" !in publicText && "第二行" !in publicText)
-        // 系统通知列表里也看得到这两个按钮
+        assertTrue(publicText, "Test items" !in publicText && "second line" !in publicText)
+        //These two buttons can also be seen in the system notification list.
         val dump = sh("dumpsys notification --noredact")
-        assertTrue("buttons not in dumpsys notification", "同意" in dump && "不同意" in dump)
+        assertTrue("buttons not in dumpsys notification", "agree" in dump && "disagree" in dump)
 
-        // 点在旧通知上的回答(申报对不上)不算数
+        //Click answer on old notification(The declaration is not correct)Doesn't count
         context.startService(Intent(context, TaskService::class.java).setAction(TaskService.ACTION_APPROVE)
             .putExtra(ConfirmationNotifier.EXTRA_REQUEST, 12345))
         Thread.sleep(1_000)
@@ -120,54 +120,54 @@ class ConfirmationDeviceTest {
         val result = lastToolResult(model.awaitCall())
         assertTrue(result, "confirmation_declined" in result)
         assertEquals(true, pollUntil(3_000) { if (attention() == null) true else null })
-        model.feed("end_not_done", """{"message":"用户没有同意下单,没有做这一步"}""")
+        model.feed("end_not_done", """{"message":"The user did not agree to place the order,Didn't do this step"}""")
         val end = pollUntil(15_000) { DeviceTaskState.state.value.takeIf { !it.running() } }
-        assertTrue(end.toString(), end is TaskState.Failed && "用户没有同意下单" in end.reason)
+        assertTrue(end.toString(), end is TaskState.Failed && "The user did not agree to place the order" in end.reason)
     }
 
     @Test
     fun approveButtonAnswersTheLoop() {
         startAndRequest()
         val n = pollUntil(5_000) { attention()?.takeIf { it.actions?.size == 2 } } ?: error("no confirmation notification")
-        // 按通知上的「同意」按钮本身发出的 Intent
-        n.actions.first { it.title.toString() == "同意" }.actionIntent.send()
+        //By clicking the "Agree" button itself on the notification Intent
+        n.actions.first { it.title.toString() == "agree" }.actionIntent.send()
         val result = lastToolResult(model.awaitCall())
         assertTrue(result, "\"approved\":true" in result)
         assertTrue(DeviceTaskState.state.value.toString(), DeviceTaskState.state.value !is TaskState.WaitingConfirmation)
-        // 同意之后不真的去做:直接结束
-        model.feed("end_not_done", """{"message":"测试到此为止"}""")
+        //Don’t actually do it after agreeing:end directly
+        model.feed("end_not_done", """{"message":"The test ends here"}""")
         pollUntil(15_000) { DeviceTaskState.state.value.takeIf { !it.running() } }
     }
 
     @Test
     fun evalAutoDeclineSkipsTheUser() {
         testTasks.evalHooks.autoDecideConfirmation = { false }
-        TaskService.start(context, "测试确认关卡")
+        TaskService.start(context, "Test confirmation level")
         assertEquals(1, model.awaitCall().number)
         model.feed("phone_launch_app", """{"package":"$SETTINGS"}""")
         assertEquals(2, model.awaitCall().number)
         appTask = shell.topTaskId(testTasks.agentDisplayId.value)
-        model.feed("request_confirmation", """{"action":"send","target":"测试","content":"转账","amount":"¥25","app":"$SETTINGS"}""")
+        model.feed("request_confirmation", """{"action":"send","target":"test","content":"transfer","amount":"¥25","app":"$SETTINGS"}""")
         val result = lastToolResult(model.awaitCall())
         assertTrue(result, "confirmation_declined" in result)
-        model.feed("end_not_done", """{"message":"没有同意"}""")
+        model.feed("end_not_done", """{"message":"No consent"}""")
         val end = pollUntil(15_000) { DeviceTaskState.state.value.takeIf { !it.running() } }
         assertTrue(end.toString(), end is TaskState.Failed)
     }
 
-    /** 第二次申报之后,点第一条通知自己的「同意」按钮不算数。 */
+    /**After the second declaration,Clicking the "Agree" button on the first notification to yourself does not count. */
     @Test
     fun firstNotificationCannotApproveSecondRequest() {
         startAndRequest()
         val first = pollUntil(5_000) { attention()?.takeIf { it.actions?.size == 2 } } ?: error("no confirmation notification")
-        val firstApprove = first.actions.first { it.title.toString() == "同意" }.actionIntent
+        val firstApprove = first.actions.first { it.title.toString() == "agree" }.actionIntent
         TaskService.decline(context, ConfirmationNotifier.requestKey(DeviceTaskState.state.value as TaskState.WaitingConfirmation))
         assertTrue(lastToolResult(model.awaitCall()).contains("confirmation_declined"))
-        // 换一类动作再申报一次(同类同 App 被拒过就不会再问)
-        model.feed("request_confirmation", """{"action":"submit","target":"测试项","content":"提交测试项","amount":"¥25","app":"$SETTINGS"}""")
+        //Change the type of action and declare it again(Apps of the same type will not be asked again if they have been rejected.)
+        model.feed("request_confirmation", """{"action":"submit","target":"Test items","content":"Submit test item","amount":"¥25","app":"$SETTINGS"}""")
         awaitState { it is TaskState.WaitingConfirmation && it.request.action.name == "submit" }
-        pollUntil(5_000) { attention()?.takeIf { it.extras.getCharSequence(Notification.EXTRA_TITLE).toString() == "要你同意:提交" } }
-        runCatching { firstApprove.send() } // 旧按钮可能已被系统作废,作废也算通过
+        pollUntil(5_000) { attention()?.takeIf { it.extras.getCharSequence(Notification.EXTRA_TITLE).toString() == "I want your consent:submit" } }
+        runCatching { firstApprove.send() } //The old button may have been disabled by the system,Even if it is invalidated, it will be considered passed.
         Thread.sleep(1_500)
         assertTrue(DeviceTaskState.state.value.toString(), DeviceTaskState.state.value is TaskState.WaitingConfirmation)
     }

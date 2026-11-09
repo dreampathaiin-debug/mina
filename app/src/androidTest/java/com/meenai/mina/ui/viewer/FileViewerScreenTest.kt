@@ -32,10 +32,10 @@ class FileViewerScreenTest {
     }
 
     @Test fun markdownFileIsRendered() {
-        show(file("notes.md", "# 周报\n\n本周完成了 **三件事**。\n\n- 第一项\n- 第二项\n"), "notes.md")
+        show(file("notes.md", "#weekly\n\nCompleted this week **three things**.\n\n-first item\n-Second item\n"), "notes.md")
         compose.onNodeWithTag("viewer.markdown").assertIsDisplayed()
-        compose.onNodeWithText("周报").assertIsDisplayed()
-        compose.onNodeWithText("第一项").assertIsDisplayed()
+        compose.onNodeWithText("weekly").assertIsDisplayed()
+        compose.onNodeWithText("first item").assertIsDisplayed()
         compose.onNodeWithText("notes.md").assertIsDisplayed()
     }
 
@@ -50,6 +50,6 @@ class FileViewerScreenTest {
         assertNull(FileViewer.kindOf(context, uri, "archive.zip"))
         show(uri, "archive.zip")
         compose.onNodeWithTag("viewer.unsupported").assertIsDisplayed()
-        compose.onNodeWithText("用其他应用打开").assertIsDisplayed()
+        compose.onNodeWithText("Open with another app").assertIsDisplayed()
     }
 }

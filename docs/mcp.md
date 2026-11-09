@@ -1,72 +1,72 @@
-# 电脑连接（MCP）：让电脑上的 AI 工具把任务交给 Mina
+# Computer access (MCP): let AI tools on your computer hand tasks to Mina
 
-简体中文 | [English](mcp.en.md)
+[简体中文](mcp.md) | English
 
-> 从电脑使用 Mina，先看[从电脑使用 Mina](computer.md)：怎么在 CLI + Skill 和 MCP 之间选、怎么连。想在终端或通过 Skill 使用，见 [CLI 与 Skill](cli.md)。
+> Using Mina from a computer? Start with [Use Mina from a computer](computer.en.md): how to choose between CLI + Skill and MCP, and how to connect. For terminal or Skill-based use, see [CLI and Skill](cli.en.md).
 
-打开「电脑连接」后，Mina 就是一个 MCP 服务器：电脑上支持 MCP 的 AI 工具（MCP 客户端）可以把一件事交给 Mina，Mina 在手机上用自己的方式去做（操作 App、用内置浏览器、处理文件），做完把结果交回去。电脑说「要办成什么」，怎么做由手机上的 Mina 决定。
+With "Computer access" on, Mina is an MCP server: an AI tool on your computer that speaks MCP (an MCP client) can hand Mina a job, and Mina does it on the phone its own way (operating apps, using the built-in browser, working with files), then hands back the result. The computer says what to get done; Mina on the phone decides how.
 
-有两种连法，各有各的开关和令牌，可以都开：
+There are two ways to connect. Each has its own switch and token, and both can be on at once:
 
-- **经 USB（推荐）**：手机用数据线连着电脑、开着 USB 调试，电脑上一条命令就能打开，不用碰手机。只在手机本机上监听，Wi-Fi 上连不到。
-- **经 Wi-Fi 或私有网络**：在手机的设置里打开，默认关着。电脑和手机在同一个 Wi-Fi，或在同一个私有 VPN 网络（组网工具建的虚拟局域网）里就能连上，不用路由器端口转发；这也是远程使用 Mina 的办法。
+- **Over USB (recommended)**: with the phone on a cable and USB debugging on, one command on the computer turns it on, without touching the phone. It listens on the phone itself only, so it can't be reached over Wi-Fi.
+- **Over Wi-Fi or a private network**: turned on in the phone's settings, off by default. When the computer and the phone are on the same Wi-Fi, or in the same private VPN network (a virtual LAN made by a mesh networking tool), they can connect without any port forwarding on your router. This is also how you use Mina remotely.
 
-## 经 USB 连接（推荐）
+## Connecting over USB (recommended)
 
-前提：电脑上有 adb，`adb devices` 里有这台手机；Mina 至少打开过一次（它要把脚本写到手机上）。
+You need adb on the computer, the phone listed in `adb devices`, and Mina opened at least once (that's when it writes the script onto the phone).
 
-1. 在电脑上运行：
+1. On the computer, run:
 
    ```
    adb shell sh /sdcard/Android/data/com.meenai.mina/files/connect-computer.sh
    ```
 
-   它先启动 Mina 的手机助手（和「用电脑启动」一样，已经在运行就跳过），再打开 USB 方式，最后打印连接信息，形如：
+   It first starts Mina's phone helper (the same as "Start from a computer"; skipped if it's already running), then turns USB mode on, and finally prints the connection info, like this:
 
    ```json
    {
        "transport": "streamable-http",
        "url": "http://127.0.0.1:8765/mcp",
        "headers": {
-           "Authorization": "Bearer <令牌>"
+           "Authorization": "Bearer <token>"
        },
-       "token": "<令牌>",
+       "token": "<token>",
        "port": 8765,
        "forward": "adb forward tcp:8765 tcp:8765",
        "boot": "17"
    }
    ```
 
-2. 把电脑上的 8765 端口转到手机上：
+2. Forward port 8765 on the computer to the phone:
 
    ```
    adb forward tcp:8765 tcp:8765
    ```
 
-3. 在 MCP 客户端里添加一个 Streamable HTTP（也叫「HTTP」）类型的服务器：地址 `http://127.0.0.1:8765/mcp`，请求头 `Authorization: Bearer <令牌>`。配置文件的写法见下面「经 Wi-Fi 或私有网络连接」里的例子，把地址换成 `http://127.0.0.1:8765/mcp` 即可。
+3. In your MCP client, add a server of type Streamable HTTP (also called "HTTP"): URL `http://127.0.0.1:8765/mcp`, header `Authorization: Bearer <token>`. See the config example under "Connecting over Wi-Fi or a private network" below; just use `http://127.0.0.1:8765/mcp` as the URL.
 
-之后想再看连接信息：
+To see the connection info again later:
 
 ```
 adb shell cat /sdcard/Android/data/com.meenai.mina/files/mcp-usb.json
 ```
 
-打开以后：
+Once it's on:
 
-- 通知栏里常驻一条「电脑连接已打开」；Mina 退到后台也一直开着。手机上的 设置 › 连接电脑 顶部先显示「等待电脑连接」，收到请求后才显示「已收到电脑请求」及时间。
-- **拔插数据线**（或电脑上的 adb 重启过）之后，要再运行一次 `adb forward tcp:8765 tcp:8765`。令牌不变。
-- 已经开着时再运行第 1 步的命令，令牌不变，已经配好的客户端照常能用。
-- **重启手机后自动关掉**，要再运行一次第 1 步的命令；这时令牌会换新的，客户端配置里的令牌也要换上。
+- A "Computer access is on" notification stays in the shade, and it stays on while Mina is in the background. On the phone, Settings › Connect a computer initially shows "Waiting for a computer"; only after a request arrives does it show "Request received from a computer" and the request time.
+- **After you unplug and replug the cable** (or adb on the computer restarts), run `adb forward tcp:8765 tcp:8765` again. The token stays the same.
+- Running the command in step 1 again while it's on keeps the token, so clients you already set up keep working.
+- **It turns off when the phone restarts.** Run the command in step 1 again; the token is new then, so update it in your client config.
 
-关掉（任一种都行，关掉后旧令牌立即作废，连接信息文件也删掉；下次打开换一个新令牌）：
+To turn it off (any of these; the old token stops working at once and the connection info file is deleted; the next time you turn it on you get a new token):
 
 ```
 adb shell sh /sdcard/Android/data/com.meenai.mina/files/connect-computer.sh off
 ```
 
-或者在手机的 设置 › 连接电脑 › 高级设置 里关掉「经 USB 连接」，或者点通知上的「关闭」（Wi-Fi 那种开着的话也一起关）。
+Or switch off "Connect through USB" in Settings › Connect a computer › Advanced settings on the phone, or tap "Turn off" on the notification (which also turns off the Wi-Fi mode if it's on).
 
-脚本做的事也可以直接用命令做（打开后等一两秒连接信息文件才写好）：
+What the script does can also be done with plain commands (after turning it on, the connection info file takes a second or two to appear):
 
 ```
 adb shell am start-foreground-service -n com.meenai.mina/.mcp.McpService -a com.meenai.mina.mcp.USB_ON
@@ -74,26 +74,26 @@ adb shell cat /sdcard/Android/data/com.meenai.mina/files/mcp-usb.json
 adb shell am start-foreground-service -n com.meenai.mina/.mcp.McpService -a com.meenai.mina.mcp.USB_OFF
 ```
 
-## 经 Wi-Fi 或私有网络连接
+## Connecting over Wi-Fi or a private network
 
-### 打开
+### Turning it on
 
-1. 打开 Mina 的 设置 › 连接电脑，选择「MCP」›「Wi-Fi / VPN」，点「开启网络访问」。网络访问默认关闭，切换引导不会自动开启。
-2. 打开后通知栏里会常驻一条「电脑连接已打开」，表示 Mina 在后台监听；通知上的「关闭」可以直接关掉。
-3. 选择电脑能访问的地址，然后点「复制配置」添加到 MCP 客户端。配置包含地址和令牌；「查看配置」默认收起，展开也只显示令牌占位符。
-4. 客户端连接或刷新工具后，确认页面顶部出现「已收到电脑请求」及请求时间。
+1. In Mina, open Settings › Connect a computer, select "MCP" › "Wi-Fi / VPN", then tap "Enable network access". Network access is off by default; selecting a guide does not enable it.
+2. While it is on, a "Computer access is on" notification stays in the shade to show Mina is listening in the background; its "Turn off" button switches it off right there.
+3. Select an address reachable from the computer, then tap "Copy config" and add it to your MCP client. The copied config contains the address and token. "Preview" is collapsed by default and only displays a token placeholder when expanded.
+4. Connect or refresh tools in the client, then check that the page shows "Request received from a computer" and the request time.
 
-访问开关、令牌的复制与更换、远程亮屏与解锁都在「高级设置」中，默认收起。「CLI / Skill」与「MCP」共用 USB / Wi-Fi / VPN 连接方式选择。「CLI / Skill」只有安装和连接两步，connect 会验证连接；网络方式使用 HTTP 根地址和令牌文件，使用 CLI 不需要 MCP 配置。
+Access switches, token copying and replacement, and remote wake/unlock are under "Advanced settings", collapsed by default. "CLI / Skill" and "MCP" share the USB / Wi-Fi / VPN connection selector. "CLI / Skill" has two steps: install and connect; connect verifies the connection. Network mode uses the HTTP origin and a token file, without MCP configuration.
 
-令牌和服务商的 API Key 一样加密存在手机上。关掉开关，端口就关了（USB 那种还开着的话，只留本机上的监听）。
+The token is stored encrypted on the phone, the same way as provider API keys. Turning the switch off closes the port (if USB mode is still on, only the listener on the phone itself stays).
 
-### 从电脑连接
+### Connecting from a computer
 
-- **同一个 Wi-Fi**：用列表里那个 Wi-Fi 地址（通常是 `192.168.*.*` 或 `10.*.*.*`）。
-- **私有 VPN 网络**：手机和电脑都加入同一个网络后，用列表里那个网络的地址（这类网络常用 `100.64.*.*` 到 `100.127.*.*` 一段）。
-- 手机走移动数据、或者对方是公网地址时，Mina 不接受连接。
+- **Same Wi-Fi**: use the Wi-Fi address from the list (usually `192.168.*.*` or `10.*.*.*`).
+- **Private VPN network**: once the phone and the computer are in the same network, use that network's address from the list (these networks often use the `100.64.*.*` to `100.127.*.*` range).
+- When the phone is on mobile data, or the other side has a public address, Mina refuses the connection.
 
-在 MCP 客户端里添加一个「HTTP」（也叫 Streamable HTTP）类型的服务器，填地址，并加上请求头 `Authorization: Bearer <令牌>`。不同客户端的配置文件写法略有不同，大多是这个样子：
+In your MCP client, add a server of type "HTTP" (also called Streamable HTTP), enter the address, and add the header `Authorization: Bearer <token>`. Each client words its config file a little differently; most look like this:
 
 ```json
 {
@@ -101,95 +101,93 @@ adb shell am start-foreground-service -n com.meenai.mina/.mcp.McpService -a com.
     "mina": {
       "type": "http",
       "url": "http://192.168.1.23:8765/mcp",
-      "headers": { "Authorization": "Bearer <令牌>" }
+      "headers": { "Authorization": "Bearer <token>" }
     }
   }
 }
 ```
 
-也可以先用命令行试一下（把地址和令牌换成自己的）：
+You can also try it from a terminal first (use your own address and token):
 
 ```sh
 curl -s http://192.168.1.23:8765/mcp \
-  -H "Authorization: Bearer <令牌>" \
+  -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"1"}}}'
 ```
 
-## 自托管远程连接
+## Self-hosted remote access
 
-公网远程连接可使用自托管网关：在「MCP → 远程」配对后显式开启访问，复制 HTTPS 配置到支持 Authorization 请求头的客户端。手机主动连接，不需要同一 Wi-Fi 或 VPN。CLI / Skill 也可选择远程，共用手机的局域网访问令牌，由手机鉴权；网关不管理访问令牌，不提供 OAuth 流程。首版为单用户、单设备，部署见[自托管远程 CLI / MCP](dev/remote-mcp.md)。网关终止 HTTPS，可读取转发内容，请使用可信网关。
+For public remote access, deploy the optional self-hosted gateway. Pair and explicitly enable access under **MCP → Remote**, then copy the config to a client supporting Authorization headers. **CLI / Skill → Remote** uses the same gateway and phone LAN access token. The phone authenticates requests; the gateway manages pairing and forwards requests, without access-token management or OAuth flows. No shared Wi-Fi or VPN is required. The first version is single-owner, single-device. See the [deployment guide](../tools/relay/README.md). HTTPS ends at the gateway, which can read forwarded contents; use one you trust.
 
-## 工具
+## Tools
 
-| 工具 | 参数 | 做什么 |
+| Tool | Arguments | What it does |
 | --- | --- | --- |
-| `mina_run_task` | `goal`（必填）、`conversation`（可选） | 把一件事交给 Mina，马上返回任务编号 `task_id`。任务记在一个对话里，手机上的对话列表看得到。想接着上一件事说，就把上一个任务返回的 `conversation` 带上。 |
-| `mina_task_status` | `task_id` | 任务此刻的状态、最近的进度、在等什么、做完时的回答。 |
-| `mina_wait_task` | `task_id`、`timeout_s`（可选，默认 30，最多 50） | 等到状态变了（比如开始等你回答、做完了）或者到时间，再返回状态。进度说明变了不算，不会一步一返回。 |
-| `mina_answer` | `task_id`、`text` | 回答 Mina 在这个任务里问的问题。 |
-| `mina_steer_task` | `task_id`、`text` | 向 running 任务追加要求（最多 4000 字符），保留任务 ID 和上下文。返回 accepted 与 message_id，不代表已经执行。 |
-| `mina_cancel_task` | `task_id` | 停下这个任务。 |
-| `mina_list_tasks` | `limit`（可选，默认 10） | 电脑交来的最近几个任务，新的在前。 |
+| `mina_run_task` | `goal` (required), `conversation` (optional) | Hands Mina a job and returns a `task_id` right away. The task is recorded in a conversation you can see in the app. To follow up on an earlier job, pass the `conversation` that task returned. |
+| `mina_task_status` | `task_id` | The task's state now: status, latest progress, what it is waiting for, and the answer when done. |
+| `mina_wait_task` | `task_id`, `timeout_s` (optional, default 30, at most 50) | Waits until the status changes (for example Mina starts waiting for an answer, or finishes) or time runs out, then returns the state. Progress notes alone don't count, so it doesn't return on every step. |
+| `mina_answer` | `task_id`, `text` | Answers the question Mina asked in this task. |
+| `mina_steer_task` | `task_id`, `text` | Adds instructions to a running task (up to 4000 characters), keeping its ID and context. Returns accepted and message_id, not proof of execution. |
+| `mina_cancel_task` | `task_id` | Stops the task. |
+| `mina_list_tasks` | `limit` (optional, default 10) | The most recent tasks handed over from computers, newest first. |
 
-状态有这几种：
+Statuses:
 
-- `starting`：刚交给手机，还没开始。
-- `running`：正在做，带着最近的进度说明。
-- `queued`：还没开始，排在前面的任务后面（同时进行的任务已满，或这个对话里已有任务在做），轮到时自动开始；只能等或者停掉。
-- `paused`：在等一个条件，比如手机锁屏了，解锁后自动接着做。
-- `waiting_for_answer`：Mina 问了一个问题，用 `mina_answer` 回答（在手机上回答也行）。等太久没人回答，Mina 会当作没有回答接着做。
-- `waiting_on_phone`：这一步只能由人在手机上处理，比如交给你亲手操作的一步。电脑这边没法代答，只能等或者停掉任务；手机上会照常弹出通知。
-- `done`：做完了，带着回答；`verified` 表示回答核对过。
-- `failed`：没做成，带着原因。
-- `cancelled`：停掉了。
+- `starting`: just handed to the phone, not started yet.
+- `running`: in progress, with the latest progress note.
+- `queued`: not started yet, waiting behind other tasks (the limit on tasks running at once is reached, or this conversation already has a task running); it starts by itself when its turn comes. Wait or cancel.
+- `paused`: waiting for a condition, such as the phone being unlocked (it carries on by itself afterwards).
+- `waiting_for_answer`: Mina asked a question; answer with `mina_answer` (answering on the phone works too). If nobody answers for a long time, Mina carries on as if there were no answer.
+- `waiting_on_phone`: this step can only be handled by a person on the phone, such as a step handed over for you to do yourself. The computer can't answer it; wait or cancel. The phone shows its usual notification.
+- `done`: finished, with the answer; `verified` says whether the answer was checked.
+- `failed`: not done, with the reason.
+- `cancelled`: stopped.
 
-建议的用法：`mina_run_task` → 反复 `mina_wait_task` → 遇到 `waiting_for_answer` 用 `mina_answer` → 直到 `done` / `failed` / `cancelled`。
+Suggested flow: `mina_run_task` → `mina_wait_task` repeatedly → on `waiting_for_answer`, reply with `mina_answer` → until `done` / `failed` / `cancelled`.
 
-追加要求后，用 `mina_task_status` 查看 `steers` 中对应 `message_id` 的去向：`received` 已收到、`joined` 已加入上下文、`not_applied` 结束或取消前未用上。正在执行的动作会先做完，追加不会撤销已做的事。排队/暂停、等待回答/审批/接管和终态均拒绝追加；收尾时未消费的远程插话不另开任务。响应丢失不要自动重发。旧 APK 的工具列表没有 `mina_steer_task`，需要升级手机 App。
+After steering, use `mina_task_status` to find the `message_id` in `steers`: `received` means queued, `joined` means added to the context, and `not_applied` means unused when the task ended or was cancelled. An action already executing finishes first; past actions are not undone. Queued/paused, question/approval/handoff-waiting and terminal tasks reject steering. Unconsumed remote instructions never start a new task. Do not automatically resend after a lost response. Older APKs do not list `mina_steer_task`; update the phone app first.
 
-## 远程亮屏与解锁
+## Remote wake and unlock
 
-在手机的 设置 › 连接电脑 › 高级设置 中打开「允许远程亮屏与解锁」，默认关闭。经自托管网关连进来的客户端还要在远程页另开「允许经网关唤醒和解锁」（默认关），否则看不到这三个工具。没有密码的锁屏不需要填写凭据；PIN 或密码在这页的「锁屏凭据」中输入两次保存，电脑不能设置或读取它。
+On the phone, open Settings › Connect a computer › Advanced settings and turn on “Allow remote wake and unlock” (off by default). Clients connecting through a self-hosted gateway also need “Allow wake and unlock through the gateway” on the Remote page (off by default); otherwise these three tools are not offered to them. Swipe/no-credential locks need no saved credential. Configure the current PIN or password twice on that page; the computer cannot set or read it.
 
-| 工具 | 参数 | 做什么 |
+| Tool | Arguments | Purpose |
 | --- | --- | --- |
-| `mina_device_state` | 无 | 读取亮屏、锁屏、手机助手状态，以及是否允许远程解锁。 |
-| `mina_wake_device` | 无 | 只唤醒主屏，不自动认证。 |
-| `mina_unlock_device` | 无 | 唤醒并解除滑动锁屏，或使用手机上保存的正确 PIN/密码认证。 |
+| `mina_device_state` | None | Read screen, keyguard, helper and local permission state. |
+| `mina_wake_device` | None | Wake the main screen without authenticating. |
+| `mina_unlock_device` | None | Wake and dismiss a swipe lock, or authenticate with the credential saved on the phone. |
 
-先调用 `mina_unlock_device`，返回 `status: unlocked` 且 `device.ready: true` 后再派任务；因锁屏而 `paused` 的任务在系统确认解锁后自动继续。`mina_wake_device` 的 `awake` 仅表示已经亮屏，不代表已经解锁。
+Call `mina_unlock_device` before starting a task. Proceed when `status` is `unlocked` and `device.ready` is true. Existing tasks waiting for unlock resume automatically after Android confirms it. An `awake` result only means the screen is on.
 
-- PIN 支持 4–16 位数字；密码支持 4–64 位英文字母、数字、空格和常见 ASCII 符号。图案锁屏、SIM PIN、无法识别的厂商凭据页不输入，返回 `unsupported_keyguard`。
-- 输入 PIN/密码需要安卓 13 及以上：按键只投给系统锁屏界面，锁屏上方另有窗口（锁屏时显示的 App、来电等）时系统拒绝，凭据不会输进别的 App。安卓 12 只能解除滑动或无密码锁屏。
-- 需先完成手机操作设置，内置手机助手和无障碍服务正常运行。有的手机还要在开发者选项里另外打开允许模拟输入的开关。
-- 凭据加密保存在本机，不发给模型、电脑或日志。接口拒绝任何参数，包括 `pin`、`password` 等。
-- 凭据提交前先持久化占位。失败、超时、取消或进程中断后，后续尝试返回 `attempt_blocked`，请在手机上检查并重新保存凭据；关开开关或重启 App 不会清掉这个保护。
-- `disabled` 表示手机上未允许；`helper_unavailable` 表示手机助手未连接；`credential_required` 表示需在手机上保存凭据；`unlock_failed` 表示系统没有确认解锁，不会把按键注入成功当作解锁成功。
-- 不支持重启后的首次解锁之前远程启动 Mina。重启后请先亲手解锁一次。这里不改变系统锁屏配置，不放行任务中的付款或确认。
+PINs must have 4–16 digits. Passwords support 4–64 printable ASCII characters. Pattern locks, SIM PINs and unrecognized vendor credential screens are not entered (`unsupported_keyguard`). Entering a PIN or password requires Android 13 or later: keys are delivered only to the system lock screen, and Android rejects them if another window (an app shown over the lock screen, an incoming call) has focus, so the credential cannot reach another app. On Android 12 only swipe/no-credential locks can be dismissed. Phone control and accessibility must be available; some phones also need a separate developer option that allows input injection over USB debugging.
 
-## 安全
+Credentials are encrypted locally and never sent to models, computers or logs. These tools reject all arguments. A credential attempt is persisted before input: failure, timeout, cancellation or process interruption blocks subsequent attempts (`attempt_blocked`) until the credential is checked and saved again on the phone. Toggling permission or restarting the app does not reset this protection.
 
-- **默认关闭**，打开后才监听；关掉立即停止。
-- **USB 方式只在本机（127.0.0.1）上监听**，Wi-Fi 和别的网络上连不到，电脑经 adb 的端口转发进来。手机上别的 App 也能连本机端口，所以照样要令牌，而且 USB 的令牌只认本机来的连接。
-- **只有电脑能打开 USB 方式、拿到它的令牌**：Mina 的这个服务只接受持有 `INTERACT_ACROSS_USERS_FULL` 权限的调用方，adb shell 有，普通 App 拿不到（这个权限也没法用 adb 授给别的 App）。令牌写在 Mina 的外部文件目录里（`/sdcard/Android/data/com.meenai.mina/files/mcp-usb.json`），安卓 11 起别的 App 读不到这个目录，只有 Mina 和 adb shell 读得到。
-- **每个请求都要带令牌**。令牌是 32 字节的随机数，按常量时间比较；同一个地址一分钟内错 5 次，就先封一分钟。
-- **不接受浏览器的请求**：带 `Origin` 请求头的一律拒绝，网页没法借你的浏览器碰到这个端口。
-- **只接受私有网络**：两端都必须是局域网、私有 VPN 网络或本机的地址，公网地址来的连接当场断开。
-- **花钱和确认只能在手机上**：电脑交来的任务里，付款、需要你同意的操作永远不会执行，不管「自主模式」开没开；交给你亲手处理的那一步也只能在手机上处理。`mina_answer` 只能回答问题，回答不了这些。
-- **只碰电脑自己交来的任务**：电脑看不到、也停不了你在手机上发起的任务；电脑开的对话编号带固定前缀，接不上你手机上的对话。
-- 每次运行的记录里写明是电脑（MCP）发起的。
-- 传输是明文 HTTP，只适合在自己信任的网络里用；令牌别发给别人，怀疑泄露就「换一个」。
+Other statuses include `disabled`, `helper_unavailable`, `credential_required`, and `unlock_failed`. Success is based on Android state, not the input command exit code. Unlock the phone manually once after reboot; this feature does not enable remote access before the first unlock, change system lock credentials, or approve task payments/confirmations.
 
-## 用不了时
+## Security
 
-- **列表里没有地址**：手机没连 Wi-Fi，也没连私有 VPN 网络。
-- **状态写「没能开启」**：端口可能被别的 App 占了；关掉再打开试试。
-- **USB 方式的脚本提示文件不存在**：先打开一次 Mina，等几秒再试；还是没有的话，手机上的 Mina 版本还不带这个功能。
-- **经 USB 连不上**（`curl` 报连接被拒或断开）：再运行一次 `adb forward tcp:8765 tcp:8765`；手机重启过的话，先再运行一次打开的命令。
-- **电脑上 8765 端口被别的程序占了**（转发报 `cannot bind`，或者连上后返回的不是 Mina 的内容）：电脑这边换一个空闲端口，比如 `adb forward tcp:18765 tcp:8765`，再把配置里的地址改成 `http://127.0.0.1:18765/mcp`。手机那边不用改。
-- **返回 429**：同一个地址错的令牌试了太多次，等一分钟再试。经 USB 时手机上所有连本机端口的都算同一个地址。
-- **电脑连不上**：确认两边在同一个网络；有的 Wi-Fi（比如访客网络）不让设备之间互相访问。
-- **任务没开始**（交任务时就报错，或者过两分钟变成 `failed`）：打开一下手机上的 Mina 再试。安卓有时不让后台的 App 自己开始干活，打开过 Mina 之后就好了。
-- **任务一直是 `paused`**：多半是手机锁屏了。先在手机上解锁，或在手机已允许远程解锁时调用 `mina_unlock_device`；仅调用亮屏不一定能解除锁屏。
+- **Off by default**; it listens only while on and stops at once when turned off.
+- **USB mode listens on the phone itself (127.0.0.1) only**; it can't be reached over Wi-Fi or any other network, and the computer comes in through adb's port forwarding. Other apps on the phone can reach that port too, so the token is still required, and the USB token is only accepted from the phone itself.
+- **Only the computer can turn USB mode on and get its token**: Mina's service only accepts callers holding the `INTERACT_ACROSS_USERS_FULL` permission. The adb shell has it; ordinary apps can't get it (and adb can't grant it to other apps). The token is written in Mina's external files folder (`/sdcard/Android/data/com.meenai.mina/files/mcp-usb.json`); since Android 11 other apps can't read that folder, only Mina and the adb shell can.
+- **Every request needs the token.** The token is 32 random bytes and is compared in constant time; 5 wrong tries from one address within a minute lock that address out for a minute.
+- **No browser requests**: anything carrying an `Origin` header is refused, so web pages can't reach the port through your browser.
+- **Private networks only**: both ends must be on a LAN, a private VPN network, or the phone itself; connections from public addresses are dropped immediately.
+- **Spending and confirmations stay on the phone**: in tasks handed over from a computer, payments and actions that need your approval are never carried out, whether or not "Autonomous mode" is on; a step handed over for you to do yourself can only be done on the phone. `mina_answer` answers questions only and cannot approve any of these.
+- **Only the computer's own tasks**: a computer can't see or stop tasks you started on the phone, and the conversations it opens use a fixed prefix, so it can't join your conversations on the phone.
+- Every run record notes that the run was started by a computer (MCP).
+- The transport is plain HTTP, so use it only on networks you trust. Don't share the token; if you think it leaked, use "New token".
+
+## When it doesn't work
+
+- **No address in the list**: the phone isn't on Wi-Fi or a private VPN network.
+- **Status says "Couldn't start"**: another app may be using the port; turn the switch off and on again.
+- **The USB script says the file doesn't exist**: open Mina once, wait a few seconds, and try again. If it's still missing, the Mina on the phone doesn't have this feature yet.
+- **Can't connect over USB** (`curl` reports connection refused or reset): run `adb forward tcp:8765 tcp:8765` again; if the phone restarted, run the command that turns it on again first.
+- **Port 8765 is already used on the computer** (the forward fails with `cannot bind`, or you get a response that isn't from Mina): pick another free port on the computer, e.g. `adb forward tcp:18765 tcp:8765`, and use `http://127.0.0.1:18765/mcp` in the config. Nothing changes on the phone.
+- **HTTP 429**: too many wrong tokens from one address; wait a minute. Over USB, everything on the phone that connects to the local port counts as the same address.
+- **The computer can't connect**: make sure both are on the same network; some Wi-Fi networks (guest networks, for example) block devices from reaching each other.
+- **The task never starts** (the call fails right away, or the task turns `failed` after two minutes): open Mina on the phone and try again. Android sometimes stops a background app from starting work on its own; once you've opened Mina it works.
+- **The task stays `paused`**: the phone is most likely locked. Mina needs the phone unlocked to work.

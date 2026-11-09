@@ -232,6 +232,8 @@ fun BrowserToolbar(
     onHome: () -> Unit,
     onShare: () -> Unit,
     onMore: () -> Unit,
+    onMinimize: () -> Unit,
+    onFullscreen: () -> Unit,
 ) {
     val c = MinaTheme.colors
     Column(Modifier.fillMaxWidth().background(c.bg).windowInsetsPadding(WindowInsets.navigationBars)) {
@@ -244,6 +246,8 @@ fun BrowserToolbar(
             BarIconButton(MinaIcons.Back, tr(R.string.back), onBackPage, enabled = page.canBack)
             BarIconButton(MinaIcons.Forward, tr(R.string.browser_forward), onForward, enabled = page.canForward)
             BarIconButton(MinaIcons.Home, tr(R.string.browser_home), onHome)
+            BarIconButton(MinaIcons.Shrink, tr(R.string.browser_minimize), onMinimize)
+            BarIconButton(MinaIcons.Expand, tr(R.string.browser_fullscreen), onFullscreen)
             BarIconButton(MinaIcons.Share, tr(R.string.share), onShare)
             BarIconButton(MinaIcons.More, tr(R.string.more), onMore)
         }

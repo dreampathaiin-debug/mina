@@ -25,8 +25,8 @@ import java.lang.reflect.Proxy
 import com.meenai.mina.core.assembly.toolDispatcher
 
 /**
- * 随 App 打包的可运行脚本在真沙箱里经 run_bundled_script 跑一遍(和模型用的是同一条路)。
- * 需要沙箱已装好;没装就跳过。
+ *Runnable scripts packaged with the App run in a real sandbox run_bundled_scriptRun it again(The same path as the model is used).
+ *The sandbox needs to be installed;Skip if not installed.
  */
 @RunWith(AndroidJUnit4::class)
 class SkillScriptsDeviceTest {
@@ -34,7 +34,7 @@ class SkillScriptsDeviceTest {
     private val ws = "skill-scripts-device-test"
     private val sb = AndroidSandbox(context, SandboxState.get(context))
 
-    /** run_bundled_script 不碰屏幕;任何屏幕调用都算测试写错了。 */
+    /** run_bundled_scriptDon't touch the screen;Any screen call is a wrongly written test. */
     private val noScreen = Proxy.newProxyInstance(ScreenPort::class.java.classLoader, arrayOf(ScreenPort::class.java)) { _, m, _ ->
         throw AssertionError("screen not expected: ${m.name}")
     } as ScreenPort
@@ -58,7 +58,7 @@ class SkillScriptsDeviceTest {
         assertEquals(r.toString(), "0", r.s("exitCode"))
     }
 
-    /** 两页、每页一行文字的最小 PDF(Helvetica,无压缩),由测试当场生成。 */
+    /**Two pages, one line of text per page minimum PDF(Helvetica,No compression),Generated on the spot by testing. */
     private fun samplePdf(vararg pages: String): ByteArray {
         val objs = mutableListOf<String>()
         val kids = pages.indices.joinToString(" ") { "${3 + it * 2} 0 R" }
@@ -95,6 +95,6 @@ class SkillScriptsDeviceTest {
     @Test fun authScriptIsUnavailable() {
         val r = runScript("sites/github.com", "scripts/api.mjs", "GET", "/user")
         assertEquals(r.toString(), "script_unavailable", r.s("error"))
-        assertTrue(r.toString(), r.s("message")!!.contains("需要账号授权,Mina 暂不支持"))
+        assertTrue(r.toString(), r.s("message")!!.contains("Account authorization is required,Mina is not supported yet"))
     }
 }

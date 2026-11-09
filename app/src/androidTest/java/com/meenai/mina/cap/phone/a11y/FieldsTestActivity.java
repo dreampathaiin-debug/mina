@@ -11,13 +11,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * 读屏与输入核实的测试页:
- * - 「结果」文字被标成对无障碍不重要(像计算器的显示区),按「7」只改它;
- * - 「空输入框」点一下只换输入焦点;
- * - 「热词示例」是只显示提示语的搜索框;
- * - 「会换的框」输入后被换成一个新的输入控件(有些 App 内容一变就重建输入视图);
- * - 「假搜索框」只是一段可点的文字,点了才出现真正的输入框并拿到焦点(很多首页的搜索条就是这样)。
- * 测试 APK 的页面运行在测试包自己的进程里、不带 Kotlin 标准库,所以用 Java 写。
+ *Screen reading and input verification test page:
+ * -"Results" text marked as not important for accessibility(like a calculator display area),Press "7" to change it only;
+ * -"Empty input box" clicks only to change the input focus;
+ * -"Hot word example" is a search box that only displays prompts;
+ * -The "changing box" is replaced by a new input control after input(Some apps rebuild the input view whenever the content changes);
+ * -The "fake search box" is just a clickable text,After clicking, the real input box appears and gets focus.(The search bars on many homepages look like this).
+ *The test APK page runs in the test package's own process, without the Kotlin standard library.,So write it in Java.
  */
 public class FieldsTestActivity extends Activity {
     private LinearLayout holder;
@@ -37,20 +37,20 @@ public class FieldsTestActivity extends Activity {
         seven.setOnClickListener(v -> result.append("7"));
         root.addView(seven);
         EditText empty = new EditText(this);
-        empty.setHint("空输入框");
+        empty.setHint("Empty input box");
         empty.setContentDescription(null);
         root.addView(empty);
         EditText hinted = new EditText(this);
-        hinted.setHint("热词示例");
+        hinted.setHint("Hot word examples");
         root.addView(hinted);
         holder = new LinearLayout(this);
         root.addView(holder);
         holder.addView(swapping(""), fullWidth());
         EditText real = new EditText(this);
-        real.setHint("真正的输入框");
+        real.setHint("real input box");
         real.setVisibility(View.GONE);
         TextView fake = new TextView(this);
-        fake.setText("假搜索框");
+        fake.setText("fake search box");
         fake.setTextSize(24f);
         fake.setOnClickListener(v -> {
             real.setVisibility(View.VISIBLE);
@@ -67,7 +67,7 @@ public class FieldsTestActivity extends Activity {
 
     private EditText swapping(CharSequence initial) {
         EditText field = new EditText(this);
-        field.setHint("会换的框");
+        field.setHint("Frame that can be changed");
         field.setText(initial);
         field.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }

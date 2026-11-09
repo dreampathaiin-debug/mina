@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ShareIntentTest {
-    private val text = "明天 7 点见; \"好\" && echo hi"
+    private val text = "See you tomorrow at 7 o'clock; \"good\" && echo hi"
 
     @Test fun singleShareScreenIsNamedDirectly() {
         assertEquals(
@@ -17,7 +17,7 @@ class ShareIntentTest {
     @Test fun severalShareScreensOnlyLimitThePackage() {
         val args = ShareIntent.amArgs(7, "com.example.chat", text, null)
         assertEquals(listOf("-p", "com.example.chat"), args.takeLast(2))
-        // 文字原样作一个参数,不经 shell 拆开
+        //The text as it is is used as a parameter,Without shell disassembly
         assertEquals(text, args[args.indexOf("android.intent.extra.TEXT") + 1])
     }
 }

@@ -58,9 +58,9 @@ class RecentPagesTest {
         val r = store()
         r.add("https://a.example.com/", ""); now += 10
         r.add("https://b.example.com/", "B")
-        r.retitle("https://a.example.com/", "A 页面")
-        assertEquals(listOf("B", "A 页面"), r.entries.value.map { it.title })
-        // 没有这一条时不加
+        r.retitle("https://a.example.com/", "A page")
+        assertEquals(listOf("B", "A page"), r.entries.value.map { it.title })
+        //If there is no such item, do not add it.
         r.retitle("https://z.example.com/", "Z")
         assertEquals(2, r.entries.value.size)
     }

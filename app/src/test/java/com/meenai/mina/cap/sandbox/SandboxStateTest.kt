@@ -38,7 +38,7 @@ class SandboxStateTest {
         val s = state()
         assertNull(s.completedStep())
         s.markStep(InstallStep.Extract)
-        // 进程在安装中途被杀:重新读取时不能是就绪
+        //Process killed mid-installation:Cannot be ready when rereading
         val again = state()
         assertEquals(InstallStep.Extract, again.completedStep())
         assertTrue(again.status.value is SandboxStatus.Broken)

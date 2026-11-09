@@ -34,13 +34,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 对话输入栏按住说话:长按输入框浮起「在听」卡片,松开后字接在输入框里;上滑取消时什么都不填。用假的语音来源,不用麦克风。 */
+/**Press and hold the dialogue input field to speak:Long press the input box to bring up the "Listening" card,After releasing, the word will be connected in the input box;When you swipe up to cancel, fill in nothing. Use fake voice source,No microphone required. */
 @RunWith(AndroidJUnit4::class)
 class VoiceHoldTest {
 
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
-    /** 假会话:事件由测试喂;记下松开、取消的次数。 */
+    /**fake session:Events are fed by tests;Record the number of times you release and cancel. */
     private class FakeSession : SpeechSession {
         val out = Channel<SpeechEvent>(Channel.UNLIMITED)
         override val events: Flow<SpeechEvent> = out.receiveAsFlow()
@@ -81,27 +81,27 @@ class VoiceHoldTest {
     private fun waitNoTag(tag: String) = compose.waitUntil(5_000) { compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isEmpty() }
 
     @Test fun holdShowsTheListenCardAndReleaseFillsTheField() {
-        composer("帮我")
+        composer("help me")
         compose.onNodeWithTag("composer-field").performTouchInput { down(center) }
         waitTag("voice-listen")
         val session = voice.sessions.single()
-        session.out.trySend(SpeechEvent.Partial("订明天", "的票"))
-        // 按满半秒以上才不算误触
+        session.out.trySend(SpeechEvent.Partial("Book tomorrow", "of tickets"))
+        //Pressing for more than half a second is not considered an accidental touch.
         Thread.sleep(700)
         compose.onNodeWithTag("composer-field").performTouchInput { up() }
         compose.waitUntil(5_000) { session.released == 1 }
-        session.out.trySend(SpeechEvent.Final("订明天的票"))
+        session.out.trySend(SpeechEvent.Final("Book tickets for tomorrow"))
         session.out.close()
         waitNoTag("voice-listen")
-        compose.onNodeWithTag("composer-field").assertTextEquals("帮我订明天的票")
+        compose.onNodeWithTag("composer-field").assertTextEquals("Help me book a ticket for tomorrow")
     }
 
     @Test fun focusedFieldKeepsLongPressForTheSystem() {
-        composer("帮我订票")
-        // 点一下:聚焦打字
+        composer("Book a ticket for me")
+        //Click:Focus on typing
         compose.onNodeWithTag("composer-field").performClick()
         compose.onNodeWithTag("composer-field").assertIsFocused()
-        // 聚焦后长按是系统的选字、粘贴,不开始听
+        //After focusing, long press is the system's word selection and paste.,Don't start listening
         compose.onNodeWithTag("composer-field").performTouchInput { down(center) }
         Thread.sleep(800)
         compose.waitForIdle()
@@ -112,24 +112,24 @@ class VoiceHoldTest {
     }
 
     @Test fun focusedMicButtonFillsTheField() {
-        composer("帮我")
+        composer("help me")
         compose.onNodeWithTag("composer-field").performClick()
         compose.onNodeWithTag("composer-field").assertIsFocused()
         waitTag("composer-mic")
         compose.onNodeWithTag("composer-mic").performTouchInput { down(center) }
         waitTag("voice-listen")
         val session = voice.sessions.single()
-        session.out.trySend(SpeechEvent.Partial("订明天", "的票"))
+        session.out.trySend(SpeechEvent.Partial("Book tomorrow", "of tickets"))
         Thread.sleep(700)
         compose.onNodeWithTag("composer-mic").performTouchInput { up() }
         compose.waitUntil(5_000) { session.released == 1 }
-        session.out.trySend(SpeechEvent.Final("订明天的票"))
+        session.out.trySend(SpeechEvent.Final("Book tickets for tomorrow"))
         session.out.close()
         waitNoTag("voice-listen")
-        compose.onNodeWithTag("composer-field").assertTextEquals("帮我订明天的票")
+        compose.onNodeWithTag("composer-field").assertTextEquals("Help me book a ticket for tomorrow")
     }
 
-    /** 已允许录音,识别服务仍报录音出错:弹说明(麦克风总开关、权限管理);别的麦克风起不来照旧只提示一句。 */
+    /**Recording allowed,The recognition service still reports a recording error:Bullet description(Microphone master switch, permission management);Otherwise, if the microphone cannot be turned on, it will still only prompt one sentence. */
     @Test fun audioErrorExplainsWhereToCheckButClientErrorKeepsTheOldHint() {
         composer()
         fun failWith(why: SpeechFailure) {
@@ -140,11 +140,11 @@ class VoiceHoldTest {
         }
         failWith(SpeechFailure.MicUnavailable)
         waitTag("voice-toast")
-        compose.onNodeWithText("麦克风用不了，可能正被别的 App 占着").assertExists()
+        compose.onNodeWithText("The microphone is unavailable and may be occupied by another app.").assertExists()
         assertEquals(0, compose.onAllNodesWithTag("voice-sheet").fetchSemanticsNodes().size)
         failWith(SpeechFailure.AudioError)
         waitTag("voice-sheet")
-        compose.onNodeWithText("麦克风还是用不了").assertExists()
+        compose.onNodeWithText("The microphone still doesn't work").assertExists()
     }
 
     @Test fun slidingUpCancels() {

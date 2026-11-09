@@ -31,7 +31,7 @@ class RelaySectionTest {
 
     private fun page() {
         compose.setContent { MinaTheme {
-            PageScaffold("远程", {}) {
+            PageScaffold("remote", {}) {
                 RelayControls(config.value, state.value, false, false,
                     { url, code -> paired = url to code }, changes::add, { unpaired++ }, { copied++ }, { copied++ },
                     onDeviceAccess = deviceChanges::add)
@@ -54,17 +54,17 @@ class RelaySectionTest {
     @Test fun pairedSettingsKeepTokensHiddenAndRequireExplicitEnableAndUnpair() {
         config.value = RelayConfig(gateway = "https://relay.example/")
         page()
-        compose.onNodeWithText("已配对，远程访问未开启").assertIsDisplayed()
+        compose.onNodeWithText("Paired, remote access is not enabled").assertIsDisplayed()
         compose.onNodeWithTag("relay-code").assertDoesNotExist()
         compose.onNodeWithTag("relay-enabled").performClick()
         assertEquals(listOf(true), changes)
         compose.onNodeWithTag("relay-device-access").performScrollTo().assertIsOff().performClick()
         assertEquals(listOf(true), deviceChanges)
-        compose.onNodeWithText("复制 MCP 地址").performScrollTo().performClick()
+        compose.onNodeWithText("Copy MCP address").performScrollTo().performClick()
         assertEquals(1, copied)
-        compose.onNodeWithText("解除网关配对").performScrollTo().performClick()
+        compose.onNodeWithText("Unpair gateway").performScrollTo().performClick()
         assertEquals(0, unpaired)
-        compose.onNodeWithText("取消").performClick()
+        compose.onNodeWithText("Cancel").performClick()
         assertEquals(0, unpaired)
     }
 
@@ -72,10 +72,10 @@ class RelaySectionTest {
         config.value = RelayConfig(true, "https://relay.example/")
         state.value = RelayState.Online
         page()
-        compose.onNodeWithText("网关已连接，等待 CLI / MCP 请求").assertIsDisplayed()
+        compose.onNodeWithText("Gateway is connected, waiting CLI /MCP request").assertIsDisplayed()
         compose.runOnIdle { state.value = RelayState.Unauthorized }
-        compose.onNodeWithText("配对已失效或被撤销，请重新配对网关").assertIsDisplayed()
+        compose.onNodeWithText("The pairing has expired or been revoked. Please pair the gateway again.").assertIsDisplayed()
         compose.runOnIdle { state.value = RelayState.Incompatible }
-        compose.onNodeWithText("请将 Mina 与网关更新到匹配的版本").assertIsDisplayed()
+        compose.onNodeWithText("Please update Mina and gateway to matching versions").assertIsDisplayed()
     }
 }

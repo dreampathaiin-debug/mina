@@ -28,7 +28,7 @@ class SlidingDeadlineTest {
         assertFalse(result.await())
     }
 
-    /** 引导页开着放了九分多钟才去系统设置:从这时起再看 10 分钟,不按第一次开始的时候收工。 */
+    /**The boot page stayed open for more than nine minutes before I went to system settings.:Watch 10 more minutes from this point,Don’t call it a day when you first started. */
     @Test
     fun extendingWhileWaitingCountsFromThen() = runTest {
         val d = deadline()

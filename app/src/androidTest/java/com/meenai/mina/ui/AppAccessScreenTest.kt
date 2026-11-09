@@ -16,10 +16,10 @@ class AppAccessScreenTest {
 
     @Test fun appAccessLoadsWithoutModelAndRecommendedCanBeCancelled() {
         compose.setContent { com.meenai.mina.ui.theme.MinaTheme { AppAccessScreen(onBack = {}, classifyApps = false) } }
-        compose.onNodeWithText("应用访问").assertIsDisplayed()
-        compose.onNodeWithText("推荐禁用", substring = true).performScrollTo().performClick()
-        compose.onNodeWithText("推荐禁用金融交易应用").assertIsDisplayed()
-        compose.onNodeWithText("取消").performClick()
-        compose.onNodeWithText("全部允许").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Application access").assertIsDisplayed()
+        compose.onNodeWithText("Recommended to disable", substring = true).performScrollTo().performClick()
+        compose.onNodeWithText("It is recommended to disable financial trading applications").assertIsDisplayed()
+        compose.onNodeWithText("Cancel").performClick()
+        compose.onNodeWithText("All allowed").performScrollTo().assertIsDisplayed()
     }
 }

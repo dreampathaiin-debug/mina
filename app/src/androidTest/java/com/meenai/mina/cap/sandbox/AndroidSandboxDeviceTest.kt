@@ -13,10 +13,10 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** AndroidSandbox 在真机上跑命令;根文件系统按冒烟测试的方式准备在 files/sandbox-test/rootfs,不碰装好的沙箱。 */
+/** AndroidSandboxRun commands on real machine;The root file system is prepared in a smoke test manner files/sandbox-test/rootfs,Do not touch the installed sandbox. */
 @RunWith(AndroidJUnit4::class)
 class AndroidSandboxDeviceTest {
-    // 测试自己解的根文件系统,跟真正装好的沙箱分开放
+    //Test your own root file system,Separate from the actual installed sandbox
     private val sb = AndroidSandbox(SandboxSmokeTest.testDirs, { SandboxStatus.Ready(network = false) }, { AndroidSandbox.dns(context) }, bridges = true)
 
     private fun sh(command: String, ws: String = "dev-a", timeoutMs: Long = 30_000): CommandResult =
@@ -42,7 +42,7 @@ class AndroidSandboxDeviceTest {
     }
 
     private fun checkTimezone(zone: java.time.ZoneId, prefix: String) {
-        // 冬夏各测一次:不能把手机此刻的 UTC 偏移写死成全年偏移。
+        //Test once in winter and summer:The current UTC offset of the mobile phone cannot be programmed into a year-round offset.
         for (date in listOf("2026-01-15T04:08:50Z", "2026-07-15T04:08:50Z")) {
             val instant = java.time.Instant.parse(date)
             val seconds = instant.epochSecond
@@ -103,14 +103,14 @@ class AndroidSandboxDeviceTest {
     @Test fun cannotSeeSdcard() {
         val r = sh("ls /sdcard /storage/emulated/0 2>&1")
         assertTrue(r.output, r.exitCode != 0 || r.output.isBlank())
-        // 经 /proc/self/root 绕到宿主的根目录也看不到
+        //through /proc/self/Root can't be seen even if it goes around the root directory of the host.
         val viaProc = sh("ls /proc/self/root/sdcard /proc/self/root/storage/emulated/0 2>&1")
         assertTrue(viaProc.output, viaProc.exitCode != 0 || viaProc.output.isBlank())
     }
 
     /**
-     * RELEASE-GATING:断网时沙箱里够不到宿主的套接字(dnsproxyd 能替沙箱解析域名,等于开了一条出网的路)。
-     * 每一条都必须失败;在真机上跑通之前不得发布沙箱。
+     * RELEASE-GATING:The host's socket cannot be reached in the sandbox when the network is disconnected(dnsproxydAbility to resolve domain names for sandboxes,It is equivalent to opening a way out of the Internet.).
+     *Every one must fail;The sandbox must not be released until it has been run on a real device.
      */
     @Test fun cannotReachHostSocketsWhenNetOff() {
         assertTrue(sh("ls /proc/self/root/dev/socket 2>&1").let { it.exitCode != 0 })
@@ -127,9 +127,9 @@ class AndroidSandboxDeviceTest {
     }
 
     /**
-     * RELEASE-GATING:经 /proc/self/root、/proc/1/root 到不了宿主,宿主的 App 数据目录和本 App 的 shared_prefs 都读不到。
-     * `readlink /proc/self/root` 显示的是宿主上根文件系统的路径(PRoot 不翻译这个链接):只是一串路径,
-     * 顺着它走还在沙箱里,同样到不了。
+     * RELEASE-GATING:through /proc/self/root,/proc/1/Root cannot reach the host,The host's App data directory and this App's shared_prefsCan't even read it.
+     * `readlink /proc/self/root`Displays the path to the root file system on the host(PRoot does not translate this link):just a string of paths,
+     *Follow it, still in the sandbox,Also unable to arrive.
      */
     @Test fun procRootStaysInGuest() {
         val pkg = context.packageName
@@ -147,8 +147,8 @@ class AndroidSandboxDeviceTest {
     }
 
     @Test fun fullOutputIsSavedInWorkspace() {
-        val path = sb.saveOutput("dev-a", "完整输出")
-        assertEquals("完整输出", sh("cat $path").output)
+        val path = sb.saveOutput("dev-a", "full output")
+        assertEquals("full output", sh("cat $path").output)
     }
 
     companion object {

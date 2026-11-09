@@ -51,14 +51,14 @@ import com.meenai.mina.core.assembly.toolDispatcher
 import com.meenai.mina.cap.phone.PhoneServices
 
 /**
- * 真机测试:web_script 的整条路径。分发器 → 端口 → 隔离世界里的脚本 → 绑定 → 子步(真实守卫、关卡、记录)→ 真实点击与输入。
- * DevTools 会话在测试里自己连(本进程的调试套接字,按记号找到这个标签的页面);产品里由会话管理提供。
+ *Real machine test:web_scriptthe entire path. distributor →port →Scripts in a quarantined world →binding →Zibu(Real guards, levels, records)→Real clicks and input.
+ *DevTools session connects itself in test(Debug socket for this process,Press the mark to find the page of this tag);The product is provided by session management.
  */
 @RunWith(AndroidJUnit4::class)
 class BrowserScriptDeviceTest {
     private val instr = InstrumentationRegistry.getInstrumentation()
     private val ctx = instr.targetContext
-    /** 本测试自己的一份:换会话来源、连法都不影响别的测试。 */
+    /**Ben tests his own copy:Changing the session source and connection method will not affect other tests. */
     private val devtools = WebDevtools(PhoneServices.of(InstrumentationRegistry.getInstrumentation().targetContext).hub::openDevtoolsSocket)
     private lateinit var host: WebHost
     private lateinit var pool: WebTabPool
@@ -106,7 +106,7 @@ class BrowserScriptDeviceTest {
         }
     }
 
-    /** 打记号,逐个页面目标求值找到这个标签。 */
+    /**mark,Page-by-page target evaluation finds this tag. */
     private suspend fun connect(tab: WebTab): CdpSession? {
         val mark = UUID.randomUUID().toString()
         js(tab, "window.__testMark='$mark'")
@@ -128,7 +128,7 @@ class BrowserScriptDeviceTest {
 
     private suspend fun script(code: String, timeoutMs: Int? = null): JsonObject {
         val id = "s${++n}"
-        // 和循环里一样经执行入口:脚本里的每个动作作为 Script 来源逐个过守卫、关卡、判定并记录
+        //Just like in the loop, go through the execution entry:Each action in the script is used as a script source to pass through guards, levels, judgments and records one by one.
         val executor = ActionExecutor(tools, OperationGuards(), ConfirmationGate(), gate = {}, recorder = ActionRecorder(sink))
         val extra = timeoutMs?.let { ""","timeoutMs":$it""" }.orEmpty()
         return executor.run(Part.ToolCall(id, "web_script", """{"code":${JsonPrimitive(code)}$extra}"""), Origin.Model(n)).execution().content
@@ -149,10 +149,10 @@ class BrowserScriptDeviceTest {
         assertEquals(r.toString(), "true", r.s("ok"))
         val v = Json.parseToJsonElement(r.result()).jsonObject
         assertEquals(5, v["texts"]!!.jsonArray.size)
-        assertEquals("苹果 3 元", v["texts"]!!.jsonArray[0].jsonPrimitive.content)
-        assertEquals("5", v.s("total")); assertEquals("5", v.s("count")); assertEquals("苹果 3 元", v.s("first"))
+        assertEquals("Apple 3 yuan", v["texts"]!!.jsonArray[0].jsonPrimitive.content)
+        assertEquals("5", v.s("total")); assertEquals("5", v.s("count")); assertEquals("Apple 3 yuan", v.s("first"))
         assertEquals("clicks=0", v.s("status")); assertEquals("null", v["none"].toString()); assertEquals("true", v.s("visible"))
-        // 页面看不到 mina、绑定和脚本的东西
+        //The page cannot see mina, bindings and scripts
         assertEquals("\"undefined undefined undefined\"", page("typeof window.mina + ' ' + typeof window.__mina + ' ' + typeof window.__MINARUN"))
     }
 
@@ -166,7 +166,7 @@ class BrowserScriptDeviceTest {
         for (k in listOf("pw", "otp", "tok")) assertEquals(k, "***", v[k]!!.jsonObject.s("value"))
         assertEquals("***", v["tok"]!!.jsonObject["attrs"]!!.jsonObject.s("value"))
         assertTrue(r.s("result"), "hunter2" !in r.s("result") && "654321" !in r.s("result") && "csrf-123" !in r.s("result"))
-        // 按 value 属性选元素(一位一位猜)不行
+        //Select elements by value attribute(Guess one by one)no
         val guess = script("return await mina.query('input[value^=\"c\"]', { fields: ['count'] })")
         assertEquals(guess.toString(), "script_error", guess.s("error"))
         assertTrue(guess.s("message"), guess.s("message").startsWith("Error: invalid_selector"))
@@ -174,7 +174,7 @@ class BrowserScriptDeviceTest {
 
     @Test
     fun pageGlobalsAreUnreachableAndHostileScriptsChangeNothing() = runBlocking<Unit> {
-        // 模型代码手里没有页面对象:浏览器全局一概是 undefined;能拿到全局对象的路都封了
+        //There is no page object in the model code:The browser globally is undefined;All access to global objects is blocked.
         val r = script("""
             const types = {};
             types.document = typeof document; types.window = typeof window; types.self = typeof self; types.globalThis = typeof globalThis;
@@ -203,7 +203,7 @@ class BrowserScriptDeviceTest {
         val v = Json.parseToJsonElement(r.result()).jsonObject
         for ((k, t) in v["types"]!!.jsonObject) assertEquals(k, "undefined", t.jsonPrimitive.content)
         for ((k, e) in v["escape"]!!.jsonObject) assertEquals(k, "blocked", e.jsonPrimitive.content)
-        // 页面原样
+        //Page as is
         assertEquals("0", page("window.clicks"))
         assertEquals("\"\"", page("document.getElementById('inc').style.color"))
         assertEquals("2", page("document.getElementById('sel').options.length"))
@@ -223,11 +223,11 @@ class BrowserScriptDeviceTest {
         val r = script("""
             const find = (s, name) => s.elements.find(e => e.name === name);
             let s = await mina.snapshot();
-            await mina.tap(find(s, '加一'));
+            await mina.tap(find(s, 'plus one'));
             s = await mina.snapshot();
-            await mina.tap(find(s, '加一').ref);
+            await mina.tap(find(s, 'plus one').ref);
             s = await mina.snapshot();
-            const typed = await mina.type(find(s, '名字'), 'Mina');
+            const typed = await mina.type(find(s, 'name'), 'Mina');
             mina.log('typed', typed.verification);
             return await mina.text('#status');
         """.trimIndent())
@@ -247,19 +247,19 @@ class BrowserScriptDeviceTest {
         val r = script("""
             for (let i = 0; i < 25; i++) {
               const s = await mina.snapshot();
-              await mina.tap(s.elements.find(e => e.name === '加一'));
+              await mina.tap(s.elements.find(e => e.name === 'plus one'));
             }
         """.trimIndent(), timeoutMs = 60_000)
         assertEquals(r.toString(), "limit_exceeded", r.s("error"))
         assertEquals("$SCRIPT_MAX_ACTIONS", page("window.clicks"))
     }
 
-    // 「提交订单」要花钱:询问时脚本里不做
+    //It costs money to "submit an order":Don’t do it in the script when asking
     @Test
     fun irreversibleTapIsNotRun() = runBlocking<Unit> {
         val r = script("""
             const s = await mina.snapshot();
-            await mina.tap(s.elements.find(e => e.name === '提交订单'));
+            await mina.tap(s.elements.find(e => e.name === 'Submit order'));
             return 'after';
         """.trimIndent())
         assertEquals(r.toString(), "confirmation_required", r.s("error"))
@@ -280,7 +280,7 @@ class BrowserScriptDeviceTest {
         assertEquals("42", page("window.pageSecret"))
     }
 
-    /** 读脚本(web_evaluate_js):真实 DOM 读得到,改不了、点不了、发不了 POST,秘密读出来是 ***,state 跨调用留着。 */
+    /**read script(web_evaluate_js):The real DOM can be read,Can't change, click, or post POST,The secret is pronounced as ***,state is retained across calls. */
     private suspend fun read(code: String): JsonObject =
         tools.runAction(Part.ToolCall("r${++n}", "web_evaluate_js", """{"script":${JsonPrimitive(code)}}""")).content
 
@@ -301,7 +301,7 @@ class BrowserScriptDeviceTest {
         }
         assertEquals(before, page("document.body.innerHTML.length"))
         assertEquals("\"export\"", page("document.title"))
-        // 读脚本不碰网络:同源 GET 也不行,别的发请求的路子也一样
+        //Read scripts without touching the Internet:Same source GET will not work either,The same goes for other ways to send requests.
         for (code in listOf("await fetch(location.href)", "await fetch(location.href, { method: 'POST' })", "await fetch('https://example.com/')",
             "window.navigator.sendBeacon(location.href, 'x')", "new window.XMLHttpRequest()", "new window.Image()",
             "new window.WebSocket('wss://example.com/')", "new window.EventSource(location.href)")) {
@@ -309,11 +309,11 @@ class BrowserScriptDeviceTest {
             assertEquals("$code $r", "blocked_network", r.s("error"))
             assertTrue(r.toString(), r.toString().contains("web_capture"))
         }
-        // 建元素、改 src 本来就是改页面
+        //Creating elements and changing src is essentially changing the page.
         assertEquals("read_only", read("document.createElement('img')").s("error"))
         read("state.n = 41; return 1;")
         assertTrue(read("state.n + 1").result().contains("42"))
-        // 「显示密码」改成 text 之后也还是秘密
+        //Even after changing "Show password" to text, it's still secret
         page("revealPassword()")
         assertTrue(read("document.querySelector('#pw').value").result().contains("\"***\""))
     }

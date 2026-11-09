@@ -10,7 +10,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** 双击还是单击、截下的屏幕发进哪个对话、带屏幕的话在列表里怎么称呼。 */
+/**Double-click or single-click, which conversation should the screenshot be sent to, and if the screen is included, how should it be called in the list. */
 class ScreenSendTest {
     @get:Rule val texts = ChineseTexts()
 
@@ -18,7 +18,7 @@ class ScreenSendTest {
         val t = DoubleTap(300)
         assertEquals(DoubleTap.Tap.First, t.tap(1_000))
         assertEquals(DoubleTap.Tap.Double, t.tap(1_250))
-        // 双击之后到时也不再算单击
+        //After double-clicking, it is no longer counted as a click.
         assertFalse(t.settle(1_400))
     }
 
@@ -27,7 +27,7 @@ class ScreenSendTest {
         assertEquals(DoubleTap.Tap.First, t.tap(1_000))
         assertFalse(t.settle(1_200))
         assertTrue(t.settle(1_300))
-        assertFalse("只算一次", t.settle(1_400))
+        assertFalse("Only counts once", t.settle(1_400))
     }
 
     @Test fun lateSecondTapStartsOver() {
@@ -50,14 +50,14 @@ class ScreenSendTest {
 
     @Test fun screenGoesToTheConversationTheCardShows() {
         val running = run("a", "c1", TaskState.Running(1, ""), CapsuleKind.Running, onScreen = true)
-        val done = run("b", "c2", TaskState.Succeeded("好"), CapsuleKind.Done)
+        val done = run("b", "c2", TaskState.Succeeded("good"), CapsuleKind.Done)
         assertEquals("c1", CapsuleCards.conversationOf(CapsuleCards.of(listOf(running), null)!!))
         assertEquals("c2", CapsuleCards.conversationOf(CapsuleCards.of(listOf(done), null)!!))
-        // 空闲卡片:接着最近的对话;选了新对话时由调用方新开
+        //free card:Follow up on recent conversations;Newly opened by the caller when a new conversation is selected
         assertEquals("c9", CapsuleCards.conversationOf(CardView.Chat("c9", title = "t")))
         assertNull(CapsuleCards.conversationOf(CardView.Chat("c9", fresh = true)))
         assertNull(CapsuleCards.conversationOf(CardView.Chat(null)))
-        // 好几件事时卡片只说排在最前的那件,屏幕发给它所在的对话
+        //When there are several things, the card only says the one that comes first,The screen is sent to the conversation it is in
         val several = CapsuleCards.of(listOf(running, done))!!
         assertEquals(CardInputKind.Steer, CapsuleCards.input(several)?.kind)
         assertEquals("c1", CapsuleCards.conversationOf(several))
@@ -66,14 +66,14 @@ class ScreenSendTest {
     @Test fun inputKindDecidesHowTheScreenIsSent() {
         val running = run("a", "c1", TaskState.Running(1, ""), CapsuleKind.Running, onScreen = true)
         assertEquals(CardInputKind.Steer, CapsuleCards.input(CapsuleCards.of(listOf(running), null)!!)!!.kind)
-        val asking = run("b", "c2", TaskState.WaitingInput("记一笔吗?", listOf("记一笔", "不用")), CapsuleKind.NeedAnswer)
+        val asking = run("b", "c2", TaskState.WaitingInput("Make a note??", listOf("Make a note", "Need not")), CapsuleKind.NeedAnswer)
         assertEquals(CardInputKind.Answer, CapsuleCards.input(CapsuleCards.of(listOf(asking), null)!!)!!.kind)
         assertEquals(CardInputKind.Start, CapsuleCards.input(CardView.Chat(null))!!.kind)
     }
 
     @Test fun plainTitles() {
-        assertEquals("第三条有没有坑?", ScreenCopy.plain("[[screen:s1]]\n第三条有没有坑?"))
+        assertEquals("Are there any pitfalls in Article 3??", ScreenCopy.plain("[[screen:s1]]\?"))
         assertEquals(ScreenCopy.TAG, ScreenCopy.plain("[[screen:s1]]"))
-        assertEquals("普通的一句话", ScreenCopy.plain("普通的一句话"))
+        assertEquals("an ordinary sentence", ScreenCopy.plain("an ordinary sentence"))
     }
 }

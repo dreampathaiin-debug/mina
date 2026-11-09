@@ -37,8 +37,8 @@ import java.util.Collections
 import kotlin.coroutines.resume
 
 /**
- * 真机测试:任务里真实的网页接管路径。接管状态机 → 任务的接管端口(和 TaskRun 里同样委托给 [WebStack])
- * → 标签锁住、同一个页面到主屏 → 用户点「处理好了」→ 交还状态机 → 标签放回、解锁、计数与登录标记交给 Agent。
+ *Real machine test:The actual web page takeover path in the task. Take over state machine →Task takeover port( [WebStack])
+ * →Tags are locked and the same page is brought to the home screen →The user clicks "Processed"→hand over state machine →Tag replacement, unlocking, counting and login tokens are handed over to the Agent.
  */
 @RunWith(AndroidJUnit4::class)
 class WebStackTakeoverTest {
@@ -58,7 +58,7 @@ class WebStackTakeoverTest {
                 .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(instr.context)).build()
             stack = WebStack.create(ctx, "run-1", bounds.width(), bounds.height(), ctx.resources.displayMetrics.densityDpi, listOf(loader))
         }
-        // 和 TaskRun 的接管端口一样:网页部分交给 WebStack,按钮动作交回状态机
+        //Same as TaskRun’s takeover port:The web page part is handed over to WebStack,Button action returns state machine
         val port = object : TakeoverPort {
             override suspend fun agentTopTask() = -1
             override suspend fun targetTask() = -1
@@ -74,7 +74,7 @@ class WebStackTakeoverTest {
             override suspend fun resume(result: HandBack) { results += result }
             override fun cancel() {}
             override suspend fun showWeb(reason: String, key: Int): Boolean? = withContext(Dispatchers.Main) {
-                stack.showForTakeover(reason, "请登录示例商城\n金额:9.90", key, actions = { a ->
+                stack.showForTakeover(reason, "Please log in to the sample mall\namount:9.90", key, actions = { a ->
                     scope.launch {
                         when (a) {
                             WebHandover.Action.HandBack, WebHandover.Action.Done -> takeover.handBack(key)
@@ -125,26 +125,26 @@ class WebStackTakeoverTest {
         s.navigate("https://appassets.androidplatform.net/assets/web-fixtures/inputs.html", newTab = false)
         val snap = s.snapshot()
         val plain = snap.elements.first { it.resourceId == "#plain" }
-        assertTrue(s.typeText(plain.ref, snap.snapshotId, "填了一半") is ActionResult.Ok)
+        assertTrue(s.typeText(plain.ref, snap.snapshotId, "half filled") is ActionResult.Ok)
         val tab = withContext(Dispatchers.Main) { stack.pool.current("run-1") }!!
 
-        takeover.onState(TaskState.WaitingTakeover("login", "请登录示例商城"))
+        takeover.onState(TaskState.WaitingTakeover("login", "Please log in to the sample mall"))
         assertTrue(takeover.handOver())
         assertNotNull(DeviceSupport.pollUntil(5_000) { displayOf(tab)?.takeIf { it == Display.DEFAULT_DISPLAY } })
         assertTrue(withContext(Dispatchers.Main) { stack.pool.isLocked(tab.id) })
-        // 用户手上的页面 Agent 动不了
+        //The page Agent in the user's hand cannot move.
         assertEquals(ActionResult.Failed("handed_over"), s.tapXY(10, 10))
-        assertEquals("请登录示例商城\n金额:9.90", WebHandover.session.value?.message)
-        assertEquals("\"填了一半\"", js(tab, "document.getElementById('plain').value"))
+        assertEquals("Please log in to the sample mall\namount:9.90", WebHandover.session.value?.message)
+        assertEquals("\"half filled\"", js(tab, "document.getElementById('plain').value"))
 
         DeviceSupport.pollUntil(3_000) { WebHandover.session.value?.url }
-        click(tab, "处理好了")
+        click(tab, "Dealt with it")
         assertNotNull(DeviceSupport.pollUntil(5_000) { results.firstOrNull() })
         assertNotNull(DeviceSupport.pollUntil(5_000) { displayOf(tab)?.takeIf { it == stack.host.displayId } })
         assertEquals(HandBackOutcome.complete, results.single().outcome)
         assertEquals("inputs", results.single().stoppedAt)
         assertFalse(withContext(Dispatchers.Main) { stack.pool.isLocked(tab.id) })
-        assertEquals("\"填了一半\"", js(tab, "document.getElementById('plain').value"))
+        assertEquals("\"half filled\"", js(tab, "document.getElementById('plain').value"))
         assertTrue(WebSites.registry(ctx).list().any { it.host == "appassets.androidplatform.net" && it.loggedInByUser })
         assertEquals(Takeover.Stage.None, takeover.stage.value)
     }
@@ -152,7 +152,7 @@ class WebStackTakeoverTest {
     @Test
     fun closingTheStackWhileHandedOverReturnsAndUnlocksFirst() = runBlocking<Unit> {
         stack.screen.navigate("https://appassets.androidplatform.net/assets/web-fixtures/host.html", newTab = false)
-        takeover.onState(TaskState.WaitingTakeover("login", "请登录"))
+        takeover.onState(TaskState.WaitingTakeover("login", "Please log in"))
         assertTrue(takeover.handOver())
         instr.runOnMainSync { stack.close() }
         instr.waitForIdleSync()

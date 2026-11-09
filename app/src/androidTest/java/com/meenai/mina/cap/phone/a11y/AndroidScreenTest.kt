@@ -19,7 +19,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 真机测试:在 Agent 虚拟屏上用系统设置验证读屏、操作和各项核实机制。 */
+/**Real machine test:Use system settings to verify screen reading, operations and various verification mechanisms on the Agent virtual screen. */
 @RunWith(AndroidJUnit4::class)
 class AndroidScreenTest {
     private val agent = DeviceSupport.newAgent()
@@ -88,8 +88,8 @@ class AndroidScreenTest {
     @Test
     fun tapReportsChangedAndUnchanged() = runBlocking<Unit> {
         val s = openSettings()
-        // 标题文字不可点,点上去页面不变
-        val title = s.elements.first { !it.clickable && !it.editable && !it.scrollable && it.name == "设置" }
+        //Title text cannot be clicked,The page remains unchanged after clicking on it
+        val title = s.elements.first { !it.clickable && !it.editable && !it.scrollable && it.name == "set up" }
         val miss = ok(screen.tapXY(title.centerX, title.centerY))
         assertEquals(false, miss.changed)
 
@@ -103,11 +103,11 @@ class AndroidScreenTest {
     @Test
     fun staleRefRelocatesAfterMinorChange() = runBlocking<Unit> {
         val old = openSettings()
-        // 屏幕中部一个有名字、名字唯一的可点条目
+        //A clickable item with a unique name in the middle of the screen
         val target = old.elements.first { e ->
             e.clickable && e.name.isNotBlank() && e.centerY in 800..1300 && old.elements.count { it.clickable && it.name == e.name } == 1
         }
-        // 慢慢往上拖一小段,界面轻微挪动;再读一次屏,旧快照就过期了
+        //Slowly drag it up a short distance,The interface moves slightly;Read the screen again,The old snapshot will expire
         ok(screen.swipe(360, 1000, 360, 960))
         val now = screen.snapshot()
         val moved = now.elements.first { it.clickable && it.name == target.name }
@@ -123,12 +123,12 @@ class AndroidScreenTest {
     fun typeTextVerifiesReadback() = runBlocking<Unit> {
         val s = openSettings()
         val field = s.elements.first { it.editable }
-        val r = ok(screen.typeText(field.ref, s.snapshotId, "蓝牙"))
+        val r = ok(screen.typeText(field.ref, s.snapshotId, "Bluetooth"))
         assertEquals(Verification.MATCH, r.verification)
-        val after = snapUntil { snap -> snap.elements.any { it.editable && it.name == "蓝牙" } }
+        val after = snapUntil { snap -> snap.elements.any { it.editable && it.name == "Bluetooth" } }
 
         ok(screen.clearText(after.elements.first { it.editable }.ref, after.snapshotId))
-        snapUntil { snap -> snap.elements.none { it.editable && it.name == "蓝牙" } }
+        snapUntil { snap -> snap.elements.none { it.editable && it.name == "Bluetooth" } }
     }
 
     @Test
@@ -143,20 +143,20 @@ class AndroidScreenTest {
         val s = openSettings()
         val p = screen.peek()
         val wlan = p.elements.first { it.clickable && it.name.startsWith("WLAN") }
-        // peek 的读屏不进编号登记表
+        //Peek's screen reading does not enter the number registration form
         assertEquals(ActionResult.Failed("ref_expired"), screen.tapRef(wlan.ref, p.snapshotId))
-        val search = s.elements.first { it.editable || it.name.contains("搜索") }
+        val search = s.elements.first { it.editable || it.name.contains("search") }
         ok(screen.tapRef(search.ref, s.snapshotId))
-        // 搜索框拿到输入焦点后,读屏标出 focused
+        //After the search box gets the input focus,screen reading mark focused
         assertNotNull("no focused field", pollUntil(5_000) { runBlocking { screen.peek() }.elements.firstOrNull { it.editable && it.focused } })
     }
 
     @Test
     fun typeTextInSearch() = runBlocking<Unit> {
         val s = openSettings()
-        val search = s.elements.first { it.editable || it.name.contains("搜索") }
+        val search = s.elements.first { it.editable || it.name.contains("search") }
         ok(screen.tapRef(search.ref, s.snapshotId))
-        // 搜索页的输入框拿到焦点后直接往焦点框里打字
+        //After the input box on the search page gets focus, type directly into the focus box.
         val typed = pollUntil(5_000) {
             runBlocking { screen.typeText(null, null, "WLAN") }.takeIf { it is ActionResult.Ok }
         }
@@ -200,7 +200,7 @@ class AndroidScreenTest {
         assertEquals(true, r.changed)
         val wlan = snapUntil { snap -> snap.elements.any { it.role == "Switch" } }
         assertTrue(wlan.elements.any { it.name == "WLAN" && !it.clickable })
-        assertTrue("still on the home page", wlan.elements.none { it.clickable && it.name.startsWith("蓝牙") })
+        assertTrue("still on the home page", wlan.elements.none { it.clickable && it.name.startsWith("Bluetooth") })
         assertEquals("main screen changed", main, DeviceSupport.mainScreenState(shell))
     }
 
@@ -225,7 +225,7 @@ class AndroidScreenTest {
         val s = openSettings()
         ok(screen.tapRef(s.clickable("WLAN").ref, s.snapshotId))
         snapUntil { snap -> snap.elements.any { it.role == "Switch" } }
-        // 普通启动回到上次的页面,冷启动回到首页
+        //Normal startup returns to the last page,Cold start back to home page
         ok(screen.openApp(SETTINGS, cold = true))
         snapUntil { snap -> snap.elements.any { it.clickable && it.name.startsWith("WLAN") } }
     }

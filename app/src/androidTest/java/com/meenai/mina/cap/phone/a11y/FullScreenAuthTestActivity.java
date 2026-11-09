@@ -8,8 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * 整屏的登录/验证页:没有对话框主题、没有密码框、也没带 excludeFromRecents,
- * 形状上和普通 App 页面一样。只有「它所在的包是没有桌面图标的账号认证器」这一条能认出它要用户亲手处理。
+ *Full screen login/Verification page:There is no dialog box theme, no password box, and no excludeFromRecents,
+ *The shape is the same as a normal App page. Only the item "The package it is in is an account authenticator without a desktop icon" can be recognized and requires the user to handle it manually.
  */
 public class FullScreenAuthTestActivity extends Activity {
     @Override

@@ -60,11 +60,11 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
     private val results = mutableListOf<Pair<String, Boolean>>()
 
     suspend fun run(): Boolean {
-        println("== Mina:用 ChatGPT 登录 · 桌面检查 ==")
-        println("工作目录:${dir.absolutePath}(令牌不打印;${if (keep) "--keep:结束时保存登录" else "默认不保存令牌"})")
+        println("== Mina: ChatGPT sign-in · desktop check ==")
+        println("Working dir: ${dir.absolutePath} (tokens are not printed; ${if (keep) "--keep: keep the login at the end" else "by default the token is not saved"})")
         prepareDir()
         val (hostId, savedClient) = registration()
-        println("本机标识:${if (savedClient == null) "第一次运行,将注册新的 client" else "沿用已注册的 client"}")
+        println("Client id: ${if (savedClient == null) "first run, a new client will be registered" else "reusing the registered client"}")
 
         var session = signIn(hostId, savedClient) ?: return summary()
         val tokens = ChatGptTokens(auth, { session }, { session = it })
@@ -103,7 +103,7 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
 
     private fun rememberClient(hostId: String, clientId: String) {
         writePrivate(hostFile, buildJsonObject { put("hostId", hostId); put("clientId", clientId) }.toString())
-        step("注册 client(client_id 已记到 ${hostFile.name})", true)
+        step("Register client (client_id saved to ${hostFile.name})", true)
     }
 
     // ---------- 2–3. 登录 ----------
@@ -119,13 +119,13 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
                 page = ::callbackPage,
                 timeoutMs = timeoutSec * 1000,
             )
-            step("收到回调(state 核对通过)", true)
-            step("用授权码换令牌", true)
-            step("验 ID 令牌(签名、签发方、受众、过期、nonce)", true)
-            step("授予了 ${ChatGptAuth.PLAN_SCOPE}", true)
-            println("    授予的权限:${s.scopes.joinToString(" ")}")
-            println("    账号:${s.email.ifEmpty { "(ID 令牌里没有邮箱)" }}")
-            println("    访问令牌有效期:约 ${(s.expiresAtMs - System.currentTimeMillis()) / 1000} 秒;刷新令牌:${if (s.refreshToken.isNotEmpty()) "有" else "没有"}")
+            step("Callback received (state verified)", true)
+            step("Exchange the code for tokens", true)
+            step("Verify the ID token (signature, issuer, audience, expiry, nonce)", true)
+            step("Granted ${ChatGptAuth.PLAN_SCOPE}", true)
+            println("    Granted scopes: ${s.scopes.joinToString(" ")}")
+            println("    Account: ${s.email.ifEmpty { "(no email in the ID token)" }}")
+            println("    Access token valid for about ${(s.expiresAtMs - System.currentTimeMillis()) / 1000} s; refresh token: ${if (s.refreshToken.isNotEmpty()) "yes" else "none"}")
             s
         } catch (e: CancellationException) {
             throw e
@@ -133,35 +133,35 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
             step(signInStep(e.reason), false, explain(e))
             null
         } catch (e: Exception) {
-            step("登录", false, "${e::class.simpleName}: ${e.message}")
+            step("Sign in", false, "${e::class.simpleName}: ${e.message}")
             null
         }
     }
 
     private fun openBrowser(url: String) {
-        println("授权地址(不含令牌):")
+        println("Authorization URL (no tokens):")
         println("    $url")
         val opened = runCatching {
             System.getProperty("os.name").lowercase().contains("mac") &&
                 ProcessBuilder("open", url).inheritIO().start().waitFor(10, TimeUnit.SECONDS)
         }.getOrDefault(false)
-        step(if (opened) "已在默认浏览器打开授权页" else "没能自动打开浏览器,请手动复制上面的地址打开", opened, null, record = false)
-        println("等待回调…(最多 $timeoutSec 秒;Ctrl+C 放弃)")
+        step(if (opened) "Opened the authorization page in the default browser" else "could not open a browser automatically; copy the URL above and open it", opened, null, record = false)
+        println("Waiting for the callback... (up to $timeoutSec s; Ctrl+C to give up)")
     }
 
     private fun callbackPage(failure: SignInException?): String {
-        val text = if (failure != null) "登录没有成功(${failure.reason}),回到终端看原因。" else "登录完成,可以关掉这个页面,回到终端看结果。"
+        val text = if (failure != null) "Sign-in did not succeed (${failure.reason}); check the terminal for the reason." else "Sign-in complete; you can close this page and check the terminal for the result."
         return "<!doctype html><html><head><meta charset=\"utf-8\"><title>Mina</title></head>" +
             "<body style=\"font-family:system-ui;margin:3em\"><p>$text</p></body></html>"
     }
 
     private fun signInStep(r: SignInFailure): String = when (r) {
-        SignInFailure.Denied, SignInFailure.StateMismatch, SignInFailure.ClientMismatch, SignInFailure.NoClientId -> "核对回调"
-        SignInFailure.TimedOut -> "等待回调"
-        SignInFailure.Exchange, SignInFailure.CodeExpired, SignInFailure.Region, SignInFailure.Blocked -> "用授权码换令牌"
-        SignInFailure.IdToken -> "验 ID 令牌"
-        SignInFailure.NoPlanScope -> "授予 ${ChatGptAuth.PLAN_SCOPE}"
-        SignInFailure.Network -> "连接 OpenAI 登录服务"
+        SignInFailure.Denied, SignInFailure.StateMismatch, SignInFailure.ClientMismatch, SignInFailure.NoClientId -> "Verify the callback"
+        SignInFailure.TimedOut -> "Wait for the callback"
+        SignInFailure.Exchange, SignInFailure.CodeExpired, SignInFailure.Region, SignInFailure.Blocked -> "Exchange the code for tokens"
+        SignInFailure.IdToken -> "Verify the ID token"
+        SignInFailure.NoPlanScope -> "Grant ${ChatGptAuth.PLAN_SCOPE}"
+        SignInFailure.Network -> "Connect to the OpenAI sign-in service"
     }
 
     // ---------- 4. 列模型 ----------
@@ -170,38 +170,38 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
         val listed = when (val r = ModelCatalog(http).openAiCompat(ChatGptAuth.API_BASE, accessToken)) {
             is ModelListResult.Ok -> r.models
             is ModelListResult.Failed -> {
-                step("列模型(GET /v1/models)", false, r.message)
+                step("List models (GET /v1/models)", false, r.message)
                 return null
             }
         }
-        step("列模型(GET /v1/models):${listed.size} 个", listed.isNotEmpty(), if (listed.isEmpty()) "列表是空的" else null)
+        step("List models (GET /v1/models): ${listed.size}", listed.isNotEmpty(), if (listed.isEmpty()) "the list is empty" else null)
         listed.forEach { m ->
             val flags = listOfNotNull(
-                m.contextTokens?.let { "上下文 $it" }, m.vision?.let { if (it) "看图" else "不看图" },
-                m.reasoning?.takeIf { it }?.let { "推理" }, m.toolCalls?.let { if (it) "工具" else "无工具" },
+                m.contextTokens?.let { "context $it" }, m.vision?.let { if (it) "vision" else "no vision" },
+                m.reasoning?.takeIf { it }?.let { "reasoning" }, m.toolCalls?.let { if (it) "tools" else "no tools" },
             )
             println("    ${m.id}${m.displayName.takeIf { it.isNotEmpty() && it != m.id }?.let { "  「$it」" }.orEmpty()}" +
                 if (flags.isEmpty()) "" else "  (${flags.joinToString(",")})")
         }
         val chosen = if (modelArg != null) {
-            listed.firstOrNull { it.id == modelArg } ?: ListedModel(modelArg).also { println("    注意:--model=$modelArg 不在列表里,照样试") }
+            listed.firstOrNull { it.id == modelArg } ?: ListedModel(modelArg).also { println("    Note: --model=$modelArg is not in the list; trying anyway") }
         } else {
             // 优先挑推理模型:工具调用那一步要顺带验加密思考的回放
             listed.firstOrNull { it.usable && it.reasoning == true && it.toolCalls != false } ?: listed.firstOrNull { it.usable }
         }
-        chosen?.let { println("    用模型:${it.id}") }
+        chosen?.let { println("    Using model: ${it.id}") }
         return chosen
     }
 
     // ---------- 5. 一次简单调用 ----------
 
     private suspend fun simpleCall(model: ResponsesModel) {
-        val name = "Responses 调用"
+        val name = "Responses call"
         try {
             val reply = model.complete("", listOf(Message(Role.User, listOf(Part.Text("Reply with the single word: pong")), Author.User)), emptyList())
             val text = reply.text()
-            step(name, text.isNotBlank(), if (text.isBlank()) "回答是空的" else null)
-            println("    回答:${text.trim().take(200)}")
+            step(name, text.isNotBlank(), if (text.isBlank()) "the answer is empty" else null)
+            println("    Answer: ${text.trim().take(200)}")
             println("    ${usage(reply.usage)}")
         } catch (e: CancellationException) {
             throw e
@@ -223,11 +223,11 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
             val first = model.complete(system, history, listOf(tool))
             val call = first.parts.filterIsInstance<Part.ToolCall>().firstOrNull()
             if (call == null) {
-                step("工具调用:模型调用 get_time", false, "模型没有调用工具,直接回答了:${first.text().take(120)}")
+                step("Tool call: the model calls get_time", false, "the model did not call a tool and answered directly: ${first.text().take(120)}")
                 return
             }
-            step("工具调用:模型调用了 ${call.name}(参数 ${call.argsJson.take(80)})", call.name == tool.name)
-            println("    加密思考:${if (call.opaque != null) "有,下一轮原样回放(store:false)" else "没有(模型没给或不是推理模型)"}")
+            step("Tool call: the model called ${call.name} (args ${call.argsJson.take(80)})", call.name == tool.name)
+            println("    Encrypted reasoning: ${if (call.opaque != null) "present, replayed verbatim next round (store:false)" else "none (not given, or not a reasoning model)"}")
             println("    ${usage(first.usage)}")
             val now = OffsetDateTime.now().withNano(0).toString()
             history += Message(Role.Assistant, first.parts, Author.Mina)
@@ -235,14 +235,14 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
             val second = model.complete(system, history, listOf(tool))
             val text = second.text()
             val more = second.parts.any { it is Part.ToolCall }
-            step("工具调用:收到 function_call_output 后作答", text.isNotBlank() && !more,
-                when { more -> "模型又调用了工具"; text.isBlank() -> "回答是空的"; else -> null })
-            println("    回答:${text.trim().take(300)}")
+            step("Tool call round-trip: answered after the function_call_output", text.isNotBlank() && !more,
+                when { more -> "the model called another tool"; text.isBlank() -> "the answer is empty"; else -> null })
+            println("    Answer: ${text.trim().take(300)}")
             println("    ${usage(second.usage)}")
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            step("工具调用往返", false, explain(e))
+            step("Tool-call round trip", false, explain(e))
         }
     }
 
@@ -253,41 +253,41 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
         try {
             tokens.get(fresh = true)
             val after = current()
-            step("用刷新令牌换新令牌", true)
-            println("    访问令牌${if (after.accessToken != before.accessToken) "已更新" else "没变"};" +
-                "刷新令牌${if (after.refreshToken != before.refreshToken) "已轮换" else "没变"};" +
-                "新的有效期约 ${(after.expiresAtMs - System.currentTimeMillis()) / 1000} 秒")
+            step("Refresh the tokens", true)
+            println("    Access token ${if (after.accessToken != before.accessToken) "updated" else "unchanged"};" +
+                "refresh token ${if (after.refreshToken != before.refreshToken) "rotated" else "unchanged"};" +
+                "new validity about ${(after.expiresAtMs - System.currentTimeMillis()) / 1000} s")
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            step("用刷新令牌换新令牌", false, explain(e))
+            step("Refresh the tokens", false, explain(e))
         }
     }
 
     private fun save(session: ChatGptSession) {
         writePrivate(sessionFile, session.toJson())
-        println("已保存登录到 ${sessionFile.absolutePath}(0600)")
+        println("Login saved to ${sessionFile.absolutePath} (0600)")
     }
 
     // ---------- 输出 ----------
 
     private fun step(name: String, ok: Boolean, why: String? = null, record: Boolean = true) {
         println("${if (ok) "✓" else "✗"} $name")
-        if (!ok && why != null) println("    原因:$why")
+        if (!ok && why != null) println("    Reason: $why")
         if (record) results += name to ok
     }
 
     private fun summary(): Boolean {
         val failed = results.filterNot { it.second }
         println()
-        println("== 小结:${results.size - failed.size}/${results.size} 步通过 ==")
+        println("== Summary: ${results.size - failed.size}/${results.size} steps passed ==")
         failed.forEach { println("✗ ${it.first}") }
         return failed.isEmpty() && results.isNotEmpty()
     }
 
     private fun ModelReply.text() = parts.filterIsInstance<Part.Text>().joinToString("") { it.text }
 
-    private fun usage(u: Usage?) = u?.let { "用量:输入 ${it.inputTokens}(缓存 ${it.cachedInputTokens}),输出 ${it.outputTokens}" } ?: "用量:服务端没给"
+    private fun usage(u: Usage?) = u?.let { "Usage: input ${it.inputTokens} (cached ${it.cachedInputTokens}), output ${it.outputTokens}" } ?: "Usage: not provided by the server"
 
     private fun writePrivate(f: File, text: String) {
         val tmp = File(f.parentFile, f.name + ".tmp")
@@ -303,11 +303,11 @@ private class Check(private val timeoutSec: Long, private val modelArg: String?,
 /** 把已知的错误说成人话。 */
 private fun explain(e: Throwable): String = when (e) {
     is SignInException -> when (e.reason) {
-        SignInFailure.Denied -> "授权页返回了错误(${e.message?.substringAfter(": ", "")}):" +
-            "access_denied 是在授权页点了取消;授权页若写着「所需权限不可用」,说明账号不是 Plus 或 Pro,不能把套餐额度给其他 App"
-        SignInFailure.StateMismatch -> "回调里的 state 和这次发起的不一致(不是这次登录的回调)"
-        SignInFailure.ClientMismatch -> "回调给出的 client_id 和保存的不一致:删掉 ~/.mina-dev/chatgpt-check/host.json 里的 clientId 后重来"
-        SignInFailure.NoClientId -> "第一次注册,回调里却没有给出 client_id"
+        SignInFailure.Denied -> "The authorization page returned an error (${e.message?.substringAfter(": ", "")}):" +
+            "access_denied means cancel was tapped on the authorization page; when the page says the required entitlement is unavailable, the account is not Plus or Pro and cannot share its plan quota with other apps"
+        SignInFailure.StateMismatch -> "The state in the callback does not match this run (it is not this sign-in's callback)"
+        SignInFailure.ClientMismatch -> "The callback's client_id differs from the saved one: delete clientId from ~/.mina-dev/chatgpt-check/host.json and retry"
+        SignInFailure.NoClientId -> "First registration, yet the callback gave no client_id"
         SignInFailure.TimedOut -> "等回调超时:浏览器里没有完成登录,或回调没回到 127.0.0.1"
         SignInFailure.Exchange -> "换令牌被拒(${e.message?.substringAfter(": ", "")}):redirect_uri 或 PKCE 不符,或别的原因"
         SignInFailure.CodeExpired -> "换令牌被拒(${e.message?.substringAfter(": ", "")}):授权码过期、已用过或和这次对不上"
@@ -319,7 +319,7 @@ private fun explain(e: Throwable): String = when (e) {
     }
     is ModelError.ChatGptNotEligible -> "subscription_sharing_user_not_eligible:这个账号不能在其他 App 里用 ChatGPT 额度(套餐、地区或账号策略不允许)" +
         e.detail.takeIf { it.isNotEmpty() }?.let { ";服务端说:$it" }.orEmpty()
-    is ModelError.ChatGptLimitReached -> "usage_limit_exceeded:ChatGPT 套餐给其他 App 的额度到了上限,等恢复后再试(用量见 ${ChatGptAuth.USAGE_URL})"
+    is ModelError.ChatGptLimitReached -> "usage_limit_exceeded: the ChatGPT plan's quota for other apps is at its limit; wait for the reset and retry (usage at ${ChatGptAuth.USAGE_URL})"
     is ModelError.SignInExpired -> "刷新令牌已不能用(被注销、过期或被重复使用),要重新登录"
     is ModelError.Auth -> "令牌被拒或客户端配置不对(401/403、client_id 不认)"
     is ModelError.ModelNotFound -> "model_not_found:这个账号用不了这个模型,换一个(--model=…)"

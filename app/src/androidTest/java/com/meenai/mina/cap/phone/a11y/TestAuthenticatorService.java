@@ -4,7 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
-/** 把测试用的账号认证器交给系统(见 {@link TestAuthenticator})。 */
+/**Give the test account authenticator to the system(See {@link TestAuthenticator}). */
 public class TestAuthenticatorService extends Service {
     private TestAuthenticator authenticator;
 

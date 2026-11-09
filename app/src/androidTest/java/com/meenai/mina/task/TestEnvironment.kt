@@ -2,6 +2,6 @@ package com.meenai.mina.task
 
 import androidx.test.platform.app.InstrumentationRegistry
 
-/** 真机测试用:被测 App 进程里那一份任务环境(换模型来源、评测钩子、看屏幕画面)。 */
+/**For real machine testing:The task environment in the App process under test(Change the model source, evaluation hook, and view the screen). */
 internal val testTasks: TaskEnvironment
     get() = TaskEnvironment.of(InstrumentationRegistry.getInstrumentation().targetContext)

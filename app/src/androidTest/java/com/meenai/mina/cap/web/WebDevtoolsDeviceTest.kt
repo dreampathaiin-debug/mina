@@ -40,14 +40,14 @@ import kotlin.coroutines.resume
 import kotlin.math.abs
 
 /**
- * 真机测试:网页标签的 DevTools 会话(直连、强制代连、强制关掉)、标签与目标的对应、默认桌面版、按站点换手机版。
- * 代连那一项要内置助手在运行(先跑 BuiltinHelperDeviceTest),没有就跳过。
+ *Real machine test:DevTools session for web page tags(Direct connection, forced proxy connection, forced shutdown), Correspondence between tags and targets, default desktop version, and change to mobile version by site.
+ *The agent connection item must have a built-in assistant running.(Run first BuiltinHelperDeviceTest),If not, skip it.
  */
 @RunWith(AndroidJUnit4::class)
 class WebDevtoolsDeviceTest {
     private val instr = InstrumentationRegistry.getInstrumentation()
     private val ctx = instr.targetContext
-    /** 本测试自己的一份:换会话来源、连法都不影响别的测试。 */
+    /**Ben tests his own copy:Changing the session source and connection method will not affect other tests. */
     private val devtools = WebDevtools(PhoneServices.of(InstrumentationRegistry.getInstrumentation().targetContext).hub::openDevtoolsSocket)
     private lateinit var host: WebHost
     private lateinit var pool: WebTabPool
@@ -85,7 +85,7 @@ class WebDevtoolsDeviceTest {
         return tab
     }
 
-    /** 页面自己看到的(经 WebView 的注入,不经 DevTools)。 */
+    /**The page you see(Injected via WebView,without experience DevTools). */
     private fun js(tab: WebTab, script: String): String = runBlocking(Dispatchers.Main) {
         suspendCancellableCoroutine { c -> tab.view.evaluateJavascript(script) { c.resume(it) } }
     }
@@ -97,7 +97,7 @@ class WebDevtoolsDeviceTest {
                 "platform:navigator.userAgentData?navigator.userAgentData.platform:null,navPlatform:navigator.platform," +
                 "iw:innerWidth,ih:innerHeight,dpr:devicePixelRatio,vvs:visualViewport?visualViewport.scale:null})",
         )
-        // evaluateJavascript 把字符串结果再包一层 JSON
+        // evaluateJavascriptWrap the string result in another layer JSON
         return Json.parseToJsonElement(Json.parseToJsonElement(raw).jsonPrimitive.content).jsonObject.also { Log.i(TAG, "page facts: $it") }
     }
 
@@ -114,10 +114,10 @@ class WebDevtoolsDeviceTest {
         assertEquals(WebDevtools.Route.Direct, devtools.route.value)
         assertTrue(devtools.available.value)
         assertEquals("elements", eval(s!!, "document.title"))
-        // 同一个标签复用同一条会话
+        //Reuse the same conversation with the same label
         assertTrue(s === devtools.session(tab))
         assertNotNull(devtools.targetId(tab))
-        // 标记用完已删
+        //Deleted after running out of tags
         assertEquals("\"undefined\"", js(tab, "typeof window.__minaDevtoolsMark"))
     }
 
@@ -132,7 +132,7 @@ class WebDevtoolsDeviceTest {
         assertNotEquals(devtools.targetId(a), devtools.targetId(b))
         assertEquals("a", eval(sa, "window.__who"))
         assertEquals("b", eval(sb, "window.__who"))
-        // 对应跨导航不变
+        //Corresponds to the same cross-navigation
         assertTrue(runBlocking { a.load(fixture("inputs.html")) })
         assertEquals("inputs", eval(sa, "document.title"))
         assertEquals("elements", eval(sb, "document.title"))
@@ -148,7 +148,7 @@ class WebDevtoolsDeviceTest {
         assertEquals("Linux", f["platform"]!!.jsonPrimitive.content)
         assertEquals("Linux x86_64", f["navPlatform"]!!.jsonPrimitive.content)
         assertTrue("innerWidth ${f["iw"]}", abs(f["iw"]!!.jsonPrimitive.double - 1280) <= 2)
-        // 高度按宿主宽高比放大
+        //The height is enlarged according to the host aspect ratio
         val expectH = 1280.0 * host.height / host.width
         assertTrue("innerHeight ${f["ih"]} vs $expectH", abs(f["ih"]!!.jsonPrimitive.double - expectH) <= 4)
     }
@@ -158,7 +158,7 @@ class WebDevtoolsDeviceTest {
         val phoneW = phoneWidth
         val tab = open()
         val s = session(tab)!!
-        // 桌面版:挂在 1280×800 的宿主显示上,1 CSS 像素对 1 视图像素,Input 坐标与 CSS 一致
+        //Desktop version:hang on 1280×800 on the host display,1CSS pixels vs. 1 view pixels,Input coordinates are consistent with CSS
         assertEquals(1280, host.width)
         assertEquals(800, host.height)
         val viewW = runBlocking(Dispatchers.Main) { tab.view.width }
@@ -172,7 +172,7 @@ class WebDevtoolsDeviceTest {
         Log.i(TAG, "desktop host: inputScale=${s.inputScale} frame=${bmp.width}x${bmp.height} dpr=${f["dpr"]}")
         assertEquals(1280, bmp.width)
         assertEquals(800, bmp.height)
-        // 换手机版:回到与主屏一样大的宿主显示;再换回桌面版
+        //Change mobile version:Return to the host display as large as the home screen;Switch back to desktop version
         val screen = WebScreen(pool, "t", host, SystemClock::uptimeMillis)
         assertTrue(runBlocking { screen.setSiteMode(true) }!!.mobile)
         assertEquals(phoneW, host.width)
@@ -195,7 +195,7 @@ class WebDevtoolsDeviceTest {
             assertEquals(1280, host.width)
             devtools.setSiteMode("appassets.androidplatform.net", mobile = true)
             assertTrue(runBlocking { tab.load(fixture("elements.html")) })
-            // 换成手机版:不经标签池,视图也换到了与主屏一样大的显示上
+            //Switch to mobile version:Without tag pool,The view is also changed to a display as large as the main screen
             assertEquals(phoneW, host.width)
             assertTrue(pageFacts(tab)["iw"]!!.jsonPrimitive.double < 1000)
         } finally {
@@ -209,13 +209,13 @@ class WebDevtoolsDeviceTest {
         assertNotNull(session(tab))
         val screen = WebScreen(pool, "t", host, SystemClock::uptimeMillis)
         val snap = runBlocking { screen.snapshot() }
-        val button = snap.elements.first { it.role == "button" && it.name == "按钮文字" }
+        val button = snap.elements.first { it.role == "button" && it.name == "button text" }
         js(tab, "window.__hits=[];document.addEventListener('click',function(e){window.__hits.push((e.target.textContent||'').trim())},true)")
         val r = runBlocking { screen.tapRef(button.ref, snap.snapshotId) }
         assertFalse("tap failed: $r", r is ActionResult.Failed)
         val hits = js(tab, "JSON.stringify(window.__hits)")
-        assertTrue("clicked $hits", "按钮文字" in hits)
-        // 读屏坐标在视图之内(整页宽 1280 CSS 像素缩到视图宽度)
+        assertTrue("clicked $hits", "button text" in hits)
+        //Reading screen coordinates are within the view(full page width 1280CSS pixel shrink to view width)
         assertTrue(snap.elements.all { it.centerX in 0..host.width })
     }
 
@@ -232,7 +232,7 @@ class WebDevtoolsDeviceTest {
         assertTrue(mf["mobile"]!!.jsonPrimitive.boolean)
         assertFalse("X11" in mf["ua"]!!.jsonPrimitive.content)
         assertTrue("innerWidth ${mf["iw"]}", mf["iw"]!!.jsonPrimitive.double < 1000)
-        // 记住了:新标签打开同一网站也是手机版
+        //Remembered:Open the same website in a new tab and also have a mobile version
         val other = open()
         assertTrue(pageFacts(other)["mobile"]!!.jsonPrimitive.boolean)
         val d = runBlocking { screen.setSiteMode(false) }!!
@@ -248,7 +248,7 @@ class WebDevtoolsDeviceTest {
         val tab = open()
         val s = session(tab)
         if (s == null) {
-            // 系统策略可能不许 shell 连 App 的套接字(SELinux 强制模式下实测如此):要干净地降级
+            //System policy may not allow the shell to connect to the App's socket(This is the actual measurement in SELinux enforcement mode):To downgrade cleanly
             assertEquals(WebDevtools.Route.None, devtools.route.value)
             assertNull(devtools.session(tab))
             assumeTrue("the system refused the helper's connection to the devtools socket (see avc in logcat)", false)
@@ -268,7 +268,7 @@ class WebDevtoolsDeviceTest {
         assertNull(devtools.session(tab))
         assertFalse(devtools.available.value)
         assertEquals(WebDevtools.Route.None, devtools.route.value)
-        // 退路:WebView 设置里的桌面 UA 仍在,页面照常
+        //retreat:Desktop UA in WebView settings is still there,Page as usual
         val f = pageFacts(tab)
         assertTrue("X11" in f["ua"]!!.jsonPrimitive.content)
         assertEquals("\"elements\"", js(tab, "document.title"))

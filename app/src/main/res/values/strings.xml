@@ -70,4 +70,10 @@
     <string name="speech_doubao_plan">Billing</string>
     <string name="speech_doubao_duration_note">Billed by recognition time</string>
     <string name="speech_doubao_concurrent_note">Billed by simultaneous connections</string>
+    <string name="browser_fullscreen">Full screen</string>
+    <string name="browser_fullscreen_exit">Exit full screen</string>
+    <string name="browser_minimize">Minimize</string>
+    <string name="browser_restore">Restore</string>
+    <string name="pip_take_control">Take control</string>
+    <string name="take_control_message">You\'re driving now. Mina will wait. Hand back when you\'re done.</string>
 </resources>

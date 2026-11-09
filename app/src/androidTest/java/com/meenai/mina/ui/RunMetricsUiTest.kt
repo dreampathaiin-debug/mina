@@ -16,7 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 「查看过程」顶上的小结一行和开发者选项里的运行统计页(不用真机任务)。 */
+/**The summary line at the top of "View Process" and the running statistics page in Developer Options(No real machine tasks required). */
 @RunWith(AndroidJUnit4::class)
 class RunMetricsUiTest {
 
@@ -29,7 +29,7 @@ class RunMetricsUiTest {
         compose.onNodeWithText(RunMetricsCopy.summaryLine(m)).assertIsDisplayed()
         compose.onNodeWithTag("run-metrics-summary").performClick()
         compose.onNodeWithText(RunMetricsCopy.MODEL).assertIsDisplayed()
-        compose.onNodeWithText("9 步").assertIsDisplayed()
+        compose.onNodeWithText("9 steps").assertIsDisplayed()
     }
 
     @Test fun statsPageShowsAggregatesAndExports() {
@@ -42,7 +42,7 @@ class RunMetricsUiTest {
         compose.setContent { MinaTheme { RunStatsContent(stats, 1, { range = it }, onCopy = { copied++ }, onShare = {}, onBack = {}) } }
         compose.onNodeWithText(RunMetricsCopy.STATS_TITLE).assertIsDisplayed()
         compose.onNodeWithText("50%（1/2）").assertExists()
-        compose.onNodeWithText("20 秒").assertExists()
+        compose.onNodeWithText("20 seconds").assertExists()
         compose.onNodeWithTag("run-stats-range-100").performClick()
         assertEquals(2, range)
         compose.onNodeWithTag("run-stats-copy").performScrollTo().performClick()

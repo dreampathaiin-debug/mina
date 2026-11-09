@@ -53,7 +53,7 @@ class RunTraceDeviceTest {
             server.dispatcher = object : Dispatcher() {
                 override fun dispatch(request: RecordedRequest): MockResponse {
                     return MockResponse().setHeader("Content-Type", "application/json")
-                    .setBody("""{"status":"completed","output":[{"type":"message","content":[{"type":"output_text","text":"完成"}]}],"usage":{"input_tokens":1200,"input_tokens_details":{"cached_tokens":512},"output_tokens":2}}""")
+                    .setBody("""{"status":"completed","output":[{"type":"message","content":[{"type":"output_text","text":"Finish"}]}],"usage":{"input_tokens":1200,"input_tokens_details":{"cached_tokens":512},"output_tokens":2}}""")
                 }
             }
             server.start()
@@ -71,45 +71,45 @@ class RunTraceDeviceTest {
                 testTasks.visionModelFactory = { _, _ -> null }
                 // A fresh install starts on the optional setup page above the chat.
                 compose.waitForIdle()
-                if (compose.onAllNodesWithContentDescription("菜单").fetchSemanticsNodes().isEmpty()) {
+                if (compose.onAllNodesWithContentDescription("menu").fetchSemanticsNodes().isEmpty()) {
                     compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
                 }
-                compose.onNodeWithContentDescription("菜单").performClick()
-                compose.onNodeWithText("设置").performClick()
-                compose.onNodeWithText("记录详细 Trace").assertDoesNotExist()
-                compose.onNodeWithText("开发者选项").performScrollTo().performClick()
-                compose.onNodeWithText("Trace 存储上限").performScrollTo().performClick()
+                compose.onNodeWithContentDescription("menu").performClick()
+                compose.onNodeWithText("set up").performClick()
+                compose.onNodeWithText("Record details Trace").assertDoesNotExist()
+                compose.onNodeWithText("Developer options").performScrollTo().performClick()
+                compose.onNodeWithText("Trace storage limit").performScrollTo().performClick()
                 compose.onNode(hasSetTextAction()).performTextReplacement("0")
-                compose.onNode(hasText("保存") and hasClickAction() and hasAnyAncestor(isDialog())).assertIsNotEnabled()
+                compose.onNode(hasText("save") and hasClickAction() and hasAnyAncestor(isDialog())).assertIsNotEnabled()
                 compose.onNode(hasSetTextAction()).performTextReplacement("37")
-                compose.clickInDialog("保存")
+                compose.clickInDialog("save")
                 compose.awaitOne("37 MiB").assertExists()
                 assertTrue(com.meenai.mina.record.DetailedTraces(app).limitMiB == 37)
-                compose.onNodeWithText("记录详细 Trace").performScrollTo().performClick()
+                compose.onNodeWithText("Record details Trace").performScrollTo().performClick()
                 assertTrue(app.detailedTraces.enabled)
                 compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
-                compose.awaitOne("设置").assertExists()
+                compose.awaitOne("set up").assertExists()
                 compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
                 compose.runOnUiThread {
                     app.chat.newConversation()
-                    assertTrue(app.chat.send("请回复完成，TRACE_FIXTURE", Prerequisites.Check(emptyList())))
+                    assertTrue(app.chat.send("Please reply to complete,TRACE_FIXTURE", Prerequisites.Check(emptyList())))
                 }
-                compose.waitUntil(30_000) { compose.onAllNodesWithText("查看过程").fetchSemanticsNodes().isNotEmpty() }
-                compose.onNodeWithText("查看过程").performSemanticsAction(SemanticsActions.OnClick)
-                compose.waitUntil(15_000) { compose.onAllNodesWithText("运行过程").fetchSemanticsNodes().isNotEmpty() }
-                // 运行过程页先出标题、再读出这次运行的头部:等头部那一行出来
-                compose.waitUntil(10_000) { compose.onAllNodesWithText("导出用量记录").fetchSemanticsNodes().isNotEmpty() }
-                compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("详细 Trace"))
-                compose.onNodeWithText("详细 Trace").performScrollTo().performClick()
-                // 页面在任务刚开始时就打开了:请求那一行要等这次请求录完、页面重读之后才出来
-                val usage = "输入 1200 · 缓存读取 512 · 未命中 688"
+                compose.waitUntil(30_000) { compose.onAllNodesWithText("View process").fetchSemanticsNodes().isNotEmpty() }
+                compose.onNodeWithText("View process").performSemanticsAction(SemanticsActions.OnClick)
+                compose.waitUntil(15_000) { compose.onAllNodesWithText("Running process").fetchSemanticsNodes().isNotEmpty() }
+                //On the running process page, the title is displayed first, and then the header of the run is read.:Wait for the head line to come out
+                compose.waitUntil(10_000) { compose.onAllNodesWithText("Export usage records").fetchSemanticsNodes().isNotEmpty() }
+                compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("detailed Trace"))
+                compose.onNodeWithText("detailed Trace").performScrollTo().performClick()
+                //The page opens at the beginning of the task:The requested line will not appear until the request is recorded and the page is reread.
+                val usage = "Input 1200 · Cache read 512 · Miss 688"
                 compose.waitUntil(30_000) { compose.onAllNodesWithText(usage, substring = true).fetchSemanticsNodes().isNotEmpty() }
                 val run = com.meenai.mina.record.RunStore(app).list().first { "TRACE_FIXTURE" in it.goal }
                 compose.waitUntil(30_000) { !app.detailedTraces.store.recording(run.id) }
-                // 请求正文被截过,录完的整次 Trace 仍标「部分记录」
-                compose.waitUntil(5_000) { compose.onAllNodesWithText("部分记录").fetchSemanticsNodes().isNotEmpty() }
+                //The request body was truncated,The entire Trace after recording is still marked as "Partial Recording"
+                compose.waitUntil(5_000) { compose.onAllNodesWithText("partial record").fetchSemanticsNodes().isNotEmpty() }
                 compose.onNodeWithText(usage, substring = true).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
-                compose.onNodeWithText("保存本次 Trace").assertExists()
+                compose.onNodeWithText("Save this time Trace").assertExists()
                 val bytes = ByteArrayOutputStream().also { app.detailedTraces.store.archive(run.id)!!.save(it, false) }.toByteArray()
                 assertTrue(bytes.isNotEmpty() && "TRACE_FIXTURE" !in bytes.decodeToString())
             } finally {

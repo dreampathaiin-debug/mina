@@ -14,7 +14,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 小窗按画面比例定大小:横向网页看得到左右两端,长屏手机的画面看得到最底下。 */
+/**The small window is sized according to the screen ratio:The left and right ends of the horizontal web page can be seen,The screen of the long-screen mobile phone can be seen at the bottom. */
 @RunWith(AndroidJUnit4::class)
 class AgentPipWebFrameTest {
 
@@ -31,7 +31,7 @@ class AgentPipWebFrameTest {
             AgentPip(PipUi(visible = true), frame, webContent = true, reduceMotion = true,
                 topInset = 0f, bottomInset = 0f, onExpand = {}, onCollapse = {}, onAttention = {})
         }
-        val pixels = compose.onNodeWithContentDescription("Mina 的虚拟屏").captureToImage().toPixelMap()
+        val pixels = compose.onNodeWithContentDescription("Mina's virtual screen").captureToImage().toPixelMap()
         val y = pixels.height / 2
         val left = pixels[pixels.width / 10, y]
         val right = pixels[pixels.width * 9 / 10, y]
@@ -41,7 +41,7 @@ class AgentPipWebFrameTest {
     }
 
     @Test fun tallPhoneFrameShowsItsBottom() {
-        // 长屏手机的画面(高约为宽的 2.2 倍):最底下一截涂成绿色,小窗按画面比例定高,底部不能被裁掉
+        //Picture of long screen mobile phone(Height is approximately 2.2 times width):The bottom section is painted green,The height of the small window is determined according to the screen ratio,The bottom cannot be cut off
         val frame = Bitmap.createBitmap(360, 794, Bitmap.Config.ARGB_8888)
         Canvas(frame).apply {
             drawColor(Color.WHITE)
@@ -51,7 +51,7 @@ class AgentPipWebFrameTest {
             AgentPip(PipUi(visible = true), frame, webContent = false, reduceMotion = true,
                 topInset = 0f, bottomInset = 0f, onExpand = {}, onCollapse = {}, onAttention = {})
         }
-        val pixels = compose.onNodeWithContentDescription("Mina 的虚拟屏").captureToImage().toPixelMap()
+        val pixels = compose.onNodeWithContentDescription("Mina's virtual screen").captureToImage().toPixelMap()
         val bottom = pixels[pixels.width / 2, pixels.height - 3]
         assertTrue("bottom of phone frame was cropped: $bottom", bottom.green > .8f && bottom.red < .2f)
         frame.recycle()

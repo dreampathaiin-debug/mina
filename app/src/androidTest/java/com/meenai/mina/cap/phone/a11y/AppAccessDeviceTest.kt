@@ -40,8 +40,8 @@ class AppAccessDeviceTest {
     }
 
     /**
-     * 从没设置过的应用默认允许:能打开、能读屏。任务进行中把它设为禁用,下一次读屏立刻被拒;
-     * 再允许后又能读 —— 权限每次都读最新状态,不用重启任务;沿用核对结果时名单一变也不再沿用。
+     *Apps that have never been set are allowed by default:Can open and read the screen. Set it to disabled while the task is in progress,The next time you read the screen, you will be rejected immediately.;
+     *You can read again after allowing it again - the permissions read the latest status every time,No need to restart the task;When the verification results are inherited, even if the list changes, they will no longer be adopted.
      */
     @Test fun blockingWhileRunningStopsTheNextRead() = runBlocking {
         val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as MinaApp
@@ -65,7 +65,7 @@ class AppAccessDeviceTest {
             app.appAccess.setBlocked(pkg, true)
             try { screen.checkScreen(); fail("Blocked app must not be read mid-task") }
             catch (e: AppAccessDenied) { assertEquals("app_blocked", e.code) }
-            // 读屏用这一屏自带的窗口归属核对:同样被拒
+            //When reading a screen, use the window ownership check that comes with this screen.:Also rejected
             try { screen.snapshot(); fail("Blocked app must not be read mid-task") }
             catch (e: AppAccessDenied) { assertEquals("app_blocked", e.code) }
 

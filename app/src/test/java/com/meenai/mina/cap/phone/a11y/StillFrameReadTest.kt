@@ -12,9 +12,9 @@ class StillFrameReadTest {
     private val cells = FrameMath.GRID_W * FrameMath.GRID_H
     private val pageA = IntArray(cells) { 200 }
     private val pageB = IntArray(cells) { 20 }
-    /** 每 50 ms 都不一样的过渡帧(页面在滑入、键盘在升起)。 */
+    /**Every 50ms are different transition frames(The page is sliding in and the keyboard is rising). */
     private fun moving(t: Long) = IntArray(cells) { ((t / 50 * 37 + it * 11) % 256).toInt() }
-    /** A 页上有一小块一直在动(动图头像):只动几格。 */
+    /**There is a small area on page A that keeps moving.(GIF avatar):Move only a few squares. */
     private fun animatedA(t: Long) = pageA.copyOf().also { f -> for (i in 0 until 4) f[i] = if ((t / 100) % 2 == 0L) 0 else 255 }
 
     private class Clock { var now = 0L }
@@ -30,7 +30,7 @@ class StillFrameReadTest {
 
     @Test fun smallAnimationsDoNotDiscardTheText() = runTest {
         val c = Clock()
-        // 头像一直在动:等到上限就认,认完只有那几格变了,照用
+        //The avatar keeps moving:Wait until the upper limit is reached,After recognition, only those few boxes have changed.,Use as usual
         val r = StillFrameRead.read({ c.now }, { c.now += it }, { animatedA(c.now) }) { c.now += 300; "lines" }
         assertEquals("lines", r)
         assertTrue(c.now <= StillFrameRead.STILL_CAP_MS + 400)
@@ -39,14 +39,14 @@ class StillFrameReadTest {
     @Test fun pageSwitchDuringRecognitionReadsAgainOnTheNewPage() = runTest {
         val c = Clock()
         var reads = 0
-        // 第一次认的时候换了页:丢掉,按新的一页再认
+        //The first time I recognized it, I changed the page.:throw away,Click on the new page to read again
         val r = StillFrameRead.read({ c.now }, { c.now += it }, { if (reads == 0 || c.now < 1_000) pageA else pageB }) {
             reads++
             if (reads == 1) c.now = 1_000
             "read $reads"
         }
         assertEquals("read 2", r)
-        // 一直在整页变:认两次都对不上,不给
+        //Keeps changing throughout the page:Even if I admit it twice, it won’t be right.,Don't give
         var n = 0
         assertNull(StillFrameRead.read({ c.now }, { c.now += it }, { if (n % 2 == 0) pageA else pageB }) { n++; "x" })
     }

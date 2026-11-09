@@ -29,10 +29,10 @@ class WebCdpPureTest {
         assertTrue(m.isMobile("www.example.com."))
         assertFalse(m.isMobile("notexample.com"))
         assertFalse(m.isMobile(null))
-        // 换个实例读回来
+        //Read it back in another instance
         val again = SiteModes(dir)
         assertEquals(listOf("example.com"), again.mobileSites())
-        // 子域名改回桌面版:连上级记录一起去掉
+        //Change subdomain name back to desktop version:Delete the superior records as well.
         again.set("shop.example.com", mobile = false)
         assertFalse(again.isMobile("example.com"))
         assertFalse(SiteModes(dir).isMobile("example.com"))
@@ -86,7 +86,7 @@ class WebCdpPureTest {
         assertEquals(2702, m["height"]!!.jsonPrimitive.int)
         assertFalse(m["mobile"]!!.jsonPrimitive.boolean)
         assertEquals(1, m["deviceScaleFactor"]!!.jsonPrimitive.int)
-        // 1280 CSS 像素 × 1.75 × scale = 720 视图像素
+        // 1280CSS pixels × 1.75 × scale =720 view pixels
         assertEquals(720.0, 1280 * 1.75 * m["scale"]!!.jsonPrimitive.double, 1e-6)
         assertEquals(800, DesktopProfile.metricsOverride(0, 0, null)["height"]!!.jsonPrimitive.int)
         assertNull(DesktopProfile.fitScale(0, 1.75f))
@@ -94,11 +94,11 @@ class WebCdpPureTest {
 
     @Test fun handOperatedTabsKeepNativeZoom() {
         val scale = DesktopProfile.fitScale(720, 1.75f)
-        // Agent 的标签:仿真把整页缩进视图
+        //Agent tags:Simulate indenting the entire page into view
         val (agent, args) = DesktopProfile.viewportCall(false, 720, 1520, scale)
         assertEquals("Emulation.setDeviceMetricsOverride", agent)
         assertEquals(DesktopProfile.metricsOverride(720, 1520, scale), args)
-        // 用户亲手操作的标签:撤销视口仿真,交给 WebView 的宽视口与总览模式,能双指缩放
+        //Labels created by the user's hands:Undo viewport emulation,Wide viewport and overview mode handed over to WebView,Able to zoom with two fingers
         val (hand, none) = DesktopProfile.viewportCall(true, 720, 1520, scale)
         assertEquals("Emulation.clearDeviceMetricsOverride", hand)
         assertTrue(none.isEmpty())
@@ -107,7 +107,7 @@ class WebCdpPureTest {
     @Test fun desktopScreenIsTheMaximizedWindow() {
         val m = DesktopProfile.metricsOverride(1280, 800, null)
         assertEquals(1280, m["screenWidth"]!!.jsonPrimitive.int)
-        // 屏幕高 = 视口高 + 窗口外框,和补丁里的 outerHeight 一致
+        //screen height =Viewport height +window frame,and in the patch outerHeightconsistent
         assertEquals(800 + DesktopProfile.WINDOW_CHROME_PX, m["screenHeight"]!!.jsonPrimitive.int)
         assertEquals("landscapePrimary", m["screenOrientation"]!!.jsonObject["type"]!!.jsonPrimitive.content)
         assertEquals("portraitPrimary", DesktopProfile.metricsOverride(720, 1520, null)["screenOrientation"]!!.jsonObject["type"]!!.jsonPrimitive.content)
@@ -131,7 +131,7 @@ class WebCdpPureTest {
         assertTrue(js.contains("'${DesktopProfile.NAVIGATOR_PLATFORM}'"))
         assertTrue(js.contains("innerHeight + ${DesktopProfile.WINDOW_CHROME_PX}"))
         for (k in listOf("maxTouchPoints", "ontouchstart", "matchMedia", "outerWidth", "createEvent", "webdriver")) assertTrue(k, js.contains(k))
-        // 不碰 UA、语言、时区
+        //Don’t touch UA, language, time zone
         for (k in listOf("userAgent", "languages", "timeZone", "Intl")) assertFalse(k, js.contains(k))
     }
 }

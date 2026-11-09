@@ -16,7 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 「后台屏」那一页:空态、一块屏一行、点开小画面(只用假数据,不建真屏)。 */
+/**The "Backstage Screen" page:Empty state, one screen per line, click to open the small screen(Just use fake data,Do not build a real screen). */
 @RunWith(AndroidJUnit4::class)
 class ScreensScreenTest {
 
@@ -31,32 +31,32 @@ class ScreensScreenTest {
     }
 
     private fun row(displayId: Int, key: String = "k$displayId") =
-        ScreenRow(key, "conv-$key", "打开设置看一下电池", displayId, TaskState.Running(1, "点了一下"), foreground = "设置")
+        ScreenRow(key, "conv-$key", "Open settings and check the battery", displayId, TaskState.Running(1, "Clicked"), foreground = "set up")
 
     @Test fun emptyPageSaysNoTaskIsRunning() {
         show(emptyList())
         compose.onNodeWithText(ScreensCopy.EMPTY).assertIsDisplayed()
     }
 
-    /** 一个任务一张卡:在做什么、在用哪个 App、状态都在;点那一行回到它所属的对话。 */
+    /**One task, one card:What you are doing, which app you are using, and your status are all there;Click on that line to return to the conversation it belongs to. */
     @Test fun oneCardPerTaskOpensItsConversation() {
         show(listOf(row(12), row(-1, "queued")))
-        compose.onNodeWithText("正在用设置").assertIsDisplayed()
-        compose.onNodeWithText("还没打开 App").assertIsDisplayed()
-        compose.onAllNodesWithText("打开设置看一下电池").assertCountEquals(2)
-        compose.onAllNodesWithText("正在执行").assertCountEquals(2)
-        compose.onNodeWithText("正在用设置").performClick()
+        compose.onNodeWithText("Using settings").assertIsDisplayed()
+        compose.onNodeWithText("Not opened yet App").assertIsDisplayed()
+        compose.onAllNodesWithText("Open settings and check the battery").assertCountEquals(2)
+        compose.onAllNodesWithText("Executing").assertCountEquals(2)
+        compose.onNodeWithText("Using settings").performClick()
         assertEquals(listOf("open conv-k12"), calls)
     }
 
-    /** 还没建屏的那块没有「看画面」:没有画面可看,不给一个点了没反应的入口。 */
+    /**There is no "viewing screen" in the area where the screen has not yet been built.:No screen to see,Don't give an entry that doesn't respond after clicking. */
     @Test fun aScreenThatIsNotBuiltYetHasNoPreview() {
         show(listOf(row(12), row(-1, "queued")))
         compose.onNodeWithTag("screens-preview-queued").assertDoesNotExist()
         compose.onNodeWithTag("screens-preview-k12").performScrollTo().assertIsDisplayed()
     }
 
-    /** 点一下展开、再点收起:按钮上的说法跟着换。 */
+    /**Click to expand and then to collapse:Change the words on the button accordingly. */
     @Test fun previewToggles() {
         show(listOf(row(12)))
         compose.onNodeWithTag("screens-preview-k12").performScrollTo().performClick()

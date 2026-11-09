@@ -21,9 +21,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * 任务结束时 Mina 屏上的 App 怎么办(IMinaShell.finishDisplay):没出声的留下,挪到主屏最后面、不到用户眼前;
- * 下次经启动入口打开时同一个任务挪回 Mina 的屏;正在出声的、标了 close 的随屏关掉;标了 keep 的出声也留下。
- * 需要外壳已连上。用户的主屏不该有任何变化(焦点、焦点窗口都不变,留下的任务看不见)。
+ *What happens to the apps on Mina’s screen when the mission ends?(IMinaShell.finishDisplay):Stay silently,Move it to the back of the home screen and out of sight of users;
+ *The same task will be moved back to Mina's screen the next time the startup portal is opened.;Close the screen that is currently speaking and marked close.;Sounds marked with keep are also left.
+ *Requires the casing to be connected. The user's home screen should not change in any way(The focus and focus window remain unchanged.,The tasks left behind are invisible).
  */
 @RunWith(AndroidJUnit4::class)
 class AppsAfterTaskDeviceTest {
@@ -36,14 +36,14 @@ class AppsAfterTaskDeviceTest {
 
     @After fun tearDown() {
         screens.forEach { runCatching { it.close() } }
-        // 留在主屏后面的探针任务:挪回一块新屏再随屏关掉(就是下次打开的那条路)
+        //Probe tasks that stay behind the home screen:Move it to a new screen and close it with the screen(It's the road that will open next time)
         runCatching { ParityScreen(shell, 720, 1600, 320).use { s -> shell.startApp(s.id, TEST_PACKAGE); Thread.sleep(500) } }
         runCatching { probe.close() }
     }
 
     private fun newScreen() = ParityScreen(shell, 720, 1600, 320).also { screens += it }
 
-    /** 主屏此刻的焦点(最上层焦点屏、焦点窗口、焦点 Activity),不含「最上面的任务」:有的系统按最近使用排任务。 */
+    /**The focus of the home screen at the moment(Top focus screen, focus window, focus Activity),Does not include "top task":Some systems arrange tasks according to recent use. */
     private fun mainFocus(): String = DeviceSupport.mainScreenState(shell).substringBefore(" topTask=")
 
     private fun Bundle.kept() = getStringArray(AppsAfterTask.KEY_KEPT)?.toList().orEmpty()
@@ -65,21 +65,21 @@ class AppsAfterTaskDeviceTest {
         assertNotNull(result)
         val note = result!!.getString(AppsAfterTask.KEY_NOTE)
         if (note?.contains(AppsAfterTask.NOTE_MOVE_UNSUPPORTED) == true) {
-            // 这台系统挪不了:照旧随屏关掉
+            //This system cannot be moved:Turn off the screen as usual
             assertEquals(listOf("$TEST_PACKAGE:${AppsAfterTask.Why.MoveUnsupported.wire}"), result.closed())
             assertNotNull(pollUntil(5_000) { true.takeIf { shell.displayOfTask(task) == -1 } })
             return
         }
         assertEquals("note=$note closed=${result.closed()}", listOf(TEST_PACKAGE), result.kept())
         assertEquals(Display.DEFAULT_DISPLAY, pollUntil(5_000) { shell.displayOfTask(task).takeIf { it == Display.DEFAULT_DISPLAY } })
-        // 不到用户眼前:看不见、焦点没变
+        //Not in front of users:Invisible, focus has not changed
         assertFalse("kept task is visible on the main screen", shell.visibleOnMainScreen(TEST_PACKAGE, AppCopyReader.myUser))
         assertEquals("main screen focus changed", before, mainFocus())
-        // 在最近任务里:系统的任务列表里还有它
-        // 最近任务的记录里每个任务写成 Task{… #<编号> …}
+        //in recent tasks:It’s also in the system’s task list
+        //Each task in the recent task record is written as Task{… #<serial number>…}
         assertTrue("kept task is gone from recents", Regex("#$task\\b").containsMatchIn(sh("dumpsys activity recents")))
 
-        // 下次打开:同一个任务挪回 Mina 的新屏
+        //Open next time:Move the same task back to Mina's new screen
         val s2 = newScreen()
         probe.clear()
         assertEquals(ShellService.START_OK, shell.startApp(s2.id, TEST_PACKAGE))
@@ -92,7 +92,7 @@ class AppsAfterTaskDeviceTest {
     @Test fun playingAppIsClosedByDefault() {
         val s = newScreen()
         val task = probeOn(s.id, AUDIO_PROBE)
-        // 播放器报到音频服务要一会儿
+        //It will take a while for the player to report to the audio service.
         Thread.sleep(PLAYER_SETTLE_MS)
         val result = shell.finishDisplay(s.id, emptyArray(), emptyArray())!!
         assertEquals("kept=${result.kept()}", listOf("$TEST_PACKAGE:${AppsAfterTask.Why.Playing.wire}"), result.closed())

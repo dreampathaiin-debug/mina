@@ -7,7 +7,7 @@ import org.junit.Test
 
 class AppSwitchTest {
     private val pickers = setOf("com.android.permissioncontroller", "com.android.intentresolver", "com.android.documentsui")
-    // 只有系统设置提供的页面在目标任务里算任务的一部分;预装的浏览器、应用商店不算
+    //Only the pages provided by the system settings are considered part of the target task.;Pre-installed browsers and app stores do not count
     private val settings = setOf("com.android.settings")
     private fun check(current: String?, sameTask: Boolean, target: String? = "com.clock"): AppSwitch.Switch? {
         var asked = false
@@ -17,7 +17,7 @@ class AppSwitchTest {
     }
 
     @Test fun systemPageOpenedByTheTargetInItsOwnTaskIsPartOfTheTask() {
-        // 时钟「添加城市」打开的是系统设置提供的选择页,但在时钟自己的任务里
+        //The clock "Add City" opens the selection page provided by the system settings.,But within the clock's own mission
         assertNull(check("com.android.settings", sameTask = true))
     }
 
@@ -35,7 +35,7 @@ class AppSwitchTest {
 
     @Test fun anotherAppInAnotherTaskIsASwitch() {
         assertEquals(AppSwitch.Switch("com.ads", byTarget = false), check("com.ads", sameTask = false))
-        // 系统 App 但不在目标的任务里:照样算被切走
+        //System App but not in the target's task:Still considered cut off
         assertEquals(AppSwitch.Switch("com.android.settings", byTarget = false), check("com.android.settings", sameTask = false))
     }
 
@@ -46,10 +46,10 @@ class AppSwitchTest {
     }
 
     @Test fun theOtherCopyOfTheTargetAppInFrontIsASwitch() {
-        // 同一个 App 装了两份:最上面换成了不是目标的那一份
+        //Installed two copies of the same app:The top part is replaced by the one that is not the target.
         assertEquals(AppSwitch.Switch("com.clock", byTarget = false),
             AppSwitch.switchedTo("com.clock", "com.clock", { true }, pickers, { false }, otherCopy = { true }))
-        // 还是目标那一份,或只装了一份(不问另一份):照旧不算
+        //Still the target,Or only one copy(Don't ask for another one):Still doesn’t count
         assertNull(AppSwitch.switchedTo("com.clock", "com.clock", { true }, pickers, { false }, otherCopy = { false }))
         assertNull(AppSwitch.switchedTo("com.clock", "com.clock", { true }, pickers, { false }))
     }

@@ -21,7 +21,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import kotlin.coroutines.resume
 
-/** 真机测试:退出一个网站只过期它的 Cookie;全部退出清空 Cookie 与网页存储。用 mina 网页配置。 */
+/**Real machine test: Cookie;Exit all to clear cookies and web storage. Configure using mina web page. */
 @RunWith(AndroidJUnit4::class)
 class WebLoginTest {
     @get:Rule val tmp = TemporaryFolder()
@@ -84,7 +84,7 @@ class WebLoginTest {
             assertNotNull(cookies(page))
             instr.runOnMainSync { login.logoutAll() }
             assertTrue(cookies(page).isNullOrEmpty())
-            // 网页存储的清除是异步的:重新打开页面后读
+            //Web storage clearing is asynchronous:
             val cleared = DeviceSupport.pollUntil(5_000) {
                 runBlocking {
                     tab.load(page)

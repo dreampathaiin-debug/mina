@@ -35,20 +35,20 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** 侧栏的「浏览器」入口;起始页的几段(搜索、常用网站、整理、最近打开),网页的顶栏和工具栏、「更多」面板、「给 Mina 登录」横幅。 */
+/**;(),The top bar and toolbar of the web page, the "More" panel, and the "Login for Mina" banner. */
 @RunWith(AndroidJUnit4::class)
 class BrowserScreenTest {
 
     @get:Rule val compose = createComposeRule()
 
     private val calls = mutableListOf<String>()
-    private val looks = mapOf("shop.example.com" to SiteLook("购物", 3, null), "example.org" to SiteLook("新闻", 3, null))
+    private val looks = mapOf("shop.example.com" to SiteLook("Shopping", 3, null), "example.org" to SiteLook("news", 3, null))
     private val face = { host: String -> SiteLooks.faceOf(host, looks) { null } }
     private val sites = listOf(FavoriteSite("shop.example.com", true), FavoriteSite("news.example.org", false))
     private val recent = StartPageModel.recentRows(
         listOf(
-            RecentPage(AddressInput.search("周末去哪玩"), "", 3_000),
-            RecentPage("https://docs.example.net/guide", "使用指南", 2_000),
+            RecentPage(AddressInput.search(""), "", 3_000),
+            RecentPage("https://docs.example.net/guide", "User Guide", 2_000),
         ),
     ) { face(it).name }
 
@@ -82,7 +82,7 @@ class BrowserScreenTest {
                 )
             }
         }
-        compose.onNodeWithText("浏览器").assertIsDisplayed().performClick()
+        compose.onNodeWithText("").assertIsDisplayed().performClick()
         assertEquals(listOf("browser"), calls)
     }
 
@@ -91,25 +91,25 @@ class BrowserScreenTest {
         start()
         compose.onNodeWithText(BROWSER_SEARCH_HINT).assertIsDisplayed()
         compose.onNodeWithText(BROWSER_ENGINE_NOTE).assertIsDisplayed()
-        compose.onNodeWithText("常用网站").assertIsDisplayed()
+        compose.onNodeWithText("Frequently used websites").assertIsDisplayed()
         compose.onNodeWithText(BROWSER_LOGIN_LEGEND).assertIsDisplayed()
         compose.onAllNodesWithTag("browser-site-logged-in", useUnmergedTree = true).fetchSemanticsNodes().let { assertEquals(1, it.size) }
-        compose.onNodeWithText("最近打开").assertIsDisplayed()
-        compose.onNodeWithText("搜索：周末去哪玩").assertIsDisplayed()
-        compose.onNodeWithText("使用指南").performClick()
-        compose.onNodeWithText("清除").performClick()
-        compose.onNodeWithText("添加").performClick()
+        compose.onNodeWithText("Recently opened").assertIsDisplayed()
+        compose.onNodeWithText("Search: Where to go on the weekend").assertIsDisplayed()
+        compose.onNodeWithText("User Guide").performClick()
+        compose.onNodeWithText("").performClick()
+        compose.onNodeWithText("Add to").performClick()
         assertEquals(listOf("open https://docs.example.net/guide", "clear", "add"), calls)
     }
 
     @Test
     fun typingShowsSuggestions() {
         start()
-        compose.onNodeWithTag("browser-search").performTextInput("周末")
+        compose.onNodeWithTag("browser-search").performTextInput("weekend")
         compose.onNodeWithTag("browser-suggestions").assertIsDisplayed()
-        compose.onNodeWithText("搜索「周末」").assertIsDisplayed()
-        compose.onNodeWithText("搜索：周末去哪玩").performClick()
-        assertEquals(listOf("open ${AddressInput.search("周末去哪玩")}"), calls)
+        compose.onNodeWithText("Search "weekend"").assertIsDisplayed()
+        compose.onNodeWithText("Search: Where to go on the weekend").performClick()
+        assertEquals(listOf(""), calls)
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -118,19 +118,19 @@ class BrowserScreenTest {
         start()
         compose.onNodeWithTag("browser-search").performTextInput("weather")
         compose.onNodeWithTag("browser-search").performImeAction()
-        compose.onNodeWithTag("browser-search").performTextInput("天气")
+        compose.onNodeWithTag("browser-search").performTextInput("")
         compose.onNodeWithTag("browser-search").performKeyInput { pressKey(Key.Enter) }
-        assertEquals(listOf("submit weather", "submit 天气"), calls)
+        assertEquals(listOf("submit weather", ""), calls)
     }
 
     @Test
     fun editModeRemovesAndFinishes() {
         start()
-        compose.onNodeWithText("整理").performClick()
-        compose.onNodeWithText("整理常用网站").assertIsDisplayed()
-        compose.onNodeWithContentDescription("移除购物", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("完成").performClick()
-        compose.onNodeWithText("浏览器").assertIsDisplayed()
+        compose.onNodeWithText("").performClick()
+        compose.onNodeWithText("Organize frequently used websites").assertIsDisplayed()
+        compose.onNodeWithContentDescription("", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Finish").performClick()
+        compose.onNodeWithText("").assertIsDisplayed()
         assertEquals("remove shop.example.com", calls.first())
     }
 
@@ -138,12 +138,12 @@ class BrowserScreenTest {
     fun longPressEntersEditMode() {
         start()
         compose.onAllNodesWithTag("browser-sites")[0].performTouchInput { longClick(center.copy(x = width / 8f, y = 40f)) }
-        compose.onNodeWithText("整理常用网站").assertIsDisplayed()
+        compose.onNodeWithText("Organize frequently used websites").assertIsDisplayed()
     }
 
     @Test
     fun pageBarAndToolbar() {
-        val page = BrowserPage("https://shop.example.com/", "购物", 40, loading = true, canBack = false, canForward = false, desktop = true)
+        val page = BrowserPage("https://shop.example.com/", "Shopping", 40, loading = true, canBack = false, canForward = false, desktop = true)
         compose.setContent {
             MinaTheme {
                 Column {
@@ -154,13 +154,13 @@ class BrowserScreenTest {
         }
         compose.onNodeWithText(BROWSER_DESKTOP_TAG).assertIsDisplayed()
         compose.onNodeWithTag("browser-progress").assertIsDisplayed()
-        compose.onNodeWithContentDescription("后退").assertIsNotEnabled()
-        compose.onNodeWithContentDescription("停止").performClick()
-        compose.onNodeWithContentDescription("起始页").performClick()
-        compose.onNodeWithContentDescription("分享").performClick()
-        compose.onNodeWithContentDescription("更多").performClick()
+        compose.onNodeWithContentDescription("Back").assertIsNotEnabled()
+        compose.onNodeWithContentDescription("stop").performClick()
+        compose.onNodeWithContentDescription("").performClick()
+        compose.onNodeWithContentDescription("share").performClick()
+        compose.onNodeWithContentDescription("More").performClick()
         compose.onNodeWithTag("browser-address-pill").performClick()
-        compose.onNodeWithText("取消").assertIsDisplayed()
+        compose.onNodeWithText("Cancel").assertIsDisplayed()
         assertEquals(listOf("stop", "home", "share", "more"), calls)
     }
 
@@ -175,11 +175,11 @@ class BrowserScreenTest {
                 )
             }
         }
-        compose.onNodeWithText("复制链接").assertIsDisplayed()
-        compose.onNodeWithText("在其他浏览器里打开").assertIsDisplayed()
-        compose.onNodeWithText("加入常用网站").assertIsDisplayed()
-        compose.onNodeWithText("这个网站下次也用电脑版").assertIsDisplayed()
-        compose.onNodeWithText("换成电脑版").performClick()
+        compose.onNodeWithText("Copy link").assertIsDisplayed()
+        compose.onNodeWithText("Open in other browsers").assertIsDisplayed()
+        compose.onNodeWithText("Join frequently used websites").assertIsDisplayed()
+        compose.onNodeWithText("I will also use the computer version of this website next time").assertIsDisplayed()
+        compose.onNodeWithText("Switch to PC version").performClick()
         assertEquals(listOf("dismiss", "desktop"), calls)
     }
 
@@ -194,6 +194,6 @@ class BrowserScreenTest {
     @Test
     fun siteTileFallsBackToInitial() {
         compose.setContent { MinaTheme { SiteTile(face("news.example.org"), 54.dp, RoundedCornerShape(16.dp), MinaType.Title) } }
-        compose.onNodeWithText("新").assertIsDisplayed()
+        compose.onNodeWithText("new").assertIsDisplayed()
     }
 }

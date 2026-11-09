@@ -29,7 +29,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import com.meenai.mina.a11y.MinaAccessibilityService
 
-/** 真机测试:需要内置助手在运行(已配对、无线调试开着),且 Mina 无障碍服务已开启。 */
+/**Real machine test:Requires the built-in assistant to be running(Paired, wireless debugging is on),And Mina accessibility services are turned on. */
 @RunWith(AndroidJUnit4::class)
 class A11yOnDisplayTest {
     companion object {
@@ -53,8 +53,8 @@ class A11yOnDisplayTest {
         }
 
         /**
-         * 启动测试时系统会强停本 App,无障碍服务随之被记为「已崩溃」、不再自动重绑。
-         * 已开启时把它从开启列表里摘下再放回,促使系统重新绑定到当前进程;没开启就不动。
+         *When starting the test, the system will forcefully stop the system. App,The accessibility service is then recorded as "crashed" and will no longer be automatically reconnected.
+         *When it's opened, take it off the open list and put it back,Causes the system to rebind to the current process;It won't move if it's not turned on.
          */
         private fun rebindAccessibility() {
             if (ScreenAccessibility.instance.value != null) return
@@ -66,13 +66,13 @@ class A11yOnDisplayTest {
                 shellCommand("settings put secure $key ${enabled.filter { it != mina }.joinToString(":").ifEmpty { "\"\"" }}")
                 Thread.sleep(500)
             } finally {
-                // 无论如何恢复原来的完整列表(含其他 App 的服务)
+                //Anyway to restore the original full list(Services including other apps)
                 shellCommand("settings put secure $key ${enabled.joinToString(":")}")
             }
         }
 
         private fun shellCommand(cmd: String): String {
-            // 不压制其他无障碍服务,否则 Mina 的服务会在测试期间被暂停
+            //Do not suppress other accessibility services,Otherwise Mina's service will be suspended during the test period
             val ua = InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             val pfd = ua.executeShellCommand(cmd)
@@ -109,13 +109,13 @@ class A11yOnDisplayTest {
         val found = pollUntil(5_000) {
             a11y.windowsOn(d.displayId).firstNotNullOfOrNull { w ->
                 w.root?.let { root ->
-                    (root.findAccessibilityNodeInfosByText("WLAN") + root.findAccessibilityNodeInfosByText("设置"))
+                    (root.findAccessibilityNodeInfosByText("WLAN") + root.findAccessibilityNodeInfosByText("set up"))
                         .firstOrNull()
                 }
             }
         }
-        assertNotNull("no WLAN/设置 node in windows on display ${d.displayId}", found)
-        // 主屏的窗口不会混进虚拟屏的列表
+        assertNotNull("no WLAN/set up node in windows ondisplay ${d.displayId}", found)
+        //Home screen windows will not be mixed into the virtual screen list
         assertTrue(a11y.windowsOn(d.displayId).none { it.displayId != d.displayId })
     }
 
@@ -129,13 +129,13 @@ class A11yOnDisplayTest {
         val a11y = service()
         val mainTop = shell.topTaskId(Display.DEFAULT_DISPLAY)
         val d = settingsOnNewDisplay()
-        // 等页面出现可点击的列表项
+        //Wait for clickable list items to appear on the page
         val item = pollUntil(5_000) { clickableItem(a11y, d.displayId) }
         assertNotNull("no clickable item on display ${d.displayId}", item)
         val before = stableFrame(d)
 
         val eventDisplays = async(start = CoroutineStart.UNDISPATCHED) {
-            // 收集一段时间内的全部事件,用于检查不会混入主屏事件
+            //Collect all events within a period of time,Used to check that home screen events are not mixed in
             val got = mutableListOf<AccessibilityEvent>()
             withTimeoutOrNull(3_000) { a11y.eventsFor(d.displayId).collect { got += it } }
             got
@@ -156,7 +156,7 @@ class A11yOnDisplayTest {
         assertEquals("main screen top task changed", mainTop, shell.topTaskId(Display.DEFAULT_DISPLAY))
     }
 
-    /** 第一个可点击的条目在屏上的中心点。 */
+    /**The first clickable item is at the center point on the screen. */
     private fun clickableItem(a11y: ScreenAccessibility, displayId: Int): Pair<Int, Int>? {
         val rect = android.graphics.Rect()
         for (w in a11y.windowsOn(displayId)) {
@@ -165,7 +165,7 @@ class A11yOnDisplayTest {
             while (queue.isNotEmpty()) {
                 val n = queue.removeFirst()
                 n.getBoundsInScreen(rect)
-                // 跳过顶部标题栏一带,点中间偏下的列表项
+                //Skip the top title bar area,Click on the lower middle list item
                 if (n.isClickable && n.isVisibleToUser && rect.top > 300 && rect.height() in 40..400) {
                     return rect.centerX() to rect.centerY()
                 }

@@ -20,7 +20,7 @@ class CapsulePreviewTest {
         runCurrent()
         source.emit(Frame("1"))
         runCurrent()
-        // 200 毫秒内来的三张只留最后一张
+        //Three pictures came within 200 milliseconds, leaving only the last one.
         source.emit(Frame("2"))
         source.emit(Frame("3"))
         source.emit(Frame("4"))
@@ -42,7 +42,7 @@ class CapsulePreviewTest {
         source.emit(first)
         advanceTimeBy(300)
         runCurrent()
-        // 同一张、内容一样的新拷贝:都不推
+        //A new copy of the same photo with the same content:Neither recommend it
         source.emit(first)
         advanceTimeBy(300)
         runCurrent()

@@ -17,74 +17,74 @@ class ConversationStoreTest {
         val dir = tmp.newFolder("c")
         val a = ConversationStore(dir)
         val id = a.newConversation()
-        a.append(id, Turn("查天气", "晴", "succeeded"))
-        a.append(id, Turn("订票", "验证码\n\"过不去\"", "failed"))
+        a.append(id, Turn("Check the weather", "", "succeeded"))
+        a.append(id, Turn("Book tickets", "Verification code\n\"make life difficult for\"", "failed"))
         val b = ConversationStore(dir)
-        assertEquals(listOf(Turn("查天气", "晴", "succeeded"), Turn("订票", "验证码\n\"过不去\"", "failed")), b.turns(id))
+        assertEquals(listOf(Turn("Check the weather", "", "succeeded"), Turn("Book tickets", "Verification code\n\"make life difficult for\"", "failed")), b.turns(id))
         assertEquals(emptyList<Turn>(), b.turns(b.newConversation()))
         assertNotEquals(id, b.newConversation())
     }
 
-    /** 留在后台运行的那一页(站点)和它后来关掉的原因跟着那一轮存下;没留页的轮次不写这两个字段。 */
+    /**The page left running in the background(site)And the reason why it was shut down later was saved with that round.;These two fields will not be written in rounds where no pages are left. */
     @Test fun persistsKeptPage() {
         val dir = tmp.newFolder("c")
         val a = ConversationStore(dir)
         val id = a.newConversation()
-        a.append(id, Turn("播放课程,挂着别关", "开始播放了", "succeeded", runId = "r1", keptPage = "course.example.com"))
-        a.append(id, Turn("谢谢", "不客气", "succeeded", runId = "r2"))
+        a.append(id, Turn("play course,Don't close it", "Started playing", "succeeded", runId = "r1", keptPage = "course.example.com"))
+        a.append(id, Turn("Thanks", "You're welcome", "succeeded", runId = "r2"))
         assertEquals(listOf("course.example.com", null), ConversationStore(dir).turns(id).map { it.keptPage })
         a.updateTurn(id, "r1") { it.copy(keptPageClosed = "expired") }
         assertEquals("expired", ConversationStore(dir).turns(id).first().keptPageClosed)
-        assertFalse("keptPage" in java.io.File(dir, "$id.json").readText().substringAfter("谢谢"))
+        assertFalse("keptPage" in java.io.File(dir, "$id.json").readText().substringAfter("Thanks"))
     }
 
-    /** 这一轮用过的能力组跟着存下(下一轮开局据此预先展开);没用过的不写这个字段。 */
+    /**The ability groups used in this round will be saved accordingly.(The next round starts accordingly.);If it has not been used, do not write this field. */
     @Test fun persistsUsedGroups() {
         val dir = tmp.newFolder("c")
         val a = ConversationStore(dir)
         val id = a.newConversation()
-        a.append(id, Turn("打开设置", "好了", "succeeded", groups = listOf("phone", "web")))
-        a.append(id, Turn("谢谢", "不客气", "succeeded"))
+        a.append(id, Turn("Open settings", "alright", "succeeded", groups = listOf("phone", "web")))
+        a.append(id, Turn("Thanks", "You're welcome", "succeeded"))
         assertEquals(listOf(listOf("phone", "web"), emptyList()), ConversationStore(dir).turns(id).map { it.groups })
-        assertFalse("groups" in java.io.File(dir, "$id.json").readText().substringAfter("谢谢"))
+        assertFalse("groups" in java.io.File(dir, "$id.json").readText().substringAfter("Thanks"))
     }
 
-    /** 插话打断的那段回复和插话一一对应存下;没打断过的轮次不写这个字段,旧文件读出来是空的。 */
+    /**The reply interrupted by the interruption is saved in one-to-one correspondence with the interruption.;Do not write this field in uninterrupted rounds.,The old file is read as empty. */
     @Test fun persistsInterruptedReplies() {
         val dir = tmp.newFolder("c")
         val a = ConversationStore(dir)
         val id = a.newConversation()
-        a.append(id, Turn("查天气", "明天多云", "succeeded", steers = listOf("改成查明天", "顺便看看后天"), interruptedReplies = listOf("今天晴", "")))
-        a.append(id, Turn("谢谢", "不客气", "succeeded", steers = listOf("好")))
+        a.append(id, Turn("Check the weather", "It will be cloudy tomorrow", "succeeded", steers = listOf("Change to check tomorrow", "Let's take a look the day after tomorrow"), interruptedReplies = listOf("It's sunny today", "")))
+        a.append(id, Turn("Thanks", "You're welcome", "succeeded", steers = listOf("good")))
         val read = ConversationStore(dir).turns(id)
-        assertEquals(listOf(listOf("今天晴", ""), emptyList()), read.map { it.interruptedReplies })
-        assertEquals(listOf("改成查明天", "顺便看看后天"), read.first().steers)
-        assertFalse("interruptedReplies" in java.io.File(dir, "$id.json").readText().substringAfter("谢谢"))
+        assertEquals(listOf(listOf("It's sunny today", ""), emptyList()), read.map { it.interruptedReplies })
+        assertEquals(listOf("Change to check tomorrow", "Let's take a look the day after tomorrow"), read.first().steers)
+        assertFalse("interruptedReplies" in java.io.File(dir, "$id.json").readText().substringAfter("Thanks"))
     }
 
-    /** 插话之前已经说完的回复同样一一对应存下;没有时不写这个字段。 */
+    /**Replies that have been finished before interrupting are also saved one-to-one.;If not, this field is not written. */
     @Test fun persistsFinishedReplies() {
         val dir = tmp.newFolder("c")
         val a = ConversationStore(dir)
         val id = a.newConversation()
-        a.append(id, Turn("查天气", "明天多云", "succeeded", steers = listOf("改成查明天"), finishedReplies = listOf("今天晴,最高 25 度。")))
-        a.append(id, Turn("谢谢", "不客气", "succeeded", steers = listOf("好")))
-        assertEquals(listOf(listOf("今天晴,最高 25 度。"), emptyList()), ConversationStore(dir).turns(id).map { it.finishedReplies })
-        assertFalse("finishedReplies" in java.io.File(dir, "$id.json").readText().substringAfter("谢谢"))
+        a.append(id, Turn("Check the weather", "It will be cloudy tomorrow", "succeeded", steers = listOf("Change to check tomorrow"), finishedReplies = listOf("It's sunny today,Maximum 25 degrees.")))
+        a.append(id, Turn("Thanks", "You're welcome", "succeeded", steers = listOf("good")))
+        assertEquals(listOf(listOf("It's sunny today,Maximum 25 degrees."), emptyList()), ConversationStore(dir).turns(id).map { it.finishedReplies })
+        assertFalse("finishedReplies" in java.io.File(dir, "$id.json").readText().substringAfter("Thanks"))
     }
 
-    /** 删对话:对话文件、标题、挪到一边的损坏文件、临时文件都删掉,列表里没有了,别的对话不动;删完发一次改动。 */
+    /**Delete conversation:Session files, titles, moved aside damaged files, and temporary files are all deleted.,Not in the list anymore,Other conversations don’t move;After deleting, post the changes. */
     @Test fun deleteRemovesTheConversationAndItsSidecars() = kotlinx.coroutines.runBlocking {
         val dir = tmp.newFolder("c")
         val store = ConversationStore(dir)
         val id = store.newConversation()
         val other = store.newConversation()
-        store.append(id, Turn("查天气", "晴", "succeeded"))
-        store.setTitle(id, "天气")
+        store.append(id, Turn("Check the weather", "", "succeeded"))
+        store.setTitle(id, "")
         store.setPinned(id, true, at = 5L)
         java.io.File(dir, "$id.json.corrupt-1").writeText("x")
         java.io.File(dir, "$id.json.tmp").writeText("x")
-        store.append(other, Turn("订票", "好了", "succeeded"))
+        store.append(other, Turn("Book tickets", "alright", "succeeded"))
         val changes = mutableListOf<String>()
         val deletions = mutableListOf<String>()
         val job = launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) { store.changes.collect { changes += it } }
@@ -102,34 +102,34 @@ class ConversationStoreTest {
         assertEquals(null, store.pinnedAt(id))
     }
 
-    /** 用户改的名字说了算:后台起标题晚到也不盖掉;起好了的标题用户照样能改;空的不改。 */
+    /**It is up to the user to change the name:Even if the title comes late in the background, it will not be covered.;Once the title has been created, the user can still change it.;Leave empty unchanged. */
     @Test fun renameByUserWinsOverAutoTitle() {
         val dir = tmp.newFolder("c")
         val store = ConversationStore(dir)
         val id = store.newConversation()
-        store.append(id, Turn("查一下明天上海的天气", "晴", "succeeded"))
-        assertTrue(store.rename(id, "  天气  "))
-        assertFalse(store.setTitle(id, "上海天气"))
-        assertEquals("天气", ConversationStore(dir).title(id))
+        store.append(id, Turn("Check the weather in Shanghai tomorrow", "", "succeeded"))
+        assertTrue(store.rename(id, "weather  "))
+        assertFalse(store.setTitle(id, "Shanghai weather"))
+        assertEquals("", ConversationStore(dir).title(id))
 
         val other = store.newConversation()
-        store.append(other, Turn("订票", "好了", "succeeded"))
-        assertTrue(store.setTitle(other, "订高铁票"))
-        assertTrue(store.rename(other, "回家的票"))
+        store.append(other, Turn("Book tickets", "alright", "succeeded"))
+        assertTrue(store.setTitle(other, "Book high-speed rail tickets"))
+        assertTrue(store.rename(other, "ticket home"))
         assertFalse(store.rename(other, "   "))
-        assertEquals("回家的票", store.title(other))
-        assertEquals(setOf("天气", "回家的票"), store.list().map { it.title }.toSet())
+        assertEquals("ticket home", store.title(other))
+        assertEquals(setOf("", "ticket home"), store.list().map { it.title }.toSet())
 
         store.delete(other)
-        assertFalse(store.rename(other, "再改"))
+        assertFalse(store.rename(other, "Change again"))
     }
 
-    /** 置顶记在 `.pin` 里(置顶的时间),重开还在;列表带上置顶时间,不改对话的先后;取消置顶就没了。 */
+    /**Pin it to the top `.pin`inside(Pin time),Reopening is still happening;List with pin time,Do not change the order of the conversation;Unpin it and it will disappear. */
     @Test fun pinPersistsAndShowsInTheList() {
         val dir = tmp.newFolder("c")
         val store = ConversationStore(dir)
-        store.append("a", Turn("一", "好", "succeeded"))
-        store.append("b", Turn("二", "好", "succeeded"))
+        store.append("a", Turn("one", "good", "succeeded"))
+        store.append("b", Turn("two", "good", "succeeded"))
         assertTrue(store.setPinned("a", true, at = 123L))
         val again = ConversationStore(dir)
         assertEquals(123L, again.pinnedAt("a"))
@@ -138,25 +138,25 @@ class ConversationStoreTest {
         assertTrue(again.setPinned("a", false))
         assertEquals(null, again.pinnedAt("a"))
         assertFalse(java.io.File(dir, "a.pin").exists())
-        // 删掉的对话不再置顶回来
+        //Deleted conversations will no longer be pinned back to the top
         again.delete("b")
         assertFalse(again.setPinned("b", true))
     }
 
-    /** 删之后才到的补写(后台起好的标题、收尾后补的结局)不把对话写回来;再存进一轮就是重新用这个编号。 */
+    /**A supplement that arrived after deletion(A good title from the background and an ending that is added after the ending.)Don't write back the dialogue;Depositing for another round means using this number again. */
     @Test fun lateWritesDoNotReviveADeletedConversation() {
         val dir = tmp.newFolder("c")
         val store = ConversationStore(dir)
         val id = store.newConversation()
-        store.append(id, Turn("查天气", "晴", "succeeded", runId = "r1"))
+        store.append(id, Turn("Check the weather", "", "succeeded", runId = "r1"))
         store.delete(id)
-        assertFalse(store.setTitle(id, "天气"))
-        store.updateTurn(id, "r1") { it.copy(outcome = "补上的") }
+        assertFalse(store.setTitle(id, ""))
+        store.updateTurn(id, "r1") { it.copy(outcome = "made up for") }
         assertTrue(dir.list()!!.isEmpty())
 
-        store.append(id, Turn("再来", "好", "succeeded"))
-        assertTrue(store.setTitle(id, "再来"))
-        assertEquals(listOf("再来"), store.list().map { it.title })
+        store.append(id, Turn("Come again", "good", "succeeded"))
+        assertTrue(store.setTitle(id, "Come again"))
+        assertEquals(listOf("Come again"), store.list().map { it.title })
     }
 
     @Test fun corruptFileReadsAsEmpty() {
@@ -185,27 +185,27 @@ class ConversationStoreTest {
         val s = ConversationStore(dir)
         val a = s.newConversation()
         val b = s.newConversation()
-        s.append(a, Turn("查天气", "晴", "succeeded"))
-        s.append(b, Turn("订票", "好了", "succeeded"))
-        s.append(b, Turn("改签", "好了", "succeeded"))
+        s.append(a, Turn("Check the weather", "", "succeeded"))
+        s.append(b, Turn("Book tickets", "alright", "succeeded"))
+        s.append(b, Turn("Change ticket", "alright", "succeeded"))
         java.io.File(dir, "$a.json").setLastModified(1_000)
         java.io.File(dir, "$b.json").setLastModified(2_000)
         java.io.File(dir, "broken.json").writeText("{")
-        assertEquals(listOf(b to "订票", a to "查天气"), s.list().map { it.id to it.title })
+        assertEquals(listOf(b to "Book tickets", a to "Check the weather"), s.list().map { it.id to it.title })
     }
 
     @Test fun unverifiedTurnKeepsItsNote() {
         val dir = tmp.newFolder()
-        val id = ConversationStore(dir).let { s -> s.newConversation().also { s.append(it, Turn("查余额", "余额 10 元", "unverified", note = "防截屏")) } }
-        assertEquals(listOf(Turn("查余额", "余额 10 元", "unverified", note = "防截屏")), ConversationStore(dir).turns(id))
+        val id = ConversationStore(dir).let { s -> s.newConversation().also { s.append(it, Turn("Check balance", "Balance 10 yuan", "unverified", note = "Anti-screenshot")) } }
+        assertEquals(listOf(Turn("Check balance", "Balance 10 yuan", "unverified", note = "Anti-screenshot")), ConversationStore(dir).turns(id))
     }
 
     @Test fun turnKeepsItsRunId() {
         val dir = tmp.newFolder()
         val s = ConversationStore(dir)
         val id = s.newConversation()
-        s.append(id, Turn("查天气", "晴", "succeeded", runId = "20261023-120000-abc123"))
-        s.append(id, Turn("旧的", "好", "succeeded"))
+        s.append(id, Turn("Check the weather", "", "succeeded", runId = "20261023-120000-abc123"))
+        s.append(id, Turn("old", "good", "succeeded"))
         assertEquals(listOf("20261023-120000-abc123", null), ConversationStore(dir).turns(id).map { it.runId })
     }
 
@@ -214,7 +214,7 @@ class ConversationStoreTest {
         val store = ConversationStore(dir)
         val note = com.meenai.mina.core.memory.MemoryNote(com.meenai.mina.core.memory.NoteKind.added, "m1", "t1", null)
         val other = com.meenai.mina.core.memory.MemoryNote(com.meenai.mina.core.memory.NoteKind.pending, "m2", "t2", "m2")
-        store.append("c1", Turn("点外卖", "ok", "succeeded", runId = "r1"))
+        store.append("c1", Turn("Order takeout", "ok", "succeeded", runId = "r1"))
         store.updateTurn("c1", "r1") { it.copy(memoryNotes = listOf(note, other), usedMemory = listOf("m1", "m3")) }
         val raw = java.io.File(dir, "c1.json").readText()
         assertTrue(raw.contains("\"memoryId\":\"m1\""))
@@ -232,20 +232,20 @@ class ConversationStoreTest {
         val dir = tmp.newFolder("c")
         val a = ConversationStore(dir)
         val id = a.newConversation()
-        val f = SharedFile("图.png", 1234, "Download/Mina/图.png", "content://media/external/downloads/7")
-        a.append(id, Turn("画图", "好了", "succeeded"), listOf(f))
-        a.append(id, Turn("再来", "好", "succeeded"))
+        val f = SharedFile("picture.png", 1234, "Download/Mina/picture.png", "content://media/external/downloads/7")
+        a.append(id, Turn("Draw a picture", "alright", "succeeded"), listOf(f))
+        a.append(id, Turn("Come again", "good", "succeeded"))
         val b = ConversationStore(dir)
         assertEquals(listOf(listOf(f), emptyList()), b.records(id).map { it.second })
         assertEquals(2, b.turns(id).size)
     }
 
-    // 任务结束后补记忆提示、删记忆时,这一轮的文件卡片不能丢
+    //When adding memory reminders or deleting memories after the task is over,This round of file cards cannot be lost.
     @Test fun filesSurviveNoteUpdatesAndStrip() {
         val dir = tmp.newFolder("d")
         val store = ConversationStore(dir)
-        val f = SharedFile("表.csv", 10, "Download/Mina/表.csv", "content://media/external/downloads/8")
-        store.append("c1", Turn("导出", "好了", "succeeded", runId = "r1"), listOf(f))
+        val f = SharedFile("surface.csv", 10, "Download/Mina/surface.csv", "content://media/external/downloads/8")
+        store.append("c1", Turn("Export", "alright", "succeeded", runId = "r1"), listOf(f))
         val note = com.meenai.mina.core.memory.MemoryNote(com.meenai.mina.core.memory.NoteKind.added, "m1", "t1", null)
         store.updateTurn("c1", "r1") { it.copy(memoryNotes = listOf(note)) }
         store.stripMemory(null)
@@ -254,41 +254,41 @@ class ConversationStoreTest {
         assertTrue(r.first.memoryNotes.isEmpty())
     }
 
-    // 写过哪个对话就发出它的编号:存进一轮、改一轮、去掉记忆提示
+    //Each dialogue written is assigned its number.:Save a round, change a round, remove memory prompts
     @Test fun announcesChangedConversations() = kotlinx.coroutines.test.runTest {
         val s = ConversationStore(tmp.newFolder("c"))
         val seen = mutableListOf<String>()
         val deleted = mutableListOf<String>()
         backgroundScope.launch(kotlinx.coroutines.test.UnconfinedTestDispatcher(testScheduler)) { s.changes.collect { seen += it } }
         backgroundScope.launch(kotlinx.coroutines.test.UnconfinedTestDispatcher(testScheduler)) { s.deletions.collect { deleted += it } }
-        s.append("a", Turn("查天气", "晴", "succeeded", runId = "r1", usedMemory = listOf("m1")))
-        s.append("b", Turn("订票", "好了", "succeeded"))
-        s.updateTurn("a", "r1") { it.copy(outcome = "晴转多云") }
+        s.append("a", Turn("Check the weather", "", "succeeded", runId = "r1", usedMemory = listOf("m1")))
+        s.append("b", Turn("Book tickets", "alright", "succeeded"))
+        s.updateTurn("a", "r1") { it.copy(outcome = "Sunny to cloudy") }
         s.updateTurn("a", "missing") { it }
         s.stripMemory(setOf("m1"))
         assertEquals(listOf("a", "b", "a", "a"), seen)
-        // 只有删对话才发 deletions
+        //Only post after deleting the conversation deletions
         assertEquals(emptyList<String>(), deleted)
     }
 
-    /** 从哪一页开始的对话:记在旁边的 .page 文件里,列表里带着;旧对话没有它照常读;删对话一起删掉。 */
+    /**From which page does the conversation begin?:Note it next to .page file,Bring in the list;Old conversations read as usual without it;Delete the conversation together. */
     @Test fun pageOriginPersistsAndIsOptional() {
         val dir = tmp.newFolder("c")
         val a = ConversationStore(dir)
         val plain = a.newConversation()
-        a.append(plain, Turn("查天气", "晴", "succeeded"))
+        a.append(plain, Turn("Check the weather", "", "succeeded"))
         val paged = a.newConversation()
-        assertTrue(a.setPageOrigin(paged, PageOrigin("https://shop.example.com/s?k=1", "shop.example.com", "搜索")))
-        a.append(paged, Turn("挑一个", "好", "succeeded"))
+        assertTrue(a.setPageOrigin(paged, PageOrigin("https://shop.example.com/s?k=1", "shop.example.com", "search")))
+        a.append(paged, Turn("pick one", "good", "succeeded"))
         val b = ConversationStore(dir)
-        assertEquals(PageOrigin("https://shop.example.com/s?k=1", "shop.example.com", "搜索"), b.pageOrigin(paged))
+        assertEquals(PageOrigin("https://shop.example.com/s?k=1", "shop.example.com", "search"), b.pageOrigin(paged))
         assertEquals(null, b.pageOrigin(plain))
         val listed = b.list().associateBy { it.id }
         assertEquals("shop.example.com", listed.getValue(paged).page?.host)
         assertEquals(null, listed.getValue(plain).page)
-        // 对话文件的格式不变:没有多出来的字段
+        //The format of the conversation file remains unchanged:no extra fields
         assertFalse(java.io.File(dir, "$paged.json").readText().contains("shop.example.com"))
-        // 坏了的 .page 当作没有
+        //broken .page as if there is no
         java.io.File(dir, "$plain.page").writeText("{not json")
         assertEquals(null, b.pageOrigin(plain))
         b.delete(paged)
@@ -297,30 +297,30 @@ class ConversationStoreTest {
     }
 
     /**
-     * 「用户此刻在哪个对话」也记下来:进程重启后胶囊据此接着那个对话,而不是靠文件时间猜最近的;
-     * 新开还没说话的对话记成 [CurrentChat.Fresh];删掉它时一起清掉;这个文件不进对话列表。
+     *Also write down "Which conversation the user is in at the moment":After the process is restarted, the capsule will continue the conversation accordingly.,Instead of guessing the latest one based on the file time;
+     *Newly opened conversations that haven’t been spoken yet will be recorded as [CurrentChat.Fresh];Clear it when you delete it;This file is not included in the conversation list.
      */
     @Test fun remembersTheConversationOnScreen() {
         val dir = tmp.newFolder("c")
         val a = ConversationStore(dir)
         val id = a.newConversation()
-        a.append(id, Turn("查天气", "晴", "succeeded"))
+        a.append(id, Turn("Check the weather", "", "succeeded"))
         assertEquals(null, a.currentChat())
 
         a.setCurrent(CurrentChat.Fresh)
         assertEquals(CurrentChat.Fresh, a.currentChat())
-        // 新开的对话还没有对话文件,重启后照样读得回来
+        //The newly opened conversation does not have a conversation file yet,I can still read it after restarting.
         assertEquals(CurrentChat.Fresh, ConversationStore(dir).currentChat())
         assertEquals(listOf(id), ConversationStore(dir).list().map { it.id })
 
         a.setCurrent(CurrentChat.Open(id))
         assertEquals(CurrentChat.Open(id), ConversationStore(dir).currentChat())
         assertEquals(CurrentChat.Open(id), ConversationStore(dir).current.value)
-        // 记在旁边的 current 文件里,不动对话文件、不进列表
+        //Record it in the current file next to it,Don't move the conversation file, don't enter the list
         assertEquals(setOf("$id.json", "current"), dir.list()!!.toSet())
         assertEquals(listOf(id), a.list().map { it.id })
 
-        // 删掉这个对话:指向它的记录一起清掉,胶囊回落到最近那个
+        //delete this conversation:Clear the records pointing to it together,
         a.delete(id)
         assertEquals(null, ConversationStore(dir).currentChat())
     }

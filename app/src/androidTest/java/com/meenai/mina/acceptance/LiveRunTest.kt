@@ -58,34 +58,34 @@ import com.meenai.mina.task.TaskEnvironment
 import com.meenai.mina.core.cap.phone.OperatingPace
 
 /**
- * 真机验收:用设置里配好的真实模型跑一个任务,只在显式传参时运行,平时整套测试里会被跳过。
+ *Real machine acceptance:Run a task using the real model configured in the settings,Only runs when parameters are passed explicitly,Usually the entire set of tests will be skipped.
  *
- * - 配模型(Key 只经参数传入,写进 App 自己的加密存储,不落别处):
- *   `-e liveKey <key> -e liveBaseUrl <url> -e liveModel <model> [-e liveId <id>]`,运行 [configureProvider]。
- * - 切主模型:`-e liveMain <id>`,同样运行 [configureProvider]。
- * - 跑任务:`-e liveGoal <目标> -e liveRun <记录目录名> [-e liveTimeoutSec 600] [-e liveOnTakeover cancel|handback]
- *   [-e livePace fast|standard|human] [-e liveMoveAwayAtStep N] [-e liveCancelAtStep N]`,运行 [runGoal]。经由真实界面:在输入框里写目标、点发送。
- *   liveCancelAtStep:到第 N 步时像点停止键一样停掉任务,再等停止后的交代记进对话(写进 result.txt 的 summary)。
- *   `-e liveKeepCheckSec N`:任务结束后看有没有留在后台运行的那一页(web_keep_open),有就隔 N 秒读两次页面里的媒体播放进度
- *   (video/audio 的 currentTime,同源的才读得到)和一个只计数的计时器,写进 result.txt 的 kept*(keptPage、keptMediaAdvanced、
- *   keptTimerAdvanced、keptNotification),再存一张它的画面 kept-frame.png;那一页不关,留着给人看。
- *   livePace:在 App 里操作的节奏 fast / standard / human(缺省 fast,跑得快;不改设置里的),比较快慢时传 standard。
- *   liveMoveAwayAtStep:到第 N 步时把虚拟屏上的 App 挪到主屏(模拟用户在主屏打开了同一个 App),
- *   记下暂停状态和通知,几秒后像点通知上的「继续」一样恢复。
+ * -Match model(Key is only passed in via parameters,Write to the app’s own encrypted storage,Don't fall anywhere else):
+ *   `-e liveKey <key> -e liveBaseUrl <url> -e liveModel <model> [-e liveId <id>]`,run [configureProvider].
+ * -Cut the main model:`-e liveMain <id>`,Run the same [configureProvider].
+ * -run tasks:`-e liveGoal <Target> -e liveRun <Record directory name> [-e liveTimeoutSec 600] [-e liveOnTakeover cancel|handback]
+ *   [-e livePace fast|standard|human] [-e liveMoveAwayAtStep N] [-e liveCancelAtStep N]`,run [runGoal]. via real interface:Write the target in the input box and click Send.
+ *   liveCancelAtStep:When step N is reached, stop the task like clicking the stop button.,Wait for the explanation after the stop to be recorded in the conversation.(write in result.txt summary).
+ *   `-e liveKeepCheckSec N`:After the task is completed, check whether there is a page left running in the background.(web_keep_open),If so, read the media playback progress on the page twice every N seconds.
+ *   (video/audio currentTime,Only those with the same origin can be read)and a timer that only counts,write in result.txt kept*(keptPage,keptMediaAdvanced,
+ *   keptTimerAdvanced,keptNotification),Save another picture of it kept-frame.png;That page is not closed,Save it for people to see.
+ *   livePace:The rhythm of operating in the app fast / standard / human(default fast,run fast;Don’t change the settings),When comparing speed, pass standard.
+ *   liveMoveAwayAtStep:At step N, move the app on the virtual screen to the home screen(The simulated user opens the same app on the home screen App),
+ *Note pause status and notifications,Resume after a few seconds just like clicking "Continue" on the notification.
  *
- * - 在浏览器页上问:`-e liveUrl <网址> -e liveGoal <问题> -e liveRun <记录目录名> [-e liveTimeoutSec 600] [-e liveDesktop true]
- *   [-e liveNew true] [-e liveTouchAtStep N -e liveResumeAfterSec S] [-e liveOnTakeover cancel|handback]`,运行 [runPageAsk]。
- *   经由真实界面:侧栏进浏览器,打开网址(liveDesktop 时换成电脑版),等页面加载完,在网页底下「问问 Mina」里写问题、点发送
- *   (liveNew 时先点「新对话」),这一页借给那个任务。liveTouchAtStep:到第 N 步时经窗口在网页上用手指往上划一下
- *   (和真人一样经 PageFrame,不点到链接),记下有没有暂停、横幅和小卡片出没出来,等 S 秒(缺省 5)后点横幅上的「继续」,记下恢复。
- *   不给 liveTouchAtStep 时,任务里因「你在操作」而暂停算失败(Mina 自己的点按、滚动不该让任务暂停),记录照写。
- *   result.txt 在 runGoal 那些之外还有:borrowed(页面借给了任务)、firstToolCalls、urlsOpened(web_navigate 打开过的网址)、
- *   reopenedSameUrl(又打开了这一页,不该有)、userTabUrlAtEnd、pausedByTouch、resumed、pauses(各种暂停的次数)、userPauses、
- *   conversationId、pageOrigin、listedAsWeb(侧栏里这条对话带「网页」小标签)。每一步、暂停、恢复、结束、侧栏各截一张主屏(step-NN.png 等)。
+ * -Ask on the browser page:`-e liveUrl <URL> -e liveGoal <question> -e liveRun <Record directory name> [-e liveTimeoutSec 600] [-e liveDesktop true]
+ *   [-e liveNew true] [-e liveTouchAtStep N -e liveResumeAfterSec S] [-e liveOnTakeover cancel|handback]`,run [runPageAsk].
+ *via real interface:Sidebar into browser,Open URL(liveDesktopSwitch to PC version),Wait for the page to load,Write a question in "Ask Mina" at the bottom of the page and click Send
+ *   (When liveNew, click "New Conversation"),This page lends itself to that mission.liveTouchAtStep:When you reach step N, swipe up on the webpage through the window with your finger.
+ *   (Just like real people PageFrame,Don’t click on the link),Take note of any pauses, banners, or cards that pop up,Wait S seconds(default 5)Then click "Continue" on the banner,Take note of recovery.
+ *Don't give liveTouchAtStephour,If the task is paused due to "you are operating", it will be considered a failure.(Mina's own clicks and scrolls should not pause the task),The record is written as written.
+ *   result.txt In addition to those of runGoal, there are also:borrowed(Page lent to task),firstToolCalls,urlsOpened(web_navigateOpened URL),
+ *   reopenedSameUrl(Opened this page again,Shouldn't have),userTabUrlAtEnd,pausedByTouch,resumed,pauses(Various number of pauses),userPauses,
+ *   conversationId,pageOrigin,listedAsWeb(This conversation in the sidebar is labeled "Web Page"). Take a screenshot of the home screen for each step, pause, resume, end, and sidebar.(step-NN.png etc.).
  *
- * 记录写到 App 外部文件目录 acceptance/<liveRun>/:log.txt(每步模型说的话、工具调用与结果摘要)、
- * result.txt(模型、目标、结果、步数、用时、最终回答)、虚拟屏每步画面与主屏截图;
- * 传了 `-e liveSettleSec N` 时等至多 N 秒让结局判定和学习做完,学到的写进 learned.txt。
+ *Records are written to the App external file directory acceptance/<liveRun>/:log.txt(What the model says, tool calls and results summary at each step),
+ * result.txt(Model, goals, results, number of steps, time taken, final answer), each step of the virtual screen and the main screen screenshots;
+ *Passed `-e liveSettleSec N`Wait at most N seconds for the outcome determination and learning to be completed,Write down what you learned learned.txt.
  */
 @RunWith(AndroidJUnit4::class)
 class LiveRunTest {
@@ -111,12 +111,12 @@ class LiveRunTest {
             val model = args.getString("liveModel") ?: error("liveModel missing")
             val id = args.getString("liveId") ?: model
             val baseUrl = args.getString("liveBaseUrl") ?: ProviderPresets.all.first().baseUrl
-            // 能力按地址对得上的模板取(和在设置里选模板一样,含提示词缓存的方式)
+            //Ability is selected based on the template that matches the address.(It’s the same as selecting a template in settings,Method with prompt word caching)
             val preset = ProviderPresets.forBaseUrl(baseUrl) ?: ProviderPresets.all.first()
             store.save(
                 ProviderConfig(
                     id, ProviderConfig.Kind.OpenAiCompat, baseUrl,
-                    // 看图主模型、看图定位已验证:按参数打开(定位验证只在有实测证据时给)
+                    //View main model and view positioning verified:Open by parameter(Positioning verification is only given when there is actual measurement evidence)
                     model, preset.capabilities.copy(vision = args.getString("liveVision") == "true",
                         groundingVerified = args.getString("liveGroundingVerified") == "true"), name = id,
                 ),
@@ -125,9 +125,9 @@ class LiveRunTest {
             check(store.apiKey(id) == key) { "key not stored" }
             saved = id
         }
-        // 配置要有用途在用,否则会被当作没人用清掉:没指定主模型时就用刚存的这条
+        //The configuration must have a purpose and be used,Otherwise, it will be treated as if no one is using it and it will be cleared.:If the main model is not specified, the newly saved one will be used.
         (main ?: saved)?.let { check(store.choose(ModelRole.Main, RoleChoice.Model(it))) { "cannot assign $it" } }
-        // 看图主模型:看图用主模型
+        //See the main model in the picture:Use the main model to view pictures
         if (args.getString("liveVision") == "true") store.choose(ModelRole.Vision, RoleChoice.SameAsMain)
     }
 
@@ -135,7 +135,7 @@ class LiveRunTest {
     fun runGoal() {
         val goal = args.getString("liveGoal")
         assumeTrue(goal != null)
-        // 测试拉起的进程没套上 App 语言,照正常启动把默认语言换成它:内置浏览器按它向网站要页面语言
+        //The process launched by the test is not set to the App language,Start as normal and change the default language to it:The built-in browser asks the website for the page language
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             val ctx = InstrumentationRegistry.getInstrumentation().targetContext
             ctx.getSystemService(android.app.LocaleManager::class.java).applicationLocales
@@ -160,13 +160,13 @@ class LiveRunTest {
         val recorder = Recorder(::note)
         testTasks.modelFactory = { ctx, s -> TaskEnvironment.defaultModelFactory(ctx, s)?.let { recorder.wrap(it) } }
         note("model=${cfg.model} pace=${pace.name.lowercase()} goal=$goal")
-        // 学习在任务结束后的进程级作用域里跑;开局记下那里已有几件常驻的事,收尾时等它回到这个数
+        //Learn to run in the process-level scope after the task ends;At the beginning, note down that there are already several permanent things there.,At the end, wait until it returns to this number
         val memory = MemoryRuntime.of(context)
         val learningJob = memory.scope.coroutineContext[Job]!!
         val resident = learningJob.children.count { it.isActive }
 
         compose.typeAndSend(goal!!)
-        // 发出去就收起键盘:对话页下面的后台屏小画面才露得出来,和真人发完就收键盘一样
+        //Put away the keyboard after sending it out:The small background screen below the conversation page is revealed.,It’s like a real person collecting the keyboard after sending it.
         compose.runOnUiThread {
             val w = compose.activity.window
             compose.activity.currentFocus?.clearFocus()
@@ -174,7 +174,7 @@ class LiveRunTest {
         }
         val chat = (context.applicationContext as MinaApp).chat
         chat.ui.value.blocked?.let { error("blocked by prerequisites: $it") }
-        // 发出去了,对话里就有这一问;没有就立刻报,不白等到超时
+        //Sent out,This question comes up in the conversation;If not, report it immediately,Don't wait until timeout is in vain
         check(chat.ui.value.exchanges.any { it.goal == goal.trim() }) {
             "send did not go out: composer=${chat.ui.value.composer} exchanges=${chat.ui.value.exchanges.size} task=${DeviceTaskState.state.value}"
         }
@@ -230,7 +230,7 @@ class LiveRunTest {
                 note("chat status at end: ${chat.ui.value.exchanges.lastOrNull()?.status}")
                 break
             }
-            // 界面测试的时钟只在测试推它时才走:等的时候一起往前推,对话页的步骤、计时、小画面才会照常刷新(录演示要用)
+            //The interface test's clock only runs when the test pushes it:While waiting, push forward together,The steps, timings, and small screens of the conversation page will be refreshed as usual.(Used for recording demonstrations)
             compose.mainClock.advanceTimeBy(250)
             Thread.sleep(250)
         }
@@ -242,7 +242,7 @@ class LiveRunTest {
         Thread.sleep(1500)
         compose.waitForIdle()
         mainShot(dir, "end-main")
-        // 停止后的交代:等它当作这一轮的回答出现在对话页
+        //explanation after stopping:Wait for it to appear on the conversation page as the answer for this round
         val summary = if (end == TaskState.Cancelled) DeviceSupport.pollUntil(30_000) {
             chat.ui.value.exchanges.lastOrNull()?.status?.let { it as? com.meenai.mina.ui.ExchangeStatus.Cancelled }?.summary
         }.also {
@@ -261,7 +261,7 @@ class LiveRunTest {
             is TaskState.Failed -> end.reason
             else -> ""
         }
-        // liveSettleSec:等交出之后的结局判定和学习做完,把学到的写进 learned.txt
+        // liveSettleSec:Wait until the ending judgment and learning after handing over are completed.,Write down what you learned learned.txt
         val settleMs = (args.getString("liveSettleSec")?.toLong() ?: 0) * 1000
         if (settleMs > 0) {
             val settled = DeviceSupport.pollUntil(settleMs) { true.takeIf { learningJob.children.count { it.isActive } <= resident } } != null
@@ -278,8 +278,8 @@ class LiveRunTest {
     }
 
     /**
-     * 任务结束后留在后台的那一页还在不在跑:隔 [seconds] 秒读两次页面里媒体的播放进度和一个只计数的计时器(只为这次验收放进页面,
-     * 不碰页面自己的东西),存一张它那块显示的画面。返回写进 result.txt 的几行。
+     *Is the page left in the background after the task still running?:separated [seconds]Read the playback progress of the media in the page twice a second and a timer that only counts(Put it into the page only for this acceptance,
+     *Don’t touch the page’s own stuff),Save a picture of its display. Return to write result.txt.
      */
     private fun keptPageCheck(seconds: Long, dir: File, note: (String) -> Unit): String {
         val keeper = (context.applicationContext as MinaApp).pageKeeper
@@ -313,7 +313,7 @@ class LiveRunTest {
             File(dir, "kept-frame.png").outputStream().use { bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
         }
         val notified = minaNotifications().contains(appString(R.string.kept_notif_title))
-        // WebView 只能在主线程上问
+        //WebView can only ask on the main thread
         var keptUrl: String? = null
         InstrumentationRegistry.getInstrumentation().runOnMainSync { keptUrl = if (tab.destroyed) null else tab.view.url }
         return "keptPage=${page.host}\nkeptUrl=$keptUrl\nkeptMedia=${before.size}\nkeptMediaAdvanced=$mediaAdvanced\n" +
@@ -342,7 +342,7 @@ class LiveRunTest {
         testTasks.modelFactory = { ctx, s -> TaskEnvironment.defaultModelFactory(ctx, s)?.let { recorder.wrap(it) } }
         note("model=${cfg.model} url=$url goal=$goal")
 
-        // 侧栏进浏览器,打开网址,等页面加载完
+        //Sidebar into browser,Open URL,Wait for the page to load
         compose.onNodeWithContentDescription(appString(R.string.chat_menu)).performClick()
         compose.awaitOne(appString(R.string.drawer_browser)).performClick()
         compose.waitForIdle()
@@ -383,7 +383,7 @@ class LiveRunTest {
         var pausedByTouch = false
         var resumed = false
         var end: TaskState? = null
-        // 暂停按状态流里出现过的每一个算(轮询会漏掉短暂的暂停,也会漏掉触摸后到恢复前测试自己等着的那段)
+        //Pause every calculation that appears in the status stream(Polling misses brief pauses,It will also miss the period after touching and before restoring to test yourself and wait.)
         val seen = java.util.Collections.synchronizedList(mutableListOf<TaskState>())
         val watch = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
             var prev: TaskState? = null
@@ -456,8 +456,8 @@ class LiveRunTest {
         val origin = app.conversations.pageOrigin(conversationId)
         val urls = recorder.toolCalls.filter { it.first == "web_navigate" }.mapNotNull { Regex("\"url\"\\s*:\\s*\"([^\"]+)\"").find(it.second)?.groupValues?.get(1) }
         val reopened = urls.any { PageConversations.pageKey(it) == PageConversations.pageKey(url!!) }
-        // 回到对话页、打开侧栏:这条对话带「网页」小标签。先收起通知栏和悬浮通知(盖在上面截不到侧栏);
-        // 界面测试的时钟要推着走,侧栏滑出来的动画才会走完
+        //Return to the conversation page and open the sidebar:This conversation is tagged "Web Page". First hide the notification bar and floating notifications(Covering it won’t cut off the sidebar);
+        //The clock for interface testing must be pushed forward,The animation that slides out of the sidebar will complete.
         fun menuShown() = compose.onAllNodesWithContentDescription(appString(R.string.chat_menu)).fetchSemanticsNodes().isNotEmpty()
         for (i in 0 until 8) {
             if (menuShown()) break
@@ -506,12 +506,12 @@ class LiveRunTest {
                 "conversationId=$conversationId\npageOrigin=${origin?.let { "${it.host} ${it.url} ${it.title}" }}\nlistedAsWeb=$listedAsWeb\n" +
                 "answer=$answer\n",
         )
-        // Mina 自己的点按、滚动不该让任务以为用户在操作
+        //Mina's own clicking and scrolling should not make the task think that the user is operating
         if (touchAt <= 0) check(userPauses == 0) { "the run paused as if the user touched the page ($userPauses times) though nobody did" }
         else check(pausedByTouch && resumed) { "touch at step $touchAt: paused=$pausedByTouch resumed=$resumed" }
     }
 
-    /** 在浏览器页的网页上经窗口用手指往上划一小段(网页上半截,面板盖不到;划动不会点到链接);返回划在哪。 */
+    /**Use your finger to swipe up a short section of the web page on the browser page through the window.(Top half of web page,The panel cannot be covered;Swiping will not click on the link);Return to where it was drawn. */
     private fun swipeOnPage(): String {
         val instr = InstrumentationRegistry.getInstrumentation()
         var at: IntArray? = null
@@ -542,7 +542,7 @@ class LiveRunTest {
         return "x=$x y=$y0"
     }
 
-    /** 此刻学到的全部:个人技能(在用与草稿)、App 知识的各份补充、记住的路线条数。 */
+    /**Everything I learned right now:personal skills(In use and draft), various supplements of App knowledge, and the number of memorized routes. */
     private fun learned(memory: MemoryRuntime): String = buildString {
         val skills = memory.skills()
         skills.list().forEach { appendLine("skill ${it.name} status=${it.status} outcomes=${it.outcomes}\n${it.markdown}\n") }
@@ -551,7 +551,7 @@ class LiveRunTest {
         appendLine("routes=${(context.applicationContext as MinaApp).routes.count()}")
     }
 
-    /** Mina 当前通知的标题、正文和按钮(从 dumpsys notification 里摘)。 */
+    /**Mina The title, text and button of the current notification(from dumpsys notificationLi pick). */
     private fun minaNotifications(): String = sh("dumpsys notification --noredact")
         .split("NotificationRecord(").drop(1).filter { "pkg=com.meenai.mina " in it }
         .joinToString(" || ") { rec ->
@@ -571,12 +571,12 @@ class LiveRunTest {
         File(dir, "$name.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 80, it) }
     }
 
-    /** 只记录,不改动:真实模型的每次回复和上一步的工具结果写进日志。 */
+    /**record only,No change:Each response of the real model and the tool result of the previous step are written into the log. */
     private class Recorder(private val note: (String) -> Unit) {
         @Volatile var calls = 0
         @Volatile var inTokens = 0
         @Volatile var outTokens = 0
-        /** 模型调过的工具(名字, 参数),按先后。 */
+        /**Model tuning tools(name,parameter),In order. */
         val toolCalls: MutableList<Pair<String, String>> = java.util.Collections.synchronizedList(mutableListOf())
 
         fun wrap(inner: ChatModel) = object : ChatModel {

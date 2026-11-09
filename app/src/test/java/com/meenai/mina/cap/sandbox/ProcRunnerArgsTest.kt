@@ -48,7 +48,7 @@ class ProcRunnerArgsTest {
         assertEquals("mina-bridge-x", bridged["MINA_BRIDGE"]); assertEquals("tok", bridged["MINA_TOKEN"])
     }
 
-    /** 代理只在给了时出现:大小写两套变量都给(有的工具只认大写),本机地址照旧直连。 */
+    /**Agent only appears when given:Both sets of uppercase and lowercase variables are given.(Some tools only recognize uppercase letters),The local address is still directly connected. */
     @Test fun proxyIsPassedOnlyWhenGiven() {
         val none = ProcRunner.env(dirs, null, null, "conv1", proxy = "")
         assertTrue(none.keys.none { it.lowercase().endsWith("_proxy") })
@@ -72,7 +72,7 @@ class ProcRunnerArgsTest {
     }
 
     @Test fun fixedOffsetTimezonesKeepTheirSign() {
-        // POSIX 的 TZ 里 GMT+8 表示比 UTC 慢 8 小时,不能把 GMT+08:00 原样给出。
+        //POSIX's TZ GMT+8 means 8 hours behind UTC,Can't put GMT+08:00 is given as is.
         val cases = mapOf(
             "GMT+08:00" to "Etc/GMT-8", "GMT-05:00" to "Etc/GMT+5", "GMT+05:45" to "<+0545>-05:45",
             "GMT-03:30" to "<-0330>03:30", "GMT" to "UTC", "UTC" to "UTC",
@@ -83,13 +83,13 @@ class ProcRunnerArgsTest {
     }
 
     @Test fun oddConversationIdsStayInsideWork() {
-        for (id in listOf("../../etc", "a/b", "", "对话一")) {
+        for (id in listOf("../../etc", "a/b", "", "Dialogue 1")) {
             val f = dirs.workspace(id)
             assertEquals(id, dirs.work, f.parentFile)
             assertFalse(id, f.name.contains(".."))
         }
         assertEquals(dirs.workspace("x/y"), dirs.workspace("x/y"))
-        // 简单名字和哈希名字分在两个前缀下:「h-…」样子的 ID 不会撞上别的对话的哈希目录
+        //Simple names and hashed names are divided under two prefixes:「h-..." will not hit the hash directory of other conversations
         val hashed = dirs.workspace("a/b").name
         assertTrue(hashed, hashed.startsWith("h-"))
         assertEquals("c-$hashed", dirs.workspace(hashed).name)

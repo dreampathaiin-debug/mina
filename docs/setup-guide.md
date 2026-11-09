@@ -1,254 +1,254 @@
-# 设置手机操作：一步一步来
+# Setting up phone control, step by step
 
-简体中文 | [English](setup-guide.en.md)
+[简体中文](setup-guide.md) | English
 
-这份指南带你走完 Mina 里的「设置手机操作」。不需要懂技术，照着做就行，大约 3 到 5 分钟。
+This guide walks you through "Set up phone control" in Mina. No technical knowledge needed; just follow along. It takes about 3 to 5 minutes.
 
-## 先了解一下
+## Before you start
 
-- **要什么**：一台安卓 12 及以上的手机（安卓 11 能装 Mina，但不能操作 App；推荐安卓 14 及以上），连着任意一个 Wi-Fi（不用能上网，连上就行）。
-- **为什么要这一步**：Mina 在一块看不见的「后台屏」上替你点 App，你照常用自己的屏幕。要做到这一点，Mina 需要借用安卓自带的「无线调试」启动一个内置的小助手。
-- **全在手机上完成**：不需要电脑，也不需要数据线。
-- **只做一次**：配对一次之后，Mina 会自己连接；以后就算系统把无线调试关了，Mina 也会在你允许的前提下把它重新打开。
-- **不设置也能用**：上网查资料、处理文件、聊天都不受影响；只有要操作手机 App 时才需要它。
+- **What you need**: an Android phone running Android 12 or later (Mina installs on Android 11 but can't use apps there; Android 14 or later recommended), connected to any Wi-Fi network (internet access not required, just being connected is enough).
+- **Why this is needed**: Mina uses apps for you on an invisible "background screen", so you can keep using your own screen. To do that, Mina borrows Android's built-in "Wireless debugging" to start a small built-in helper.
+- **Everything happens on the phone**: no computer, no cable.
+- **You do it once**: after pairing once, Mina connects by itself. Even if the system later turns wireless debugging off, Mina turns it back on, with your permission.
+- **Optional**: web, files and chat work without it. You only need it for tasks that use apps on your phone.
 
-> 下面写的路径按安卓原版系统。有的手机菜单名字或位置不一样，找不到时可以在系统设置顶部的搜索框里搜关键字（比如「版本号」「开发者选项」「无线调试」）。
+> The paths below follow stock Android. Some phones name or place menus differently. If you can't find something, use the search box at the top of system Settings (search for "Build number", "Developer options" or "Wireless debugging").
 
-## 在哪里打开向导
+## Where to find the wizard
 
-- 第一次打开 Mina 时，配好模型后的最后一步就是「设置手机操作」。
-- 当时点了「稍后再说」也没关系：打开 Mina 的设置，点顶上状态卡片里的提示即可进入；或者进 设置 › 手机操作 › 重新配对。
-- 任务要用手机而还没设置时，对话里也会出现一行提示，点「去设置」即可。
+- The first time you open Mina, "Set up phone control" is the last step after setting up a model.
+- If you tapped "Not now" back then, that's fine: open Mina's Settings and tap the notice in the status card at the top, or go to Settings › Phone control › Pair again.
+- If a task needs your phone before you've set it up, a line appears in the chat; tap "Open Settings".
 
-向导是一张有编号的清单，一共六步。**做完一步会自动打勾**，Mina 会自己检查系统开关，一般不需要点「下一步」。当前这一步会亮起并带一个按钮，点它会直接跳到系统里对应的设置页；做完后按返回键回到 Mina 就行。
+The wizard is a numbered checklist of six steps. **Each step ticks itself off when it's done**: Mina checks the system switches by itself, so you usually don't need to press "Next". The current step is highlighted and has a button that takes you straight to the right system settings page; when you're done there, press Back to return to Mina.
 
-有的手机读不到、或读不准这些开关：明明打开了，Mina 还停在这一步。这时点这一步下面的「我已经打开了,下一步」继续就行，向导不会把你卡住。最后以配对、连接成功为准：连上了就算设置好了。已经打勾的步骤可以点一下，回去重做。
+Some phones can't report these switches, or report them wrong: you've turned a setting on but Mina stays on that step. Then tap "I’ve turned it on, next" under the step to carry on; the wizard never locks you in. What counts in the end is pairing and connecting: once Mina connects, setup is done. You can also tap any ticked step to go back and redo it.
 
-<!-- 截图：「设置手机操作」向导的六步清单 -->
+<!-- Screenshot: the six-step checklist in "Set up phone control" -->
 
 ---
 
-## 第 1 步：打开开发者选项
+## Step 1: Turn on Developer options
 
-**在 Mina 里**：点「打开关于手机」。
+**In Mina**: tap "Open About phone".
 
-**在系统里**：
+**In system settings**:
 
-1. 来到 设置 › 关于手机。
-2. 一直往下滑，找到「版本号」。
-3. **连续快速点「版本号」7 次**。中途会提示「再点几次就进入开发者模式」；如果手机设了锁屏密码，会让你输一次密码。
-4. 看到「你已处于开发者模式」（或类似的提示）就好了。
+1. Go to Settings › About phone.
+2. Scroll all the way down to "Build number".
+3. **Tap "Build number" 7 times quickly in a row.** Along the way you'll see "You are now X steps away from being a developer". If your phone has a screen lock, you'll be asked for your PIN or password once.
+4. When you see "You are now a developer!" (or similar), you're done.
 
-<!-- 截图：关于手机页面里的「版本号」 -->
+<!-- Screenshot: "Build number" on the About phone page -->
 
-**怎么知道成功了**：回到 Mina，第 1 步显示「已打开」并打勾。
+**How to tell it worked**: back in Mina, step 1 shows "On" with a tick.
 
-**常见问题**：
+**Common snags**:
 
-- 找不到「版本号」：有的手机放在「关于手机」里面的「软件信息」或「版本信息」里。也可以在设置里搜「版本号」。
-- 点了没反应：要连续点，中间不要停太久。
-- 提示「已处于开发者模式」：说明之前开过了，直接回 Mina。
-- 明明开了，Mina 还停在这一步：点「我已经打开了,下一步」继续。
+- Can't find "Build number": on some phones it's inside "Software information" or "Version" under "About phone". You can also search Settings for "Build number".
+- Nothing happens: tap in quick succession without long pauses.
+- "No need, you are already a developer": it was already on; just go back to Mina.
+- It's on but Mina stays on this step: tap "I’ve turned it on, next" to continue.
 
-## 第 2 步：打开 USB 调试
+## Step 2: Turn on USB debugging
 
-> 注意：开发者选项里，本指南没写到的开关都不要动。设置时只需要打开这一步的「USB 调试」和第 4 步的「无线调试」。有的开关会清除手机数据，比如「以 16KB 页面大小启动设备」，在一些手机上打开它会要求清除全部数据。看到要求清除数据、重新格式化或恢复出厂设置的提示，点「取消」，不要点「清除所有数据」。
+> Note: in Developer options, don't change any switch this guide doesn't mention. Setup only needs "USB debugging" here and "Wireless debugging" in step 4. Some switches can erase the phone: "Boot with 16 KB page size", for example, asks to erase all data on some phones. If you see a prompt to erase data, reformat or factory reset the phone, tap "Cancel", not "Erase all data".
 
-**在 Mina 里**：点「打开开发者选项」。
+**In Mina**: tap "Open Developer options".
 
-**在系统里**：
+**In system settings**:
 
-1. 来到 设置 › 系统 › 开发者选项（Mina 会直接带你过来）。
-2. 往下找到「USB 调试」，打开开关。
-3. 弹出「允许 USB 调试吗？」时点「确定」。
+1. Go to Settings › System › Developer options (Mina takes you there).
+2. Scroll to "USB debugging" and turn it on.
+3. When asked "Allow USB debugging?", tap "OK".
 
-<!-- 截图：开发者选项里的「USB 调试」开关 -->
+<!-- Screenshot: the "USB debugging" switch in Developer options -->
 
-**不需要插数据线**。打开它的作用是：配对好以后，就算断开 Wi-Fi，Mina 也能继续操作手机。
+**No cable needed.** With it on, Mina can keep working even when Wi-Fi is off, once pairing is done.
 
-**怎么知道成功了**：回到 Mina，第 2 步打勾。
+**How to tell it worked**: back in Mina, step 2 is ticked.
 
-**常见问题**：
+**Common snags**:
 
-- 找不到「开发者选项」：安卓原版在 设置 › 系统 里面；有的手机放在「更多设置」「其他设置」里。在设置里搜「开发者选项」最快。
-- 以后请**一直开着** USB 调试，关掉后手机操作会停下。
-- 明明开了，Mina 还停在这一步：点「我已经打开了,下一步」继续。
+- Can't find "Developer options": on stock Android it's under Settings › System; some phones put it under "Additional settings" or similar. Searching Settings for "Developer options" is fastest.
+- **Keep USB debugging on** from now on. Turning it off stops phone control.
+- It's on but Mina stays on this step: tap "I’ve turned it on, next" to continue.
 
-## 第 3 步：打开 Mina 的无障碍（建议先跳过）
+## Step 3: Turn on Mina's accessibility (we suggest skipping this)
 
-**建议：直接点「跳过(配对后 Mina 会自己打开)」**，它就是这一步最上面那个按钮。
+**Suggestion: just tap "Skip (Mina turns it on after pairing)"**, the top button on this step.
 
-为什么建议跳过：
+Why we suggest skipping:
 
-- 配对完成后，Mina 会**自己**把它的无障碍服务打开（设置 › 恢复与修复 里的「替我打开无障碍」默认就是开着的），你不用去系统里找。
-- 自己打开反而容易卡住：如果 Mina 不是从应用商店装的（比如从网页下载的安装包），安卓会把无障碍标成「受限制的设置」，不让直接打开。由 Mina 配对后自己打开，就不会遇到这个限制。
+- Once pairing is done, Mina turns on its own accessibility service **by itself** ("Turn on accessibility for me" in Settings › Recovery & repair is on by default). You don't have to hunt for it in system settings.
+- Doing it by hand can get stuck: if Mina wasn't installed from an app store (for example, you downloaded the APK from a web page), Android marks accessibility as a "Restricted setting" and won't let you turn it on directly. When Mina turns it on after pairing, this restriction doesn't get in the way.
 
-跳过的代价只有一点：下一步配对时要你自己填一次 6 位配对码（很简单，见第 5 步）。
+The only cost of skipping: in the next steps you type the 6-digit pairing code yourself once (it's easy, see step 5).
 
-<!-- 截图：无障碍一步的「跳过(配对后 Mina 会自己打开)」按钮 -->
+<!-- Screenshot: the "Skip (Mina turns it on after pairing)" button on the accessibility step -->
 
-**如果你已经开过无障碍**：这一步会自动打勾，配对时 Mina 会自己读出配对码，更省事。
+**If accessibility is already on**: this step ticks itself off and Mina reads the pairing code by itself, which is even easier.
 
-**如果你一定要现在手动打开**：点「去无障碍设置」，在列表里找到 Mina，打开开关并确认。如果开关是灰的、或提示「受限制的设置」：
+**If you really want to turn it on by hand now**: tap "Open Accessibility settings", find Mina in the list, turn it on and confirm. If the switch is greyed out or you see "Restricted setting":
 
-1. 先回到 Mina，点「打不开？先去应用信息里允许受限制的设置」（或者自己去 设置 › 应用 › Mina）。
-2. 在「应用信息」页右上角点 ⋮（三个点），选「允许受限制的设置」，按提示确认。
-3. 再回到无障碍设置，打开 Mina。
+1. Go back to Mina and tap "Can't turn it on? Allow restricted settings in App info first" (or go to Settings › Apps › Mina yourself).
+2. On the "App info" page, tap ⋮ (three dots) at the top right and choose "Allow restricted settings", then confirm.
+3. Go back to Accessibility settings and turn Mina on.
 
-<!-- 截图：应用信息右上角 ⋮ 菜单里的「允许受限制的设置」 -->
+<!-- Screenshot: "Allow restricted settings" in the ⋮ menu on App info -->
 
-> 注意：⋮ 菜单里的「允许受限制的设置」，要你**先试着打开过一次**无障碍、被系统拦下之后才会出现。
+> Note: "Allow restricted settings" only appears in the ⋮ menu **after you've tried once** to turn on accessibility and the system blocked it.
 
-如果打开时系统提示「应用遮挡了权限请求」：先关掉其他 App 的悬浮窗或气泡（比如聊天气泡、悬浮球），再试一次。
+If the system says "An app is obscuring a permission request" when you turn it on: close other apps' floating windows or bubbles (chat bubbles, floating buttons), then try again.
 
-## 第 4 步：打开无线调试
+## Step 4: Turn on Wireless debugging
 
-**先确认手机连着 Wi-Fi**（不需要能上网）。
+**First make sure the phone is on Wi-Fi** (internet access not required).
 
-**在 Mina 里**：点「打开开发者选项」。
+**In Mina**: tap "Open Developer options".
 
-**在系统里**：
+**In system settings**:
 
-1. 在开发者选项里往下找到「无线调试」，打开它右边的**开关**。
-2. 系统问「要允许在此网络上进行无线调试吗？」时：**勾上「始终允许使用此网络」**，再点「允许」。勾上后，以后在这个 Wi-Fi 上 Mina 就能自己打开无线调试。
+1. In Developer options, scroll to "Wireless debugging" and turn on the **switch** on its right.
+2. When the system asks "Allow wireless debugging on this network?": **tick "Always allow on this network"**, then tap "Allow". With that ticked, Mina can turn wireless debugging on by itself on this Wi-Fi in future.
 
-<!-- 截图：开发者选项里的「无线调试」 -->
-<!-- 截图：「允许无线调试」弹框和「始终允许使用此网络」勾选框 -->
+<!-- Screenshot: "Wireless debugging" in Developer options -->
+<!-- Screenshot: the "Allow wireless debugging" dialog with the "Always allow on this network" checkbox -->
 
-**怎么知道成功了**：回到 Mina，第 4 步打勾。
+**How to tell it worked**: back in Mina, step 4 is ticked.
 
-**常见问题**：
+**Common snags**:
 
-- 开关打开后自己又关了：多半是没连 Wi-Fi，或者在弹框里没点「允许」。连上 Wi-Fi 再开一次。
-- 开关明明开着，Mina 还停在这一步：有的手机读不到这个开关，点「我已经打开了,下一步」继续。
-- 开发者选项里根本没有「无线调试」：点这一步里的「找不到无线调试？」，改用电脑启动（见下文[另一种办法](#另一种办法用电脑启动usb-数据线)）。
+- The switch turns itself off again: usually the phone isn't on Wi-Fi, or "Allow" wasn't tapped in the dialog. Join Wi-Fi and try again.
+- The switch is on but Mina stays on this step: some phones don't report this switch. Tap "I’ve turned it on, next" to continue.
+- There's no "Wireless debugging" in Developer options at all: tap "Can’t find Wireless debugging?" in this step and start it from a computer instead (see [Another way](#another-way-start-it-from-a-computer-usb-cable) below).
 
-## 第 5 步：用配对码配对
+## Step 5: Pair with a code
 
-**先说最容易出错的一点**：配对码只在系统的配对窗口开着时有效。**窗口一关（切到别的 App、按返回、锁屏），这个码就作废了**。所以填码时请留在配对窗口上，不要切换 App。
+**The one thing that trips people up**: the pairing code only works while the system's pairing dialog is open. **As soon as the dialog closes (switching apps, pressing Back, locking the screen), the code is no longer valid.** So stay on the pairing dialog while you enter the code; don't switch apps.
 
-**开始前**：Mina 到这一步会请求「发通知」的权限，请点「允许」——没有无障碍时，配对码就是填在 Mina 的通知里的。通知没开时，这一步最显眼的按钮就是先把它打开：
+**Before you start**: at this step Mina asks for permission to send notifications. Please tap "Allow": without accessibility, the pairing code is entered in Mina's notification. If notifications are off, the main button on this step is to turn them on first:
 
-- 没允许 Mina 发通知：向导写着「配对码要在通知里填，先允许 Mina 发通知。」，点「允许通知」。
-- 允许了，但 Mina 的「配对」这一类通知被关掉了：点「打开「配对」通知」，在系统的通知设置里打开它。
-- 「配对」通知被调成了不弹出：向导会提醒一句，点「去打开」，打开「在屏幕上弹出」；不打开也行，下拉通知栏照样能填。
+- Mina isn't allowed to send notifications: the wizard says "The pairing code goes into a notification, so allow Mina’s notifications first." Tap "Allow notifications".
+- Allowed, but Mina's "Pairing" notifications are turned off: tap "Turn on “Pairing” notifications" and turn them on in the system notification settings.
+- "Pairing" notifications are set not to pop up: the wizard mentions it; tap "Turn on" and turn on "Pop on screen". You can also skip that and enter the code from the notification shade.
 
-**在 Mina 里**：点「去无线调试」。
+**In Mina**: tap "Open Wireless debugging".
 
-**在系统里**：
+**In system settings**:
 
-1. Mina 会带你到开发者选项，并标出「无线调试」那一行。**点「无线调试」这几个字**（不是开关），进入它的页面。
-2. 点「使用配对码配对设备」。
-3. 屏幕上弹出一个窗口，里面有 **6 位数字的配对码**，还有「IP 地址和端口」。
+1. Mina takes you to Developer options with the "Wireless debugging" row highlighted. **Tap the words "Wireless debugging"** (not the switch) to open its page.
+2. Tap "Pair device with pairing code".
+3. A dialog appears with a **6-digit pairing code** and an "IP address & port".
 
-<!-- 截图：无线调试页面里的「使用配对码配对设备」 -->
-<!-- 截图：显示 6 位配对码的配对窗口 -->
+<!-- Screenshot: "Pair device with pairing code" on the Wireless debugging page -->
+<!-- Screenshot: the pairing dialog showing the 6-digit code -->
 
-接下来分两种情况：
+Then one of two things happens:
 
-### 情况 A：无障碍已经开着 —— 什么都不用做
+### Case A: accessibility is already on — nothing to do
 
-Mina 的向导会显示绿色的提示「看到配对码后稍等几秒，Mina 会自己读出来并完成配对」。停在配对窗口上**等几秒**，Mina 会自己读出配对码并完成配对，窗口会自己关掉。
+The wizard shows a green hint: "When the code appears, wait a few seconds — Mina reads it and finishes pairing." Stay on the pairing dialog and **wait a few seconds**. Mina reads the code and pairs by itself, and the dialog closes on its own.
 
-### 情况 B：无障碍没开（跳过了第 3 步）—— 在通知里填码
+### Case B: accessibility is off (you skipped step 3) — enter the code in the notification
 
-向导里这一步会画出三小步：① 点「使用配对码配对设备」 ② 屏幕顶部弹出 Mina 的通知；没看到就下拉通知栏 ③ 点「填配对码」，输入 6 位数字。具体是：
+The wizard shows this as three small steps: ① Tap “Pair device with pairing code” ② Mina’s notification pops up at the top of the screen; if not, swipe down to open the notification shade ③ Tap “Enter code” and type the 6 digits. In detail:
 
-1. **不要离开配对窗口**，记下那 6 位数字。
-2. 配对窗口一出来，屏幕顶部就会弹出 Mina 的通知「输入配对码」，下面写着「把屏幕上的 6 位数字填在这里，不用离开配对窗口」。没人填的话，它会隔一会儿再弹，最多再弹三次。
-   - 如果通知没有弹出来，或者一闪就收起了：**从屏幕顶部往下拉**，打开通知栏，就能看到它。下拉通知栏不会关掉配对窗口。
-3. 点通知上的「填配对码」，会出现一个写着「6 位数字」的输入框。
-4. 填上那 6 位数字，点发送（输入框右边的箭头）。带空格、横线或全角数字都没关系。
-5. 通知变成「正在配对…」，几秒后变成「配对成功」，过一会儿自己消失。
+1. **Don't leave the pairing dialog.** Note the 6 digits.
+2. As soon as the pairing dialog opens, Mina's notification "Enter pairing code" pops up at the top of the screen, saying "Type the 6 digits shown on screen here — no need to leave the pairing window". If nobody answers it, it pops up again a little later, at most three more times.
+   - If it doesn't pop up, or disappears quickly: **swipe down from the top of the screen** to open the notification shade, and you'll find it there. Pulling down the shade doesn't close the pairing dialog.
+3. Tap "Enter code" on the notification. An input box labelled "6 digits" appears.
+4. Type the 6 digits and tap send (the arrow next to the box). Spaces, dashes or full-width digits are fine.
+5. The notification changes to "Pairing…", then a few seconds later to "Paired", and goes away by itself.
 
-<!-- 截图：通知栏里 Mina 的「输入配对码」通知和输入框 -->
+<!-- Screenshot: Mina's "Enter pairing code" notification with the input box in the notification shade -->
 
-**小提示**：
+**Tips**:
 
-- 先允许 Mina 发通知。没允许的话，向导里会有提示和「允许通知」按钮。
-- 向导里如果出现一条橙色提示，说「需要你处理」和「任务结果」的通知不会弹出：这说的是以后任务里的通知，和配对无关。可以点「去打开」，也可以先不管。
-- 填的不是 6 位数字：通知马上提示「要填 6 位数字，再填一次」，输入框还在，不会拿去试。
-- 码不对或过期了：通知提示「配对码不对或已失效：在配对窗口重新点「使用配对码配对设备」拿新的码，再填一次」，输入框还在，拿到新码直接填。配对窗口已经关了也一样：回到「无线调试」再点一次「使用配对码配对设备」，会出现**新的**配对码，填新的。
-- 实在找不到通知：Mina 向导里有「通知没出来？在这里填」。不过回 Mina 会让配对窗口关掉，所以要用**分屏**：一边显示配对窗口，一边在 Mina 里填。万一 Mina 还没找到配对窗口，它会多要一个数字——配对窗口里「IP 地址和端口」冒号后面的那串数字。
+- Allow Mina's notifications first. If you haven't, the wizard shows a note and an "Allow notifications" button.
+- If the wizard shows an orange note saying "Needs you" and "Task results" notifications won't pop up: that's about notifications during later tasks, not pairing. You can tap "Turn on", or ignore it for now.
+- If what you typed isn't 6 digits, the notification says "Enter 6 digits, then try again" right away and keeps the input box; nothing is sent.
+- If the code was wrong or expired, the notification says "Wrong or expired code: in the pairing window, tap “Pair device with pairing code” again to get a new code, then enter it again" and keeps the input box. The same goes if the pairing dialog has already closed: go back to "Wireless debugging" and tap "Pair device with pairing code" again to get a **new** code, then enter the new one.
+- Still no notification? The wizard has "No notification? Enter it here". But going back to Mina closes the pairing dialog, so use **split screen**: the pairing dialog on one side, Mina on the other. If Mina hasn't found the pairing dialog yet, it asks for one more number: the digits after the colon in "IP address & port" in the pairing dialog.
 
-**怎么知道成功了**：回到 Mina，第 5 步显示「已配对」。
+**How to tell it worked**: back in Mina, step 5 shows "Paired".
 
-这一步没有「下一步」：配对要真的做成。通知和自动读码都不行时，用上面说的「通知没出来？在这里填」。
+This step has no "Next": pairing has to actually happen. If neither the notification nor reading the code works, use "No notification? Enter it here" described above.
 
-## 第 6 步：自动连接
+## Step 6: Connect automatically
 
-这一步不用你做任何事。配对好之后，Mina 会自己连上并准备好，一般几秒钟。看到「手机操作已经设置好了」就完成了。
+Nothing to do here. Once paired, Mina connects and gets ready by itself, usually in a few seconds. When you see "Phone control is set up", you're done.
 
-<!-- 截图：向导显示「手机操作已经设置好了」 -->
+<!-- Screenshot: the wizard showing "Phone control is set up" -->
 
-如果第 3 步跳过了，这时 Mina 会自己把它的无障碍服务打开。可以在系统的无障碍设置里看到 Mina 已经是打开状态。
+If you skipped step 3, Mina now turns on its own accessibility service. You can see Mina switched on in the system's Accessibility settings.
 
-Mina 找无线调试的端口时，先试上次连上的、系统给的和局域网里公布的；都找不到时（有的路由器拦着这种公布），它会在这台手机自己身上找一遍，界面上显示「正在本机查找无线调试端口…」，最多十来秒。只找这台手机本身，不碰同一个 Wi-Fi 里的别的设备。
+To find the Wireless debugging port, Mina first tries the one it used last time, the one the system reports and the one announced on the local network. If none of these works (some routers block those announcements), it searches this phone itself; the wizard shows "Looking for the Wireless debugging port on this phone…" for up to about ten seconds. It only looks at this phone, never at other devices on the same Wi-Fi.
 
-还是找不到时，「自动连接」这一步会出现「填无线调试的端口」：打开系统的「无线调试」页面，看「IP 地址和端口」那一行，把**冒号后面的数字**（比如 `192.168.1.5:41235` 里的 `41235`）填进去，点「连接」。连上之后 Mina 会记住它；关掉再打开无线调试后这个数字会变，Mina 一般能自己找到新的，找不到再填一次就行。
+If it still can't find it, the "Connect automatically" step shows "Enter the Wireless debugging port": open the system's "Wireless debugging" page, look at the "IP address & port" line, enter **the number after the colon** (for example `41235` in `192.168.1.5:41235`) and tap "Connect". Mina remembers it once connected. The number changes when you turn Wireless debugging off and on; Mina can usually find the new one by itself, otherwise just enter it again.
 
-正在连接、连接失败时，底部都有「稍后再说」，随时可以先离开，以后从设置里接着弄。
+While connecting and after a failed connection, "Not now" is always at the bottom, so you can leave at any time and continue later from Settings.
 
-如果配对或连接没成功，Mina 会按它读到的情况，说出最可能是前面哪一步的问题（比如「「无线调试」好像没开」、「这台手机读不到「无线调试」的开关」），并给一个「回到「打开无线调试」」这样的按钮，点它回去重做那一步。
+If pairing or connecting fails, Mina uses what it could read to say which earlier step is the most likely cause (for example "“Wireless debugging” seems to be off" or "This phone doesn’t let Mina read the “Wireless debugging” switch"), with a button such as "Back to “Turn on Wireless debugging”" that takes you back to redo that step.
 
-## 另一种办法：用电脑启动（USB 数据线）
+## Another way: start it from a computer (USB cable)
 
-无线调试配对不成功（有些厂商系统根本没有能用的「无线调试」），或者想让电脑上的 AI 助手替你设置时，可以用一台装了 adb 的电脑，经 USB 数据线启动同一个内置助手：
+If wireless pairing doesn't work (some vendor ROMs have no working "Wireless debugging" at all), or you'd like an AI agent on your computer to set things up, you can start the same built-in helper from a computer with adb over a USB cable:
 
-1. 在手机上打开 Mina 一次（Mina 会准备好启动用的文件）。
-2. 做完第 1、2 步（开发者选项、USB 调试），用数据线连上电脑；手机上问要不要允许 USB 调试时点「允许」。
-3. 在电脑上运行：
+1. Open Mina on the phone once (Mina prepares the start file).
+2. Do steps 1 and 2 (Developer options, USB debugging) and connect the phone to the computer with a cable; when the phone asks whether to allow USB debugging, tap "Allow".
+3. On the computer, run:
 
 ```
 adb shell sh /sdcard/Android/data/com.meenai.mina/files/usb-start.sh
 ```
 
-看到 `Mina helper starting...` 就回到 Mina，「手机操作」显示已就绪即可。真正要紧的是这条命令以 adb 的 shell 身份运行，不一定非得是电脑：手机上已经有别的能以 shell 身份跑 adb 命令的通道时，用它运行同一个脚本也行。之后拔掉数据线也能继续用。向导不会一直显示这条路：需要时，当前这一步里会出现「这台手机打不开无线调试？改用电脑启动」，里面有同一条命令和「复制」按钮。需要的情况是：手机没有无线调试、你在第 4 步点了「找不到无线调试？」、配对或连接没成功，或者在第 4 步、第 5 步（还没找到配对窗口时）、「自动连接」停了 45 秒左右没有进展。
+When you see `Mina helper starting...`, go back to Mina and check that "Phone control" shows ready. What matters is that the command runs as adb's shell user, not that it comes from a computer: if the phone already has another channel that runs adb shell commands, running the same script through it works too. You can unplug the cable afterwards. The wizard doesn't show this option all the time. The same command, with a "Copy" button, appears in the current step as "Can’t use Wireless debugging on this phone? Start from a computer instead" when it's needed: the phone has no Wireless debugging, you tapped "Can’t find Wireless debugging?" in step 4, pairing or connecting failed, or the wizard has been waiting on step 4, step 5 (before the pairing window is found) or "Connect automatically" for about 45 seconds.
 
-要知道的几点：
+Good to know:
 
-- **手机重启后要再运行一次。** 这样启动的助手在重启后就没了，不会自己回来；没配对过无线调试时 Mina 自己起不来，会显示「手机助手已停止」，并在「设置手机操作」里直接给出这条命令和「复制」按钮，不会再让你去找无线调试。重启后先打开一次 Mina（它会重新准备启动用的文件），再运行同一条命令。
-- 手机有能用的「无线调试」时，配对一次（第 4、5 步）之后，重启后 Mina 就能自己连回去，不用再接电脑。没有的手机只能每次重启后再运行命令。
-- 用这条路启动后，向导里第 4、5 步会标成「已跳过」；助手连着时不会提示去打开无线调试。
-- 提示 `Mina helper did not start` 或 `is not running` 时，先打开一次 Mina，再运行同一条命令。
-- Mina 更新后也要先打开一次 Mina，再运行。
-- 启动用的文件只在助手没连着时带一次性的口令，用过一次就作废；助手连着时文件里只有一句「已经在运行」。
+- **Run it again after a phone restart.** A helper started this way is gone after a restart and doesn't come back by itself. Without wireless pairing Mina can't start it either, so it shows "Phone helper stopped", and "Set up phone control" shows this command with a "Copy" button instead of sending you to look for Wireless debugging. After a restart, open Mina once (it prepares a fresh start file), then run the same command.
+- If the phone has a working "Wireless debugging", pairing once (steps 4 and 5) lets Mina reconnect by itself after restarts, with no computer. Phones without it need the command after every restart.
+- After starting this way, steps 4 and 5 show as "Skipped" in the wizard, and Mina doesn't ask you to turn on Wireless debugging while the helper is connected.
+- If it says `Mina helper did not start` or `is not running`, open Mina once, then run the same command again.
+- After a Mina update, also open Mina once before running it.
+- The start file holds a one-time code only while the helper isn't connected, and the code stops working once used; while the helper is connected, the file only says it's already running.
 
 ---
 
-## 设置好以后
+## After setup
 
-- **USB 调试请一直开着**。关掉后手机操作会停下。
-- **无线调试可能会被系统关掉**：安卓在断开 Wi-Fi、换 Wi-Fi、重启手机后会把它关掉。这很正常，Mina 平时用不着它，只有重新启动内置助手（比如重启手机、Mina 更新之后）时才要它开着。设置 › 恢复与修复 里的「自动打开无线调试」「重启后自动恢复」默认开着，Mina 会在连着 Wi-Fi 时替你重新打开，不用再输配对码。
-- **第一次到一个新的 Wi-Fi**：系统还没允许在这个网络上无线调试，Mina 打不开它。这时请亲手打开一次「无线调试」，在弹框里**勾选「始终允许使用此网络」**再点「允许」。以后在这个 Wi-Fi 上就不用管了。
-- **想重来一遍**：设置 › 手机操作 › 重新配对。
-- **不想用了**：设置 › 手机操作 › 解除配对。也可以到系统的 无线调试 › 已配对的设备 里把 Mina 删掉。
+- **Keep USB debugging on.** Turning it off stops phone control.
+- **The system may turn wireless debugging off**: Android turns it off when Wi-Fi disconnects or changes, and after a restart. That's normal. Mina doesn't need it day to day, only when restarting its built-in helper (for example after a phone restart or a Mina update). "Turn on Wireless debugging automatically" and "Restore after restart" in Settings › Recovery & repair are on by default, so Mina turns it back on for you while on Wi-Fi, with no new pairing code.
+- **The first time on a new Wi-Fi network**: the system hasn't allowed wireless debugging on that network yet, so Mina can't turn it on. Turn on "Wireless debugging" once yourself and, in the dialog, **tick "Always allow on this network"** and tap "Allow". After that, nothing more to do on that Wi-Fi.
+- **To start over**: Settings › Phone control › Pair again.
+- **To stop using it**: Settings › Phone control › Unpair. You can also remove Mina under Wireless debugging › Paired devices in system settings.
 
-## 遇到问题
+## Troubleshooting
 
-| 现象 | 怎么办 |
+| Symptom | What to do |
 |---|---|
-| 找不到「开发者选项」 | 先做第 1 步（在「关于手机」里连点「版本号」7 次）。打开后，安卓原版在 设置 › 系统 › 开发者选项；别的手机可能在「更多设置」等地方，在设置里搜「开发者选项」。 |
-| 找不到「版本号」 | 在「关于手机」里往下滑；有的手机在「软件信息」「版本信息」里面。或者在设置里搜「版本号」。 |
-| 无线调试的开关打开后自己关掉 | 确认连着 Wi-Fi；打开时弹出的询问框要点「允许」，并勾选「始终允许使用此网络」。换了 Wi-Fi 后要在新网络上再允许一次。 |
-| 没看到 Mina 的配对通知 | 先确认允许了 Mina 发通知、「配对」通知没被关掉（向导会提示并给按钮）；从屏幕顶部往下拉通知栏找；还是没有，用向导里的「通知没出来？在这里填」配合分屏。 |
-| 配对通知只在通知栏里、不在屏幕顶部弹出 | 「配对」通知被调成了不弹出。点向导里的「去打开」，在系统设置里打开「在屏幕上弹出」；不打开也能下拉通知栏去填。 |
-| 提示「配对码不对或已过期」 | 每次打开配对窗口码都会换。回到「无线调试」，重新点「使用配对码配对设备」，填新的 6 位数字。 |
-| 提示「配对窗口关掉了」 | 填码时配对窗口要一直开着：不要切 App、不要按返回、不要锁屏。重新打开配对窗口再填。 |
-| 配对成功了，但「自动连接」失败 | 确认「无线调试」还开着、手机连着 Wi-Fi，然后点「重试」。还不行就点「重新配对」。向导指出了可能有问题的一步时，点「回到「…」」回去重做。 |
-| 一直停在「自动连接」/ 找不到无线调试的端口 | 关掉再打开「无线调试」后点「重试」；换用手机热点或家里的 Wi-Fi（有的路由器拦着设备互相发现）；或者在「填无线调试的端口」里填「无线调试」页面上「IP 地址和端口」冒号后面的数字，点「连接」。 |
-| 开关明明打开了，向导还停在那一步 | 有的手机读不准开关，点「我已经打开了,下一步」继续；最后以配对、连接成功为准。 |
-| 提示「这个 Wi-Fi 还没允许无线调试」 | 亲手打开一次「无线调试」，弹框里勾选「始终允许使用此网络」再点「允许」。 |
-| 提示「没有连上 Wi-Fi」 | 连上任意一个 Wi-Fi（不用能上网），Mina 会自己恢复。 |
-| 提示「配对失效了」 | 重新配对一次。在开发者选项里打开「停用 adb 授权超时功能」，以后就不会再失效。 |
-| 提示「手机助手已停止」 | 助手是用 USB 启动命令启动的，手机重启后不会自己回来。先打开一次 Mina，再运行一次 `adb shell sh /sdcard/Android/data/com.meenai.mina/files/usb-start.sh`（「设置手机操作」里可以复制）。手机有能用的「无线调试」时，也可以配对一次，以后重启会自动恢复。 |
-| 无障碍里 Mina 的开关是灰的 / 提示「受限制的设置」 | 推荐的做法：跳过这一步，配对后 Mina 会自己打开。要手动打开的话：先试着打开一次被拦下，再去 设置 › 应用 › Mina，右上角 ⋮ › 允许受限制的设置，然后回无障碍设置打开 Mina。 |
-| 配对后无障碍还是没打开 | 确认 设置 › 恢复与修复 里「替我打开无障碍」是开着的，等几秒；还不行就按上一行手动打开。 |
-| 打开无障碍时提示「应用遮挡了权限请求」 | 先关掉其他 App 的悬浮窗或气泡（聊天气泡、悬浮球等），再回无障碍设置打开 Mina。 |
-| 卡住了，上面都对不上 | 点向导底部的「复制诊断信息」（失败时出错的那一步里也有；也可以在 关于 Mina › 反馈问题 里找到），看一眼内容再点「复制」或「分享」，发给作者（微信或 GitHub 问题）。里面有版本、机型、每一步的状态和最近一次出错的原因，不包含 API Key、聊天内容和屏幕内容。 |
+| Can't find "Developer options" | Do step 1 first (tap "Build number" 7 times in "About phone"). Once on, stock Android has it under Settings › System › Developer options; other phones may put it under "Additional settings" or similar. Search Settings for "Developer options". |
+| Can't find "Build number" | Scroll down in "About phone"; on some phones it's inside "Software information" or "Version". Or search Settings for "Build number". |
+| The Wireless debugging switch turns itself off | Make sure you're on Wi-Fi; in the dialog that appears when you turn it on, tap "Allow" and tick "Always allow on this network". After changing Wi-Fi, allow it once more on the new network. |
+| No pairing notification from Mina | Check that Mina is allowed to send notifications and that "Pairing" notifications aren't turned off (the wizard reminds you and gives a button); swipe down from the top to open the notification shade; if it's still not there, use "No notification? Enter it here" in the wizard together with split screen. |
+| The pairing notification only shows in the shade and doesn't pop up | "Pairing" notifications are set not to pop up. Tap "Turn on" in the wizard and turn on "Pop on screen" in system settings; or just swipe down to the shade to enter the code. |
+| "Wrong or expired pairing code" | The code changes each time the pairing dialog opens. Go back to "Wireless debugging", tap "Pair device with pairing code" again and enter the new 6 digits. |
+| "The pairing window closed" | Keep the pairing dialog open while entering the code: don't switch apps, press Back or lock the screen. Open the dialog again and enter the code. |
+| Pairing worked, but "Connect automatically" fails | Make sure "Wireless debugging" is still on and the phone is on Wi-Fi, then tap "Retry". If that doesn't help, tap "Pair again". If the wizard points at an earlier step, tap "Back to “…”" to redo it. |
+| Stuck at "Connect automatically" / can't find the Wireless debugging port | Turn "Wireless debugging" off and on, then tap "Retry"; switch to a phone hotspot or your home Wi-Fi (some routers stop devices from discovering each other); or in "Enter the Wireless debugging port", enter the number after the colon in "IP address & port" on the "Wireless debugging" page and tap "Connect". |
+| A switch is on but the wizard stays on that step | Some phones report switches wrong. Tap "I’ve turned it on, next" to continue; what counts in the end is pairing and connecting. |
+| "Wireless debugging isn't allowed on this Wi-Fi yet" | Turn on "Wireless debugging" once yourself; in the dialog, tick "Always allow on this network" and tap "Allow". |
+| "Not connected to Wi-Fi" | Join any Wi-Fi network (internet access not required); Mina resumes by itself. |
+| "Pairing expired" | Pair again. Turn on "Disable adb authorization timeout" in Developer options so it won't expire again. |
+| "Phone helper stopped" | The helper was started with the USB start command and doesn't come back by itself after a phone restart. Open Mina once, then run `adb shell sh /sdcard/Android/data/com.meenai.mina/files/usb-start.sh` again (you can copy it in "Set up phone control"). If the phone has a working "Wireless debugging", you can also pair once so it comes back by itself after restarts. |
+| Mina's accessibility switch is greyed out / "Restricted setting" | Recommended: skip that step; Mina turns it on after pairing. To do it by hand: try turning it on once so the system blocks it, then go to Settings › Apps › Mina, tap ⋮ at the top right › Allow restricted settings, and go back to Accessibility settings to turn Mina on. |
+| Accessibility still off after pairing | Check that "Turn on accessibility for me" in Settings › Recovery & repair is on, and wait a few seconds; if it's still off, turn it on by hand as in the row above. |
+| "An app is obscuring a permission request" when turning on accessibility | Close other apps' floating windows or bubbles (chat bubbles, floating buttons), then go back to Accessibility settings and turn Mina on. |
+| Stuck and nothing above fits | Tap "Copy diagnostics" at the bottom of the wizard (also inside the failed step, and under About Mina › Send feedback). Look it over, then tap "Copy" or "Share" and send it to the author (WeChat or a GitHub issue). It has the version, phone model, the state of each step and the last error — no API keys, chat content or screen content. |
 
-## 设置好了却不好用：跑一次兼容性自检
+## Set up but not working well: run the compatibility self-check
 
-配对、连接都成功了，任务却打不开 App、点不动、过一会儿就卡住？打开 设置 › 恢复与修复 › **兼容性自检**，点「开始自检」。大约 1 分钟，Mina 在自己的虚拟屏上打开它自己的测试页和系统设置（只看不点），试一遍读屏、点按、打字、滚动和返回，再查内置浏览器和沙箱；不会操作你的其他 App，不改设置，不联网。检查时请停留在这一页。
+Pairing and connecting worked, but tasks can't open apps, taps don't land, or things freeze after a while? Open Settings › Recovery & repair › **Compatibility self-check** and tap "Start". In about 1 minute Mina opens its own test page and system Settings (look only, no taps) on its own virtual display, tries reading the screen, tapping, typing, scrolling and going back, then checks the built-in browser and the sandbox. It doesn't touch your other apps, doesn't change settings and doesn't use the network. Please stay on that page while it runs.
 
-每一项都会写明通过、部分可用、未通过还是跳过，没通过的给出原因和下一步。跑完后点「去 GitHub 反馈」：报告会复制好，并打开「机型兼容性反馈」的新问题页，把报告粘贴到「自检报告」一栏再提交。报告里只有机型、系统版本和每一项的结果，不含账号、App 列表和你的内容，发出前可以先看一遍。
+Each check shows pass, partial, failed or skipped, and the ones that didn't pass say why and what to do next. When it finishes, tap "Report on GitHub": the report is copied and the "Device compatibility report" issue page opens; paste the report into "Self-check report" and submit. The report only has the phone model, system version and the result of each check, with no accounts, app lists or your content. You can read it before posting.
