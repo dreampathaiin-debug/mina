@@ -173,15 +173,29 @@ class WebStack private constructor(
      * 留在后台接着运行(显示就不关了);交不出(那一页已关、崩了)时照常全关。
      */
     fun close() {
+        // 用户正接管着页面、任务却到了头:那一页是用户正在用的,不随任务一起关,交给留页的接着跑
+        val driving = handedTab
         runCatching { returnFromTakeover(loggedIn = false) }.onFailure { Log.w(TAG, "takeover not returned cleanly", it) }
-        // 先从池里拿出要留的那一页,别的标签关掉时就不会把别的页挂到显示上顶掉它
-        val kept = runCatching { pool.closeKeeping(taskId, screen.keepMark?.tabId) }.onFailure { Log.w(TAG, "kept page not released", it) }.getOrNull()
+        // 先从池里拿出要留的那一页,别的标签关掉时就不会把别的页挂到显示上顶掉它(用户借的页面除外:那本来就是他的)
+        val keepId = screen.keepMark?.tabId ?: driving?.takeIf { !pool.isExternal(it.id) }?.id
+        val kept = runCatching { pool.closeKeeping(taskId, keepId) }.onFailure { Log.w(TAG, "kept page not released", it) }.getOrNull()
         runCatching { pool.close() }
         val handed = kept != null && runCatching { handOff(kept) }.onFailure { Log.w(TAG, "kept page not handed off", it) }.getOrDefault(false)
         if (kept != null && !handed) runCatching { kept.destroy() }
         if (!handed) runCatching { host.close() }
         runCatching { files?.close() }
         transfers.cancel()
+    }
+
+    /** 任务到头时页面还在出声(视频、音乐)而模型没标留页:替模型留住当前这一页,歌不跟着任务一起停。主线程,可挂起。 */
+    suspend fun autoKeepIfMediaPlaying() {
+        if (screen.keepMark != null || handedTab != null) return
+        val tab = pool.current(taskId) ?: return
+        if (tab.destroyed || tab.crashed) return
+        if (!runCatching { screen.mediaPlaying() }.getOrDefault(false)) return
+        runCatching { screen.keepOpen(true, "media was still playing when the task ended") }
+            .onSuccess { Log.i(TAG, "tab ${tab.id} auto-kept: still playing when the task ended") }
+            .onFailure { Log.w(TAG, "auto keep not marked", it) }
     }
 
     /** 把留下的那一页交给 [keeper];收下了返回 true。 */

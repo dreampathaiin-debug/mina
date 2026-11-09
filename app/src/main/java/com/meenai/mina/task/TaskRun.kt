@@ -937,9 +937,12 @@ class TaskRun(
             liveFeed?.close()
             approval?.let { approvalControl.end(it) }
             gate = null
+            userControl = false
             takeover = null
             handoverRef = null
             sideScope = null
+            // 网页还在出声(视频、音乐)而模型没标留页时,替它留住这一页:歌不能跟着任务一起停
+            webStackRef?.let { st -> withContext(Dispatchers.Main + NonCancellable) { runCatching { st.autoKeepIfMediaPlaying() } } }
             // 借来的页面还回浏览器页(在关掉网页这一套之前)
             withContext(Dispatchers.Main + NonCancellable) { runCatching { UserBrowser.existing()?.loans?.end(key) } }
             withContext(Dispatchers.IO + NonCancellable) {

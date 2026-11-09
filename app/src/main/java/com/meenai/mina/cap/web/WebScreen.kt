@@ -967,6 +967,21 @@ class WebScreen(
         return KeepOpenResult(true, tab.id, u, title?.takeIf { it.isNotBlank() }, u?.let(WebUrlPolicy::host), KEEP_OPEN_HOURS, replaces = now()?.host)
     }
 
+    /** 任务结束时要不要替模型留页:这一页有没有还在出声的视频或音频。主文档里查,iframe 里的一类查不到,尽力而为;查不了按没有算。 */
+    suspend fun mediaPlaying(): Boolean {
+        val tab = currentTab() ?: return false
+        if (tab.crashed || tab.destroyed) return false
+        return try { kotlinx.coroutines.withTimeout(2_000) {
+            withContext(Dispatchers.Main) {
+                val done = kotlinx.coroutines.CompletableDeferred<Boolean>()
+                tab.view.evaluateJavascript(
+                    "(function(){try{var m=document.querySelectorAll('video,audio');for(var i=0;i<m.length;i++){var x=m[i];if(!x.paused&&!x.ended&&!x.muted)return true}}catch(e){}return false})()"
+                ) { r -> done.complete(r?.contains("true") == true) }
+                done.await()
+            }
+        } } catch (e: Throwable) { false }
+    }
+
     override suspend fun siteMode(): String? =
         currentTab()?.takeIf { !it.crashed }?.let { if (it.devtools.isMobile(it)) "mobile" else "desktop" }
 
