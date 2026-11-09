@@ -17,8 +17,8 @@ android {
         applicationId = "com.meenai.mina"
         minSdk = 30
         targetSdk = 35
-        versionCode = 55
-        versionName = "0.1.54"
+        versionCode = 56
+        versionName = "0.1.55"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
         // The Beta tag after the version on the About page; set to false for a stable release

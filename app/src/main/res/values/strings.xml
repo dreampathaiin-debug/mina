@@ -76,4 +76,18 @@
     <string name="browser_restore">Restore</string>
     <string name="pip_take_control">Take control</string>
     <string name="take_control_message">You\'re driving now. Mina will wait. Hand back when you\'re done.</string>
+    <string name="devices_title">Devices</string>
+    <string name="devices_row_sub">This phone\'s permissions, all in one place</string>
+    <string name="devices_this_device">This device</string>
+    <string name="devices_manage">Manage permissions</string>
+    <string name="perm_calendar">Calendar</string>
+    <string name="perm_call_history">Call history</string>
+    <string name="perm_contacts">Contacts</string>
+    <string name="perm_messages">Messages</string>
+    <string name="perm_microphone">Microphone</string>
+    <string name="perm_phone_notifications">Phone notifications</string>
+    <string name="perm_run_background">Run in background</string>
+    <string name="devices_notif_sub">Read and reply to messages from notifications</string>
+    <string name="devices_background_sub">Keep Mina ready when it is not on screen</string>
+    <string name="devices_perms_sub">Tap a row to allow or remove it in system settings</string>
 </resources>
