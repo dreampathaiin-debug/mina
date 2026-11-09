@@ -588,7 +588,7 @@ class UserBrowser private constructor(private val app: Context) {
         // 用户亲手看、亲手点:电脑版也不定死缩放,能双指放大
         t.devtools.setHandOperated(t)
         t.devtools.setModePolicy(t) { host ->
-            BrowserIdentity.mobile(loginForMika = loginFor[t] != null, agentMobile = t.devtools.agentWantsMobile(host), userDesktop = modes.isDesktop(host))
+            BrowserIdentity.mobile(loginForMina = loginFor[t] != null, agentMobile = t.devtools.agentWantsMobile(host), userDesktop = modes.isDesktop(host))
         }
         t.view.setFindListener { active, matches, _ ->
             if (t === tab) {

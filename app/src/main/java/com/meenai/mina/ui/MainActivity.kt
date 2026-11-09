@@ -34,6 +34,7 @@ import com.meenai.mina.confirm.ConfirmationNotifier
 import com.meenai.mina.memory.MemoryRuntime
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.collectAsState
@@ -50,10 +51,12 @@ import com.meenai.mina.cap.web.WebSites
 import com.meenai.mina.browser.UserBrowser
 import com.meenai.mina.BuildConfig
 import com.meenai.mina.MinaApp
+import androidx.lifecycle.lifecycleScope
 import com.meenai.mina.about.Diagnostics
 import com.meenai.mina.about.DiagnosticsCollector
 import com.meenai.mina.about.MinaLinks
 import com.meenai.mina.about.QrImage
+import com.meenai.mina.about.ReleaseInfo
 import com.meenai.mina.chat.ConversationStore
 import com.meenai.mina.record.RunStore
 import com.meenai.mina.task.TaskService
