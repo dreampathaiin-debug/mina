@@ -3,7 +3,10 @@ package com.meenai.mina.cap.phone.shell
 import android.Manifest
 import android.app.RemoteInput
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.CalendarContract
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.provider.Telephony
@@ -103,6 +106,41 @@ class PhoneDataBridge(private val context: Context) : PhoneDataPort {
             }
         }.getOrElse { return@withContext failed("read_failed", it.message ?: "could not read the call log") }
         buildJsonObject { put("ok", true); put("count", rows.size); put("calls", JsonArray(rows)) }
+    }
+
+    override suspend fun readCalendar(limit: Int): JsonObject = withContext(Dispatchers.IO) {
+        if (!granted(Manifest.permission.READ_CALENDAR)) return@withContext need(Manifest.permission.READ_CALENDAR)
+        val rows = runCatching {
+            val now = System.currentTimeMillis()
+            query(
+                CalendarContract.Events.CONTENT_URI,
+                arrayOf(CalendarContract.Events.TITLE, CalendarContract.Events.DTSTART, CalendarContract.Events.DTEND, CalendarContract.Events.EVENT_LOCATION, CalendarContract.Events.ALL_DAY),
+                "${CalendarContract.Events.DTSTART} >= ?",
+                arrayOf(now.toString()),
+                "${CalendarContract.Events.DTSTART} ASC LIMIT $limit",
+            ) { c ->
+                buildJsonObject {
+                    put("title", c.getString(0) ?: "")
+                    put("start", stamp(c.getLong(1)))
+                    put("end", stamp(c.getLong(2)))
+                    put("location", c.getString(3) ?: "")
+                    put("allDay", c.getInt(4) == 1)
+                }
+            }
+        }.getOrElse { return@withContext failed("read_failed", it.message ?: "could not read the calendar") }
+        buildJsonObject { put("ok", true); put("count", rows.size); put("events", JsonArray(rows)) }
+    }
+
+    override suspend fun placeCall(number: String): JsonObject = withContext(Dispatchers.IO) {
+        if (!granted(Manifest.permission.CALL_PHONE)) return@withContext need(Manifest.permission.CALL_PHONE)
+        val dialable = number.filter { it.isDigit() || it == '+' }
+        val started = runCatching {
+            context.startActivity(
+                Intent(Intent.ACTION_CALL, Uri.parse("tel:$dialable")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        }.isSuccess
+        if (started) buildJsonObject { put("ok", true); put("number", number); put("note", "call placed; the in-call screen is the system's own") }
+        else failed("call_failed", "the system refused to start the call")
     }
 
     override suspend fun recentNotifications(app: String?, limit: Int): JsonObject = withContext(Dispatchers.IO) {

@@ -35,7 +35,7 @@ import com.meenai.mina.ui.theme.MinaIcons
 /** 这台手机上 Mina 的各能力当前有没有授权;都是读系统,不在应用里存。 */
 private class DevicePerms(
     val calendar: Boolean, val callLog: Boolean, val contacts: Boolean, val sms: Boolean,
-    val mic: Boolean, val listener: Boolean, val background: Boolean,
+    val mic: Boolean, val calls: Boolean, val listener: Boolean, val background: Boolean,
 )
 
 private fun permissionStates(context: Context): DevicePerms {
@@ -46,6 +46,7 @@ private fun permissionStates(context: Context): DevicePerms {
         contacts = granted(Manifest.permission.READ_CONTACTS),
         sms = granted(Manifest.permission.READ_SMS),
         mic = granted(Manifest.permission.RECORD_AUDIO),
+        calls = granted(Manifest.permission.CALL_PHONE),
         listener = NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName),
         background = context.getSystemService(PowerManager::class.java)
             ?.isIgnoringBatteryOptimizations(context.packageName) == true,
@@ -101,6 +102,7 @@ fun DevicesScreen(onBack: () -> Unit) {
             PermRow(MinaIcons.Lines, R.string.perm_contacts, perms.contacts, onClick = { openAppPermissions(context) })
             PermRow(MinaIcons.Message, R.string.perm_messages, perms.sms, onClick = { openAppPermissions(context) })
             PermRow(MinaIcons.Mic, R.string.perm_microphone, perms.mic, onClick = { openAppPermissions(context) })
+            PermRow(MinaIcons.Phone, R.string.perm_make_calls, perms.calls, R.string.devices_calls_sub, onClick = { openAppPermissions(context) })
             PermRow(MinaIcons.Bell, R.string.perm_phone_notifications, perms.listener, R.string.devices_notif_sub, onClick = { openNotificationAccess(context) })
             PermRow(MinaIcons.Refresh, R.string.perm_run_background, perms.background, R.string.devices_background_sub, onClick = { openBattery(context) })
         }

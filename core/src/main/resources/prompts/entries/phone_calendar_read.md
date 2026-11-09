@@ -1,0 +1,1 @@
+Read upcoming calendar events straight from the phone's calendar, soonest first, without opening any app. Use it for "what's on my schedule" questions. If it returns permission_needed, tell the user to grant Mina the Calendar permission (Mina Settings > Devices > Calendar opens the right page), then try again once. If read_failed, say so instead of retrying blind.

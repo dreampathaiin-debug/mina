@@ -90,4 +90,6 @@
     <string name="devices_notif_sub">नोटिफिकेशन से मैसेज पढ़ना और जवाब देना</string>
     <string name="devices_background_sub">स्क्रीन पर न होने पर भी Mina तैयार रहे</string>
     <string name="devices_perms_sub">किसी पर टैप करके सिस्टम सेटिंग में अनुमति दें या हटाएँ</string>
+    <string name="perm_make_calls">कॉल करें</string>
+    <string name="devices_calls_sub">डायलर खोले बिना सीधे कॉल लगाए</string>
 </resources>

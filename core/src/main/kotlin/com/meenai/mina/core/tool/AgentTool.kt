@@ -28,7 +28,7 @@ enum class Verb {
     Tap, TypeText, ClearText, Scroll, Swipe, Back, PressKey,
     ListApps, LaunchApp, OpenLink, ShareText, AppAfterTask,
     SetAlarm, SetTimer, ShowAlarms, AddCalendarEvent, AppIntent, SetWheel,
-    SmsSend, SmsRead, ContactsFind, CallLogRead, NotificationsRead, NotificationReply,
+    SmsSend, SmsRead, ContactsFind, CallLogRead, NotificationsRead, NotificationReply, CallPlace, CalendarRead,
     Navigate, ReadPage, EvaluateJs, SiteCommand, Tabs, Downloads, Upload, SiteMode, Script, Interact, Capture, WaitFor, KeepOpen,
     RunCommand, RunBundledScript, ReadFile, WriteFile, SearchFiles, ShareFile,
     Wait, AskUser, RequestConfirmation, HandToUser, HandleObstacle, EndNotDone,

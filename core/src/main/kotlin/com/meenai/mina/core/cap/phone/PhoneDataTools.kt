@@ -78,6 +78,55 @@ internal object SmsSend : PhoneTool {
         .takeIf { r.content["ok"] == JsonPrimitive(true) } ?: emptyList()
 }
 
+/** 打电话:CALL_PHONE 授权后 ACTION_CALL 直接打出,不用碰拨号盘。 */
+internal object CallPlace : PhoneTool {
+    override val verb = Verb.CallPlace
+    override val label = "Place call"
+    override val risk = Risk.Write
+    override val entry = Entry.Alone
+    override val logged = true
+    override val offScreen = true
+    override val def = ToolDef("phone_call_place", Prompts.tool("phone_call_place"), mapOf(
+        "number" to str("Phone number to call, international format like +919876543210."),
+    ), listOf("number"))
+
+    override fun offered(ctx: ToolContext) = ctx.phone.data != null
+
+    override suspend fun execute(a: Args, ctx: ToolContext): ToolExecution {
+        val number = a.str("number", max = 20)!!.trim()
+        if (!Regex("^[+0-9 ()-]{5,20}$").matches(number)) throw ArgError("number", "must be a phone number in international format, like +919876543210")
+        val port = ctx.phone.data ?: return unavailable()
+        return dataResult(port.placeCall(number))
+    }
+
+    override fun logTarget(o: JsonObject, r: ToolExecution, ctx: ToolContext): String? =
+        (o["number"] as? JsonPrimitive)?.contentOrNull
+
+    override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> =
+        listOf(Observation(ObsKind.Fact, "$name placed a call to ${(o["number"] as? JsonPrimitive)?.contentOrNull ?: "the number"}", source = PHONE))
+            .takeIf { r.content["ok"] == JsonPrimitive(true) } ?: emptyList()
+}
+
+/** 未来日程:从现在起最近的日历事件,倒排无,按开始时间升序。 */
+internal object CalendarRead : PhoneTool {
+    override val verb = Verb.CalendarRead
+    override val label = "Read calendar"
+    override val risk = Risk.Read
+    override val entry = Entry.Alone
+    override val offScreen = true
+    override val def = ToolDef("phone_calendar_read", Prompts.tool("phone_calendar_read"), mapOf(
+        "limit" to int("Optional: how many upcoming events to read, 1-30. Default 10.", 1, 30),
+    ))
+
+    override fun offered(ctx: ToolContext) = ctx.phone.data != null
+
+    override suspend fun execute(a: Args, ctx: ToolContext): ToolExecution {
+        val limit = a.o["limit"]?.let { a.int("limit", 1, 30) } ?: 10
+        val port = ctx.phone.data ?: return unavailable()
+        return dataResult(port.readCalendar(limit))
+    }
+}
+
 /** 读最近的短信:按时间倒序,可按内容或号码过滤。 */
 internal object SmsRead : PhoneTool {
     override val verb = Verb.SmsRead

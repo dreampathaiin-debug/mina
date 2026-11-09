@@ -25,6 +25,12 @@ interface PhoneDataPort {
     /** 最近的通知(通知监听权);[app] 给了时只看这个包的。 */
     suspend fun recentNotifications(app: String?, limit: Int): JsonObject
 
+    /** 打出电话(ACTION_CALL;需要 CALL_PHONE 权限),不用碰拨号盘。 */
+    suspend fun readCalendar(limit: Int): JsonObject
+
+    /** 打出电话(ACTION_CALL;需要 CALL_PHONE 权限),不用碰拨号盘。 */
+    suspend fun placeCall(number: String): JsonObject
+
     /** 直接回复一条通知里的消息(通知自己带回复动作时才行)。 */
     suspend fun replyNotification(key: String, text: String): JsonObject
 }
