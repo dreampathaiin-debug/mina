@@ -68,6 +68,8 @@ import com.meenai.mina.ui.components.ValueTone
 import com.meenai.mina.ui.theme.MinaIcons
 import com.meenai.mina.ui.theme.MinaTheme
 import com.meenai.mina.ui.theme.MinaType
+import com.meenai.mina.ui.components.MinaSwitch
+afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/AboutScreen.kt
 
 /** 关于页上点开的底部面板。 */
 private enum class AboutSheet { Update, Changelog, Feedback, Group, Diagnostics }
@@ -91,6 +93,8 @@ fun AboutScreen(
     onOpenLicense: () -> Unit,
     onBack: () -> Unit,
     diagnostics: () -> String = { "" },
+    autoUpdate: Boolean = false,
+    onAutoUpdate: (Boolean) -> Unit = {},
 ) {
     val c = MinaTheme.colors
     val context = LocalContext.current
@@ -130,7 +134,15 @@ fun AboutScreen(
                 TrailingValue(v)
                 RowChevron()
             }
+            ListRow(
+                MinaIcons.Refresh,
+                stringResource(R.string.about_auto_update),
+                stringResource(R.string.about_auto_update_detail),
+            ) {
+                MinaSwitch(autoUpdate, onAutoUpdate, Modifier.testTag("auto-update-switch"))
+            }
             ListRow(MinaIcons.Lines, AboutCopy.CHANGELOG, AboutCopy.CHANGELOG_SUB, onClick = { sheet = AboutSheet.Changelog }) { RowChevron() }
+afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/AboutScreen.kt
         }
         GroupCard {
             ListRow(MinaIcons.Chats, AboutCopy.GROUP, AboutCopy.GROUP_SUB, first = true, onClick = { sheet = AboutSheet.Group }) { RowChevron() }
@@ -272,7 +284,7 @@ private fun NotesBox(notes: String) {
 }
 
 @Composable
-private fun UpdateSheet(r: ReleaseInfo, current: String, beta: Boolean, onOpenUrl: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun UpdateSheet(r: ReleaseInfo, current: String, beta: Boolean, onOpenUrl: (String) -> Unit, onDismiss: () -> Unit) {
     AboutSheetFrame(AboutCopy.updateTitle(r.version), AboutCopy.updateSub(current, beta, r.date), "update-sheet", onDismiss) {
         if (r.notes.isNotBlank()) NotesBox(r.notes)
         if (r.apkUrl != null) UpdateDownloadControls(r)

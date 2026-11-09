@@ -77,4 +77,9 @@
     <string name="about_update_channel">App updates</string>
     <string name="about_update_ready">Mina %1$s ready to install</string>
     <string name="about_update_notification_text">Tap to install the new version. Your chats and settings are kept.</string>
+    <string name="about_auto_update">Auto-update</string>
+    <string name="about_auto_update_detail">Download new versions in the background and ask before installing</string>
+    <string name="about_auto_update_ready">Mina %1$s is ready to install</string>
+    <string name="about_auto_update_disable">Turn off auto-update</string>
+afe3c617 (feat(update): 后台下载新版并在聊天页提示安装)
 </resources>

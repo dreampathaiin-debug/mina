@@ -211,10 +211,14 @@ class MinaApp : Application(), WebOwner, SandboxOwner, TaskEnvironment.Owner, Ph
     val foreground = AppForeground()
 
     /** 检查更新:查到的新版本跟进程走,侧栏、设置首页、关于页的红点看同一份。 */
+    internal val automaticUpdates: com.meenai.mina.about.AutomaticUpdates by lazy { com.meenai.mina.about.AutomaticUpdates(this, com.meenai.mina.about.ApkUpdater(this)) }
     val updates: com.meenai.mina.about.UpdateChecker by lazy {
         com.meenai.mina.about.UpdateChecker(java.io.File(filesDir, "update-v1.json"), BuildConfig.VERSION_NAME,
             deviceAbis = android.os.Build.SUPPORTED_ABIS.toList())
     }
+
+    internal val apkUpdater by lazy { com.meenai.mina.about.ApkUpdater(this) }
+    internal val automaticUpdates by lazy { com.meenai.mina.about.AutomaticUpdates(this, apkUpdater) }
 
     /** 浮在别的 App 上的悬浮胶囊。 */
     val capsule: CapsuleController by lazy { CapsuleController(this, taskState, foreground, resources.takeoverQueue) }
@@ -326,6 +330,7 @@ class MinaApp : Application(), WebOwner, SandboxOwner, TaskEnvironment.Owner, Ph
         scope.launch(Dispatchers.IO) { runCatching { com.meenai.mina.about.ApkUpdater(this@MinaApp).dropInstalled() } }
         // 运行环境没准备好(首次启动、Mina 升级后)就在后台准备,不联网、对用户不可见
         RuntimePreparer.ensure(this)
+afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/MinaApp.kt
         // 沙箱就绪(启动时已就绪,或刚装好)就把技能目录核对一次:App 更新带来的脚本马上能用
         scope.launch {
             SandboxState.get(this@MinaApp).status.first { it is SandboxStatus.Ready }

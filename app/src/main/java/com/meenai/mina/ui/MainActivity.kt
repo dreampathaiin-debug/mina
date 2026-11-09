@@ -1,7 +1,13 @@
 package com.meenai.mina.ui
 
 import com.meenai.mina.i18n.AppLanguage
+import androidx.compose.foundation.layout.Box
+afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import com.meenai.mina.ui.components.KeyboardDismissArea
 import android.Manifest
@@ -62,6 +68,7 @@ import com.meenai.mina.ui.theme.MinaTheme
 import com.meenai.mina.ui.theme.animationsOff
 import com.meenai.mina.ui.theme.appearanceDark
 import com.meenai.mina.ui.theme.systemBarsFor
+afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
 
 class MainActivity : ComponentActivity() {
     private lateinit var monitor: SystemStatusMonitor
@@ -103,11 +110,20 @@ class MainActivity : ComponentActivity() {
         requestedConversation = intent.getStringExtra(EXTRA_OPEN_CONVERSATION)
     }
 
+    private var updateWatch: Job? = null
+
     override fun onStart() {
         super.onStart()
         monitor.start()
         // 每次打开都悄悄查一次新版本(两分钟内连着打开的只查一次),失败不吭声
         com.meenai.mina.about.UpdateAutomation.onAppOpened(this, (application as MinaApp).updates)
+        val app = application as MinaApp
+        val check = app.updates.autoCheckInBackground()
+        updateWatch = lifecycleScope.launch {
+            check.join()
+            app.automaticUpdates.watch(app.updates.state)
+        }
+afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
         // 电脑连接开着、服务却不在(被系统停过、从后台没能起来):界面在前台时补起来
         (application as MinaApp).mcp.ensureRunning()
     }
@@ -118,6 +134,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
+        updateWatch?.cancel()
         monitor.stop()
         super.onStop()
     }
@@ -233,6 +250,8 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
     val app = context.applicationContext as MinaApp
     // 查到的新版本:侧栏、设置首页、关于页的红点都看它
     val updateState by app.updates.state.collectAsState()
+    val autoUpdate by app.automaticUpdates.enabled.collectAsState()
+    val readyUpdate by app.automaticUpdates.ready.collectAsState()
     LaunchedEffect(requestedConversation) {
         if (requestedConversation != null) {
             app.chat.openConversation(requestedConversation)
@@ -337,6 +356,25 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                     voice = app.voice,
                     openSpeechModel = { nav.push(Route.SpeechModel) },
                 )
+var installUpdate by remember { mutableStateOf<ReleaseInfo?>(null) }
+                    readyUpdate?.takeIf { autoUpdate && it.apkUrl == updateState.update?.apkUrl }?.let { release ->
+                        UpdateReadyCapsule(
+                            release,
+                            onInstall = {
+                                installUpdate = release
+                                app.automaticUpdates.dismiss(release)
+                            },
+                            onTimeout = { app.automaticUpdates.dismiss(release) },
+                            onDisable = { app.automaticUpdates.setEnabled(false) },
+                            modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 54.dp),
+                        )
+                    }
+                    installUpdate?.let { release ->
+                        UpdateSheet(release, BuildConfig.VERSION_NAME, BuildConfig.BETA,
+                            onOpenUrl = { openInBrowser(context, it) }, onDismiss = { installUpdate = null })
+                    }
+                }
+afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
             }
         }
         Route.Settings -> {
@@ -368,6 +406,8 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                 )
             },
             onCheck = app.updates::checkInBackground,
+            autoUpdate = autoUpdate,
+            onAutoUpdate = app.automaticUpdates::setEnabled,
             onOpenUrl = { openInBrowser(context, it) },
             onSaveQr = { QrImage.saveToPictures(context) },
             onOpenLicense = { nav.push(Route.License) },
