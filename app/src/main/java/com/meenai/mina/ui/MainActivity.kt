@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import com.meenai.mina.ui.components.KeyboardDismissArea
 import com.meenai.mina.ui.components.glassSource
 import com.meenai.mina.ui.components.rememberGlassBackdrop
-3b54bc0b (style(update): 按调样配置实现深色液态玻璃):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -363,7 +362,6 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                     }
                     var installUpdate by remember { mutableStateOf<ReleaseInfo?>(null) }
                     readyRelease?.let { release ->
-3b54bc0b (style(update): 按调样配置实现深色液态玻璃):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
                         UpdateReadyCapsule(
                             release,
                             onInstall = {
