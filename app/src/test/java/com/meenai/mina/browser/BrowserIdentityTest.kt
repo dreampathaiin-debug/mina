@@ -12,7 +12,7 @@ class BrowserIdentityTest {
     @Test
     fun userBrowsingDefaultsToMobile() {
         assertTrue(BrowserIdentity.mobile(loginForMina = false, agentMobile = false, userDesktop = false))
-        //Which version does Agent use without affecting normal browsing?
+        // Agent 那边用哪一版不影响平常浏览
         assertTrue(BrowserIdentity.mobile(loginForMina = false, agentMobile = true, userDesktop = false))
     }
 
@@ -42,7 +42,7 @@ class BrowserIdentityTest {
         assertTrue(m.isDesktop("m.example.com"))
         assertFalse(m.isDesktop("example.org"))
         assertTrue(UserSiteModes(tmp.root).isDesktop("shop.example.com"))
-        //Switch back to the mobile version on the subdomain:Delete even the records of superiors
+        // 在子域名上换回手机版:连上级的记录一起去掉
         m.set("m.example.com", false)
         assertFalse(m.isDesktop("example.com"))
         assertFalse(UserSiteModes(tmp.root).isDesktop("m.example.com"))
