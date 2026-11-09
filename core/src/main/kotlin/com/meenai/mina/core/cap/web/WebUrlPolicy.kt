@@ -23,6 +23,26 @@ object WebUrlPolicy {
         "itunes.apple.com" to "/",
     )
 
+    /** 网银、UPI、KYC 一类页面:Agent 不代用户操作(见 [moneyGuard]);普通购物结账页(购物车到刷卡)不在内。 */
+    private val MONEY_TOKENS = listOf(
+        "netbanking", "internetbanking", "onlinebanking", "online-banking", "ebanking",
+        "upi/collect", "upi/pay", "/kyc", "-kyc", "ekyc", "aadhaar", "digilocker",
+    )
+    /** 登录门户的主机本身不含上面字样的银行。 */
+    private val MONEY_HOSTS = listOf("onlinesbi.sbi", "infinity.icicibank.com")
+
+    /** null = 普通页面;非 null 是给模型的说明:网银/UPI/KYC 页不代操作,这一步交给用户(hand_to_user)。 */
+    fun moneyGuard(url: String): String? {
+        val h = host(url) ?: return null
+        val u = runCatching { URI(url.trim()) }.getOrNull()
+        val path = u?.rawPath.orEmpty().lowercase()
+        val query = u?.rawQuery.orEmpty().lowercase()
+        val text = "$h$path?$query"
+        val hit = MONEY_TOKENS.any { it in text } || MONEY_HOSTS.any { h.contains(it) }
+        return if (hit) "this is a netbanking, UPI or KYC page, and Mina does not act on banking or payment pages: hand this step to the user with hand_to_user and let them finish it there"
+        else null
+    }
+
     /** null = 可以打开;否则是给模型的 invalid_arguments 说明。 */
     fun checkNavigable(url: String): String? {
         val u = url.trim()

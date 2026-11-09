@@ -186,6 +186,11 @@ class WebTab(
             override fun shouldOverrideUrlLoading(v: WebView, request: WebResourceRequest): Boolean {
                 val url = request.url.toString()
                 if (request.isForMainFrame && refusePopup(url)) return true
+                // 网银、UPI 与 KYC 页在任务里不开:Agent 不代操作银行页,步骤交给用户(设置登录与用户自己的浏览器页不受限)
+                if (request.isForMainFrame && moneyGuardBlocks(url)) {
+                    Log.i(TAG, "blocked navigation to a netbanking/UPI/KYC page on tab $id")
+                    return true
+                }
                 // 跳 App 的链接(intent:、自定义协议、应用商店)不跳;只有主文档的才告诉标签池(子框架里的静默拦下)
                 WebUrlPolicy.external(url)?.let { link ->
                     if (request.isForMainFrame) {
@@ -200,6 +205,11 @@ class WebTab(
             override fun onPageStarted(v: WebView, url: String?, favicon: Bitmap?) {
                 // 弹出窗口的第一次导航不一定经过 shouldOverrideUrlLoading:这里再核对一次
                 if (url != null && refusePopup(url)) {
+                    v.stopLoading()
+                    return
+                }
+                if (url != null && moneyGuardBlocks(url)) {
+                    Log.i(TAG, "stopped a netbanking/UPI/KYC page load on tab $id")
                     v.stopLoading()
                     return
                 }
@@ -372,7 +382,7 @@ class WebTab(
      * 弹出的标签要导航到和打开它的页面不同的网站(about:blank 除外):拦下。还没在同站页面上加载过时交标签池关掉它,
      * 之后只拦这次导航。
      */
-    private fun refusePopup(url: String): Boolean {
+private fun refusePopup(url: String): Boolean {
         val opener = popupOpener ?: return false
         if (url == "about:blank" || WebUrlPolicy.sameSite(opener, url)) {
             if (url != "about:blank") popupCommitted = true
@@ -382,6 +392,10 @@ class WebTab(
         else Log.i(TAG, "popup tab $id kept on its site, refused ${url.take(80)}")
         return true
     }
+
+    /** 网银、UPI 与 KYC 页只在任务标签里拦:设置登录(ownerTaskId=settings)与用户自己的浏览器页(user-browser)不受限。 */
+    private fun moneyGuardBlocks(url: String): Boolean =
+        ownerTaskId != "user-browser" && ownerTaskId != "settings" && WebUrlPolicy.moneyGuard(url) != null
 
     private fun finish(ok: Boolean) {
         pending?.complete(ok)

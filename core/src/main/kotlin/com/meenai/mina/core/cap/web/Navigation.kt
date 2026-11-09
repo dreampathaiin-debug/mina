@@ -50,6 +50,8 @@ internal object Navigate : WebTool {
         val newTab = a.bool("newTab", false)
         WebUrlPolicy.external(url)?.let { return externalLink(it.url, it.packageName) }
         WebUrlPolicy.checkNavigable(url)?.let { throw ArgError("url", it) }
+        // 网银、UPI 与 KYC 页面不开:说明直接给模型,这一步交给用户
+        WebUrlPolicy.moneyGuard(url)?.let { return bankingPage(it, url) }
         // 同一个网站上一页还没看够:先补足停留(停留里可以轻轻滚几下眼前这一页);这个网站本任务里的页到了上限就不打开
         try { ctx.dwell?.before(url, ctx.web) } catch (e: DwellStop) { return dwellStopped(e) }
         val r = try { ctx.web!!.navigate(url, newTab) } catch (e: WebTabCrashed) { return failCode("tab_crashed") } catch (e: WebTabHandedOver) { return failCode("handed_over") } catch (e: WebDialogOpen) { return failCode(DIALOG_OPEN) }
@@ -89,6 +91,13 @@ internal object Navigate : WebTool {
             else if (r.settled == false) put("hint", HINT_NOT_SETTLED)
         }
     }
+
+    /** 网银/UPI/KYC 页:ok=false 与 error=banking_page,说明里写清交给用户。 */
+    private fun bankingPage(message: String, url: String) = ToolExecution(buildJsonObject {
+        put("ok", false); put("error", "banking_page"); put("url", url)
+        put("message", message)
+        put("recoverable", true)
+    })
 
     private fun externalLink(url: String, pkg: String?) = ToolExecution(buildJsonObject {
         put("ok", false); put("error", "external_app_link"); put("url", url)
