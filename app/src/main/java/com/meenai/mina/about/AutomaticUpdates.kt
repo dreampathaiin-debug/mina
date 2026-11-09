@@ -1,4 +1,4 @@
-package com.wangzan101.mika.about
+package com.meenai.mina.about
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -62,7 +62,7 @@ internal class AutomaticUpdates(context: Context, private val updater: ApkUpdate
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.w("MikaAutoUpdate", "Could not download update ${release.version}", e)
+                Log.w("MinaAutoUpdate", "Could not download update ${release.version}", e)
             }
         }
     }

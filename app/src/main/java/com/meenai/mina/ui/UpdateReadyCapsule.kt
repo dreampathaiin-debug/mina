@@ -1,4 +1,4 @@
-package com.wangzan101.mika.ui
+package com.meenai.mina.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -49,11 +49,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import com.wangzan101.mika.R
-import com.wangzan101.mika.about.ReleaseInfo
-import com.wangzan101.mika.ui.components.GlassBackdrop
-import com.wangzan101.mika.ui.theme.MikaIcons
-import com.wangzan101.mika.ui.theme.MikaTheme
+import com.meenai.mina.R
+import com.meenai.mina.about.ReleaseInfo
+import com.meenai.mina.ui.components.GlassBackdrop
+import com.meenai.mina.ui.theme.MinaIcons
+import com.meenai.mina.ui.theme.MinaTheme
 import kotlinx.coroutines.delay
 
 @Composable
@@ -65,7 +65,7 @@ internal fun BoxScope.UpdateReadyCapsule(
     backdrop: GlassBackdrop?,
     modifier: Modifier = Modifier,
 ) {
-    val reduceMotion = MikaTheme.reduceMotion
+    val reduceMotion = MinaTheme.reduceMotion
     val reveal = remember(release.apkUrl) { Animatable(if (reduceMotion) 1f else 0f) }
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
@@ -92,7 +92,7 @@ internal fun BoxScope.UpdateReadyCapsule(
     }
 
     val material = UpdateGlassMaterial.Capsule
-    val success = if (MikaTheme.colors.isDark) Color(0xFF80E5A1) else Color(0xFF237B42)
+    val success = if (MinaTheme.colors.isDark) Color(0xFF80E5A1) else Color(0xFF237B42)
     UpdateGlassSurface(
         material, backdrop,
         modifier.size(material.width.dp, material.height.dp)
@@ -112,7 +112,7 @@ internal fun BoxScope.UpdateReadyCapsule(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(Modifier.size(31.dp).background(success.copy(alpha = 0.16f), CircleShape), contentAlignment = Alignment.Center) {
-                    Icon(MikaIcons.Check, null, Modifier.size(14.dp), tint = success)
+                    Icon(MinaIcons.Check, null, Modifier.size(14.dp), tint = success)
                 }
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.about_auto_update_ready, release.version), color = UpdateGlassInk,
@@ -166,13 +166,13 @@ private fun UpdateGlassClose(label: String, onClick: () -> Unit, modifier: Modif
         .clickable(role = Role.Button, onClick = onClick).padding(top = 8.dp, end = 3.dp),
         contentAlignment = Alignment.TopCenter,
     ) {
-        Icon(MikaIcons.Close, label, Modifier.size(13.dp), tint = UpdateGlassSecondaryInk)
+        Icon(MinaIcons.Close, label, Modifier.size(13.dp), tint = UpdateGlassSecondaryInk)
     }
 }
 
 @Composable
 private fun UpdateGlassAction(label: String, primary: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val dark = MikaTheme.colors.isDark
+    val dark = MinaTheme.colors.isDark
     val fill = when {
         primary && dark -> Color(0xFFB4DBB3)
         primary -> Color(0xFF294332)

@@ -1,7 +1,7 @@
-package com.wangzan101.mika.ui
+package com.meenai.mina.ui
 
-import com.wangzan101.mika.R
-import com.wangzan101.mika.i18n.tr
+import com.meenai.mina.R
+import com.meenai.mina.i18n.tr
 import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -26,10 +26,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.rememberCoroutineScope
-import com.wangzan101.mika.browser.PageAskMode
+import com.meenai.mina.browser.PageAskMode
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import com.wangzan101.mika.ui.components.MikaDialog
+import com.meenai.mina.ui.components.MinaDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -60,16 +60,16 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.wangzan101.mika.browser.BrowserFavorites
-import com.wangzan101.mika.browser.ChooserMimeTypes
-import com.wangzan101.mika.browser.RecentPages
-import com.wangzan101.mika.browser.SiteLooks
-import com.wangzan101.mika.browser.StartPageModel
-import com.wangzan101.mika.browser.UserBrowser
-import com.wangzan101.mika.core.cap.web.WebUrlPolicy
-import com.wangzan101.mika.core.uistate.PageDialog
-import com.wangzan101.mika.ui.components.PageBackground
-import com.wangzan101.mika.ui.theme.MikaType
+import com.meenai.mina.browser.BrowserFavorites
+import com.meenai.mina.browser.ChooserMimeTypes
+import com.meenai.mina.browser.RecentPages
+import com.meenai.mina.browser.SiteLooks
+import com.meenai.mina.browser.StartPageModel
+import com.meenai.mina.browser.UserBrowser
+import com.meenai.mina.core.cap.web.WebUrlPolicy
+import com.meenai.mina.core.uistate.PageDialog
+import com.meenai.mina.ui.components.PageBackground
+import com.meenai.mina.ui.theme.MinaType
 
 /**
  * 浏览器页(侧栏「浏览器」):没有打开的网页时是起始页([BrowserStart]:搜索框、常用网站、最近打开),
@@ -423,13 +423,13 @@ private fun chooserMimeTypes(params: WebChromeClient.FileChooserParams): Array<S
 
 @Composable
 private fun WebPermissionDialog(site: String, what: String, onAllow: () -> Unit, onDeny: () -> Unit) {
-    MikaDialog(
+    MinaDialog(
         onDismissRequest = onDeny,
         title = { Text(site) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(tr(R.string.browser_permission_ask))
-                Text(what, style = MikaType.BodyStrong)
+                Text(what, style = MinaType.BodyStrong)
             }
         },
         confirmButton = { TextButton(onClick = onAllow) { Text(tr(R.string.browser_permission_allow)) } },
@@ -462,7 +462,7 @@ private fun openOutside(context: Context, url: String): String? = try {
 private fun PageDialogBox(d: PageDialog, answer: (Boolean, String?) -> Unit) {
     var input by remember(d) { mutableStateOf(d.defaultText.orEmpty()) }
     val leave = d.kind == PageDialog.BEFORE_UNLOAD
-    MikaDialog(
+    MinaDialog(
         onDismissRequest = { answer(false, null) },
         title = { Text(if (leave) tr(R.string.browser_leave_q) else tr(R.string.browser_page_says)) },
         text = {

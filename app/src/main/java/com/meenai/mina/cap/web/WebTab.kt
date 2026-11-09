@@ -1,4 +1,4 @@
-package com.wangzan101.mika.cap.web
+package com.meenai.mina.cap.web
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -30,12 +30,12 @@ import androidx.webkit.ProfileStore
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
-import com.wangzan101.mika.core.cap.web.DialogReply
-import com.wangzan101.mika.core.cap.web.ExternalLink
-import com.wangzan101.mika.core.cap.web.PageDialogs
-import com.wangzan101.mika.core.uistate.PageDialog
-import com.wangzan101.mika.core.cap.web.WebUrlPolicy
-import com.wangzan101.mika.cap.web.cdp.WebDevtools
+import com.meenai.mina.core.cap.web.DialogReply
+import com.meenai.mina.core.cap.web.ExternalLink
+import com.meenai.mina.core.cap.web.PageDialogs
+import com.meenai.mina.core.uistate.PageDialog
+import com.meenai.mina.core.cap.web.WebUrlPolicy
+import com.meenai.mina.cap.web.cdp.WebDevtools
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -468,7 +468,7 @@ class WebTab(
     }
 
     companion object {
-        private const val TAG = "MikaWebTab"
+        private const val TAG = "MinaWebTab"
         private const val PROFILE = "mika"
 
         /**

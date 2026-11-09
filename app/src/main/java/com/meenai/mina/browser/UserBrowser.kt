@@ -1,7 +1,7 @@
-package com.wangzan101.mika.browser
+package com.meenai.mina.browser
 
-import com.wangzan101.mika.R
-import com.wangzan101.mika.i18n.tr
+import com.meenai.mina.R
+import com.meenai.mina.i18n.tr
 import android.content.Context
 import android.content.MutableContextWrapper
 import android.graphics.Bitmap
@@ -18,14 +18,14 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewDatabase
-import com.wangzan101.mika.cap.web.LoginProbe
-import com.wangzan101.mika.cap.web.LoginState
-import com.wangzan101.mika.cap.web.SiteRegistry
-import com.wangzan101.mika.cap.web.WebSites
-import com.wangzan101.mika.cap.web.WebTab
-import com.wangzan101.mika.core.cap.web.ExternalLink
-import com.wangzan101.mika.core.cap.web.WebUrlPolicy
-import com.wangzan101.mika.core.uistate.PageDialog
+import com.meenai.mina.cap.web.LoginProbe
+import com.meenai.mina.cap.web.LoginState
+import com.meenai.mina.cap.web.SiteRegistry
+import com.meenai.mina.cap.web.WebSites
+import com.meenai.mina.cap.web.WebTab
+import com.meenai.mina.core.cap.web.ExternalLink
+import com.meenai.mina.core.cap.web.WebUrlPolicy
+import com.meenai.mina.core.uistate.PageDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -77,7 +77,7 @@ internal fun findMatchIndex(active: Int, matches: Int): Int =
  * (记在 [modes]),「给 Mika 登录」时照 Mika 办事时的那一版;规则只装在这个标签上(WebDevtools.setModePolicy),
  * Agent 的标签不受影响。
  *
- * 不进任何任务的标签池,也不走 [com.wangzan101.mika.cap.web.WebHandover] 的那一次接管:Agent 的标签、接管照常进行,互不影响。
+ * 不进任何任务的标签池,也不走 [com.meenai.mina.cap.web.WebHandover] 的那一次接管:Agent 的标签、接管照常进行,互不影响。
  * 标签放在进程里(转屏、页面重建时同一个 WebView 接着用),离开浏览器页时关掉。界面不止一个实例时,浏览器页可能同时有几处:
  * 视图挂在哪一处、哪一处走了才关网页,见 [PageHosts]。
  * WebView 的环境是 [MutableContextWrapper]:挂到界面上时换成那个 Activity(下拉框、长按菜单要它),摘下时换回 App。
@@ -487,10 +487,10 @@ class UserBrowser private constructor(private val app: Context) {
     // ---------- 在这一页上问 Mika ----------
 
     /** 此刻看着的这一页(给 Mika 的说明用);没有打开的网页为 null。 */
-    fun pageInfo(): com.wangzan101.mika.core.cap.web.AttachedPage.Page? {
+    fun pageInfo(): com.meenai.mina.core.cap.web.AttachedPage.Page? {
         val url = currentUrl()?.takeIf { it.startsWith("http") } ?: return null
         val title = tab?.view?.title?.takeIf { it != url }.orEmpty().ifEmpty { _page.value?.title.orEmpty() }
-        return com.wangzan101.mika.core.cap.web.AttachedPage.Page(url, title)
+        return com.meenai.mina.core.cap.web.AttachedPage.Page(url, title)
     }
 
     /** 读用户在页面上选中的字,交给 [onText](没选、读不到为 null)。 */
@@ -815,7 +815,7 @@ class UserBrowser private constructor(private val app: Context) {
     }
 
     companion object {
-        private const val TAG = "MikaUserBrowser"
+        private const val TAG = "MinaUserBrowser"
         /** 这个标签不属于任何任务。 */
         const val OWNER = "user-browser"
         private const val PROBE_DELAY_MS = 1_500L
