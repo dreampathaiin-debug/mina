@@ -435,6 +435,12 @@ The clock's alarm list is open on the phone screen. Observe it to check, change 
 ## calendar.opened
 The calendar's new-event screen is open with these details filled in; nothing is saved yet. Observe it, check the fields, tap its save button yourself, then check the result.
 
+## app_intent.whatsapp_tap
+The chat is open on screen with the message typed in; the send button still needs a tap, WhatsApp does not let anyone send without one.
+
+## app_intent.dial_tap
+The number is on the dialer; the call button still needs a tap before it rings.
+
 ## system_action.screen_opened
 The app opened its own screen on the phone instead of finishing on its own: observe it and confirm or save there.
 

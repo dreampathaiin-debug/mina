@@ -201,6 +201,54 @@ internal object AddCalendarEvent : PhoneTool {
     }
 }
 
+/** 经 intent 直接打开 App 的页面:WhatsApp 的聊天、地图的导航、放视频、拨号盘;WhatsApp 的发送和拨号都要屏幕上点一下,这里只把页面和内容摆好。 */
+internal object AppIntentTool : PhoneTool {
+    override val verb = Verb.AppIntent
+    override val label = "Open app directly"
+    override val risk = Risk.Write
+    override val entry = Entry.Opens
+    override val showsScreenAfter = true
+    override val logged = true
+    override val def = ToolDef("phone_app_intent", Prompts.tool("phone_app_intent"), mapOf(
+        "kind" to str("What to open directly: whatsapp_chat, map_directions, play_media or dial."),
+        "target" to str("whatsapp_chat and dial: the phone number, international format (+919876543210). map_directions: the destination (place name or address). play_media: a YouTube video URL, its 11-character video id, or the words to search in the YouTube app."),
+        "text" to str("Optional with whatsapp_chat: the message to type into the chat."),
+    ), listOf("kind", "target"))
+
+    override suspend fun execute(a: Args, ctx: ToolContext): ToolExecution {
+        val kind = SystemAction.AppIntent.Kind.of(a.str("kind")!!) ?: throw ArgError("kind", "must be whatsapp_chat, map_directions, play_media or dial")
+        val target = a.str("target", max = 300)!!.trim()
+        val text = a.str("text", max = 2000)
+        when (kind) {
+            SystemAction.AppIntent.Kind.WHATSAPP_CHAT, SystemAction.AppIntent.Kind.DIAL ->
+                if (!Regex("^[+*#0-9 ()-]{3,20}$").matches(target)) throw ArgError("target", "must be a phone number in international format, like +919876543210")
+            else -> if (target.length < 2) throw ArgError("target", "cannot be empty")
+        }
+        ctx.refusedPay = null
+        val res = ctx.phone.screen.systemAction(SystemAction.AppIntent(kind, target, text))
+        if (res.result is ActionResult.Ok) ctx.appOpened = true
+        return systemResult(ctx, res) {
+            put("requested", buildJsonObject {
+                put("kind", kind.wire); put("target", target); text?.let { put("text", it) }
+            })
+            hint(this, when (kind) {
+                SystemAction.AppIntent.Kind.WHATSAPP_CHAT -> Feedback["app_intent.whatsapp_tap"]
+                SystemAction.AppIntent.Kind.DIAL -> Feedback["app_intent.dial_tap"]
+                else -> null
+            }, res, silent = false)
+        }
+    }
+
+    override fun logTarget(o: JsonObject, r: ToolExecution, ctx: ToolContext): String? = (o["target"] as? JsonPrimitive)?.contentOrNull
+
+    override fun observations(o: JsonObject, r: ToolExecution, log: EvidenceLog): List<Observation> {
+        if (r.content["ok"] != JsonPrimitive(true)) return emptyList()
+        val kind = (r.content["requested"] as? JsonObject)?.get("kind") as? JsonPrimitive ?: return emptyList()
+        val by = (r.content["handledBy"] as? JsonPrimitive)?.contentOrNull ?: return emptyList()
+        return listOf(Observation(ObsKind.Fact, "$name opened ${kind.content} in $by", source = PHONE))
+    }
+}
+
 /** 结果:端口的动作结果照常转(失败按错误码给说明),成功时加上接手的 App 和 [more]。 */
 private fun systemResult(ctx: ToolContext, res: SystemActionResult, more: JsonObjectBuilder.() -> Unit): ToolExecution {
     val r = ctx.action(res.result)

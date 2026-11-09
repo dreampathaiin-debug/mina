@@ -49,6 +49,11 @@ phone on the main screen at the same time.
   phone_set_timer and phone_add_calendar_event over operating the clock or
   calendar screens (phone_show_alarms opens the alarm list to check, change
   or delete one). Operate those screens only when they return not_supported.
+- For a WhatsApp chat to a known number, Maps directions, playing a song on
+  YouTube or dialling a number, prefer phone_app_intent: it goes straight to
+  the right page through the app's own intent, no screen walking. Sending the
+  WhatsApp message and making the call still need one tap on screen; only
+  walk the app's screens when phone_app_intent returns not_supported.
 - For wheel or drum pickers (time, date, region...), call phone_set_wheel once
   per wheel instead of swiping it step by step.
 - An app may be installed more than once (another copy in another user or

@@ -33,7 +33,7 @@ object SystemIntents {
             ?: handlers.firstOrNull()
 
     /** 一个 intent 的内容:动作、数据和类型、附加值(只有 Int、Long、Boolean、String、整数列表)。 */
-    data class Spec(val action: String, val data: String? = null, val type: String? = null, val extras: Map<String, Any> = emptyMap())
+    data class Spec(val action: String, val data: String? = null, val type: String? = null, val extras: Map<String, Any> = emptyMap(), val pkg: String? = null)
 
     fun spec(a: SystemAction): Spec = when (a) {
         is SystemAction.SetAlarm -> Spec(AlarmClock.ACTION_SET_ALARM, extras = buildMap {
@@ -59,17 +59,39 @@ object SystemIntents {
             a.location?.let { put(CalendarContract.Events.EVENT_LOCATION, it) }
             a.description?.let { put(CalendarContract.Events.DESCRIPTION, it) }
         })
+        is SystemAction.AppIntent -> when (a.kind) {
+            // 指到具体的包:wa.me 这类链接别的应用也会认领,不指就有开错 App 的风险
+            SystemAction.AppIntent.Kind.WHATSAPP_CHAT -> Spec(Intent.ACTION_VIEW,
+                "https://wa.me/${a.target.filter { it.isDigit() || it == '+' }}${a.text?.let { "?text=" + Uri.encode(it) } ?: ""}", pkg = "com.whatsapp")
+            SystemAction.AppIntent.Kind.MAPS_NAVIGATE -> Spec(Intent.ACTION_VIEW, "google.navigation:q=${Uri.encode(a.target)}", pkg = "com.google.android.apps.maps")
+            SystemAction.AppIntent.Kind.PLAY_MEDIA -> youtube(a.target)
+            SystemAction.AppIntent.Kind.DIAL -> Spec(Intent.ACTION_DIAL, "tel:${a.target.filter { it.isDigit() || it == '+' || it == '*' || it == '#' }}")
+        }
     }
 
+    /** 视频链接、视频编号就放它,别的一律当作在 YouTube 里搜这几个词。 */
+    private fun youtube(target: String): Spec {
+        val t = target.trim()
+        val id = t.length == 11 && t.all { it.isLetterOrDigit() || it == '-' || it == '_' }
+        return when {
+            t.startsWith("http") -> Spec(Intent.ACTION_VIEW, t, pkg = "com.google.android.youtube")
+            id -> Spec(Intent.ACTION_VIEW, "vnd.youtube:$t", pkg = "com.google.android.youtube")
+            else -> Spec(Intent.ACTION_VIEW, "https://www.youtube.com/results?search_query=${Uri.encode(t)}", pkg = "com.google.android.youtube")
+        }
+    }
     /** 内置助手只替 Mina 启动这几种:动作在表里,插入的只能是日程。 */
     fun allowed(action: String?, data: String?): Boolean = when (action) {
         AlarmClock.ACTION_SET_ALARM, AlarmClock.ACTION_SET_TIMER, AlarmClock.ACTION_SHOW_ALARMS -> data == null
         Intent.ACTION_INSERT -> data == EVENTS_URI
+        Intent.ACTION_VIEW -> data != null && (data.startsWith("https://wa.me/") || data.startsWith("google.navigation:q=") ||
+            data.startsWith("vnd.youtube:") || data.startsWith("https://www.youtube.com/") || data.startsWith("https://m.youtube.com/") || data.startsWith("https://youtube.com/"))
+        Intent.ACTION_DIAL -> data != null && data.startsWith("tel:")
         else -> false
     }
 
     fun toIntent(s: Spec): Intent {
         val i = Intent(s.action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        s.pkg?.let { i.setPackage(it) }
         when {
             s.data != null && s.type != null -> i.setDataAndType(Uri.parse(s.data), s.type)
             s.data != null -> i.data = Uri.parse(s.data)

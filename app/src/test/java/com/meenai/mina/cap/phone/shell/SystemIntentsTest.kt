@@ -52,6 +52,47 @@ class SystemIntentsTest {
         assertEquals(true, allDay.extras["allDay"])
     }
 
+    @Test fun whatsappChatGoesThroughWameToTheWhatsAppApp() {
+        val s = SystemIntents.spec(SystemAction.AppIntent(SystemAction.AppIntent.Kind.WHATSAPP_CHAT, "+91 98765 43210", "hi there"))
+        assertEquals("android.intent.action.VIEW", s.action)
+        assertEquals("https://wa.me/+919876543210?text=hi%20there", s.data)
+        assertEquals("com.whatsapp", s.pkg)
+        assertTrue(SystemIntents.allowed(s.action, s.data))
+    }
+
+    @Test fun chatWithoutATextOpensTheChatAlone() {
+        val s = SystemIntents.spec(SystemAction.AppIntent(SystemAction.AppIntent.Kind.WHATSAPP_CHAT, "9876543210"))
+        assertEquals("https://wa.me/9876543210", s.data)
+    }
+
+    @Test fun mapsNavigationTargetsMaps() {
+        val s = SystemIntents.spec(SystemAction.AppIntent(SystemAction.AppIntent.Kind.MAPS_NAVIGATE, "Indira Gandhi International Airport"))
+        assertEquals("android.intent.action.VIEW", s.action)
+        assertEquals("google.navigation:q=Indira%20Gandhi%20International%20Airport", s.data)
+        assertEquals("com.google.android.apps.maps", s.pkg)
+        assertTrue(SystemIntents.allowed(s.action, s.data))
+    }
+
+    @Test fun playMediaPassesIdsAndUrlsThroughAndSearchesTheRest() {
+        val id = SystemIntents.spec(SystemAction.AppIntent(SystemAction.AppIntent.Kind.PLAY_MEDIA, "dQw4w9WgXcQ"))
+        assertEquals("vnd.youtube:dQw4w9WgXcQ", id.data)
+        assertEquals("com.google.android.youtube", id.pkg)
+        val url = SystemIntents.spec(SystemAction.AppIntent(SystemAction.AppIntent.Kind.PLAY_MEDIA, "https://www.youtube.com/watch?v=dQw4w9WgXcQ"))
+        assertEquals("https://www.youtube.com/watch?v=dQw4w9WgXcQ", url.data)
+        val search = SystemIntents.spec(SystemAction.AppIntent(SystemAction.AppIntent.Kind.PLAY_MEDIA, "kesariya arijit singh"))
+        assertEquals("https://www.youtube.com/results?search_query=kesariya%20arijit%20singh", search.data)
+        assertTrue(SystemIntents.allowed(id.action, id.data))
+        assertTrue(SystemIntents.allowed(search.action, search.data))
+    }
+
+    @Test fun dialTypesTheNumberOnTheDialer() {
+        val s = SystemIntents.spec(SystemAction.AppIntent(SystemAction.AppIntent.Kind.DIAL, "1800 123 456"))
+        assertEquals("android.intent.action.DIAL", s.action)
+        assertEquals("tel:1800123456", s.data)
+        assertNull(s.pkg)
+        assertTrue(SystemIntents.allowed(s.action, s.data))
+    }
+
     @Test fun helperOnlyStartsTheseActions() {
         for (a in listOf(SystemAction.SetAlarm(1, 2), SystemAction.SetTimer(3), SystemAction.ShowAlarms, SystemAction.AddCalendarEvent("t", 0))) {
             val s = SystemIntents.spec(a)

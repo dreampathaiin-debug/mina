@@ -15,6 +15,14 @@ sealed interface SystemAction {
         val location: String? = null, val description: String? = null,
     ) : SystemAction
 
+    /** 经 intent 直接打开的 App 页面:WhatsApp 的聊天、地图的导航、放视频、拨号盘;把页面和内容摆好,发送、拨号这类确认仍要屏幕上点。 */
+    data class AppIntent(val kind: Kind, val target: String, val text: String? = null) : SystemAction {
+        enum class Kind(val wire: String) {
+            WHATSAPP_CHAT("whatsapp_chat"), MAPS_NAVIGATE("map_directions"), PLAY_MEDIA("play_media"), DIAL("dial");
+            companion object { fun of(wire: String): Kind? = entries.firstOrNull { it.wire == wire } }
+        }
+    }
+
     /** 交给 App 后不留界面(闹钟、计时器);其余在 Mina 的屏上打开那个 App 的页面。 */
     val silent: Boolean get() = this is SetAlarm || this is SetTimer
 }
