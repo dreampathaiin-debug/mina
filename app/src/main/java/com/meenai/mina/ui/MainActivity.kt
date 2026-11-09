@@ -10,6 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import com.meenai.mina.ui.components.KeyboardDismissArea
+import com.meenai.mina.ui.components.glassSource
+import com.meenai.mina.ui.components.rememberGlassBackdrop
+3b54bc0b (style(update): 按调样配置实现深色液态玻璃):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -334,30 +337,36 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                 reopen = nav.reopenDrawer,
                 onReopened = nav::drawerReopened,
             ) { openDrawer ->
-                ChatScreen(
-                    vm = app.chat,
-                    check = check,
-                    frames = app.taskState.frames,
-                    webOpen = app.tasks.webScreenOpen,
-                    reduceMotion = MinaTheme.reduceMotion,
-                    onOpenDrawer = openDrawer,
-                    openSettings = { nav.push(Route.Settings) },
-                    openRun = { runId = it; nav.push(Route.Run) },
-                    phoneSetupNeeded = phoneSetupNeeded && status.builtinShell != BuiltinShellStatus.Running,
-                    openPhoneSetup = { onFix(Fix.OpenPhoneSetup) },
-                    loadSource = { id ->
-                        withContext(Dispatchers.IO) { evidenceSource(RunStore(context).events(id)) { ConfirmationNotifier.appLabel(context, it) } }
-                    },
-                    openSource = { id, legacy ->
-                        sourceRunId = id
-                        sourceLegacyText = legacy
-                        nav.push(Route.Source)
-                    },
-                    voice = app.voice,
-                    openSpeechModel = { nav.push(Route.SpeechModel) },
-                )
-var installUpdate by remember { mutableStateOf<ReleaseInfo?>(null) }
-                    readyUpdate?.takeIf { autoUpdate && it.apkUrl == updateState.update?.apkUrl }?.let { release ->
+                Box(Modifier.fillMaxSize()) {
+                    val readyRelease = readyUpdate?.takeIf { autoUpdate && it.apkUrl == updateState.update?.apkUrl }
+                    val updateBackdrop = if (readyRelease != null) rememberGlassBackdrop() else null
+                    Box(Modifier.fillMaxSize().glassSource(updateBackdrop)) {
+                        ChatScreen(
+                            vm = app.chat,
+                            check = check,
+                            frames = app.taskState.frames,
+                            webOpen = app.tasks.webScreenOpen,
+                            reduceMotion = MinaTheme.reduceMotion,
+                            onOpenDrawer = openDrawer,
+                            openSettings = { nav.push(Route.Settings) },
+                            openRun = { runId = it; nav.push(Route.Run) },
+                            phoneSetupNeeded = phoneSetupNeeded && status.builtinShell != BuiltinShellStatus.Running,
+                            openPhoneSetup = { onFix(Fix.OpenPhoneSetup) },
+                            loadSource = { id ->
+                                withContext(Dispatchers.IO) { evidenceSource(RunStore(context).events(id)) { ConfirmationNotifier.appLabel(context, it) } }
+                            },
+                            openSource = { id, legacy ->
+                                sourceRunId = id
+                                sourceLegacyText = legacy
+                                nav.push(Route.Source)
+                            },
+                            voice = app.voice,
+                            openSpeechModel = { nav.push(Route.SpeechModel) },
+                        )
+                    }
+                    var installUpdate by remember { mutableStateOf<ReleaseInfo?>(null) }
+                    readyRelease?.let { release ->
+3b54bc0b (style(update): 按调样配置实现深色液态玻璃):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
                         UpdateReadyCapsule(
                             release,
                             onInstall = {
@@ -366,6 +375,7 @@ var installUpdate by remember { mutableStateOf<ReleaseInfo?>(null) }
                             },
                             onTimeout = { app.automaticUpdates.dismiss(release) },
                             onDisable = { app.automaticUpdates.setEnabled(false) },
+                            backdrop = updateBackdrop,
                             modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 54.dp),
                         )
                     }
