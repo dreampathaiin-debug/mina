@@ -14,7 +14,6 @@ It works on a hidden background screen, so you can keep using your phone.
 <a href="https://github.com/meenaispeaks6-droid/meena/releases"><img src="https://img.shields.io/github/downloads/meenaispeaks6-droid/meena/total?label=downloads&color=2ea043" alt="downloads" /></a>
 <a href="https://github.com/meenaispeaks6-droid/meena/releases/latest"><img src="https://img.shields.io/github/v/release/meenaispeaks6-droid/meena?include_prereleases&label=version" alt="version" /></a>
 
-English · (docs/readme/README.ja.md) · 
 <br/>
 </div>
 
@@ -68,7 +67,7 @@ Then try saying: "Set alarms for 9:40 and 10:00 tomorrow morning" or "Check the 
 | **Files and computing** | A Linux sandbox per conversation runs Python, Node and shell on the files you send (arm64) |
 | **From your computer** | AI tools on your computer can hand Mina tasks through CLI + Skill or MCP ([use Mina from a computer](docs/computer.en.md)) |
 
-By default Mina runs in **Ask mode**: it checks with you only before spending money (placing orders, paying) and just does everything else. You can switch to **Autonomous mode** instead. See [Ask and Autonomous](docs/modes.en.md).
+By default Mina runs in **Ask mode**: it checks with you only before spending money (placing orders, paying) and just does everything else. You can switch to **Autonomous mode** instead. See [Ask and Autonomous].
 
 For how each of these works and the finer details, see [features in detail](docs/features.en.md).
 
@@ -111,7 +110,7 @@ Not sure your phone is up to it? Run Settings › Recovery & repair › **Compat
 
 **Wireless debugging turned itself off?** Android turns it off when you change Wi-Fi or restart. With your permission, Mina turns it back on by itself; if it still can't connect, go back to "Set up phone control" and pair again.
 
-**Can't find wireless debugging on my phone?** Some phone systems leave it out. You can start the phone helper from a computer over USB instead; see the [setup guide](docs/setup-guide.en.md).
+**Can't find wireless debugging on my phone?** Some phone systems leave it out. You can start the phone helper from a computer over USB instead; 
 
 **Some screens can't be read or captured?** Pages like payments and password entry block screenshots, so Mina asks you to take over there.
 
@@ -121,6 +120,5 @@ Not sure your phone is up to it? Run Settings › Recovery & repair › **Compat
 
 **Where do updates come from?** Only from this repository's [Releases](https://github.com/meenaispeaks6-droid/meena/releases); you can also upgrade in the app from About › Check for updates.
 
-More answers are in the [FAQ](docs/faq.en.md).
 
 
