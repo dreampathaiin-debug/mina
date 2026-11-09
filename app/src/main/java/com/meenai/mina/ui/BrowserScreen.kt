@@ -10,8 +10,11 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.imePadding
@@ -19,7 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.meenai.mina.browser.PageAskMode
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
+import com.meenai.mina.ui.components.MinaDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -34,25 +37,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import com.meenai.mina.ui.components.floatShadow
-import com.meenai.mina.ui.theme.MinaIcons
-import com.meenai.mina.ui.theme.MinaTheme
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.meenai.mina.browser.BrowserFavorites
+import com.meenai.mina.browser.RecentPages
 import com.meenai.mina.browser.SiteLooks
 import com.meenai.mina.browser.StartPageModel
 import com.meenai.mina.browser.UserBrowser
@@ -63,9 +63,9 @@ import com.meenai.mina.ui.components.PageBackground
 /**
  * 浏览器页(侧栏「浏览器」):没有打开的网页时是起始页([BrowserStart]:搜索框、常用网站、最近打开),
  * 打开了是网页([BrowserPageBar] + 网页 + [BrowserToolbar],「更多」是 [BrowserMoreSheet])。
- * 网页底下是「问问 Mina」([PageAskBar]):对着这一页问,这一页借给那个任务当它的当前网页标签;干活时网页下半截盖一块对话面板
- * ([PagePanel]),页面四周亮一圈光边([PageGlow]);你一摸页面 Mina 就暂停,面板收成小卡片([PageCard]),顶上一条「继续」([PausedBanner])。
- * 选中网页上的文字时,文字选择菜单里多一项「问 Mina」,选中的字带进去。状态在 [PageChat]。
+ * 网页底下是「问问 Mika」([PageAskBar]):对着这一页问,这一页借给那个任务当它的当前网页标签;干活时网页下半截盖一块对话面板
+ * ([PagePanel]),页面四周亮一圈光边([PageGlow]);你一摸页面 Mika 就暂停,面板收成小卡片([PageCard]),顶上一条「继续」([PausedBanner])。
+ * 选中网页上的文字时,文字选择菜单里多一项「问 Mika」,选中的字带进去。状态在 [PageChat]。
  * 系统返回键先在网页里后退,退不了回到起始页,起始页上再按回到进来的地方。
  * 网页视图放在进程里([UserBrowser]),转屏时接着用;离开这一页(不是转屏、也没有别处的浏览器页)时关掉。
  */
@@ -79,12 +79,20 @@ fun BrowserScreen(browser: UserBrowser, onBack: () -> Unit) {
     val recentPages by browser.recent.entries.collectAsState()
     val edits by browser.favorites.edits.collectAsState()
     val looks by browser.looks.entries.collectAsState()
+    val tabs by browser.tabs.collectAsState()
+    val find by browser.find.collectAsState()
+    val fullscreen by browser.fullscreen.collectAsState()
     val activity = remember(context) { context.findActivity() }
     var moreOpen by rememberSaveable { mutableStateOf(false) }
+    var menuOpen by rememberSaveable { mutableStateOf(false) }
+    var tabsOpen by rememberSaveable { mutableStateOf(false) }
+    var historyOpen by rememberSaveable { mutableStateOf(false) }
+    var clearOpen by rememberSaveable { mutableStateOf(false) }
 
     val face = remember(looks) { { host: String -> SiteLooks.faceOf(host, looks, browser.looks::iconFile) } }
     val favorites = remember(edits, registry) { BrowserFavorites.combine(edits, registry) }
-    val recent = remember(recentPages, looks) { StartPageModel.recentRows(recentPages) { face(it).name } }
+    val allRecent = remember(recentPages, looks) { StartPageModel.recentRows(recentPages) { face(it).name } }
+    val recent = remember(allRecent) { allRecent.take(RecentPages.START_LIMIT) }
     val toast: (String) -> Unit = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
     val scope = rememberCoroutineScope()
     val chat = remember(browser) { PageChat(context.applicationContext, browser, scope) }
@@ -105,7 +113,8 @@ fun BrowserScreen(browser: UserBrowser, onBack: () -> Unit) {
             browser.closeHost(place, keepPage = activity?.isChangingConfigurations == true)
         }
     }
-    BackHandler(enabled = page != null) { browser.systemBack() }
+    BackHandler(enabled = page != null || tabs.isNotEmpty()) { browser.systemBack() }
+    BackHandler(enabled = find.active) { browser.stopFind() }
     LaunchedEffect(notice) {
         notice?.let {
             toast(it)
@@ -128,18 +137,30 @@ fun BrowserScreen(browser: UserBrowser, onBack: () -> Unit) {
                     toast(tr(R.string.browser_removed, face(site.host).name))
                 },
                 onAddHint = { toast(BROWSER_ADD_HINT) },
-                onClearRecent = browser.recent::clear,
+                tabsCount = tabs.size,
+                onMenu = { menuOpen = true },
+                onHistory = { historyOpen = true },
             )
         } else {
             val host = WebUrlPolicy.host(p.url)
             val loginBanner = p.loginFor != null && !BrowserFavorites.loggedIn(registry, p.loginFor)
-            // 窗口大小:平常 / 全屏(只剩网页)/ 最小化(右下角小卡片);最小化时网页照常跑
-            var windowMode by rememberSaveable { mutableStateOf("normal") }
-            val mode = chat.mode
-            /** 网页视图那一块:[m] 由调用处给大小;[overlay] 平时带着问问面板,全屏和最小化时不带。 */
-            val pageView: @Composable (Modifier, Boolean) -> Unit = { m, overlay ->
-                Box(m) {
-                    // 网页视图由 UserBrowser 放进这个容器(换了标签也放进同一个);手指按下告诉借着页面的任务,选中文字时菜单里有「问 Mina」
+            Column(Modifier.fillMaxSize()) {
+                BrowserPageBar(
+                    p, host?.let(face),
+                    onClose = browser::closeActiveTab,
+                    onSubmit = { input -> browser.submit(input)?.let(toast) },
+                    onReload = browser::reload, onStop = browser::stop,
+                )
+                if (find.active) {
+                    BrowserFindBar(
+                        find, browser::setFindQuery,
+                        onPrev = { browser.findNext(false) }, onNext = { browser.findNext(true) }, onClose = browser::stopFind,
+                    )
+                }
+                if (loginBanner) LoginBanner(desktop = p.desktop, onDone = browser::confirmLogin)
+                val mode = chat.mode
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    // 网页视图由 UserBrowser 放进这个容器(换了标签也放进同一个);手指按下告诉借着页面的任务,选中文字时菜单里有「问 Mika」
                     AndroidView(
                         factory = { ctx ->
                             PageFrame(ctx, onTouch = chat::touched, onAsk = { done ->
@@ -152,56 +173,15 @@ fun BrowserScreen(browser: UserBrowser, onBack: () -> Unit) {
                         modifier = Modifier.fillMaxSize().testTag("browser-page"),
                         onRelease = { browser.setContainer(place, null) },
                     )
-                    if (overlay) PageAskOverlay(chat, site = host?.let { face(it).name } ?: p.url, pageTitle = p.title)
+                    PageAskOverlay(chat, site = host?.let { face(it).name } ?: p.url, pageTitle = p.title)
                 }
+                if (mode == PageAskMode.Bar && p.loginFor == null) PageAskBar(chat, Modifier.imePadding())
+                BrowserToolbar(
+                    p, onBackPage = browser::back, onForward = browser::forward, onHome = browser::closeActiveTab,
+                    onShare = { share(context, p.url, p.title)?.let(toast) },
+                    onMore = { moreOpen = true },
+                )
             }
-            when (windowMode) {
-                "full" -> {
-                    Box(Modifier.fillMaxSize()) {
-                        pageView(Modifier.fillMaxSize(), false)
-                        Box(
-                            Modifier.align(Alignment.TopEnd).padding(12.dp).size(36.dp)
-                                .floatShadow(MinaTheme.colors, CircleShape).background(MinaTheme.colors.glass, CircleShape).clip(CircleShape)
-                                .clickable(onClickLabel = tr(R.string.browser_fullscreen_exit)) { windowMode = "normal" }
-                                .testTag("browser-fullscreen-exit"),
-                            contentAlignment = Alignment.Center,
-                        ) { Icon(MinaIcons.Shrink, tr(R.string.browser_fullscreen_exit), Modifier.size(16.dp), tint = MinaTheme.colors.ink) }
-                    }
-                }
-                "mini" -> {
-                    Box(Modifier.fillMaxSize()) {
-                        pageView(Modifier.align(Alignment.BottomEnd).padding(12.dp).size(width = 176.dp, height = 264.dp), false)
-                        Box(
-                            Modifier.align(Alignment.TopEnd).padding(12.dp).size(36.dp)
-                                .floatShadow(MinaTheme.colors, CircleShape).background(MinaTheme.colors.glass, CircleShape).clip(CircleShape)
-                                .clickable(onClickLabel = tr(R.string.browser_restore)) { windowMode = "normal" }
-                                .testTag("browser-restore"),
-                            contentAlignment = Alignment.Center,
-                        ) { Icon(MinaIcons.Expand, tr(R.string.browser_restore), Modifier.size(16.dp), tint = MinaTheme.colors.ink) }
-                    }
-                }
-                else -> {
-                    Column(Modifier.fillMaxSize()) {
-                        BrowserPageBar(
-                            p, host?.let(face),
-                            onClose = browser::closePage,
-                            onSubmit = { input -> browser.submit(input)?.let(toast) },
-                            onReload = browser::reload, onStop = browser::stop,
-                        )
-                        if (loginBanner) LoginBanner(desktop = p.desktop, onDone = browser::confirmLogin)
-                        pageView(Modifier.weight(1f).fillMaxWidth(), true)
-                        if (mode == PageAskMode.Bar && p.loginFor == null) PageAskBar(chat, Modifier.imePadding())
-                        BrowserToolbar(
-                            p, onBackPage = browser::back, onForward = browser::forward, onHome = browser::closePage,
-                            onShare = { share(context, p.url, p.title)?.let(toast) },
-                            onMore = { moreOpen = true },
-                            onMinimize = { windowMode = "mini" },
-                            onFullscreen = { windowMode = "full" },
-                        )
-                    }
-                }
-            }
-
             if (moreOpen) {
                 val favorite = host != null && BrowserFavorites.contains(favorites, host)
                 BrowserMoreSheet(
@@ -227,6 +207,73 @@ fun BrowserScreen(browser: UserBrowser, onBack: () -> Unit) {
                         browser.setDesktop(!p.desktop)
                         toast(if (p.desktop) tr(R.string.browser_switched_mobile) else tr(R.string.browser_switched_desktop))
                     },
+                    onTabs = { tabsOpen = true },
+                    tabsCount = tabs.size,
+                    onHistory = { historyOpen = true },
+                    onFind = browser::startFind,
+                    onClearData = { clearOpen = true },
+                )
+            }
+        }
+    }
+
+    if (menuOpen) {
+        BrowserMenuSheet(
+            tabsCount = tabs.size,
+            onDismiss = { menuOpen = false },
+            onTabs = { menuOpen = false; tabsOpen = true },
+            onHistory = { menuOpen = false; historyOpen = true },
+            onClearData = { menuOpen = false; clearOpen = true },
+        )
+    }
+    if (tabsOpen) {
+        TabsSheet(
+            tabs = tabs,
+            onDismiss = { tabsOpen = false },
+            onSelect = { id -> tabsOpen = false; browser.selectTab(id) },
+            onClose = browser::closeTab,
+            onNew = { tabsOpen = false; browser.newTab() },
+        )
+    }
+    if (historyOpen) {
+        HistorySheet(
+            pages = allRecent, now = System.currentTimeMillis(),
+            onDismiss = { historyOpen = false },
+            onOpen = { r -> historyOpen = false; browser.open(r.url)?.let(toast) },
+            onRemove = { r -> browser.recent.remove(r.url) },
+            onClear = browser.recent::clear,
+        )
+    }
+    if (clearOpen) {
+        ClearDataSheet(onDismiss = { clearOpen = false }) { history, siteData, cache ->
+            browser.clearBrowsingData(history, siteData, cache)
+            clearOpen = false
+            toast(tr(R.string.browser_data_cleared))
+        }
+    }
+
+    fullscreen?.let { f ->
+        Dialog(
+            onDismissRequest = { browser.exitFullscreen() },
+            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        ) {
+            val view = LocalView.current
+            val controller = remember(view) { ViewCompat.getWindowInsetsController(view) }
+            DisposableEffect(view) {
+                controller?.hide(WindowInsetsCompat.Type.systemBars())
+                controller?.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                onDispose { controller?.show(WindowInsetsCompat.Type.systemBars()) }
+            }
+            Box(Modifier.fillMaxSize().background(Color.Black)) {
+                AndroidView(
+                    factory = { ctx ->
+                        FrameLayout(ctx).also {
+                            (f.view.parent as? ViewGroup)?.removeView(f.view)
+                            it.addView(f.view, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    onRelease = { it.removeView(f.view) },
                 )
             }
         }
@@ -260,7 +307,7 @@ private fun openOutside(context: Context, url: String): String? = try {
 private fun PageDialogBox(d: PageDialog, answer: (Boolean, String?) -> Unit) {
     var input by remember(d) { mutableStateOf(d.defaultText.orEmpty()) }
     val leave = d.kind == PageDialog.BEFORE_UNLOAD
-    AlertDialog(
+    MinaDialog(
         onDismissRequest = { answer(false, null) },
         title = { Text(if (leave) tr(R.string.browser_leave_q) else tr(R.string.browser_page_says)) },
         text = {

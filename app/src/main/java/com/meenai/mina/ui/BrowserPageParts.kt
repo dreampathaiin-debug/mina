@@ -17,16 +17,19 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -232,8 +235,6 @@ fun BrowserToolbar(
     onHome: () -> Unit,
     onShare: () -> Unit,
     onMore: () -> Unit,
-    onMinimize: () -> Unit,
-    onFullscreen: () -> Unit,
 ) {
     val c = MinaTheme.colors
     Column(Modifier.fillMaxWidth().background(c.bg).windowInsetsPadding(WindowInsets.navigationBars)) {
@@ -246,21 +247,19 @@ fun BrowserToolbar(
             BarIconButton(MinaIcons.Back, tr(R.string.back), onBackPage, enabled = page.canBack)
             BarIconButton(MinaIcons.Forward, tr(R.string.browser_forward), onForward, enabled = page.canForward)
             BarIconButton(MinaIcons.Home, tr(R.string.browser_home), onHome)
-            BarIconButton(MinaIcons.Shrink, tr(R.string.browser_minimize), onMinimize)
-            BarIconButton(MinaIcons.Expand, tr(R.string.browser_fullscreen), onFullscreen)
             BarIconButton(MinaIcons.Share, tr(R.string.share), onShare)
             BarIconButton(MinaIcons.More, tr(R.string.more), onMore)
         }
     }
 }
 
-/** 「给 Mina 登录」的横幅:说明这次用的是 Mina 办事时的那一版,登录完点「登录好了」。 */
+/** 「给 Mika 登录」的横幅:说明这次用的是 Mika 办事时的那一版,登录完点「登录好了」。 */
 @Composable
 fun LoginBanner(desktop: Boolean, onDone: () -> Unit) {
     val c = MinaTheme.colors
     val text = buildAnnotatedString {
-        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(tr(R.string.browser_login_for_mina)) }
-        append(tr(R.string.browser_login_for_mina_sub, if (desktop) tr(R.string.browser_desktop) else tr(R.string.browser_mobile)))
+        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(tr(R.string.browser_login_for_mika)) }
+        append(tr(R.string.browser_login_for_mika_sub, if (desktop) tr(R.string.browser_desktop) else tr(R.string.browser_mobile)))
     }
     Row(
         Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 8.dp)
@@ -291,6 +290,11 @@ fun BrowserMoreSheet(
     onOpenOutside: () -> Unit,
     onToggleFavorite: () -> Unit,
     onToggleDesktop: () -> Unit,
+    onTabs: () -> Unit = {},
+    tabsCount: Int = 0,
+    onHistory: () -> Unit = {},
+    onFind: () -> Unit = {},
+    onClearData: () -> Unit = {},
 ) {
     val c = MinaTheme.colors
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = c.surface, shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)) {
@@ -309,17 +313,26 @@ fun BrowserMoreSheet(
                 }
             }
             fun act(f: () -> Unit): () -> Unit = { onDismiss(); f() }
-            ListRow(MinaIcons.Refresh, tr(R.string.refresh), first = true, onClick = act(onReload))
-            ListRow(MinaIcons.Copy, tr(R.string.browser_copy_link), onClick = act(onCopy))
-            ListRow(MinaIcons.External, tr(R.string.browser_open_outside), onClick = act(onOpenOutside))
-            if (host != null) {
-                ListRow(MinaIcons.Star, if (favorite) tr(R.string.browser_unfavorite) else tr(R.string.browser_favorite), onClick = act(onToggleFavorite))
+            Column(Modifier.heightIn(max = 480.dp).verticalScroll(rememberScrollState())) {
+                ListRow(MinaIcons.Refresh, tr(R.string.refresh), first = true, onClick = act(onReload))
+                ListRow(MinaIcons.Search, tr(R.string.browser_find), onClick = act(onFind))
+                ListRow(MinaIcons.Copy, tr(R.string.browser_copy_link), onClick = act(onCopy))
+                ListRow(MinaIcons.External, tr(R.string.browser_open_outside), onClick = act(onOpenOutside))
                 ListRow(
-                    if (desktop) MinaIcons.Phone else MinaIcons.Desktop,
-                    if (desktop) tr(R.string.browser_to_mobile) else tr(R.string.browser_to_desktop),
-                    subtitle = if (desktop) tr(R.string.browser_keep_mobile) else tr(R.string.browser_keep_desktop),
-                    onClick = act(onToggleDesktop),
+                    MinaIcons.Apps, tr(R.string.browser_tabs), detail = tabsCount.takeIf { it > 0 }?.toString(),
+                    onClick = act(onTabs),
                 )
+                ListRow(MinaIcons.Clock, tr(R.string.browser_history), onClick = act(onHistory))
+                if (host != null) {
+                    ListRow(MinaIcons.Star, if (favorite) tr(R.string.browser_unfavorite) else tr(R.string.browser_favorite), onClick = act(onToggleFavorite))
+                    ListRow(
+                        if (desktop) MinaIcons.Phone else MinaIcons.Desktop,
+                        if (desktop) tr(R.string.browser_to_mobile) else tr(R.string.browser_to_desktop),
+                        subtitle = if (desktop) tr(R.string.browser_keep_mobile) else tr(R.string.browser_keep_desktop),
+                        onClick = act(onToggleDesktop),
+                    )
+                }
+                ListRow(MinaIcons.Trash, tr(R.string.browser_clear_data), onClick = act(onClearData))
             }
             Spacer(Modifier.height(4.dp))
         }
