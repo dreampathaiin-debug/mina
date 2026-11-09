@@ -177,6 +177,8 @@ object MinaIcons {
         "lock", "M7.5 10.5 h9 a2 2 0 0 1 2 2 v5 a2 2 0 0 1 -2 2 h-9 a2 2 0 0 1 -2 -2 v-5 a2 2 0 0 1 2 -2 z",
         "M8.5 10.5 V8 a3.5 3.5 0 0 1 7 0 v2.5", width = 2.2f,
     )
+    val Bookmark = stroke("bookmark", "M7 4.5 h10 v15 l-5 -3.5 l-5 3.5 z")
+    val Download = stroke("download", "M12 4 v11", "M7 10.5 l5 5 l5 -5", "M5 19.5 h14")
     val Copy = stroke(
         "copy", "M10 8 h7 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-7 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 z", "M5 15 V6 a1 1 0 0 1 1 -1 h9",
     )

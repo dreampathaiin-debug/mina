@@ -37,6 +37,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,18 +56,26 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.meenai.mina.browser.CustomSearchEngine
 import com.meenai.mina.browser.FavoriteSite
+import com.meenai.mina.browser.PageBookmark
 import com.meenai.mina.browser.RecentItem
+import com.meenai.mina.browser.SearchEngine
+import com.meenai.mina.browser.SearchEngineSpec
 import com.meenai.mina.browser.SiteFace
 import com.meenai.mina.browser.StartPageModel
 import com.meenai.mina.browser.Suggestion
+import com.meenai.mina.core.cap.web.WebUrlPolicy
 import com.meenai.mina.ui.components.BarIconButton
 import com.meenai.mina.ui.components.GroupCard
 import com.meenai.mina.ui.components.Hairline
+import com.meenai.mina.ui.components.MinaDialog
+import com.meenai.mina.ui.components.RadioRow
 import com.meenai.mina.ui.components.TopBar
 import com.meenai.mina.ui.components.cardSurface
 import com.meenai.mina.ui.components.keepsKeyboard
@@ -76,15 +86,18 @@ import com.meenai.mina.ui.theme.MinaTheme
 import com.meenai.mina.ui.theme.MinaType
 
 val BROWSER_SEARCH_HINT: String get() = tr(R.string.browser_search_hint)
-val BROWSER_ENGINE_NOTE: String get() = tr(R.string.browser_engine_note)
-val BROWSER_TYPING_NOTE: String get() = tr(R.string.browser_typing_note)
 val BROWSER_LOGIN_LEGEND: String get() = tr(R.string.browser_login_legend)
 val BROWSER_ADD_HINT: String get() = tr(R.string.browser_add_hint)
 private const val COLUMNS = 4
 
+/** 起始页上最多列出几条书签,更多的在「全部」里。 */
+private const val MAX_BOOKMARKS = 5
+
 /**
- * 浏览器的起始页:顶栏是返回、更多和「浏览器」;一个大搜索框(必应),输入时下面是联想(先是搜这句话或打开这个网址,再是最近打开里对得上的);
+ * 浏览器的起始页:顶栏是返回、下载、更多和「浏览器」;一个大搜索框(用 [engine] 搜索,下面一行小字点开换引擎、加自己的引擎),
+ * 输入时下面是联想(先是搜这句话或打开这个网址,再是最近打开里对得上的);
  * 「常用网站」一行四个(图标、名字,登录着的带小绿点,最后一格「＋」),「整理」或长按进整理(图标轻轻抖,× 移除,「完成」退出);
+ * 「书签」最近加入的几条,「全部」打开书签页;
  * 「最近打开」最近 10 条(右边是时间,标题右边「全部」打开完整历史)。整理和输入中按返回先退出它们。
  */
 @Composable
@@ -98,14 +111,26 @@ fun BrowserStart(
     onOpenSite: (FavoriteSite) -> Unit,
     onRemoveSite: (FavoriteSite) -> Unit,
     onAddHint: () -> Unit,
+    onClearRecent: () -> Unit = {},
+    bookmarks: List<PageBookmark> = emptyList(),
+    onOpenBookmark: (PageBookmark) -> Unit = {},
+    onShowBookmarks: () -> Unit = {},
+    onDownloads: () -> Unit = {},
     tabsCount: Int = 0,
     onMenu: () -> Unit = {},
     onHistory: () -> Unit = {},
+    engine: SearchEngineSpec = SearchEngine.Bing,
+    custom: List<CustomSearchEngine> = emptyList(),
+    onPickEngine: (SearchEngineSpec) -> Unit = {},
+    onAddEngine: (CustomSearchEngine) -> Unit = {},
+    onRemoveEngine: (CustomSearchEngine) -> Unit = {},
     now: Long = System.currentTimeMillis(),
 ) {
     val c = MinaTheme.colors
     var query by rememberSaveable { mutableStateOf("") }
     var editing by rememberSaveable { mutableStateOf(false) }
+    var pickingEngine by rememberSaveable { mutableStateOf(false) }
+    var addingEngine by rememberSaveable { mutableStateOf(false) }
     BackHandler(enabled = editing || query.isNotEmpty()) {
         if (editing) editing = false else query = ""
     }
@@ -119,6 +144,7 @@ fun BrowserStart(
             })
         } else {
             TopBar(tr(R.string.drawer_browser), MinaIcons.Back, onBack, tr(R.string.back), right = {
+                BarIconButton(MinaIcons.Download, tr(R.string.browser_downloads), onDownloads)
                 BarIconButton(MinaIcons.More, tr(R.string.more), onMenu, badge = tabsCount > 0)
             })
         }
@@ -140,22 +166,39 @@ fun BrowserStart(
                     }
                 })
                 if (query.isBlank()) {
-                    Caption(BROWSER_ENGINE_NOTE)
+                    EngineNote(engine) { pickingEngine = true }
                     SectionHeader(tr(R.string.browser_favorites), if (sites.isEmpty()) null else tr(R.string.browser_edit)) { editing = true }
                     SiteGrid(sites, face, editing = false, onOpen = onOpenSite, onRemove = {}, onEdit = { editing = true }, onAdd = onAddHint)
                     if (sites.any { it.loggedIn }) Legend(BROWSER_LOGIN_LEGEND, dot = true)
+                    SectionHeader(tr(R.string.browser_bookmarks), if (bookmarks.isEmpty()) null else tr(R.string.browser_all), onShowBookmarks)
+                    BookmarkCard(bookmarks, face, onOpenBookmark)
                     SectionHeader(tr(R.string.browser_recent_source), if (recent.isEmpty()) null else tr(R.string.browser_all), onHistory)
                     RecentCard(recent, face, now, onOpenUrl)
                 } else {
-                    val suggestions = remember(query, recent) { StartPageModel.suggestions(query, recent) }
+                    val suggestions = remember(query, recent, engine) { StartPageModel.suggestions(query, recent, engine) }
                     SuggestionCard(suggestions, face) { s ->
                         query = ""
                         onOpenUrl(s.url)
                     }
-                    Caption(BROWSER_TYPING_NOTE)
+                    Caption(tr(R.string.browser_typing_note, engine.displayName))
                 }
             }
             Spacer(Modifier.height(MinaSpace.S24))
+        }
+        if (pickingEngine) {
+            EnginePicker(
+                engine, custom,
+                onPick = { pickingEngine = false; onPickEngine(it) },
+                onAdd = { pickingEngine = false; addingEngine = true },
+                onRemove = onRemoveEngine,
+                onDismiss = { pickingEngine = false },
+            )
+        }
+        if (addingEngine) {
+            CustomEngineDialog(
+                onSave = { addingEngine = false; onAddEngine(it) },
+                onDismiss = { addingEngine = false },
+            )
         }
     }
 }
@@ -200,6 +243,99 @@ private val BigText = MinaType.Body.copy(fontSize = 16.sp)
 private fun Caption(text: String) {
     Text(
         text, Modifier.fillMaxWidth().padding(top = 8.dp), style = MinaType.Hint, color = MinaTheme.colors.ink3, textAlign = TextAlign.Center,
+    )
+}
+
+/** 搜索框下的一行小字「用必应搜索」:点一下换搜索引擎。 */
+@Composable
+private fun EngineNote(engine: SearchEngineSpec, onClick: () -> Unit) {
+    val c = MinaTheme.colors
+    Text(
+        tr(R.string.browser_engine_note, engine.displayName),
+        Modifier.fillMaxWidth().clip(MinaShapes.Pill)
+            .clickable(role = Role.Button, onClickLabel = tr(R.string.browser_engine_choose), onClick = onClick)
+            .padding(top = 8.dp, bottom = 2.dp).testTag("browser-engine"),
+        style = MinaType.Hint, color = c.ink3, textAlign = TextAlign.Center,
+    )
+}
+
+/** 换搜索引擎的弹窗:内置和自定义的排成一列单选项,选中就收起;下面可以再加一个,自定义的能删。 */
+@Composable
+private fun EnginePicker(
+    engine: SearchEngineSpec,
+    custom: List<CustomSearchEngine>,
+    onPick: (SearchEngineSpec) -> Unit,
+    onAdd: () -> Unit,
+    onRemove: (CustomSearchEngine) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val c = MinaTheme.colors
+    val engines: List<SearchEngineSpec> = SearchEngine.entries + custom
+    MinaDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(tr(R.string.browser_engine_choose)) },
+        text = {
+            Column(Modifier.testTag("browser-engine-picker")) {
+                engines.forEachIndexed { i, e ->
+                    RadioRow(
+                        e.displayName, selected = e.id == engine.id, onClick = { onPick(e) }, first = i == 0,
+                        trailing = {
+                            if (e is CustomSearchEngine) {
+                                val remove = tr(R.string.browser_engine_custom_remove, e.displayName)
+                                Box(
+                                    Modifier.size(36.dp).clip(CircleShape)
+                                        .clickable(role = Role.Button, onClickLabel = remove) { onRemove(e) }
+                                        .testTag("browser-engine-remove"),
+                                    contentAlignment = Alignment.Center,
+                                ) { Icon(MinaIcons.Close, remove, Modifier.size(16.dp), tint = c.ink3) }
+                            }
+                        },
+                    )
+                }
+                TextButton(onClick = onAdd, modifier = Modifier.testTag("browser-engine-add")) {
+                    Text(tr(R.string.browser_engine_custom_add))
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.done)) } },
+    )
+}
+
+/** 加自定义搜索引擎:名字和一个用 %s 代表搜索词的网址模板;不合法时提示,不收起。 */
+@Composable
+private fun CustomEngineDialog(onSave: (CustomSearchEngine) -> Unit, onDismiss: () -> Unit) {
+    val c = MinaTheme.colors
+    var name by rememberSaveable { mutableStateOf("") }
+    var url by rememberSaveable { mutableStateOf("") }
+    var invalid by rememberSaveable { mutableStateOf(false) }
+    MinaDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(tr(R.string.browser_engine_custom_add)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                TextField(
+                    name, { name = it; invalid = false }, Modifier.fillMaxWidth().testTag("browser-engine-name"),
+                    singleLine = true, placeholder = { Text(tr(R.string.browser_engine_custom_name)) },
+                )
+                TextField(
+                    url, { url = it; invalid = false }, Modifier.fillMaxWidth().testTag("browser-engine-url"),
+                    singleLine = true, placeholder = { Text(tr(R.string.browser_engine_custom_url)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, autoCorrectEnabled = false),
+                )
+                Text(tr(R.string.browser_engine_custom_hint), style = MinaType.Hint, color = c.ink3)
+                if (invalid) Text(tr(R.string.browser_engine_custom_invalid), style = MinaType.Hint, color = c.warn)
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val engine = CustomSearchEngine.create(name, url)
+                    if (engine == null) invalid = true else onSave(engine)
+                },
+                modifier = Modifier.testTag("browser-engine-save"),
+            ) { Text(tr(R.string.add)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.cancel)) } },
     )
 }
 
@@ -340,6 +476,26 @@ private fun RecentCard(recent: List<RecentItem>, face: (String) -> SiteFace, now
     }
 }
 
+/** 起始页上的书签:最近加入的至多 [MAX_BOOKMARKS] 条;没有时说明怎么加。 */
+@Composable
+private fun BookmarkCard(bookmarks: List<PageBookmark>, face: (String) -> SiteFace, onOpen: (PageBookmark) -> Unit) {
+    val c = MinaTheme.colors
+    GroupCard {
+        if (bookmarks.isEmpty()) {
+            Text(tr(R.string.browser_bookmark_empty), Modifier.fillMaxWidth().padding(16.dp), style = MinaType.Body, color = c.ink3)
+        }
+        bookmarks.take(MAX_BOOKMARKS).forEachIndexed { i, b ->
+            if (i > 0) Hairline(start = 56.dp)
+            val host = WebUrlPolicy.host(b.url)
+            val site = host?.let { face(it).name } ?: b.url
+            SmallRow(
+                b.title.ifBlank { site }, host ?: b.url, onClick = { onOpen(b) },
+                lead = { if (host != null) SiteTile(face(host), 28.dp, MiniShape, InitialSmall) else SearchMini(MinaIcons.Bookmark) },
+            )
+        }
+    }
+}
+
 @Composable
 private fun SuggestionCard(list: List<Suggestion>, face: (String) -> SiteFace, onPick: (Suggestion) -> Unit) {
     if (list.isEmpty()) return
@@ -362,7 +518,7 @@ private fun SuggestionCard(list: List<Suggestion>, face: (String) -> SiteFace, o
 
 /** 起始页上的一行:左边 28 的小图标,标题(一行)和小字,右边可放时间。 */
 @Composable
-private fun SmallRow(
+internal fun SmallRow(
     title: String,
     subtitle: String,
     onClick: () -> Unit,
