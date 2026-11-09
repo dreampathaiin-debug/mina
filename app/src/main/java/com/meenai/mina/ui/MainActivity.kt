@@ -2,7 +2,6 @@ package com.meenai.mina.ui
 
 import com.meenai.mina.i18n.AppLanguage
 import androidx.compose.foundation.layout.Box
-afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -71,7 +70,6 @@ import com.meenai.mina.ui.theme.MinaTheme
 import com.meenai.mina.ui.theme.animationsOff
 import com.meenai.mina.ui.theme.appearanceDark
 import com.meenai.mina.ui.theme.systemBarsFor
-afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
 
 class MainActivity : ComponentActivity() {
     private lateinit var monitor: SystemStatusMonitor
@@ -126,7 +124,6 @@ class MainActivity : ComponentActivity() {
             check.join()
             app.automaticUpdates.watch(app.updates.state)
         }
-afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
         // 电脑连接开着、服务却不在(被系统停过、从后台没能起来):界面在前台时补起来
         (application as MinaApp).mcp.ensureRunning()
     }
@@ -384,7 +381,6 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                             onOpenUrl = { openInBrowser(context, it) }, onDismiss = { installUpdate = null })
                     }
                 }
-afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/MainActivity.kt
             }
         }
         Route.Settings -> {

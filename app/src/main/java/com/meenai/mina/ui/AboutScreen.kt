@@ -69,7 +69,6 @@ import com.meenai.mina.ui.theme.MinaIcons
 import com.meenai.mina.ui.theme.MinaTheme
 import com.meenai.mina.ui.theme.MinaType
 import com.meenai.mina.ui.components.MinaSwitch
-afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/AboutScreen.kt
 
 /** 关于页上点开的底部面板。 */
 private enum class AboutSheet { Update, Changelog, Feedback, Group, Diagnostics }
@@ -142,7 +141,6 @@ fun AboutScreen(
                 MinaSwitch(autoUpdate, onAutoUpdate, Modifier.testTag("auto-update-switch"))
             }
             ListRow(MinaIcons.Lines, AboutCopy.CHANGELOG, AboutCopy.CHANGELOG_SUB, onClick = { sheet = AboutSheet.Changelog }) { RowChevron() }
-afe3c617 (feat(update): 后台下载新版并在聊天页提示安装):app/src/main/java/com/wangzan101/mika/ui/AboutScreen.kt
         }
         GroupCard {
             ListRow(MinaIcons.Chats, AboutCopy.GROUP, AboutCopy.GROUP_SUB, first = true, onClick = { sheet = AboutSheet.Group }) { RowChevron() }
