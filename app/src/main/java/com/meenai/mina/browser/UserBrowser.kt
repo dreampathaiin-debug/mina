@@ -1,27 +1,31 @@
-package com.meenai.mina.browser
+package com.wangzan101.mika.browser
 
-import com.meenai.mina.R
-import com.meenai.mina.i18n.tr
+import com.wangzan101.mika.R
+import com.wangzan101.mika.i18n.tr
 import android.content.Context
 import android.content.MutableContextWrapper
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.GeolocationPermissions
+import android.webkit.PermissionRequest
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewDatabase
-import com.meenai.mina.cap.web.LoginProbe
-import com.meenai.mina.cap.web.LoginState
-import com.meenai.mina.cap.web.SiteRegistry
-import com.meenai.mina.cap.web.WebSites
-import com.meenai.mina.cap.web.WebTab
-import com.meenai.mina.core.cap.web.ExternalLink
-import com.meenai.mina.core.cap.web.WebUrlPolicy
-import com.meenai.mina.core.uistate.PageDialog
+import com.wangzan101.mika.cap.web.LoginProbe
+import com.wangzan101.mika.cap.web.LoginState
+import com.wangzan101.mika.cap.web.SiteRegistry
+import com.wangzan101.mika.cap.web.WebSites
+import com.wangzan101.mika.cap.web.WebTab
+import com.wangzan101.mika.core.cap.web.ExternalLink
+import com.wangzan101.mika.core.cap.web.WebUrlPolicy
+import com.wangzan101.mika.core.uistate.PageDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -31,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.UUID
 
 /**
  * 浏览器页此刻打开的网页。[desktop]:标签此刻用的是电脑版网页;[loginFor]:这次是「给 Mika 登录」,为要登录的网站
@@ -47,6 +52,12 @@ data class BrowserPage(
     val loginFor: String? = null,
 )
 
+/** 用户浏览器里网页弹出的文件选择框，选好的 URI 只交给发起请求的标签。 */
+class FilePickRequest(val tab: WebTab, val callback: ValueCallback<Array<Uri>>, val params: WebChromeClient.FileChooserParams) {
+    val id: String = UUID.randomUUID().toString()
+    @Volatile var started = false
+}
+
 /** 标签页列表里的一项:[active] 是此刻看着的那一个。 */
 data class BrowserTab(val id: String, val title: String, val url: String, val host: String?, val active: Boolean)
 
@@ -56,13 +67,17 @@ class FullscreenVideo(val view: View, val callback: WebChromeClient.CustomViewCa
 /** 页内查找:是否开着、搜的词、共几处、现在是第几处(都从 1 数)。 */
 data class FindState(val active: Boolean = false, val query: String = "", val matches: Int = 0, val index: Int = 0)
 
+/** WebView 给的当前匹配序号从 0 数;界面显示从 1 数,没有匹配时为 0。 */
+internal fun findMatchIndex(active: Int, matches: Int): Int =
+    if (matches > 0) (active + 1).coerceIn(1, matches) else 0
+
 /**
  * 用户自己用的浏览器(侧栏「浏览器」):一个看得见的 [WebTab],和 Agent 的标签同一个网页配置(Cookie、网页存储)。
  * 在这里登录了,Mika 办事时也是登录的。用哪一版网页由 [BrowserIdentity] 定:平常默认手机版、按网站可换成电脑版
  * (记在 [modes]),「给 Mika 登录」时照 Mika 办事时的那一版;规则只装在这个标签上(WebDevtools.setModePolicy),
  * Agent 的标签不受影响。
  *
- * 不进任何任务的标签池,也不走 [com.meenai.mina.cap.web.WebHandover] 的那一次接管:Agent 的标签、接管照常进行,互不影响。
+ * 不进任何任务的标签池,也不走 [com.wangzan101.mika.cap.web.WebHandover] 的那一次接管:Agent 的标签、接管照常进行,互不影响。
  * 标签放在进程里(转屏、页面重建时同一个 WebView 接着用),离开浏览器页时关掉。界面不止一个实例时,浏览器页可能同时有几处:
  * 视图挂在哪一处、哪一处走了才关网页,见 [PageHosts]。
  * WebView 的环境是 [MutableContextWrapper]:挂到界面上时换成那个 Activity(下拉框、长按菜单要它),摘下时换回 App。
@@ -76,7 +91,12 @@ class UserBrowser private constructor(private val app: Context) {
     private val dir = File(app.filesDir, "web")
     val recent = RecentPages(dir)
     val favorites = BrowserFavorites(dir)
+    val bookmarks = PageBookmarks(dir)
     val looks = SiteLooks(dir)
+    /** 用户浏览器的下载:交给系统下载,列表也问系统要。 */
+    val downloads = BrowserDownloads(app, dir)
+    /** 起始页和地址栏用的搜索引擎;用户可以在起始页换,也可以自己加。 */
+    val searchEngine = SearchEngineStore(dir)
     private val modes = UserSiteModes(dir)
     /** 看着的这一页借给任务(见 [PageLoans])。 */
     val loans = PageLoans<WebTab>()
@@ -89,6 +109,10 @@ class UserBrowser private constructor(private val app: Context) {
     /** 普通标签(弹出的窗口不在里面),按打开顺序。 */
     private val openTabs = ArrayList<WebTab>()
     private var tab: WebTab? = null
+        set(value) {
+            if (field !== value) denyPendingPermissions()
+            field = value
+        }
     /** 页面弹出的窗口开着时([tab] 是弹窗),打开它的那一页;没有弹窗为 null。 */
     private var opener: WebTab? = null
     private val hosts = PageHosts<ViewGroup, Context>()
@@ -121,11 +145,60 @@ class UserBrowser private constructor(private val app: Context) {
     /** 给用户的一句提示(拦下了什么、页面崩了);显示后调 [noticeShown]。 */
     val notice: StateFlow<String?> = _notice.asStateFlow()
 
+    private val _filePick = MutableStateFlow<FilePickRequest?>(null)
+    /** 网页要选文件,等界面弹系统选择器;选好后调 [answerFileChooser]。 */
+    val filePick: StateFlow<FilePickRequest?> = _filePick.asStateFlow()
+
+    private val mediaPermissions = BrowserPermissionRequests<PermissionRequest>()
+    /** 网页要摄像头、麦克风等,等界面问用户;回答时调 [answerPagePermission]。 */
+    internal val pagePermission = mediaPermissions.pending
+
+    private val locationPermissions = BrowserPermissionRequests<GeolocationPermissions.Callback>()
+    /** 网页要定位,等界面问用户;回答时调 [answerGeolocation]。 */
+    internal val geoPermission = locationPermissions.pending
+
+    /** 系统选择器回来了:交回网页;取消(空)交 null。 */
+    fun answerFileChooser(id: String, uris: List<Uri>?) {
+        val r = _filePick.takeFileRequest(id, FilePickRequest::id) ?: return
+        r.callback.onReceiveValue(uris?.takeIf { tab === r.tab && it.isNotEmpty() }?.toTypedArray())
+    }
+
+    /** 用户同意或拒绝网页用摄像头、麦克风。 */
+    fun answerPagePermission(id: String, grant: Boolean) {
+        val request = mediaPermissions.take(id)?.value ?: return
+        if (grant) {
+            // 只授摄像头和麦克风,请求里夹带的 MIDI、受保护媒体不放行
+            val allowed = request.resources
+                .filter { it == PermissionRequest.RESOURCE_AUDIO_CAPTURE || it == PermissionRequest.RESOURCE_VIDEO_CAPTURE }
+                .toTypedArray()
+            request.grant(allowed)
+        } else {
+            request.deny()
+        }
+    }
+
+    /** 用户同意或拒绝网页用定位。 */
+    fun answerGeolocation(id: String, grant: Boolean) {
+        val r = locationPermissions.take(id) ?: return
+        r.value.invoke(r.origin, grant, false)
+    }
+
+    private fun answerPendingRequests() {
+        _filePick.value?.callback?.onReceiveValue(null)
+        _filePick.value = null
+        denyPendingPermissions()
+    }
+
+    private fun denyPendingPermissions() {
+        pagePermission.value?.let { answerPagePermission(it.id, false) }
+        geoPermission.value?.let { answerGeolocation(it.id, false) }
+    }
+
     /**
      * 打开地址栏或搜索框里的一句话(见 [AddressInput])。打不开时返回给用户看的原因,不动当前页面。
      */
     fun submit(input: String): String? {
-        val url = AddressInput.resolve(input) ?: return null
+        val url = AddressInput.resolve(input, searchEngine.choices.value.selected) ?: return null
         return open(url)
     }
 
@@ -218,6 +291,7 @@ class UserBrowser private constructor(private val app: Context) {
 
     /** 关掉所有标签回到起始页。借给任务的标签交给任务接着用(任务收下了就不销毁)。 */
     fun closePage() {
+        answerPendingRequests()
         stopFind()
         clearFullscreen()
         probes.values.forEach(main::removeCallbacks)
@@ -241,20 +315,12 @@ class UserBrowser private constructor(private val app: Context) {
 
     /** 开一个空标签并显示起始页。 */
     fun newTab() {
+        if (opener != null) closePopup()
+        stopFind()
+        clearFullscreen()
         newTopTab()
         _page.value = null
         _dialog.value = null
-    }
-
-    /** 在当前标签里打开一个新的;没有标签时也开一个。 */
-    fun openInNewTab(url: String): String? {
-        refusal(url)?.let { return it }
-        stopFind()
-        val t = newTopTab()
-        loginFor[t] = null
-        _page.value = BrowserPage(url, "", 0, true, false, false, desktop = !t.devtools.isMobile(t))
-        navigate(t, url)
-        return null
     }
 
     /** 换到标签 [id];找不到不动。 */
@@ -282,6 +348,7 @@ class UserBrowser private constructor(private val app: Context) {
         val t = openTabs.firstOrNull { it.id == id } ?: return
         // 关的是弹窗的父页:先把弹窗收起来,否则弹窗关掉时会回到一个已经没了的页面
         if (t === opener) closePopup()
+        if (t === tab) denyPendingPermissions()
         val index = openTabs.indexOf(t)
         openTabs.removeAt(index)
         loginFor.remove(t)
@@ -402,6 +469,8 @@ class UserBrowser private constructor(private val app: Context) {
                 WebViewDatabase.getInstance(app).clearHttpAuthUsernamePassword()
                 sites.clear()
             }
+            loginFor.keys.forEach { loginFor[it] = null }
+            refresh()
         }
         if (cache) {
             openTabs.forEach { runCatching { it.view.clearCache(true) } }
@@ -418,10 +487,10 @@ class UserBrowser private constructor(private val app: Context) {
     // ---------- 在这一页上问 Mika ----------
 
     /** 此刻看着的这一页(给 Mika 的说明用);没有打开的网页为 null。 */
-    fun pageInfo(): com.meenai.mina.core.cap.web.AttachedPage.Page? {
+    fun pageInfo(): com.wangzan101.mika.core.cap.web.AttachedPage.Page? {
         val url = currentUrl()?.takeIf { it.startsWith("http") } ?: return null
         val title = tab?.view?.title?.takeIf { it != url }.orEmpty().ifEmpty { _page.value?.title.orEmpty() }
-        return com.meenai.mina.core.cap.web.AttachedPage.Page(url, title)
+        return com.wangzan101.mika.core.cap.web.AttachedPage.Page(url, title)
     }
 
     /** 读用户在页面上选中的字,交给 [onText](没选、读不到为 null)。 */
@@ -522,7 +591,13 @@ class UserBrowser private constructor(private val app: Context) {
             BrowserIdentity.mobile(loginForMika = loginFor[t] != null, agentMobile = t.devtools.agentWantsMobile(host), userDesktop = modes.isDesktop(host))
         }
         t.view.setFindListener { active, matches, _ ->
-            if (t === tab) _find.value = _find.value.copy(matches = matches.coerceAtLeast(0), index = active.coerceAtLeast(0))
+            if (t === tab) {
+                // activeMatchOrdinal 从 0 数;界面显示从 1 数,0 处时显示 0
+                _find.value = _find.value.copy(
+                    matches = matches.coerceAtLeast(0),
+                    index = findMatchIndex(active, matches),
+                )
+            }
         }
         t.listener = listener
     }
@@ -550,6 +625,7 @@ class UserBrowser private constructor(private val app: Context) {
             val url = tab.view.url ?: return
             if (!url.startsWith("http")) return
             recent.add(url, tab.view.title?.takeIf { it != url })
+            bookmarks.retitle(url, tab.view.title.orEmpty())
             WebTab.cookieManager().flush()
             readName(tab, url)
             scheduleProbe(tab, 0)
@@ -576,6 +652,40 @@ class UserBrowser private constructor(private val app: Context) {
             }
         }
 
+        /** 用户自己看的这个标签要选文件:交给界面弹系统选择器。 */
+        override fun onFileChooser(tab: WebTab, callback: ValueCallback<Array<Uri>>, params: WebChromeClient.FileChooserParams): Boolean {
+            if (tab !== this@UserBrowser.tab) return false
+            val previous = _filePick.value
+            _filePick.value = FilePickRequest(tab, callback, params)
+            previous?.callback?.onReceiveValue(null)
+            return true
+        }
+
+        /** 用户自己看的这个标签要摄像头、麦克风等:交给界面问用户。 */
+        override fun onPermissionRequest(tab: WebTab, request: PermissionRequest): Boolean {
+            if (tab !== this@UserBrowser.tab) return false
+            // 只接摄像头和麦克风;MIDI、受保护媒体这些照旧拒绝
+            if (request.resources.none { it == PermissionRequest.RESOURCE_AUDIO_CAPTURE || it == PermissionRequest.RESOURCE_VIDEO_CAPTURE }) return false
+            mediaPermissions.replace(request.origin.toString(), request)?.value?.deny()
+            return true
+        }
+
+        override fun onPermissionRequestCanceled(tab: WebTab, request: PermissionRequest) {
+            pagePermission.value?.takeIf { it.value === request }?.let { mediaPermissions.take(it.id) }
+        }
+
+        /** 用户自己看的这个标签要定位:交给界面问用户。 */
+        override fun onGeolocationRequest(tab: WebTab, origin: String?, callback: GeolocationPermissions.Callback): Boolean {
+            if (tab !== this@UserBrowser.tab || origin.isNullOrBlank()) return false
+            geoPermission.value?.let { answerGeolocation(it.id, false) }
+            locationPermissions.replace(origin, callback)
+            return true
+        }
+
+        override fun onGeolocationPermissionsHidePrompt(tab: WebTab) {
+            if (tab === this@UserBrowser.tab) geoPermission.value?.let { locationPermissions.take(it.id) }
+        }
+
         override fun onDialog(tab: WebTab) {
             if (tab === this@UserBrowser.tab) _dialog.value = tab.dialogs.current
         }
@@ -596,7 +706,10 @@ class UserBrowser private constructor(private val app: Context) {
         }
 
         override fun onDownload(tab: WebTab, url: String, userAgent: String, contentDisposition: String?, mime: String?) {
-            if (tab === this@UserBrowser.tab) _notice.value = tr(R.string.browser_no_download)
+            scope.launch {
+                val name = withContext(Dispatchers.IO) { downloads.enqueue(url, userAgent, contentDisposition, mime) }
+                _notice.value = if (name != null) tr(R.string.browser_download_started, name) else tr(R.string.browser_download_failed_start)
+            }
         }
 
         override fun onCrashed(tab: WebTab) {
@@ -616,6 +729,7 @@ class UserBrowser private constructor(private val app: Context) {
             if (!isUserGesture || tab !== this@UserBrowser.tab || opener != null) return false
             if (tab !in openTabs) return false
             val transport = resultMsg.obj as? WebView.WebViewTransport ?: return false
+            stopFind()
             val popup = createTab()
             transport.webView = popup.view
             resultMsg.sendToTarget()
@@ -638,10 +752,13 @@ class UserBrowser private constructor(private val app: Context) {
     /** 关掉弹出的窗口,回到打开它的那一页;没有弹窗时返回 false。 */
     private fun closePopup(): Boolean {
         val o = opener ?: return false
+        denyPendingPermissions()
         opener = null
         stopFind()
         clearFullscreen()
         tab?.let { popup ->
+            loginFor.remove(popup)
+            probes.remove(popup)?.let(main::removeCallbacks)
             loans.swapped(popup, o)
             popup.destroy()
         }
@@ -688,7 +805,7 @@ class UserBrowser private constructor(private val app: Context) {
     /** 页面加载完后读网站名(页面声明的网站名或标题),记进 [looks]。 */
     private fun readName(t: WebTab, url: String) {
         val host = WebUrlPolicy.host(url) ?: return
-        if (AddressInput.searchQuery(url) != null) return
+        if (AddressInput.searchQuery(url, searchEngine.choices.value.all) != null) return
         t.view.evaluateJavascript(SiteNames.SCRIPT) { raw ->
             if (t.destroyed) return@evaluateJavascript
             val (declared, title) = SiteNames.parse(raw) ?: return@evaluateJavascript
@@ -698,7 +815,7 @@ class UserBrowser private constructor(private val app: Context) {
     }
 
     companion object {
-        private const val TAG = "MinaUserBrowser"
+        private const val TAG = "MikaUserBrowser"
         /** 这个标签不属于任何任务。 */
         const val OWNER = "user-browser"
         private const val PROBE_DELAY_MS = 1_500L

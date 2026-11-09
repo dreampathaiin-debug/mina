@@ -1,4 +1,4 @@
-package com.meenai.mina.cap.web
+package com.wangzan101.mika.cap.web
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -30,12 +30,12 @@ import androidx.webkit.ProfileStore
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
-import com.meenai.mina.core.cap.web.DialogReply
-import com.meenai.mina.core.cap.web.ExternalLink
-import com.meenai.mina.core.cap.web.PageDialogs
-import com.meenai.mina.core.uistate.PageDialog
-import com.meenai.mina.core.cap.web.WebUrlPolicy
-import com.meenai.mina.cap.web.cdp.WebDevtools
+import com.wangzan101.mika.core.cap.web.DialogReply
+import com.wangzan101.mika.core.cap.web.ExternalLink
+import com.wangzan101.mika.core.cap.web.PageDialogs
+import com.wangzan101.mika.core.uistate.PageDialog
+import com.wangzan101.mika.core.cap.web.WebUrlPolicy
+import com.wangzan101.mika.cap.web.cdp.WebDevtools
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -44,8 +44,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * 一个网页标签:一个 WebView 加它的加载状态。默认打开桌面版网页,按站点可换回手机版(见 [WebDevtools])。
  * 必须在主线程创建;[assetLoaders] 只给本地夹具这类 App 自带的网页用(每个域名一个)。
- * 系统支持多配置时用名为 mina 的独立网页配置(Cookie、存储与系统里别的 WebView 分开)。
- * 页面的权限申请(定位、相机、麦克风、MIDI、受保护媒体)一律静默拒绝;跳 App 的链接不跳;下载暂不接收。
+ * 系统支持多配置时用名为 mika 的独立网页配置(Cookie、存储与系统里别的 WebView 分开)。
+ * 页面的权限申请(定位、相机、麦克风、MIDI、受保护媒体)默认静默拒绝;用户自己看的标签由界面问用户。
+ * 跳 App 的链接不跳;下载暂不接收。
  * 页面弹框(alert/confirm/prompt、离开页面确认)不弹系统对话框,记进 [dialogs] 等 Agent(或用户自己用的浏览器页)回话。
  */
 @SuppressLint("SetJavaScriptEnabled")
@@ -76,6 +77,14 @@ class WebTab(
         fun onDialog(tab: WebTab) {}
         /** 收到了当前页面的网站图标。 */
         fun onIcon(tab: WebTab, icon: Bitmap) {}
+        /** 用户自己看的标签要选文件:由界面弹系统选择器,[callback] 收到选好的文件(取消为 null)。返回 true 表示接下。 */
+        fun onFileChooser(tab: WebTab, callback: ValueCallback<Array<Uri>>, params: WebChromeClient.FileChooserParams): Boolean = false
+        /** 用户自己看的标签要摄像头、麦克风等:由界面问用户,[request] 由界面同意或拒绝。返回 true 表示接下。 */
+        fun onPermissionRequest(tab: WebTab, request: PermissionRequest): Boolean = false
+        fun onPermissionRequestCanceled(tab: WebTab, request: PermissionRequest) {}
+        /** 用户自己看的标签要定位:由界面问用户,[callback] 由界面回话。返回 true 表示接下。 */
+        fun onGeolocationRequest(tab: WebTab, origin: String?, callback: GeolocationPermissions.Callback): Boolean = false
+        fun onGeolocationPermissionsHidePrompt(tab: WebTab) {}
         /** 网页要全屏播放视频:由界面把 [view] 盖到整屏上,并把回调留着,退出时交给调用方。返回 true 表示接下。 */
         fun onFullscreen(tab: WebTab, view: View, callback: WebChromeClient.CustomViewCallback): Boolean = false
         /** 网页要退出全屏。 */
@@ -108,8 +117,8 @@ class WebTab(
 
     // 弹出的标签已经在同站页面上开始加载过:之后再要去别的网站只拦下那次导航,不再关标签
     private var popupCommitted = false
-    /** 替网络代理答过几次账号密码(只在主线程上动)。 */
-    private var proxyAuthAnswers = 0
+    /** 当前主文档的代理认证重试额度(只在主线程上动)。 */
+    private val proxyAuth = WebProxyAuth()
 
     /** 主文档是否正在加载。只在主线程读写。 */
     var loading: Boolean = false
@@ -191,11 +200,6 @@ class WebTab(
             override fun shouldOverrideUrlLoading(v: WebView, request: WebResourceRequest): Boolean {
                 val url = request.url.toString()
                 if (request.isForMainFrame && refusePopup(url)) return true
-                // 网银、UPI 与 KYC 页在任务里不开:Agent 不代操作银行页,步骤交给用户(设置登录与用户自己的浏览器页不受限)
-                if (request.isForMainFrame && moneyGuardBlocks(url)) {
-                    Log.i(TAG, "blocked navigation to a netbanking/UPI/KYC page on tab $id")
-                    return true
-                }
                 // 跳 App 的链接(intent:、自定义协议、应用商店)不跳;只有主文档的才告诉标签池(子框架里的静默拦下)
                 WebUrlPolicy.external(url)?.let { link ->
                     if (request.isForMainFrame) {
@@ -213,11 +217,7 @@ class WebTab(
                     v.stopLoading()
                     return
                 }
-                if (url != null && moneyGuardBlocks(url)) {
-                    Log.i(TAG, "stopped a netbanking/UPI/KYC page load on tab $id")
-                    v.stopLoading()
-                    return
-                }
+                proxyAuth.onPageStarted()
                 loading = true
                 armed = true
                 mainFrameFailed = false
@@ -261,12 +261,11 @@ class WebTab(
             // 网络代理要账号密码:只回答设置 › 网络代理 里那个 HTTP 代理,答过几次还在问(账号密码不对)就不再答;
             // 网站自己的登录框不在这里填
             override fun onReceivedHttpAuthRequest(v: WebView, handler: HttpAuthHandler, host: String?, realm: String?) {
-                val credentials = WebProxy.credentialsFor(host)
-                if (credentials == null || proxyAuthAnswers >= MAX_PROXY_AUTH_ANSWERS) {
+                val credentials = proxyAuth.credentialsFor(host)
+                if (credentials == null) {
                     handler.cancel()
                     return
                 }
-                proxyAuthAnswers++
                 handler.proceed(credentials.first, credentials.second)
             }
 
@@ -327,15 +326,26 @@ class WebTab(
             override fun onJsBeforeUnload(v: WebView, url: String?, message: String?, result: JsResult): Boolean =
                 held(PageDialog.BEFORE_UNLOAD, message, null, result)
 
-            // 用户看不见这个标签,弹框授权等于替用户点同意:一律拒绝
+            // 用户可能看不见这个标签,不替用户点同意;用户自己看的标签由界面问
             override fun onPermissionRequest(request: PermissionRequest) {
+                if (listener?.onPermissionRequest(this@WebTab, request) == true) return
                 request.deny()
             }
 
+            override fun onPermissionRequestCanceled(request: PermissionRequest) {
+                listener?.onPermissionRequestCanceled(this@WebTab, request)
+            }
+
             override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
+                if (callback != null && listener?.onGeolocationRequest(this@WebTab, origin, callback) == true) return
                 callback?.invoke(origin, false, false)
             }
 
+            override fun onGeolocationPermissionsHidePrompt() {
+                listener?.onGeolocationPermissionsHidePrompt(this@WebTab)
+            }
+
+            // 文件选择框:agent 先用 web_upload 事先放好的工作区文件(取走即清);用户自己看的标签交界面弹系统选择器
             // 全屏视频:交给看得见的标签那一侧盖到整屏;没人接就立刻退出
             override fun onShowCustomView(view: View, callback: CustomViewCallback) {
                 if (listener?.onFullscreen(this@WebTab, view, callback) == true) return
@@ -350,13 +360,14 @@ class WebTab(
             override fun onShowFileChooser(v: WebView, callback: ValueCallback<Array<Uri>>, params: FileChooserParams): Boolean {
                 val files = pendingUpload
                 pendingUpload = null
-                if (files.isNullOrEmpty()) {
-                    choosersRefused++
-                    callback.onReceiveValue(null)
+                if (!files.isNullOrEmpty()) {
+                    val picked = if (params.mode == FileChooserParams.MODE_OPEN_MULTIPLE) files else files.take(1)
+                    callback.onReceiveValue(picked.toTypedArray())
                     return true
                 }
-                val picked = if (params.mode == FileChooserParams.MODE_OPEN_MULTIPLE) files else files.take(1)
-                callback.onReceiveValue(picked.toTypedArray())
+                if (listener?.onFileChooser(this@WebTab, callback, params) == true) return true
+                choosersRefused++
+                callback.onReceiveValue(null)
                 return true
             }
         }
@@ -397,7 +408,7 @@ class WebTab(
      * 弹出的标签要导航到和打开它的页面不同的网站(about:blank 除外):拦下。还没在同站页面上加载过时交标签池关掉它,
      * 之后只拦这次导航。
      */
-private fun refusePopup(url: String): Boolean {
+    private fun refusePopup(url: String): Boolean {
         val opener = popupOpener ?: return false
         if (url == "about:blank" || WebUrlPolicy.sameSite(opener, url)) {
             if (url != "about:blank") popupCommitted = true
@@ -407,10 +418,6 @@ private fun refusePopup(url: String): Boolean {
         else Log.i(TAG, "popup tab $id kept on its site, refused ${url.take(80)}")
         return true
     }
-
-    /** 网银、UPI 与 KYC 页只在任务标签里拦:设置登录(ownerTaskId=settings)与用户自己的浏览器页(user-browser)不受限。 */
-    private fun moneyGuardBlocks(url: String): Boolean =
-        ownerTaskId != "user-browser" && ownerTaskId != "settings" && WebUrlPolicy.moneyGuard(url) != null
 
     private fun finish(ok: Boolean) {
         pending?.complete(ok)
@@ -461,13 +468,11 @@ private fun refusePopup(url: String): Boolean {
     }
 
     companion object {
-        private const val TAG = "MinaWebTab"
-        /** 同一个标签页替代理答账号密码的上限:再问就是账号密码不对,不再答,免得一直转。 */
-        private const val MAX_PROXY_AUTH_ANSWERS = 3
-        private const val PROFILE = "mina"
+        private const val TAG = "MikaWebTab"
+        private const val PROFILE = "mika"
 
         /**
-         * 网页登录数据所在的 Cookie 库:支持多配置时是 mina 配置的,否则是默认的。主线程调用。
+         * 网页登录数据所在的 Cookie 库:支持多配置时是 mika 配置的,否则是默认的。主线程调用。
          * 不支持多配置时它和本 App 进程里任何别的 WebView 共用:App 里不得再有别的 WebView 处理网站登录,否则登录态会混在一起。
          */
         fun cookieManager(): CookieManager =
