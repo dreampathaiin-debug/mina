@@ -48,7 +48,7 @@ class ResFileTexts(folder: String, private val locale: Locale) : UiTexts {
 
     override fun plural(id: Int, count: Int, args: Array<out Any?>): String {
         val name = pluralNames[id] ?: error("no R.plurals with id $id")
-        val forms = plurals[name] ?: error("no plurals $name")
+        val forms = plurals[name] ?: fallback?.plurals?.get(name) ?: error("no plurals $name")
         //English:1 use one;Chinese only other
         val raw = (if (count == 1) forms["one"] else null) ?: forms.getValue("other")
         return String.format(locale, raw, *(if (args.isEmpty()) arrayOf(count) else args))
