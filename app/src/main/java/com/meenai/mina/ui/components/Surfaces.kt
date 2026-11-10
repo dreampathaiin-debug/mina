@@ -43,6 +43,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
+import com.meenai.mina.ui.components.GlassBaseDark
+import com.meenai.mina.ui.components.GlassBaseLight
 import com.meenai.mina.ui.theme.MinaColors
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -75,7 +77,9 @@ fun Modifier.floatShadow(colors: MinaColors, shape: Shape): Modifier =
 fun MinaCard(modifier: Modifier = Modifier, shape: Shape = MinaShapes.Card, content: @Composable ColumnScope.() -> Unit) {
     val haze = LocalHazeState.current
     val c = MinaTheme.colors
-    val glassStyle = remember(c) { HazeStyle(tint = HazeTint(c.surface), blurRadius = 28.dp) }
+    // haze 0.9 画玻璃时会先铺一层 backgroundColor,不指定就抛 IllegalArgumentException(见 v0.1.61 崩溃日志)
+    val glassBase = if (c.isDark) GlassBaseDark else GlassBaseLight
+    val glassStyle = remember(c) { HazeStyle(backgroundColor = glassBase, tint = HazeTint(c.surface), blurRadius = 28.dp) }
     Column(
         modifier.fillMaxWidth()
             .then(if (haze != null && GlassBlurSupported) Modifier.hazeChild(haze, shape = shape, style = glassStyle) else Modifier)

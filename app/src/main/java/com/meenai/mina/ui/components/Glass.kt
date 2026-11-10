@@ -90,6 +90,10 @@ private val GlowWarm = Color(0xFFF3E9E0)
 private val TopDark = Color(0xFF1B2433)
 private val BottomDark = Color(0xFF0E1117)
 
+/** 玻璃卡片身后的近似底色(haze 的 HazeStyle 必须要一个 backgroundColor):光晕后面的渐变中段。 */
+val GlassBaseLight = MidLight
+val GlassBaseDark = Color(0xFF131824)
+
 /** 页面底:竖向渐变 + 中上部的暖色光晕 + 5% 胶片颗粒。深色用 [TopDark] → [BottomDark]。 */
 @Composable
 fun GradientGrainBackground(modifier: Modifier = Modifier) {
