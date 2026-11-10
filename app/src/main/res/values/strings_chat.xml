@@ -69,6 +69,8 @@
     <string name="drawer_rename_title">Rename chat</string>
     <string name="drawer_pinned">Pinned</string>
     <string name="drawer_pinned_mark">Pinned</string>
+    <string name="drawer_view_all">View all</string>
+    <string name="drawer_show_less">Show less</string>
     <string name="settings_title">Settings</string>
     <string name="chat_unconfirmed">Couldn’t confirm: %1$s</string>
     <string name="chat_unverified">Done, but couldn’t verify</string>

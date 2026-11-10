@@ -145,6 +145,8 @@ fun drawerSections(
     canSwitch: Boolean,
     now: Long,
     zone: ZoneId = ZoneId.systemDefault(),
+    /** 「最近」最多列几条;超出的一条不进侧栏,「查看全部」展开时才列。 */
+    recentLimit: Int = MAX_RECENT,
 ): DrawerSections {
     val byId = all.associateBy { it.id }
     fun timeOf(id: String?) = byId[id]?.let { conversationTime(it.updatedAt, now, zone) }.orEmpty()
@@ -164,7 +166,7 @@ fun drawerSections(
     }
     val rest = all.filter { it.id !in runningIds }
     val pinnedRows = rest.filter { it.pinnedAt != null }.sortedByDescending { it.pinnedAt }.map(::entry)
-    val recent = rest.asSequence().filter { it.pinnedAt == null }.take(MAX_RECENT).map(::entry).toList()
+    val recent = rest.asSequence().filter { it.pinnedAt == null }.take(recentLimit).map(::entry).toList()
     return DrawerSections(running, recent, pinnedRows)
 }
 
@@ -192,6 +194,9 @@ fun readiness(check: Prerequisites.Check): Pair<String, Boolean> = when {
 
 private const val MAX_RECENT = 50
 
+/** 侧栏里「最近」默认列几条:收起时只列开头一段,「查看全部」展开列出全部。 */
+private const val RECENT_PREVIEW = 10
+
 /**
  * 侧栏:从左边滑出、右边圆角。顶部是标志和状态;四个入口;中间是进行中(段标题右边进「后台屏」页)和最近的对话;最底下设置和关于并排。
  * 打开和关上由外面的抽屉管,这里只摆内容,点了什么交给回调。
@@ -213,6 +218,10 @@ fun ChatDrawer(
     aboutDot: Boolean = false,
     /** 长按一条存过的对话:在它原地弹出操作菜单(置顶、改名、删除);带上那一行在窗口里的位置和大小。 */
     onActions: (DrawerConversation, Rect) -> Unit = { _, _ -> },
+    /** 「最近」现在是全部展开(真)还是只列开头一段;决定「查看全部」那行写什么。 */
+    recentExpanded: Boolean = false,
+    /** 「查看全部」那一行:展开最近的对话(再点收回去)。 */
+    onViewAll: () -> Unit = {},
 ) {
     val c = MinaTheme.colors
     Column(
@@ -246,8 +255,7 @@ fun ChatDrawer(
         val list = rememberLazyListState()
         val first = when {
             sections.running.isNotEmpty() -> "h-running"
-            sections.pinned.isNotEmpty() -> "h-pinned"
-            sections.recent.isNotEmpty() -> "h-recent"
+            sections.pinned.isNotEmpty() || sections.recent.isNotEmpty() -> "h-recent"
             else -> "end"
         }
         LaunchedEffect(first) { list.scrollToItem(0) }
@@ -257,8 +265,9 @@ fun ChatDrawer(
                 item("h-running") { RunningLabel(onScreens) }
                 items(sections.running, key = { "r-${it.id}" }) { ConversationEntry(it, onOpen, onActions) }
             }
-            // 换不了对话时的说明放在第一段存着的对话(置顶或最近)上面
-            val busyNote: LazyListScope.() -> Unit = {
+            // 置顶的直接列在「最近」标题下(前面带图钉),和没置顶的中间一条细线隔开;最底下一行「查看全部」
+            if (sections.pinned.isNotEmpty() || sections.recent.isNotEmpty()) {
+                item("h-recent") { SectionLabel(stringResource(R.string.drawer_recent)) }
                 if (!canSwitch) {
                     item("busy") {
                         Text(
@@ -267,16 +276,12 @@ fun ChatDrawer(
                         )
                     }
                 }
-            }
-            if (sections.pinned.isNotEmpty()) {
-                item("h-pinned") { SectionLabel(stringResource(R.string.drawer_pinned)) }
-                busyNote()
                 items(sections.pinned, key = { "p-${it.id}" }) { ConversationEntry(it, onOpen, onActions) }
-            }
-            if (sections.recent.isNotEmpty()) {
-                item("h-recent") { SectionLabel(stringResource(R.string.drawer_recent)) }
-                if (sections.pinned.isEmpty()) busyNote()
+                if (sections.pinned.isNotEmpty() && sections.recent.isNotEmpty()) {
+                    item("p-divider") { ListDivider() }
+                }
                 items(sections.recent, key = { "c-${it.id}" }) { ConversationEntry(it, onOpen, onActions) }
+                item("view-all") { ViewAllRow(recentExpanded, onViewAll) }
             }
             item("end") { Box(Modifier.height(12.dp)) }
         }
@@ -341,6 +346,34 @@ private fun SectionLabel(text: String) {
     )
 }
 
+/** 置顶的对话和没置顶的中间那条细线。 */
+@Composable
+private fun ListDivider() {
+    Box(
+        Modifier.padding(start = 24.dp, end = 24.dp, top = 6.dp, bottom = 6.dp)
+            .fillMaxWidth().height(0.5.dp).background(MinaTheme.colors.hair),
+    )
+}
+
+/** 「查看全部」那一行:收起时点开列出全部对话,展开时点回收回去。样式和上面那些对话行一致:图标加文字。 */
+@Composable
+private fun ViewAllRow(expanded: Boolean, onClick: () -> Unit) {
+    val c = MinaTheme.colors
+    Row(
+        Modifier.padding(horizontal = 12.dp).fillMaxWidth().height(44.dp).clip(NavShape)
+            .clickable(role = Role.Button, onClick = onClick).testTag("drawer-view-all")
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Icon(MinaIcons.More, null, Modifier.size(MinaSize.Icon), tint = c.ink2)
+        Text(
+            stringResource(if (expanded) R.string.drawer_show_less else R.string.drawer_view_all),
+            style = MinaType.Body, color = c.ink2, maxLines = 1, softWrap = false,
+        )
+    }
+}
+
 /**
  * 一条对话:点开它;长按(带一下振动)在原地弹出它的操作菜单(置顶、改名、删除)。换不了对话时(任务进行中、没开并行)点不开,长按照样能用。
  * 还没存进对话列表的(没有编号)没东西可改,不响应长按。置顶了的标题前有个小图钉。
@@ -371,18 +404,18 @@ private fun ConversationEntry(item: DrawerConversation, onOpen: (DrawerConversat
             .alpha(if (item.enabled) 1f else 0.45f)
             .padding(horizontal = 12.dp, vertical = 9.dp),
     ) {
-        ConversationRowContent(item)
+        ConversationRowContent(item, onMore = if (deletable) ({ onActions(item, bounds.value) }) else null)
     }
 }
 
-/** 一条对话里面的东西:进行中的小圆点、图钉、标题、时间,有副标题时下面一行。侧栏里那一行和长按抬起的那一张都用它。 */
+/** 一条对话里面的东西:对话气泡图标、进行中的小圆点、标题、时间,置顶的在右边图钉,存过的右边还有「更多」;有副标题时下面一行。侧栏里那一行和长按抬起的那一张都用它([onMore] 为空时没有「更多」)。 */
 @Composable
-internal fun ConversationRowContent(item: DrawerConversation) {
+internal fun ConversationRowContent(item: DrawerConversation, onMore: (() -> Unit)? = null) {
     val c = MinaTheme.colors
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            Icon(MinaIcons.Message, null, Modifier.size(18.dp), tint = c.ink3)
             if (item.running) Box(Modifier.size(7.dp).background(c.accent, CircleShape))
-            if (item.pinned) Icon(MinaIcons.Pin, stringResource(R.string.drawer_pinned_mark), Modifier.size(14.dp).testTag("conversation-pin"), tint = c.ink3)
             Text(item.title, Modifier.weight(1f, fill = item.site == null), style = ConversationTitle, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (item.site != null) {
                 Text(
@@ -393,6 +426,13 @@ internal fun ConversationRowContent(item: DrawerConversation) {
             }
             if (item.time.isNotEmpty()) {
                 Text(item.time, Modifier.padding(start = 5.dp).testTag("conversation-time"), style = ConversationTime, color = c.ink3, maxLines = 1, softWrap = false)
+            }
+            if (item.pinned) Icon(MinaIcons.Pin, stringResource(R.string.drawer_pinned_mark), Modifier.size(14.dp).testTag("conversation-pin"), tint = c.ink3)
+            if (onMore != null) {
+                Box(
+                    Modifier.size(28.dp).clip(CircleShape).clickable(role = Role.Button, onClick = onMore).testTag("conversation-more"),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(MinaIcons.More, null, Modifier.size(16.dp), tint = c.ink3) }
             }
         }
         val sub = item.subtitle.ifEmpty { item.site.orEmpty() }
@@ -521,6 +561,8 @@ fun ChatWithDrawer(
         if (open) activity?.moveTaskToBack(true)
         else scope.launch { if (reduceMotion) drawer.snapTo(DrawerValue.Open) else drawer.open() }
     }
+    /** 「最近」全部展开了没:侧栏默认只列开头一段,「查看全部」展开列出全部,再点收回去。 */
+    var recentExpanded by remember { mutableStateOf(false) }
     var revision by remember { mutableIntStateOf(0) }
     LaunchedEffect(conversationChanges) { conversationChanges.collect { revision++ } }
     val deleted by vm.deleted.collectAsState()
@@ -570,8 +612,11 @@ fun ChatWithDrawer(
                 )
                 val canSwitch = vm.canSwitch()
                 // 删掉的对话当场不列,不等后台删完
-                val sections = remember(all, current, others, canSwitch, deleted) {
-                    drawerSections(all.filter { it.id !in deleted }, current, others.filter { it !in deleted }, vm::runningGoal, canSwitch, System.currentTimeMillis())
+                val sections = remember(all, current, others, canSwitch, deleted, recentExpanded) {
+                    drawerSections(
+                        all.filter { it.id !in deleted }, current, others.filter { it !in deleted }, vm::runningGoal, canSwitch, System.currentTimeMillis(),
+                        recentLimit = if (recentExpanded) Int.MAX_VALUE else RECENT_PREVIEW,
+                    )
                 }
                 ChatDrawer(
                     check, sections, canSwitch,
@@ -584,6 +629,8 @@ fun ChatWithDrawer(
                     onAbout = { leave(onAbout) },
                     aboutDot = updateAvailable,
                     onActions = { item, bounds -> if (item.id != null) acting = item to bounds },
+                    recentExpanded = recentExpanded,
+                    onViewAll = { recentExpanded = !recentExpanded },
                     onOpen = { item ->
                         close {
                             val id = item.id

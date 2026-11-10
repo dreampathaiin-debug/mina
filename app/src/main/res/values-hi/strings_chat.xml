@@ -69,6 +69,8 @@
     <string name="drawer_rename_title">चैट का नाम बदलें</string>
     <string name="drawer_pinned">पिन की गई</string>
     <string name="drawer_pinned_mark">पिन की गई</string>
+    <string name="drawer_view_all">सभी देखें</string>
+    <string name="drawer_show_less">कम दिखाएँ</string>
     <string name="settings_title">सेटिंग्स</string>
     <string name="chat_unconfirmed">पुष्टि नहीं की जा सकी: %1$s</string>
     <string name="chat_unverified">हो गया, लेकिन सत्यापित नहीं किया जा सका</string>
