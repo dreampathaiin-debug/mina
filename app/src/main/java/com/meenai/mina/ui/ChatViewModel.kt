@@ -1423,6 +1423,14 @@ class ToolLabels(private val tools: ToolIndex, private val legacy: LegacyNames =
             "Tap" to R.string.tool_tap,
             "Type text" to R.string.tool_type,
             "Clear the input box" to R.string.tool_clear,
+            "Send SMS" to R.string.tool_phone_sms_send,
+            "Place call" to R.string.tool_phone_call_place,
+            "Read calendar" to R.string.tool_phone_calendar_read,
+            "Read SMS" to R.string.tool_phone_sms_read,
+            "Find contacts" to R.string.tool_phone_contacts_find,
+            "Read call log" to R.string.tool_phone_call_log,
+            "Read notifications" to R.string.tool_phone_notifications,
+            "Reply to notification" to R.string.tool_phone_notification_reply,
         )
     }
 }

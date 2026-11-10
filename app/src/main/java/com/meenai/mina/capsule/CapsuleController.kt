@@ -211,6 +211,8 @@ class CapsuleController(
     private var windowOn: ScreenAccessibility? = null
     /** 在这个服务实例上加窗口失败过:不再试,等服务重连。 */
     private var failedOn: ScreenAccessibility? = null
+    /** failedOn 上次加窗口失败的时刻;过了 [RETRY_MS] 就再试一次,不再一失败就永远等重连。 */
+    private var failedAt = 0L
     private var tick: Job? = null
     private val ticks = MutableStateFlow(0)
     private var last: Snapshot? = null
@@ -318,7 +320,7 @@ class CapsuleController(
         }
         val inputs = CapsuleInputs(
             s.runs, s.mode, s.minaInForeground, screenInteractive = !s.locked,
-            serviceAvailable = service != null && service !== failedOn, cardOpen = expanded, kept = s.kept,
+            serviceAvailable = service != null && (service !== failedOn || SystemClock.elapsedRealtime() - failedAt >= RETRY_MS), cardOpen = expanded, kept = s.kept,
         )
         val shown = model.update(inputs, System.currentTimeMillis()) as? CapsuleView.Shown
         schedule(model.nextChangeAt)
@@ -367,6 +369,7 @@ class CapsuleController(
             ball?.close()
             panel?.close()
             failedOn = service
+            failedAt = SystemClock.elapsedRealtime()
             Log.w(TAG, "capsule overlay unavailable, falling back to notifications")
             return null
         }
@@ -1325,6 +1328,8 @@ class CapsuleController(
         /** 截屏前收起卡片里的输入法,最多等它这么久下去。 */
         const val IME_GONE_MS = 700L
         const val IME_POLL_MS = 30L
+        /** 加浮层失败后过多久再试一次。 */
+        const val RETRY_MS = 30_000L
     }
 }
 

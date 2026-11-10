@@ -60,4 +60,12 @@
     <string name="tool_tap">नल</string>
     <string name="tool_type">टेक्स्ट टाइप करें</string>
     <string name="tool_clear">साफ़ फ़ील्ड</string>
+    <string name="tool_phone_sms_send">SMS भेजें</string>
+    <string name="tool_phone_call_place">कॉल करें</string>
+    <string name="tool_phone_calendar_read">कैलेंडर पढ़ें</string>
+    <string name="tool_phone_sms_read">SMS पढ़ें</string>
+    <string name="tool_phone_contacts_find">संपर्क खोजें</string>
+    <string name="tool_phone_call_log">कॉल लॉग पढ़ें</string>
+    <string name="tool_phone_notifications">सूचनाएं पढ़ें</string>
+    <string name="tool_phone_notification_reply">सूचना का जवाब दें</string>
 </resources>

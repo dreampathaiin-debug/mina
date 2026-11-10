@@ -61,4 +61,12 @@
     <string name="tool_tap">Tap</string>
     <string name="tool_type">Type text</string>
     <string name="tool_clear">Clear the input box</string>
+    <string name="tool_phone_sms_send">Send SMS</string>
+    <string name="tool_phone_call_place">Place call</string>
+    <string name="tool_phone_calendar_read">Read calendar</string>
+    <string name="tool_phone_sms_read">Read SMS</string>
+    <string name="tool_phone_contacts_find">Find contacts</string>
+    <string name="tool_phone_call_log">Read call log</string>
+    <string name="tool_phone_notifications">Read notifications</string>
+    <string name="tool_phone_notification_reply">Reply to notification</string>
 </resources>
