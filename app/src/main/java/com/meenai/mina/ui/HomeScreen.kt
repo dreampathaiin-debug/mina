@@ -206,7 +206,7 @@ private fun PanelsSection(onAskAgent: (String) -> Unit) {
     LaunchedEffect(Unit) {
         panels = withContext(Dispatchers.IO) { store.all() }
         // 天气卡在打开时刷新:半小时内的旧数据直接用
-        val stale = panels.filter { it.kind == "weather" && it.lat != null && (it.temp == null || it.updatedAt < System.currentTimeMillis() - 30 * 60_000L) }
+        val stale = panels.filter { it.kind == "weather" && it.lat != null && it.lon != null && (it.temp == null || it.updatedAt < System.currentTimeMillis() - 30 * 60_000L) }
         if (stale.isNotEmpty()) {
             val fresh = stale.mapNotNull { p ->
                 val now = withContext(Dispatchers.IO) { Weather.now(p.lat!!, p.lon!!) } ?: return@mapNotNull null

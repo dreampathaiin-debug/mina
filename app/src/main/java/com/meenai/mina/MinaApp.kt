@@ -296,6 +296,23 @@ class MinaApp : Application(), WebOwner, SandboxOwner, TaskEnvironment.Owner, Ph
 
     override fun onCreate() {
         super.onCreate()
+        // 上次崩溃的现场留在 crash-latest.txt,下次启动界面先把它亮出来(见 MainActivity)
+        val prevHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { t, e ->
+            try {
+                val text = buildString {
+                    append("Mina crash\n")
+                    append("time: ").append(java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(java.util.Date())).append('\n')
+                    append("version: ").append(BuildConfig.VERSION_NAME).append(" (").append(BuildConfig.VERSION_CODE).append(")\n")
+                    append("device: ").append(android.os.Build.MANUFACTURER).append(' ').append(android.os.Build.MODEL)
+                        .append(" API ").append(android.os.Build.VERSION.SDK_INT).append('\n')
+                    append(android.util.Log.getStackTraceString(e))
+                }
+                java.io.File(filesDir, "crash-latest.txt").writeText(text)
+            } catch (_: Throwable) {
+            }
+            prevHandler?.uncaughtException(t, e)
+        }
         // 界面以外的文字(通知、服务、悬浮胶囊)按 App 语言取
         AppLanguage.applyDefaultLocale(this)
         UiText.source = ResourceTexts { AppLanguage.resources(this) }

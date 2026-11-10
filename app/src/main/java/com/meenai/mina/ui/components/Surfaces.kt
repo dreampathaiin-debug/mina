@@ -78,7 +78,7 @@ fun MinaCard(modifier: Modifier = Modifier, shape: Shape = MinaShapes.Card, cont
     val glassStyle = remember(c) { HazeStyle(tint = HazeTint(c.surface), blurRadius = 28.dp) }
     Column(
         modifier.fillMaxWidth()
-            .then(if (haze != null) Modifier.hazeChild(haze, shape = shape, style = glassStyle) else Modifier)
+            .then(if (haze != null && GlassBlurSupported) Modifier.hazeChild(haze, shape = shape, style = glassStyle) else Modifier)
             .cardSurface(c, shape).clip(shape),
         content = content,
     )

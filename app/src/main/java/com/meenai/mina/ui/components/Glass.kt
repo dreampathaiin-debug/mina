@@ -228,7 +228,8 @@ fun GlassPillTabs(
             .border(1.dp, c.cardEdge, pillShape),
     ) {
         val n = options.size.coerceAtLeast(1)
-        val w = maxWidth / n
+        // 宽度没被约束时(BoxWithConstraints 会给 Infinity)算不出滑块位,退回平铺布局
+        val w = if (maxWidth.value.isFinite()) maxWidth / n else maxWidth
         val offset by animateDpAsState(w * selected, spring(dampingRatio = 0.8f, stiffness = 400f), label = "pillx")
         Box(
             Modifier.offset(x = offset).width(w).height(height)

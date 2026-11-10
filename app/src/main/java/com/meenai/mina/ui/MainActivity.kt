@@ -102,13 +102,23 @@ class MainActivity : ComponentActivity() {
         monitor = SystemStatusMonitor(this, PhoneServices.of(this).shellControl)
         val store = ProviderStore.get(this)
         setContent {
-            // 外观按设置来,改了当场换;系统栏图标的深浅跟着界面
-            val dark = appearanceDark()
-            LaunchedEffect(dark) { systemBarsFor(dark) }
-            MinaTheme(dark = dark, reduceMotion = animationsOff(this)) {
-                // 在输入框外面点一下或拖动就收起键盘,全 App 统一
-                KeyboardDismissArea(Modifier.fillMaxSize()) {
-                    MinaRoot(store, monitor, ::perform, requestedConversation) { requestedConversation = null }
+            // 上次崩了就把崩溃现场先亮出来(截图/分享给开发),清除后才进正常界面
+            val crashFile = remember { java.io.File(filesDir, "crash-latest.txt") }
+            var crashText by remember { mutableStateOf<String?>(crashFile.takeIf { it.length() > 0 }?.readText()) }
+            if (crashText != null) {
+                CrashReportScreen(crashText!!) {
+                    crashFile.delete()
+                    crashText = null
+                }
+            } else {
+                // 外观按设置来,改了当场换;系统栏图标的深浅跟着界面
+                val dark = appearanceDark()
+                LaunchedEffect(dark) { systemBarsFor(dark) }
+                MinaTheme(dark = dark, reduceMotion = animationsOff(this)) {
+                    // 在输入框外面点一下或拖动就收起键盘,全 App 统一
+                    KeyboardDismissArea(Modifier.fillMaxSize()) {
+                        MinaRoot(store, monitor, ::perform, requestedConversation) { requestedConversation = null }
+                    }
                 }
             }
         }
