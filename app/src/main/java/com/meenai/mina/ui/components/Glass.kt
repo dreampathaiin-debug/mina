@@ -197,7 +197,7 @@ fun Modifier.pressScale(
 
 // ---------- 列表入场:依次淡入上移 ----------
 
-fun Modifier.staggerIn(index: Int): Modifier = composed {
+fun Modifier.staggerIn(index: Int, slide: Dp = 26.dp): Modifier = composed {
     if (MinaTheme.reduceMotion) {
         this
     } else {
@@ -205,7 +205,7 @@ fun Modifier.staggerIn(index: Int): Modifier = composed {
         LaunchedEffect(Unit) { shown = true }
         val delay = (index % 10) * 40
         val a by animateFloatAsState(if (shown) 1f else 0f, tween(260, delayMillis = delay, easing = MinaMotion.Decelerate), label = "stagA")
-        val ty by animateFloatAsState(if (shown) 0f else 26f, tween(300, delayMillis = delay, easing = MinaMotion.Decelerate), label = "stagY")
+        val ty by animateFloatAsState(if (shown) 0f else slide.value, tween(300, delayMillis = delay, easing = MinaMotion.Decelerate), label = "stagY")
         graphicsLayer { alpha = a; translationY = ty }
     }
 }

@@ -173,4 +173,10 @@
     <string name="advanced_note">\u092F\u0947 \u0926\u0940\u0930\u094D\u0918 \u0938\u0947\u091F\u093F\u0902\u0917\u094D\u0938 \u0939\u0948\u0902, \u0932\u0917\u092D\u0917 \u0915\u092D\u0940 \u091C\u093C\u0930\u0942\u0930\u0924 \u092A\u095C\u0924\u0940 \u0939\u0948\u0964</string>
     <string name="privacy_title">\u092A\u094D\u0930\u093E\u0907\u0935\u0938\u0940 \u0914\u0930 \u0921\u0947\u091F\u093E</string>
     <string name="privacy_note">\u092E\u0947\u092E\u0930\u0940 \u0938\u0947 Mina \u0906\u092A\u0915\u0947 \u0932\u093F\u090F \u092C\u093E\u0924\u0947\u0902 \u092F\u093E\u0926 \u0930\u0916\u0924\u093E \u0939\u0948; \u0935\u0947\u092C\u0938\u093E\u0907\u091F \u0932\u0949\u0917\u093F\u0928 \u0907\u0938 \u0921\u093F\u0935\u093E\u0907\u0938 \u092A\u0930 \u0939\u0940 \u0930\u0939\u0924\u0947 \u0939\u0948\u0902\u0964</string>
+    <string name="home_sunrise">सूर्योदय</string>
+    <string name="home_enable_location">लोकेशन चालू करें</string>
+    <string name="home_location_rationale">मीना स्थानीय मौसम दिखाने के लिए एक बार आपकी अनुमानित लोकेशन पढ़ता है। यह जानकारी इसी डिवाइस पर रहती है।</string>
+    <string name="home_deleted">हटा दिया</string>
+    <string name="home_undo">वापस लाएँ</string>
+    <string name="home_no_location">मौसम देखने के लिए अपना इलाका जोड़ें</string>
 </resources>

@@ -1,40 +1,35 @@
 package com.meenai.mina.ui
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.os.Build
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,36 +39,39 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meenai.mina.R
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
 import com.meenai.mina.home.HomePanel
-import com.meenai.mina.cap.phone.shell.NotificationStore
+import com.meenai.mina.home.HomeViewModel
 import com.meenai.mina.home.PanelsStore
+import com.meenai.mina.home.SunPhase
 import com.meenai.mina.home.Weather
+import com.meenai.mina.home.WeatherData
+import com.meenai.mina.home.sunPhase
 import com.meenai.mina.home.weatherKind
 import com.meenai.mina.i18n.tr
-import com.meenai.mina.ui.components.GroupCard
-import com.meenai.mina.ui.components.staggerIn
-import com.meenai.mina.ui.components.SwipeToDeleteRow
-import com.meenai.mina.ui.components.GlassPillTabs
-import com.meenai.mina.ui.components.GlassPage
 import com.meenai.mina.ui.components.BarIconButton
-import com.meenai.mina.ui.components.GroupLabel
-import com.meenai.mina.ui.components.ListRow
+import com.meenai.mina.ui.components.GlassCompactTabs
+import com.meenai.mina.ui.components.GlassPage
+import com.meenai.mina.ui.components.GroupCard
 import com.meenai.mina.ui.components.MinaCard
+import com.meenai.mina.ui.components.NotificationCard
+import com.meenai.mina.ui.components.SwipeToDeleteCard
+import com.meenai.mina.ui.components.SwipeToDeleteRow
 import com.meenai.mina.ui.components.TopBar
+import com.meenai.mina.ui.components.WeatherCardModel
+import com.meenai.mina.ui.components.WeatherCardView
+import com.meenai.mina.ui.components.appearDown
+import com.meenai.mina.ui.components.staggerIn
+import com.meenai.mina.ui.components.weatherIconFor
 import com.meenai.mina.ui.theme.MinaIcons
 import com.meenai.mina.ui.theme.MinaTheme
 import com.meenai.mina.ui.theme.MinaType
@@ -81,12 +79,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 /**
- * Home 页:Hark 风格的重要通知、agent 留意的面板,和手机上已装的 App(点了直接打开)。
- * Chat 的那段应用横条保持原样,这里是一份可以点击打开的完整网格。
+ * Home 页:顶部是可左滑删除的通知卡,然后常驻天气卡(自动定位、open-meteo),
+ * 再往下的面板(agent 在盯的事)原样保留。原来的「Your apps」一段已撤。
  */
 @Composable
 fun HomeScreen(
@@ -100,76 +100,149 @@ fun HomeScreen(
     /** 把一句话交给 agent 去办(发进当前对话,并回到 Chat 页看回复)。 */
     onAskAgent: (String) -> Unit,
 ) {
-    val c = MinaTheme.colors
+    val vm: HomeViewModel = viewModel()
+    val state by vm.ui.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // 回到前台时看一眼天气(半小时内的缓存直接用,位置挪远了才重取)
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner) {
+        val obs = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_RESUME) vm.onResume() }
+        owner.lifecycle.addObserver(obs)
+        onDispose { owner.lifecycle.removeObserver(obs) }
+    }
+
+    val staggerBase = (if (updateAvailable) 1 else 0) + (if (phoneSetupNeeded) 1 else 0)
+
     GlassPage {
-        Column(Modifier.fillMaxSize()) {
-            TopBar(
-                "", left = MinaIcons.Menu, leftLabel = stringResource(R.string.chat_menu), onLeft = openDrawer,
-                center = pill,
-                right = { BarIconButton(MinaIcons.Gear, stringResource(R.string.settings_title), onSettings) },
-            )
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 28.dp)) {
-                Column(Modifier.staggerIn(0)) { ImportantSection(updateAvailable, onOpenAbout, phoneSetupNeeded, onPhoneSetup) }
-                Column(Modifier.staggerIn(1)) { PanelsSection(onAskAgent) }
-                Column(Modifier.staggerIn(2)) { AppsSection() }
+        Box(Modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize()) {
+                TopBar(
+                    "", left = MinaIcons.Menu, leftLabel = stringResource(R.string.chat_menu), onLeft = openDrawer,
+                    center = pill,
+                    right = { BarIconButton(MinaIcons.Gear, stringResource(R.string.settings_title), onSettings) },
+                )
+                LazyColumn(
+                    Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 28.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    if (updateAvailable) item(key = "sys-update") {
+                        MinaCard(Modifier.staggerIn(0, 16.dp)) {
+                            ActionCard(tr(R.string.home_update_verb), tr(R.string.home_update_title), tr(R.string.home_update_sub), first = true, onClick = onOpenAbout)
+                        }
+                    }
+                    if (phoneSetupNeeded) item(key = "sys-phone") {
+                        MinaCard(Modifier.staggerIn(if (updateAvailable) 1 else 0, 16.dp)) {
+                            ActionCard(tr(R.string.home_fix_verb), tr(R.string.home_phone_title), tr(R.string.home_phone_sub), first = true, onClick = onPhoneSetup)
+                        }
+                    }
+                    items(state.notifications, key = { "notif-" + it.key }) { n ->
+                        Box(Modifier.animateItem().appearDown()) {
+                            SwipeToDeleteCard(onDelete = {
+                                vm.dismiss(n.key)
+                                scope.launch {
+                                    val r = snackbar.showSnackbar(
+                                        tr(R.string.home_deleted),
+                                        actionLabel = tr(R.string.home_undo),
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                    if (r == SnackbarResult.ActionPerformed) vm.undoDismiss(n.key)
+                                }
+                            }) {
+                                NotificationCard(
+                                    verb = tr(n.verb),
+                                    title = n.title,
+                                    app = n.app,
+                                    onClick = { openRelatedApp(context, n.app) },
+                                )
+                            }
+                        }
+                    }
+                    item(key = "weather") { WeatherSection(vm, state.weather, state.isWeatherLoading, state.locationDenied, staggerBase) }
+                    item(key = "panels") { PanelsSection(onAskAgent, staggerBase + 1) }
+                }
             }
+            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp))
         }
     }
 }
 
-/** 顶栏中间的 Home/Chat 分段胶囊:玻璃底,黑色滑块随弹簧滑动。 */
+/** 顶栏中间的 Home/Chat 分段胶囊:56dp 高、内容定宽,黑色滑块随弹簧滑动。 */
 @Composable
 fun RootTabPill(home: Boolean, onPick: (Boolean) -> Unit) {
-    GlassPillTabs(
+    GlassCompactTabs(
         options = listOf(tr(R.string.root_home), tr(R.string.root_chat)),
         selected = if (home) 0 else 1,
         onSelect = { i -> onPick(i == 0) },
-        height = 34.dp,
     )
 }
 
-// ---------- 重要通知 ----------
+// ---------- 常驻天气卡 ----------
 
 @Composable
-private fun ImportantSection(updateAvailable: Boolean, onOpenAbout: () -> Unit, phoneSetupNeeded: Boolean, onPhoneSetup: () -> Unit) {
-    val notes = remember { NotificationStore.snapshot(null, 3) }
-    val anyCard = updateAvailable || phoneSetupNeeded || notes.isNotEmpty()
-    GroupLabel(tr(R.string.home_important))
-    if (!anyCard) {
-        GroupCard {
-            ListRow(MinaIcons.Check, tr(R.string.home_caught_up), tr(R.string.home_caught_up_sub), first = true)
-        }
-        return
+private fun WeatherSection(
+    vm: HomeViewModel,
+    weather: WeatherData?,
+    loading: Boolean,
+    locationDenied: Boolean,
+    staggerIndex: Int,
+) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+        if (grants.values.any { it }) vm.onLocationGranted()
     }
-    if (updateAvailable) {
-        GroupCard {
-            ActionCard(tr(R.string.home_update_verb), tr(R.string.home_update_title), tr(R.string.home_update_sub), first = true, onClick = onOpenAbout)
-        }
-    }
-    if (phoneSetupNeeded) {
-        GroupCard {
-            ActionCard(tr(R.string.home_fix_verb), tr(R.string.home_phone_title), tr(R.string.home_phone_sub), first = true, onClick = onPhoneSetup)
-        }
-    }
-    if (notes.isNotEmpty()) {
-        GroupCard {
-            notes.forEachIndexed { i, n ->
-                ActionCard(
-                    tr(R.string.home_note_verb),
-                    jsonText(n, "title").ifBlank { jsonText(n, "text") },
-                    listOf(jsonText(n, "text"), jsonText(n, "app")).filter { it.isNotBlank() }.joinToString(" · "),
-                    first = i == 0,
+    val model = weather?.let { weatherCardModel(it, context) }
+    MinaCard(Modifier.staggerIn(staggerIndex, 16.dp)) {
+        WeatherCardView(
+            w = model,
+            loading = loading,
+            showEnableLocation = locationDenied,
+            onEnableLocation = {
+                launcher.launch(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
                 )
-            }
+            },
+            rationale = if (locationDenied) tr(R.string.home_location_rationale) else null,
+        )
+    }
+}
+
+/** 天气数据 → 界面要的文字:天气名、温度、日落/下一次日出(按设备 12/24 小时制)。 */
+private fun weatherCardModel(w: WeatherData, context: Context): WeatherCardModel {
+    val now = LocalDateTime.now()
+    val phase = sunPhase(w, now)
+    val riseToday = w.todaySunrise?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() }
+    val iso = when (phase) {
+        SunPhase.Sunset -> w.sunset
+        SunPhase.Sunrise -> if (riseToday != null && now < riseToday) w.todaySunrise else w.nextSunrise
+    }
+    val pattern = if (android.text.format.DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a"
+    val fmt = DateTimeFormatter.ofPattern(pattern)
+    return WeatherCardModel(
+        place = w.place.ifBlank { null },
+        condition = tr(weatherKind(w.code)),
+        temp = "${w.temp.roundToInt()}°C",
+        sunLabel = tr(if (phase == SunPhase.Sunset) R.string.panel_sunset else R.string.home_sunrise),
+        sunTime = iso?.let { i -> runCatching { fmt.format(LocalDateTime.parse(i)) }.getOrNull() } ?: "—",
+        icon = weatherIconFor(w.code, w.isDay),
+    )
+}
+
+/** 点卡片打开通知来源的 App;没有可打开的就什么都不做。 */
+private fun openRelatedApp(context: Context, pkg: String?) {
+    if (pkg.isNullOrBlank()) return
+    runCatching {
+        context.packageManager.getLaunchIntentForPackage(pkg)?.let {
+            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(it)
         }
     }
 }
 
-private fun jsonText(o: JsonObject, key: String): String =
-    (o[key] as? JsonPrimitive)?.contentOrNull.orEmpty()
-
-
-/** Hark 风格的通知卡:左边动词小胶囊,右边一句话。 */
+/** 顶栏下面的一张状态卡:动词胶囊 + 标题 + 说明,整卡可点。 */
 @Composable
 private fun ActionCard(verb: String, title: String, subtitle: String, first: Boolean, onClick: (() -> Unit)? = null) {
     val c = MinaTheme.colors
@@ -195,7 +268,7 @@ private fun ActionCard(verb: String, title: String, subtitle: String, first: Boo
 // ---------- 面板 ----------
 
 @Composable
-private fun PanelsSection(onAskAgent: (String) -> Unit) {
+private fun PanelsSection(onAskAgent: (String) -> Unit, staggerIndex: Int = 0) {
     val context = LocalContext.current
     val store = remember { PanelsStore.shared(context) }
     val scope = rememberCoroutineScope()
@@ -217,7 +290,6 @@ private fun PanelsSection(onAskAgent: (String) -> Unit) {
         }
     }
 
-    GroupLabel(tr(R.string.home_panels))
     panels.forEach { p ->
         val del: () -> Unit = { scope.launch { withContext(Dispatchers.IO) { store.remove(p.id) }; panels = store.all() } }
         SwipeToDeleteRow(onDelete = del) {
@@ -225,7 +297,7 @@ private fun PanelsSection(onAskAgent: (String) -> Unit) {
             else TrackCard(p, onAsk = { onAskAgent(tr(R.string.panel_ask_msg, p.name)) }, onDelete = del)
         }
     }
-    GroupCard {
+    GroupCard(Modifier.staggerIn(staggerIndex, 16.dp)) {
         Row(
             Modifier.fillMaxWidth().clickable { create = true }.padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -347,68 +419,5 @@ private fun KindChip(text: String, selected: Boolean, onClick: () -> Unit) {
             .clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
         Text(text, style = MinaType.Caption, color = if (selected) c.bg else c.ink)
-    }
-}
-
-// ---------- 已装的 App ----------
-
-private data class AppEntry(val label: String, val pkg: String, val icon: Bitmap?)
-
-@Composable
-private fun AppsSection() {
-    val context = LocalContext.current
-    var apps by remember { mutableStateOf<List<AppEntry>?>(null) }
-    LaunchedEffect(Unit) { apps = withContext(Dispatchers.IO) { loadApps(context) } }
-    GroupLabel(tr(R.string.home_apps))
-    GroupCard {
-        val rows = (apps ?: emptyList()).chunked(4)
-        if (apps == null) {
-            ListRow(MinaIcons.Apps, tr(R.string.home_apps_loading), first = true)
-            return@GroupCard
-        }
-        rows.forEachIndexed { i, row ->
-            Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 4.dp)) {
-                row.forEach { a -> AppTile(a, Modifier.weight(1f)) }
-                repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
-            }
-            if (i != rows.lastIndex) Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(0.5.dp).background(MinaTheme.colors.hair))
-        }
-    }
-}
-
-private fun loadApps(context: Context): List<AppEntry> {
-    val pm = context.packageManager
-    val self = context.packageName
-    val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-    return runCatching {
-        pm.queryIntentActivities(intent, 0)
-            .filter { it.activityInfo.packageName != self }
-            .distinctBy { it.activityInfo.packageName }
-            .mapNotNull { info ->
-                runCatching {
-                    val label = info.loadLabel(pm)?.toString()?.trim()?.takeIf { it.isNotEmpty() } ?: info.activityInfo.packageName
-                    val icon = runCatching { pm.getApplicationIcon(info.activityInfo.packageName).toBitmap(96, 96) }.getOrNull()
-                    AppEntry(label, info.activityInfo.packageName, icon)
-                }.getOrNull()
-            }
-            .sortedBy { it.label.lowercase() }
-    }.getOrDefault(emptyList())
-}
-
-@Composable
-private fun AppTile(a: AppEntry, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val c = MinaTheme.colors
-    Column(
-        modifier.clickable {
-            context.packageManager.getLaunchIntentForPackage(a.pkg)?.let { context.startActivity(it) }
-        }.padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background(c.fill), contentAlignment = Alignment.Center) {
-            a.icon?.let { Image(it.asImageBitmap(), null, Modifier.size(30.dp)) }
-                ?: Icon(MinaIcons.Apps, null, Modifier.size(22.dp), tint = c.ink2)
-        }
-        Text(a.label, Modifier.padding(top = 4.dp, start = 2.dp, end = 2.dp), style = MinaType.Hint, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

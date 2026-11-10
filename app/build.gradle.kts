@@ -17,8 +17,8 @@ android {
         applicationId = "com.meenai.mina"
         minSdk = 30
         targetSdk = 35
-        versionCode = 65
-        versionName = "0.1.64"
+        versionCode = 66
+        versionName = "0.1.65"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
         // The Beta tag after the version on the About page; set to false for a stable release
@@ -105,6 +105,11 @@ dependencies {
     implementation(libs.androidx.webkit)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.okhttp)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.compose.ui:ui-tooling-preview")
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.xz)
     implementation(libs.commonmark)
@@ -124,6 +129,7 @@ dependencies {
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.test.manifest)
+    debugImplementation("androidx.compose.ui:ui-tooling")
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.okhttp.mockwebserver)

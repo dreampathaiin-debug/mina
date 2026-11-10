@@ -173,4 +173,10 @@
     <string name="advanced_note">These cover the deeper workings; most people rarely need them.</string>
     <string name="privacy_title">Privacy &amp; data</string>
     <string name="privacy_note">Memory lets Mina remember things for you; website logins stay on this device.</string>
+    <string name="home_sunrise">Sunrise</string>
+    <string name="home_enable_location">Enable location</string>
+    <string name="home_location_rationale">Mina reads your rough location once to show local weather. It never leaves this device.</string>
+    <string name="home_deleted">Deleted</string>
+    <string name="home_undo">Undo</string>
+    <string name="home_no_location">Add your area to see the weather</string>
 </resources>
