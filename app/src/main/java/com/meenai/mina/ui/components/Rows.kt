@@ -75,10 +75,8 @@ enum class TileTone {
 /** 行左边的图标块:30dp、圆角 9,里面图形 18dp。 */
 @Composable
 fun IconTile(icon: ImageVector, tone: TileTone = TileTone.Neutral) {
-    val (bg, fg) = tone.colors(MinaTheme.colors)
-    Box(Modifier.size(MinaSize.Tile).background(bg, MinaShapes.Tile), contentAlignment = Alignment.Center) {
-        Icon(icon, null, Modifier.size(MinaSize.TileIcon), tint = fg)
-    }
+    val (_, fg) = tone.colors(MinaTheme.colors)
+    Icon(icon, null, Modifier.size(MinaSize.TileIcon), tint = fg)
 }
 
 /** 行与行之间的分隔线,从 [start] 画到右边;分组首行([first])不画。 */
@@ -90,7 +88,7 @@ private fun Modifier.topHairline(first: Boolean, start: Dp, color: Color): Modif
     }
 
 /** 有图标块时文字从这里开始:左边距 16 + 图标块 30 + 间距 14。 */
-private val TextStartWithIcon = 60.dp
+private val TextStartWithIcon = 54.dp
 private val TextStartPlain = 16.dp
 
 /**
@@ -115,7 +113,7 @@ fun ListRow(
     Row(
         Modifier.fillMaxWidth()
             .topHairline(first, if (icon != null) TextStartWithIcon else TextStartPlain, c.hair)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(if (onClick != null) Modifier.pressScale(onClick) else Modifier)
             .heightIn(min = MinaSize.RowMin)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -123,7 +121,7 @@ fun ListRow(
     ) {
         if (icon != null) IconTile(icon, tone)
         Column(Modifier.weight(1f).padding(vertical = 11.dp)) {
-            Text(title, style = MinaType.Body, color = titleColor.takeOrElse { c.ink })
+            Text(title, style = MinaType.RowTitle, color = titleColor.takeOrElse { c.ink })
             if (!subtitle.isNullOrEmpty()) Text(subtitle, Modifier.padding(top = 2.dp), style = MinaType.Caption, color = c.ink3)
             if (!detail.isNullOrEmpty()) Text(detail, Modifier.padding(top = 2.dp), style = MinaType.Hint, color = detailColor.takeOrElse { c.ink3 })
         }
@@ -141,7 +139,7 @@ fun RowValue(text: String, tone: ValueTone = ValueTone.Plain) {
         text, style = MinaType.Value,
         fontWeight = if (tone == ValueTone.Link) FontWeight.Medium else FontWeight.Normal,
         color = when (tone) {
-            ValueTone.Plain -> c.ink3
+            ValueTone.Plain -> c.ink
             ValueTone.Ok -> c.ok
             ValueTone.Warn -> c.warn
             ValueTone.Bad -> c.bad

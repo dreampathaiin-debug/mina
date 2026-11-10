@@ -65,6 +65,10 @@ import com.meenai.mina.home.Weather
 import com.meenai.mina.home.weatherKind
 import com.meenai.mina.i18n.tr
 import com.meenai.mina.ui.components.GroupCard
+import com.meenai.mina.ui.components.staggerIn
+import com.meenai.mina.ui.components.SwipeToDeleteRow
+import com.meenai.mina.ui.components.GlassPillTabs
+import com.meenai.mina.ui.components.GlassPage
 import com.meenai.mina.ui.components.BarIconButton
 import com.meenai.mina.ui.components.GroupLabel
 import com.meenai.mina.ui.components.ListRow
@@ -97,46 +101,31 @@ fun HomeScreen(
     onAskAgent: (String) -> Unit,
 ) {
     val c = MinaTheme.colors
-    Column(Modifier.fillMaxSize().background(c.bg)) {
-        TopBar(
-            "", left = MinaIcons.Menu, leftLabel = stringResource(R.string.chat_menu), onLeft = openDrawer,
-            center = pill,
-            right = { BarIconButton(MinaIcons.Gear, stringResource(R.string.settings_title), onSettings) },
-        )
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 28.dp)) {
-            ImportantSection(updateAvailable, onOpenAbout, phoneSetupNeeded, onPhoneSetup)
-            PanelsSection(onAskAgent)
-            AppsSection()
+    GlassPage {
+        Column(Modifier.fillMaxSize()) {
+            TopBar(
+                "", left = MinaIcons.Menu, leftLabel = stringResource(R.string.chat_menu), onLeft = openDrawer,
+                center = pill,
+                right = { BarIconButton(MinaIcons.Gear, stringResource(R.string.settings_title), onSettings) },
+            )
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 28.dp)) {
+                Column(Modifier.staggerIn(0)) { ImportantSection(updateAvailable, onOpenAbout, phoneSetupNeeded, onPhoneSetup) }
+                Column(Modifier.staggerIn(1)) { PanelsSection(onAskAgent) }
+                Column(Modifier.staggerIn(2)) { AppsSection() }
+            }
         }
     }
 }
 
-/** 顶栏中间的 Home/Chat 分段胶囊:激活段深色实底,切换带弹簧。 */
+/** 顶栏中间的 Home/Chat 分段胶囊:玻璃底,黑色滑块随弹簧滑动。 */
 @Composable
 fun RootTabPill(home: Boolean, onPick: (Boolean) -> Unit) {
-    val c = MinaTheme.colors
-    Row(
-        Modifier.clip(RoundedCornerShape(50)).background(c.ink.copy(alpha = 0.07f)).padding(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        RootSegment(tr(R.string.root_home), home) { if (!home) onPick(true) }
-        RootSegment(tr(R.string.root_chat), !home) { if (home) onPick(false) }
-    }
-}
-
-@Composable
-private fun RootSegment(text: String, selected: Boolean, onClick: () -> Unit) {
-    val c = MinaTheme.colors
-    val bg by animateColorAsState(
-        if (selected) c.ink else Color.Transparent,
-        spring(stiffness = Spring.StiffnessMediumLow), label = "tabbg",
+    GlassPillTabs(
+        options = listOf(tr(R.string.root_home), tr(R.string.root_chat)),
+        selected = if (home) 0 else 1,
+        onSelect = { i -> onPick(i == 0) },
+        height = 34.dp,
     )
-    Box(
-        Modifier.clip(RoundedCornerShape(50)).background(bg).clickable(onClick = onClick)
-            .padding(horizontal = 15.dp, vertical = 6.dp),
-    ) {
-        Text(text, style = MinaType.Body, color = if (selected) c.bg else c.ink2, maxLines = 1)
-    }
 }
 
 // ---------- 重要通知 ----------
@@ -230,8 +219,11 @@ private fun PanelsSection(onAskAgent: (String) -> Unit) {
 
     GroupLabel(tr(R.string.home_panels))
     panels.forEach { p ->
-        if (p.kind == "weather") WeatherCard(p, onDelete = { scope.launch { withContext(Dispatchers.IO) { store.remove(p.id) }; panels = store.all() } })
-        else TrackCard(p, onAsk = { onAskAgent(tr(R.string.panel_ask_msg, p.name)) }, onDelete = { scope.launch { withContext(Dispatchers.IO) { store.remove(p.id) }; panels = store.all() } })
+        val del: () -> Unit = { scope.launch { withContext(Dispatchers.IO) { store.remove(p.id) }; panels = store.all() } }
+        SwipeToDeleteRow(onDelete = del) {
+            if (p.kind == "weather") WeatherCard(p, onDelete = del)
+            else TrackCard(p, onAsk = { onAskAgent(tr(R.string.panel_ask_msg, p.name)) }, onDelete = del)
+        }
     }
     GroupCard {
         Row(

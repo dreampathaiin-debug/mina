@@ -90,6 +90,7 @@
     </queries>
 
     <application
+        android:enableOnBackInvokedCallback="true"
         android:name=".MinaApp"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"

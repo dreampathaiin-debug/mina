@@ -1,6 +1,13 @@
 package com.meenai.mina.ui
 
 import com.meenai.mina.i18n.AppLanguage
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -294,7 +301,19 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
     val back: () -> Unit = { nav.back() }
     // 聊天页离开组合树时保留列表位置和输入内容，返回设置页等子页面后原样恢复。
     val screenStates = rememberSaveableStateHolder()
-    when (nav.current) {
+    val reduceMotion = MinaTheme.reduceMotion
+    AnimatedContent(
+        targetState = nav.current,
+        label = "page",
+        transitionSpec = {
+            val dur = if (reduceMotion) 1 else 220
+            val enter =
+                if (targetState != Route.Chat) slideInHorizontally(tween(dur)) { it } + fadeIn(tween(dur))
+                else slideInHorizontally(tween(dur)) { -it / 5 } + fadeIn(tween(dur))
+            enter togetherWith (scaleOut(targetScale = 0.96f, animationSpec = tween(dur)) + fadeOut(tween(dur)))
+        },
+    ) { route ->
+    when (route) {
         Route.PhoneSetup -> PhoneSetupScreen(status, setupRepair, onFix, onboarding = onboarding == OnboardingStep.Phone) {
             phoneSetup.markGuideSeen()
             if (onboarding == OnboardingStep.Phone) goOnboarding(null) else nav.back()
@@ -484,5 +503,6 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
             app.chat.openConversation(it)
             nav.reset()
         })
+    }
     }
 }

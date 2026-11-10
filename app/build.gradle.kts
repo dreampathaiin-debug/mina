@@ -17,8 +17,8 @@ android {
         applicationId = "com.meenai.mina"
         minSdk = 30
         targetSdk = 35
-        versionCode = 60
-        versionName = "0.1.59"
+        versionCode = 61
+        versionName = "0.1.60"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
         // The Beta tag after the version on the About page; set to false for a stable release
@@ -100,6 +100,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
+    implementation("dev.chrisbanes.haze:haze:0.9.0-rc03")
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.webkit)
     implementation(libs.kotlinx.coroutines.android)

@@ -44,24 +44,27 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
 import com.meenai.mina.ui.theme.MinaColors
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeChild
 import com.meenai.mina.ui.theme.MinaShapes
 import com.meenai.mina.ui.theme.MinaSize
 import com.meenai.mina.ui.theme.MinaTheme
 import com.meenai.mina.ui.theme.MinaType
 
-/** 页面底:干净的近白(深色下近黑),不加渐变。 */
+/** 页面底:渐变 + 光晕 + 颗粒([GlassPage]),玻璃卡片在它上面真模糊。 */
 @Composable
 fun PageBackground(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
-    Box(modifier.fillMaxSize().background(MinaTheme.colors.bg), content = content)
+    GlassPage(modifier, content = content)
 }
 
 /** 卡片的底:白底 + 黑 5% 描边 + 极淡阴影;深色下只有描边。 */
 fun Modifier.cardSurface(colors: MinaColors, shape: Shape = MinaShapes.Card): Modifier =
     (if (colors.cardShadow.alpha > 0f) {
-        shadow(6.dp, shape, clip = false, ambientColor = colors.cardShadow.copy(alpha = 0.45f), spotColor = colors.cardShadow.copy(alpha = 0.16f))
+        shadow(10.dp, shape, clip = false, ambientColor = colors.cardShadow.copy(alpha = 0.28f), spotColor = colors.cardShadow.copy(alpha = 0.10f))
     } else this)
         .background(colors.surface, shape)
-        .border(0.5.dp, colors.edge, shape)
+        .border(1.dp, colors.cardEdge, shape)
 
 /** 悬浮元素的阴影(输入栏、浮在内容上的按钮)。 */
 fun Modifier.floatShadow(colors: MinaColors, shape: Shape): Modifier =
@@ -70,7 +73,15 @@ fun Modifier.floatShadow(colors: MinaColors, shape: Shape): Modifier =
 /** 一张卡片,内容裁在圆角里(行的按压效果不出角)。 */
 @Composable
 fun MinaCard(modifier: Modifier = Modifier, shape: Shape = MinaShapes.Card, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.fillMaxWidth().cardSurface(MinaTheme.colors, shape).clip(shape), content = content)
+    val haze = LocalHazeState.current
+    val c = MinaTheme.colors
+    val glassStyle = remember(c) { HazeStyle(tint = HazeTint(c.surface), blurRadius = 28.dp) }
+    Column(
+        modifier.fillMaxWidth()
+            .then(if (haze != null) Modifier.hazeChild(haze, shape = shape, style = glassStyle) else Modifier)
+            .cardSurface(c, shape).clip(shape),
+        content = content,
+    )
 }
 
 /**

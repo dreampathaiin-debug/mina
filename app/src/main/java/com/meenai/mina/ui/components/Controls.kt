@@ -3,6 +3,7 @@ package com.meenai.mina.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -121,8 +122,8 @@ enum class ButtonKind { Primary, Secondary, Tonal, Text }
 /** 大:页面底部 52;中:卡片里并排 42;小:行内 32 的胶囊。 */
 enum class ButtonSize(val height: Dp, val shape: RoundedCornerShape, val text: TextStyle, val padding: Dp) {
     Large(MinaSize.Button, MinaShapes.Button, TextStyle(fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold), 20.dp),
-    Medium(42.dp, RoundedCornerShape(12.dp), TextStyle(fontSize = 14.5.sp, lineHeight = 19.sp, fontWeight = FontWeight.SemiBold), 14.dp),
-    Small(32.dp, RoundedCornerShape(16.dp), TextStyle(fontSize = 13.5.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold), 14.dp),
+    Medium(42.dp, RoundedCornerShape(50), TextStyle(fontSize = 14.5.sp, lineHeight = 19.sp, fontWeight = FontWeight.SemiBold), 14.dp),
+    Small(32.dp, RoundedCornerShape(50), TextStyle(fontSize = 13.5.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold), 14.dp),
 }
 
 /** 按钮。宽度由 [modifier] 定(铺满、按权重分或包住文字)。 */
@@ -138,8 +139,8 @@ fun MinaButton(
     val c = MinaTheme.colors
     val shape = size.shape
     val (bg, fg) = when (kind) {
-        ButtonKind.Primary -> c.accent to c.onAccent
-        ButtonKind.Secondary -> c.surface to c.accent
+        ButtonKind.Primary -> c.btnPrimary to c.onBtnPrimary
+        ButtonKind.Secondary -> c.surface to c.ink
         ButtonKind.Tonal -> c.fill to c.ink
         ButtonKind.Text -> Color.Transparent to c.accent
     }
@@ -147,7 +148,7 @@ fun MinaButton(
         modifier
             .then(if (kind == ButtonKind.Secondary) Modifier.cardSurface(c, shape) else Modifier.background(bg, shape))
             .clip(shape)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .pressScale(onClick, enabled, role = Role.Button)
             .alpha(if (enabled) 1f else 0.45f)
             .height(size.height)
             .padding(horizontal = size.padding),
@@ -159,7 +160,7 @@ fun MinaButton(
 
 // ---------- 分段控件 ----------
 
-/** 分段控件:浅填充底,选中的一段是白色浮起。[tags] 是各段的测试标签。 */
+/** 分段控件:玻璃胶囊底,黑色滑块随弹簧滑动。 */
 @Composable
 fun SegmentedControl(
     options: List<String>,
@@ -168,31 +169,8 @@ fun SegmentedControl(
     modifier: Modifier = Modifier,
     tags: List<String>? = null,
 ) {
-    val c = MinaTheme.colors
-    Row(modifier.fillMaxWidth().background(c.fill, SegmentOuter).padding(2.dp)) {
-        options.forEachIndexed { i, label ->
-            val on = i == selected
-            Box(
-                Modifier.weight(1f).height(32.dp)
-                    .then(
-                        if (on) Modifier.shadow(1.dp, SegmentInner, clip = false, ambientColor = c.cardShadow, spotColor = c.cardShadow)
-                            .background(c.surface, SegmentInner)
-                        else Modifier,
-                    )
-                    .clip(SegmentInner)
-                    .selectable(on, role = Role.Tab) { onSelect(i) }
-                    .then(if (tags != null) Modifier.testTag(tags[i]) else Modifier),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(label, style = SegmentText, color = if (on) c.ink else c.ink2, maxLines = 1)
-            }
-        }
-    }
+    GlassPillTabs(options, selected, onSelect, modifier, tags, height = 36.dp)
 }
-
-private val SegmentOuter = RoundedCornerShape(10.dp)
-private val SegmentInner = RoundedCornerShape(8.dp)
-private val SegmentText = TextStyle(fontSize = 13.5.sp, lineHeight = 18.sp, fontWeight = FontWeight.Medium)
 
 // ---------- 顶栏 ----------
 
@@ -212,16 +190,18 @@ fun BarIconButton(
     val c = MinaTheme.colors
     Box(
         Modifier.size(MinaSize.IconButton)
-            .then(if (glass) Modifier.floatShadow(c, CircleShape).background(c.surface, CircleShape) else Modifier)
+            .background(c.glass.copy(alpha = if (c.isDark) 0.55f else 0.6f), CircleShape)
+            .border(1.dp, c.cardEdge, CircleShape)
+            .then(if (glass) Modifier.floatShadow(c, CircleShape) else Modifier)
             .clip(CircleShape)
-            .clickable(enabled = enabled, onClickLabel = label, role = Role.Button, onClick = onClick),
+            .pressScale(onClick, enabled),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, label, Modifier.size(MinaSize.Icon).alpha(if (enabled) 1f else 0.35f), tint = c.ink)
+        Icon(icon, label, Modifier.size(22.dp).alpha(if (enabled) 1f else 0.35f), tint = c.ink)
         if (badge) {
             Box(
-                Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 7.dp).size(8.dp)
-                    .background(c.bg, CircleShape).padding(1.dp).background(c.accent, CircleShape),
+                Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 10.dp).size(8.dp)
+                    .background(c.glass, CircleShape).padding(1.dp).background(c.accent, CircleShape),
             )
         }
     }
@@ -244,7 +224,7 @@ fun TopBar(
     center: (@Composable () -> Unit)? = null,
     subtitle: String? = null,
     subtitleColor: Color = Color.Unspecified,
-    background: Color = MinaTheme.colors.bg,
+    background: Color = Color.Transparent,
 ) {
     val c = MinaTheme.colors
     Box(Modifier.fillMaxWidth().background(background).windowInsetsPadding(WindowInsets.statusBars)) {
@@ -281,7 +261,7 @@ fun SelectChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: M
         modifier
             .then(
                 when {
-                    selected -> Modifier.background(c.ink, shape)
+                    selected -> Modifier.background(c.btnPrimary, shape)
                     small -> Modifier.background(c.fill, shape)
                     else -> Modifier.cardSurface(c, shape)
                 },
