@@ -6,8 +6,8 @@ import java.net.URLEncoder
 
 /** All of Mina's public links live here: repo, issues, author, and the update-check sources. Change addresses in this one place. */
 object MinaLinks {
-    const val REPO = "https://github.com/anilmeenaa/mina"
-    const val REPO_LABEL = "github.com/anilmeenaa/mina"
+    const val REPO = "https://github.com/dreampathaiin-debug/mina"
+    const val REPO_LABEL = "github.com/dreampathaiin-debug/mina"
     const val README = "$REPO#readme"
     const val RELEASES = "$REPO/releases"
     const val NEW_ISSUE = "$REPO/issues/new"
@@ -20,7 +20,7 @@ object MinaLinks {
     const val X_GROUP = "https://chat.whatsapp.com/COjMS1kgsZD96OKRNJVF5h?s=qs&p=a&iam=2"
 
     /** Update checks only ask the GitHub releases page (no sign-in, hourly rate limit). */
-    const val LATEST_RELEASE_API = "https://api.github.com/repos/anilmeenaa/mina/releases/latest"
+    const val LATEST_RELEASE_API = "https://api.github.com/repos/dreampathaiin-debug/mina/releases/latest"
 
     /** Device and version info pre-filled into the issue template for feedback. */
     data class Device(
