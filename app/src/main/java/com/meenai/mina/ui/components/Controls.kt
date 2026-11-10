@@ -240,6 +240,8 @@ fun TopBar(
     /** 左边按钮上的小圆点,见 [BarIconButton]。 */
     leftBadge: Boolean = false,
     right: (@Composable RowScope.() -> Unit)? = null,
+    /** 标题位换成自定义内容(Home/Chat 分段胶囊),副标题仍在下面。 */
+    center: (@Composable () -> Unit)? = null,
     subtitle: String? = null,
     subtitleColor: Color = Color.Unspecified,
     background: Color = MinaTheme.colors.bg,
@@ -253,7 +255,8 @@ fun TopBar(
         ) {
             if (left != null) BarIconButton(left, leftLabel, onLeft, badge = leftBadge) else Spacer(Modifier.size(MinaSize.IconButton))
             Column(Modifier.weight(1f).padding(horizontal = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(title, style = MinaType.Title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (center != null) center()
+                else Text(title, style = MinaType.Title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (!subtitle.isNullOrEmpty()) {
                     Text(
                         subtitle, style = MinaType.Hint, fontWeight = FontWeight.Medium,

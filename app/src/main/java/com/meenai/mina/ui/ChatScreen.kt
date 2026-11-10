@@ -175,6 +175,8 @@ fun ChatScreen(
     voice: VoiceSource? = null,
     /** 「还不能语音输入」里的「去选」。 */
     openSpeechModel: () -> Unit = {},
+    /** 顶栏中间的 Home/Chat 分段胶囊;null 时维持原来的标题。 */
+    pill: (@Composable () -> Unit)? = null,
 ) {
     val ui by vm.ui.collectAsState()
     val others by vm.otherRunning.collectAsState()
@@ -317,7 +319,8 @@ fun ChatScreen(
         val sub = ChatCopy.subtitle(last, last?.let(vm::livePlace)) ?: kept?.let { ChatCopy.KEPT_PAGE to ChatCopy.Tone.Ok }
         Column(Modifier.behindMenu(menuOpen) { lift.value }.onSizeChanged { topHeight = it.height }) {
             TopBar(
-                ChatCopy.APP_TITLE,
+                if (pill == null) ChatCopy.APP_TITLE else "",
+                center = pill,
                 left = MinaIcons.Menu, leftLabel = stringResource(R.string.chat_menu), onLeft = onOpenDrawer,
                 // 别的对话里还有任务在跑(并行时):菜单上一个小圆点,侧栏「进行中」里能切过去
                 leftBadge = others.isNotEmpty(),

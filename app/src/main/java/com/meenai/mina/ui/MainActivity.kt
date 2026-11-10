@@ -339,7 +339,21 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                 Box(Modifier.fillMaxSize()) {
                     val readyRelease = readyUpdate?.takeIf { autoUpdate && it.apkUrl == updateState.update?.apkUrl }
                     val updateBackdrop = if (readyRelease != null) rememberGlassBackdrop() else null
-                    Box(Modifier.fillMaxSize().glassSource(updateBackdrop)) {
+                    // 顶栏 Home/Chat 分段:home 时画 Home 页,chat 时还是对话
+                    var rootTab by rememberSaveable { mutableStateOf("chat") }
+                    val pill: @Composable () -> Unit = { RootTabPill(rootTab == "home") { rootTab = if (it) "home" else "chat" } }
+                    if (rootTab == "home") {
+                        HomeScreen(
+                            openDrawer = openDrawer,
+                            onSettings = { nav.push(Route.Settings) },
+                            pill = pill,
+                            updateAvailable = AboutCopy.drawerDot(updateState),
+                            onOpenAbout = { nav.push(Route.About) },
+                            phoneSetupNeeded = phoneSetupNeeded && status.builtinShell != BuiltinShellStatus.Running,
+                            onPhoneSetup = { onFix(Fix.OpenPhoneSetup) },
+                            onAskAgent = { msg -> app.chat.send(msg, check); rootTab = "chat" },
+                        )
+                    } else Box(Modifier.fillMaxSize().glassSource(updateBackdrop)) {
                         ChatScreen(
                             vm = app.chat,
                             check = check,
@@ -361,6 +375,7 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                             },
                             voice = app.voice,
                             openSpeechModel = { nav.push(Route.SpeechModel) },
+                            pill = pill,
                         )
                     }
                     var installUpdate by remember { mutableStateOf<ReleaseInfo?>(null) }
@@ -397,7 +412,8 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
             SettingsScreen(store, status, release, onFix, onBack = back, onOpenMemory = { nav.push(Route.Memory) },
                 onOpenModels = { nav.push(Route.Models) }, webSites = webSites,
                 autonomous = autonomous, onAutonomous = app.approvalControl::setAutonomous,
-                updateVersion = updateState.update?.version, onOpenAbout = { nav.push(Route.About) })
+                updateVersion = updateState.update?.version, onOpenAbout = { nav.push(Route.About) },
+                onOpenPlans = { nav.push(Route.Plans) }, profile = memoryRuntime.profile())
         }
         Route.Models -> ModelsScreen(store, onBack = back, onOpenSpeech = { nav.push(Route.SpeechModel) })
         Route.SpeechModel -> SpeechModelScreen(store, onBack = back)

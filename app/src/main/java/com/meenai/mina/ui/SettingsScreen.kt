@@ -3,7 +3,17 @@ package com.meenai.mina.ui
 import com.meenai.mina.R
 import com.meenai.mina.i18n.tr
 import com.meenai.mina.i18n.trPlural
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextOverflow
 import com.meenai.mina.settings.ProviderConnection
 import android.app.ActivityManager
 import androidx.activity.compose.BackHandler
@@ -23,11 +33,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import com.meenai.mina.BuildConfig
 import com.meenai.mina.cap.sandbox.SandboxState
 import com.meenai.mina.capsule.CapsuleMode
 import com.meenai.mina.core.agent.SpeedFlags
 import com.meenai.mina.core.cap.sandbox.SandboxStatus
+import com.meenai.mina.core.memory.ProfileStore
 import com.meenai.mina.core.model.ModelRole
 import com.meenai.mina.core.shell.BuiltinShellStatus
 import com.meenai.mina.record.RunStore
@@ -48,6 +60,7 @@ import com.meenai.mina.ui.components.GroupCard
 import com.meenai.mina.ui.components.GroupLabel
 import com.meenai.mina.ui.components.ListRow
 import com.meenai.mina.ui.components.MinaButton
+import com.meenai.mina.ui.components.MinaCard
 import com.meenai.mina.ui.components.PageScaffold
 import com.meenai.mina.ui.components.PillTone
 import com.meenai.mina.ui.components.RowChevron
@@ -56,6 +69,8 @@ import com.meenai.mina.ui.components.StateCard
 import com.meenai.mina.ui.components.StatusPill
 import com.meenai.mina.ui.components.TileTone
 import com.meenai.mina.ui.theme.MinaIcons
+import com.meenai.mina.ui.theme.MinaTheme
+import com.meenai.mina.ui.theme.MinaType
 import com.meenai.mina.core.usage.UsageQuery
 import com.meenai.mina.core.usage.UsageRange
 import com.meenai.mina.i18n.AppLanguage
@@ -66,11 +81,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** 设置里能进入的子页面;[Home] 是设置首页。 */
-private enum class SettingsPage { Home, AppAccess, Usage, PhoneOps, DuringWork, Capsule, Language, Notifications, WebSites, Sandbox, Routes, Recovery, SelfCheck, ComputerAccess, Developer, RunStats, Devices }
+private enum class SettingsPage { Home, Profile, Accounts, Privacy, Advanced, AppAccess, Usage, PhoneOps, DuringWork, Capsule, Language, Notifications, WebSites, Sandbox, Routes, Recovery, SelfCheck, ComputerAccess, Developer, RunStats, Devices }
 
 /**
- * 设置页:总状态卡 + 基本 / 隐私与数据 / 高级 / 关于四组。各子页面在这里切换(返回键先回首页),
- * 模型页由 [onOpenModels]、关于页由 [onOpenAbout] 交给 Activity。修复动作由 [onFix] 交给 Activity 去做(请求权限、跳转系统设置)。
+ * 设置页:总状态卡 + 新的分组首页(Profile / 常用 / 隐私与数据 / Advanced / 关于)。
+ * 各子页面在这里切换(返回键先回首页),模型页由 [onOpenModels]、关于页由 [onOpenAbout] 交给 Activity,
+ * 计划任务由 [onOpenPlans] 打开。修复动作由 [onFix] 交给 Activity 去做(请求权限、跳转系统设置)。
  */
 @Composable
 fun SettingsScreen(
@@ -88,6 +104,10 @@ fun SettingsScreen(
     /** 查到的新版本号;有它时「关于 Mina」一行写「x 可更新」带红点。 */
     updateVersion: String? = null,
     onOpenAbout: () -> Unit = {},
+    /** 计划任务(Plans)页。 */
+    onOpenPlans: () -> Unit = {},
+    /** agent 的 profile 记忆:Profile 页写进去。 */
+    profile: ProfileStore? = null,
 ) {
     val configs by store.configs.collectAsState()
     val roles by store.roles.collectAsState()
@@ -117,7 +137,7 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) { routeCount = withContext(Dispatchers.IO) { runCatching { routeStore.count() }.getOrNull() } }
     val sandboxStatus by remember { SandboxState.get(context) }.status.collectAsState()
-    // 网络代理:只在这里改;读设置要解密、看浏览器支不支持要加载 WebView,都放到后台
+    // 网络代理:只在 Advanced 里改;读设置要解密、看浏览器支不支持要加载 WebView,都放到后台
     val proxies = remember { NetProxyStore.get(context) }
     var proxy by remember { mutableStateOf<String?>(null) }
     var browserProxy by remember { mutableStateOf<WebProxy.Mode?>(null) }
@@ -177,14 +197,31 @@ fun SettingsScreen(
             capsuleMode = capsuleMode, onOpenCapsule = { page = SettingsPage.Capsule },
             onOpenNotifications = { notificationsFrom = SettingsPage.Home; page = SettingsPage.Notifications },
             language = language, onOpenLanguage = { page = SettingsPage.Language },
+            onOpenProfile = { page = SettingsPage.Profile },
+            onOpenAccounts = { page = SettingsPage.Accounts },
+            onOpenPrivacy = { page = SettingsPage.Privacy },
+            onOpenAdvanced = { page = SettingsPage.Advanced },
+            onOpenPlans = onOpenPlans,
+            onOpenAbout = onOpenAbout,
+            versionName = BuildConfig.VERSION_NAME, updateVersion = updateVersion,
+        )
+        SettingsPage.Profile -> ProfileScreen(profile, onBack = toHome)
+        SettingsPage.Accounts -> AccountsScreen(webSites, onBack = toHome)
+        SettingsPage.Privacy -> PrivacyScreen(
             onOpenMemory = onOpenMemory,
-            webSitesCount = webSites?.sites?.size, onOpenWebSites = { page = SettingsPage.WebSites },
+            webSitesCount = webSites?.sites?.size,
+            onOpenWebSites = { page = SettingsPage.WebSites },
+            onBack = toHome,
+        )
+        SettingsPage.Advanced -> AdvancedScreen(
+            proxy = proxy, proxyNote = proxy?.let { NetProxyCopy.subtitle(it, browserProxy) }, onOpenProxy = { editingProxy = true },
+            usageTokens = usageWeek, onOpenUsage = { page = SettingsPage.Usage },
             sandbox = sandboxStatus, onOpenSandbox = { page = SettingsPage.Sandbox },
             routes = routeCount, onOpenRoutes = { page = SettingsPage.Routes },
             onOpenRecovery = { page = SettingsPage.Recovery },
             computerAccess = mcpOn, onOpenComputerAccess = { page = SettingsPage.ComputerAccess },
             showDeveloper = showDeveloper, onOpenDeveloper = { page = SettingsPage.Developer },
-            versionName = BuildConfig.VERSION_NAME, updateVersion = updateVersion, onOpenAbout = onOpenAbout,
+            onBack = toHome,
         )
         SettingsPage.AppAccess -> AppAccessScreen(onBack = toHome)
         SettingsPage.Devices -> DevicesScreen(onBack = toHome)
@@ -255,9 +292,11 @@ fun SettingsScreen(
     }
 }
 
+// ---------- 设置首页:新 UI ----------
+
 /**
- * 不带状态的设置首页,便于测试。可选的入口([usageTokens]、[onOpenMemory]、[webSitesCount]、[grantsCount]、[routes]、[sandbox])
- * 为空时对应那一行不显示;[showDeveloper] 为假(发布版)时没有开发者选项。
+ * 设置首页(Hark 风格):Profile 头像卡、Mina 版本卡,然后是常用/高级的分组。
+ * 原来的全部入口都在:常用的留在外面,代理/用量/沙盒/路线/恢复/MCP/开发者收进 Advanced,记忆和网页登录收进 Privacy & data。
  */
 @Composable
 fun SettingsContent(
@@ -287,54 +326,64 @@ fun SettingsContent(
     /** 此刻选的界面语言,写在「语言」一行的右边。 */
     language: AppLanguage = AppLanguage.System,
     onOpenLanguage: () -> Unit = {},
-    onOpenMemory: (() -> Unit)? = null,
-    webSitesCount: Int? = null,
-    onOpenWebSites: () -> Unit = {},
-    sandbox: SandboxStatus? = null,
-    onOpenSandbox: () -> Unit = {},
-    /** 已记住的操作路线条数;为空(还没读出来)时不显示这一行。 */
-    routes: Int? = null,
-    onOpenRoutes: () -> Unit = {},
-    onOpenRecovery: () -> Unit = {},
-    /** 电脑连接(MCP)开着没有;为空时不显示这一行。 */
-    computerAccess: Boolean? = null,
-    onOpenComputerAccess: () -> Unit = {},
-    showDeveloper: Boolean = false,
-    onOpenDeveloper: () -> Unit = {},
+    onOpenProfile: () -> Unit = {},
+    onOpenAccounts: () -> Unit = {},
+    onOpenPrivacy: () -> Unit = {},
+    onOpenAdvanced: () -> Unit = {},
+    /** 计划任务(Plans)。 */
+    onOpenPlans: () -> Unit = {},
     versionName: String = "",
     updateVersion: String? = null,
     onOpenAbout: () -> Unit = {},
 ) {
     val check = Prerequisites.check(status, hasMainModel = mainModel != null)
+    val context = LocalContext.current
+    var profileValues by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    LaunchedEffect(Unit) { profileValues = ProfileUiStore.read(context) }
     PageScaffold(stringResource(R.string.settings_title), onBack) {
         StatusSummary(check, onProblem)
 
-        GroupLabel(stringResource(R.string.settings_basic))
+        // Profile 头像卡:有名字才显示
+        val name = profileValues["name"]
+        val email = profileValues["email"]
+        if (!name.isNullOrBlank() || !email.isNullOrBlank()) {
+            MinaCard(Modifier.padding(bottom = 12.dp).clickable(onClick = onOpenProfile)) {
+                Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text(name.orEmpty().ifBlank { tr(R.string.profile_title) }, style = MinaType.BodyStrong, color = MinaTheme.colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (!email.isNullOrBlank()) Text(email, style = MinaType.Caption, color = MinaTheme.colors.ink3, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                    RowChevron()
+                }
+            }
+        }
+
+        // Mina 版本卡:右边「更新」或「关于」
+        MinaCard(Modifier.padding(bottom = 12.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Mina", style = MinaType.Title, color = MinaTheme.colors.ink)
+                    Text(AboutCopy.settingsValue(updateVersion, versionName).text ?: "v" + versionName, style = MinaType.Caption, color = MinaTheme.colors.ink3)
+                }
+                MinaButton(
+                    if (updateVersion != null) tr(R.string.settings_update_btn) else tr(R.string.settings_about_btn),
+                    onOpenAbout, kind = ButtonKind.Tonal, size = ButtonSize.Small,
+                )
+            }
+        }
+
+        GroupLabel(stringResource(R.string.settings_main))
+        GroupCard {
+            ListRow(MinaIcons.Gear, stringResource(R.string.settings_profile), stringResource(R.string.settings_profile_sub), first = true, onClick = onOpenProfile) { RowChevron() }
+            ListRow(MinaIcons.Clock, stringResource(R.string.settings_scheduled), onClick = onOpenPlans) { RowChevron() }
+            ListRow(MinaIcons.Link, stringResource(R.string.settings_accounts), stringResource(R.string.settings_accounts_sub), onClick = onOpenAccounts) { RowChevron() }
+        }
+
         GroupCard {
             ListRow(MinaIcons.Spark, stringResource(R.string.settings_model), first = true, onClick = onOpenModels) {
                 RowValue(mainModel ?: stringResource(R.string.settings_not_set))
                 RowChevron()
             }
-            // 调模型的连接要不要走代理,和模型放在一起找得到;容器、更新、内置浏览器也按这一处
-            proxy?.let {
-                ListRow(MinaIcons.Link, NetProxyCopy.TITLE, proxyNote, onClick = onOpenProxy) {
-                    RowValue(NetProxyCopy.value(it))
-                    RowChevron()
-                }
-            }
-            usageTokens?.let {
-                ListRow(MinaIcons.Chart, UsageCopy.TITLE, onClick = onOpenUsage) {
-                    RowValue(UsageCopy.settingsValue(it))
-                    RowChevron()
-                }
-            }
-            ListRow(MinaIcons.Phone, stringResource(R.string.settings_phone_ops), onClick = onOpenPhoneOps) {
-                PhoneOpsPill(status)
-                RowChevron()
-            }
-            ListRow(MinaIcons.Phone, stringResource(R.string.appaccess_title), stringResource(R.string.appaccess_row_sub), onClick = onOpenAppAccess) { RowChevron() }
-            ListRow(MinaIcons.Shield, stringResource(R.string.devices_title), stringResource(R.string.devices_row_sub), onClick = onOpenDevices) { RowChevron() }
-            ListRow(MinaIcons.Moon, stringResource(R.string.settings_during_work), stringResource(R.string.settings_during_work_sub), onClick = onOpenDuringWork) { RowChevron() }
             ListRow(MinaIcons.Message, CapsuleSettingsCopy.TITLE, CapsuleSettingsCopy.SUBTITLE, onClick = onOpenCapsule) {
                 RowValue(CapsuleSettingsCopy.label(capsuleMode))
                 RowChevron()
@@ -343,55 +392,27 @@ fun SettingsContent(
                 RowValue(languageLabel(language))
                 RowChevron()
             }
+        }
+
+        GroupLabel(stringResource(R.string.settings_general))
+        GroupCard {
+            ListRow(MinaIcons.Lock, stringResource(R.string.settings_privacy_data), stringResource(R.string.settings_privacy_data_sub), first = true, onClick = onOpenPrivacy) { RowChevron() }
             val (notifText, notifTone) = StatusCopy.notificationSummary(status.notificationOverview().summary)
             ListRow(MinaIcons.Bell, StatusCopy.NOTIFICATIONS, stringResource(R.string.settings_notif_sub), onClick = onOpenNotifications) {
                 RowValue(notifText, notifTone)
                 RowChevron()
             }
+            ListRow(MinaIcons.Phone, stringResource(R.string.settings_phone_ops), onClick = onOpenPhoneOps) {
+                PhoneOpsPill(status)
+                RowChevron()
+            }
+            ListRow(MinaIcons.Apps, stringResource(R.string.appaccess_title), stringResource(R.string.appaccess_row_sub), onClick = onOpenAppAccess) { RowChevron() }
+            ListRow(MinaIcons.Shield, stringResource(R.string.devices_title), stringResource(R.string.devices_row_sub), onClick = onOpenDevices) { RowChevron() }
+            ListRow(MinaIcons.Moon, stringResource(R.string.settings_during_work), stringResource(R.string.settings_during_work_sub), onClick = onOpenDuringWork) { RowChevron() }
         }
 
-        val privacyRows = onOpenMemory != null || webSitesCount != null
-        if (privacyRows) {
-            GroupLabel(stringResource(R.string.settings_privacy))
-            GroupCard {
-                var first = true
-                fun take(): Boolean = first.also { first = false }
-                onOpenMemory?.let {
-                    ListRow(MinaIcons.Heart, stringResource(R.string.memory_and_skills), stringResource(R.string.settings_memory_sub), first = take(), onClick = it) { RowChevron() }
-                }
-                webSitesCount?.let {
-                    ListRow(MinaIcons.Globe, stringResource(R.string.settings_web_logins), first = take(), onClick = onOpenWebSites) { RowValue(trPlural(R.plurals.settings_count_sites, it)); RowChevron() }
-                }
-            }
-        }
-
-        val sandboxRow = sandbox?.takeIf { it !is SandboxStatus.Unsupported }
-        val recoveryRow = status.sdkInt >= Prerequisites.MIN_SDK
-        if (sandboxRow != null || routes != null || recoveryRow || computerAccess != null || showDeveloper) {
-            GroupLabel(stringResource(R.string.settings_advanced))
-            GroupCard {
-                var first = true
-                fun take(): Boolean = first.also { first = false }
-                if (sandboxRow != null) {
-                    ListRow(MinaIcons.Terminal, stringResource(R.string.settings_sandbox), first = take(), onClick = onOpenSandbox) {
-                        RowValue(sandboxValue(sandboxRow)); RowChevron()
-                    }
-                }
-                routes?.let {
-                    ListRow(MinaIcons.Route, stringResource(R.string.settings_routes), first = take(), onClick = onOpenRoutes) { RowValue(trPlural(R.plurals.settings_count_routes, it)); RowChevron() }
-                }
-                if (recoveryRow) {
-                    ListRow(MinaIcons.Wrench, stringResource(R.string.settings_recovery), first = take(), onClick = onOpenRecovery) { RowChevron() }
-                }
-                computerAccess?.let { on ->
-                    ListRow(MinaIcons.Desktop, stringResource(R.string.mcp_title), first = take(), onClick = onOpenComputerAccess) {
-                        RowValue(stringResource(if (on) R.string.state_on else R.string.state_off)); RowChevron()
-                    }
-                }
-                if (showDeveloper) {
-                    ListRow(MinaIcons.Code, stringResource(R.string.settings_developer), first = take(), onClick = onOpenDeveloper) { RowChevron() }
-                }
-            }
+        GroupCard {
+            ListRow(MinaIcons.Code, stringResource(R.string.settings_advanced), stringResource(R.string.settings_advanced_sub), first = true, onClick = onOpenAdvanced) { RowChevron() }
         }
 
         GroupCard {
@@ -400,6 +421,101 @@ fun SettingsContent(
                 RowChevron()
             }
         }
+    }
+}
+
+// ---------- Advanced ----------
+
+/** Advanced:代理、用量、沙盒、路线、恢复、MCP、开发者。 */
+@Composable
+private fun AdvancedScreen(
+    proxy: String?,
+    proxyNote: String?,
+    onOpenProxy: () -> Unit,
+    usageTokens: Long?,
+    onOpenUsage: () -> Unit,
+    sandbox: SandboxStatus?,
+    onOpenSandbox: () -> Unit,
+    routes: Int?,
+    onOpenRoutes: () -> Unit,
+    onOpenRecovery: () -> Unit,
+    computerAccess: Boolean?,
+    onOpenComputerAccess: () -> Unit,
+    showDeveloper: Boolean,
+    onOpenDeveloper: () -> Unit,
+    onBack: () -> Unit,
+) {
+    PageScaffold(stringResource(R.string.advanced_title), onBack) {
+        GroupLabel(stringResource(R.string.settings_advanced))
+        GroupCard {
+            proxy?.let {
+                ListRow(MinaIcons.Link, NetProxyCopy.TITLE, proxyNote, first = true, onClick = onOpenProxy) {
+                    RowValue(NetProxyCopy.value(it))
+                    RowChevron()
+                }
+            }
+            usageTokens?.let {
+                ListRow(MinaIcons.Chart, UsageCopy.TITLE, first = proxy == null, onClick = onOpenUsage) {
+                    RowValue(UsageCopy.settingsValue(it))
+                    RowChevron()
+                }
+            }
+            val sandboxRow = sandbox?.takeIf { it !is SandboxStatus.Unsupported }
+            val recoveryRow = true
+            var shown = proxy == null && usageTokens == null
+            fun take(): Boolean = shown.also { shown = false }
+            if (sandboxRow != null) {
+                ListRow(MinaIcons.Terminal, stringResource(R.string.settings_sandbox), first = take(), onClick = onOpenSandbox) {
+                    RowValue(sandboxValue(sandboxRow)); RowChevron()
+                }
+            }
+            routes?.let {
+                ListRow(MinaIcons.Route, stringResource(R.string.settings_routes), first = take(), onClick = onOpenRoutes) { RowValue(trPlural(R.plurals.settings_count_routes, it)); RowChevron() }
+            }
+            if (recoveryRow) {
+                ListRow(MinaIcons.Wrench, stringResource(R.string.settings_recovery), first = take(), onClick = onOpenRecovery) { RowChevron() }
+            }
+            computerAccess?.let { on ->
+                ListRow(MinaIcons.Desktop, stringResource(R.string.mcp_title), first = take(), onClick = onOpenComputerAccess) {
+                    RowValue(stringResource(if (on) R.string.state_on else R.string.state_off)); RowChevron()
+                }
+            }
+            if (showDeveloper) {
+                ListRow(MinaIcons.Code, stringResource(R.string.settings_developer), first = take(), onClick = onOpenDeveloper) { RowChevron() }
+            }
+        }
+        FooterNoteCopy()
+    }
+}
+
+@Composable
+private fun FooterNoteCopy() {
+    com.meenai.mina.ui.components.FooterNote(tr(R.string.advanced_note))
+}
+
+// ---------- Privacy & data ----------
+
+/** Privacy & data:记忆与个人技能、网页登录。 */
+@Composable
+private fun PrivacyScreen(
+    onOpenMemory: (() -> Unit)?,
+    webSitesCount: Int?,
+    onOpenWebSites: () -> Unit,
+    onBack: () -> Unit,
+) {
+    PageScaffold(stringResource(R.string.privacy_title), onBack) {
+        GroupLabel(stringResource(R.string.settings_privacy))
+        GroupCard {
+            var first = true
+            fun take(): Boolean = first.also { first = false }
+            onOpenMemory?.let {
+                ListRow(MinaIcons.Heart, stringResource(R.string.memory_and_skills), stringResource(R.string.settings_memory_sub), first = take(), onClick = it) { RowChevron() }
+            }
+            webSitesCount?.let {
+                ListRow(MinaIcons.Globe, stringResource(R.string.settings_web_logins), first = take(), onClick = onOpenWebSites) { RowValue(trPlural(R.plurals.settings_count_sites, it)); RowChevron() }
+            }
+        }
+        com.meenai.mina.ui.components.FooterNote(stringResource(R.string.privacy_note))
     }
 }
 
