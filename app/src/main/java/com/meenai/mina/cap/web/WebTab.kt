@@ -189,10 +189,15 @@ class WebTab(
             // 新窗口经 onCreateWindow 交给标签池;脚本不能不经用户操作就自己开窗口
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = false
+            // 伪装成真 Chrome,避免被拒绝 WebView 的站点(Google 登录、Instagram 等)挡住
+            @Suppress("NULLABILITY_MISMATCH_TO_NON_NULL")
+            userAgentString = WebSettings.getDefaultUserAgent(context)
+                .replace("; wv)", ")")
+                .replace(Regex("Version/\\d+\\.\\d+\\s"), "")
         }
         devtools.prepare(this, context)
-        // 第三方 Cookie 关闭(裁定);后续确有站点需要再单独定
-        cookieManager().setAcceptThirdPartyCookies(view, false)
+        // 第三方 Cookie 开启;Google 等跨域登录需要(用户裁定,浏览器登录优先)
+        cookieManager().setAcceptThirdPartyCookies(view, true)
         view.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(v: WebView, request: WebResourceRequest): WebResourceResponse? =
                 assetLoaders.firstNotNullOfOrNull { it.shouldInterceptRequest(request.url) }
