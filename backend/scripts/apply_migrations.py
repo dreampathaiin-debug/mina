@@ -16,7 +16,8 @@ async def main() -> int:
     files = sorted(glob.glob(os.path.join(os.path.dirname(__file__), "..", "migrations", "*.sql")))
     if not files:
         print("FAIL: no migration files found"); return 2
-    conn = await asyncpg.connect(url, ssl="require" if "sslmode" not in url else None)
+    ssl = "require" if "supabase" in url else None
+    conn = await asyncpg.connect(url, ssl=ssl)
     try:
         await conn.execute(
             f"CREATE TABLE IF NOT EXISTS {TRACKING_TABLE} (name text primary key, applied_at timestamptz default now())"

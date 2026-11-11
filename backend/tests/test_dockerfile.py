@@ -8,7 +8,8 @@ BACKEND = Path(__file__).resolve().parent.parent
 
 def test_dockerfile_installs_locked_deps_and_runs_uvicorn():
     dockerfile = (BACKEND / "Dockerfile").read_text()
-    assert "pip install -r requirements.txt" in dockerfile
+    assert "COPY requirements.lock ./" in dockerfile
+    assert "pip install -r requirements.lock" in dockerfile
     assert "uvicorn mina_api.main:app" in dockerfile
     assert "python:3.12" in dockerfile
 
