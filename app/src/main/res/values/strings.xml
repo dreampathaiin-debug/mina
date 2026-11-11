@@ -89,7 +89,7 @@
     <string name="perm_run_background">Run in background</string>
     <string name="devices_notif_sub">Read and reply to messages from notifications</string>
     <string name="devices_background_sub">Keep Mina ready when it is not on screen</string>
-    <string name="devices_perms_sub">Tap a row to allow or remove it in system settings</string>
+    <string name="devices_perms_sub">Tap a row to allow it right here. Notification access and battery open in system settings</string>
     <string name="perm_make_calls">Make calls</string>
     <string name="devices_calls_sub">Place calls directly, without the dialer</string>
     <string name="root_home">Home</string>

@@ -1,6 +1,7 @@
 package com.meenai.mina.ui
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,6 +9,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -16,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -87,6 +91,20 @@ fun DevicesScreen(onBack: () -> Unit) {
         onDispose { lifecycle.lifecycle.removeObserver(obs) }
     }
     val perms = remember(tick) { permissionStates(context) }
+    // 点一下直接弹系统的允许对话框;系统不再弹(永久拒绝)时才退回应用信息页
+    val permLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+        tick++
+        val denied = result.filterValues { !it }.keys
+        val act = context as? Activity
+        if (denied.isNotEmpty() && act != null && denied.all { !ActivityCompat.shouldShowRequestPermissionRationale(act, it) }) {
+            openAppPermissions(context)
+        }
+    }
+    fun requestPerm(vararg ps: String) {
+        val need = ps.filter { ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED }
+        if (need.isEmpty()) { tick++; return }
+        permLauncher.launch(need.toTypedArray())
+    }
     PageScaffold(stringResource(R.string.devices_title), onBack) {
         GroupLabel(stringResource(R.string.devices_this_device))
         GroupCard {
@@ -97,12 +115,12 @@ fun DevicesScreen(onBack: () -> Unit) {
         }
         GroupLabel(stringResource(R.string.devices_manage))
         GroupCard {
-            PermRow(MinaIcons.Clock, R.string.perm_calendar, perms.calendar, first = true, onClick = { openAppPermissions(context) })
-            PermRow(MinaIcons.Phone, R.string.perm_call_history, perms.callLog, onClick = { openAppPermissions(context) })
-            PermRow(MinaIcons.Lines, R.string.perm_contacts, perms.contacts, onClick = { openAppPermissions(context) })
-            PermRow(MinaIcons.Message, R.string.perm_messages, perms.sms, onClick = { openAppPermissions(context) })
-            PermRow(MinaIcons.Mic, R.string.perm_microphone, perms.mic, onClick = { openAppPermissions(context) })
-            PermRow(MinaIcons.Phone, R.string.perm_make_calls, perms.calls, R.string.devices_calls_sub, onClick = { openAppPermissions(context) })
+            PermRow(MinaIcons.Clock, R.string.perm_calendar, perms.calendar, first = true, onClick = { requestPerm(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR) })
+            PermRow(MinaIcons.Phone, R.string.perm_call_history, perms.callLog, onClick = { requestPerm(Manifest.permission.READ_CALL_LOG) })
+            PermRow(MinaIcons.Lines, R.string.perm_contacts, perms.contacts, onClick = { requestPerm(Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS) })
+            PermRow(MinaIcons.Message, R.string.perm_messages, perms.sms, onClick = { requestPerm(Manifest.permission.READ_SMS, Manifest.permission.SEND_SMS) })
+            PermRow(MinaIcons.Mic, R.string.perm_microphone, perms.mic, onClick = { requestPerm(Manifest.permission.RECORD_AUDIO) })
+            PermRow(MinaIcons.Phone, R.string.perm_make_calls, perms.calls, R.string.devices_calls_sub, onClick = { requestPerm(Manifest.permission.CALL_PHONE) })
             PermRow(MinaIcons.Bell, R.string.perm_phone_notifications, perms.listener, R.string.devices_notif_sub, onClick = { openNotificationAccess(context) })
             PermRow(MinaIcons.Refresh, R.string.perm_run_background, perms.background, R.string.devices_background_sub, onClick = { openBattery(context) })
         }
