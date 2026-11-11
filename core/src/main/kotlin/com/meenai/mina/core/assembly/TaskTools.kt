@@ -116,9 +116,11 @@ fun toolDispatcher(
     /** 存下的运行记录;给了、而这个对话之前有记过运行的轮次时提供 history_read(查之前几轮读到的东西)。 */
     phoneData: PhoneDataPort? = null,
     runRecords: RunRecords? = null,
+    /** The user's Composio account; empty means no connector tools (not saved yet in Accounts > Connections). */
+    composio: com.meenai.mina.core.composio.ComposioClient? = null,
 ): ToolDispatcher {
     val config = ToolConfig(visionEnabled, skills, recordFrames, vision, inlineScreen, adaptiveVision, memory, profile, utterances, conversationId,
-        imageOps, scheduleTrigger, scheduleAdmin, runSpec, childHost, userScreens, personalSkills, selfConfig, runRecords)
+        imageOps, scheduleTrigger, scheduleAdmin, runSpec, childHost, userScreens, personalSkills, selfConfig, runRecords, composio = composio)
     val providers: List<CapabilityProvider> = listOf(
         object : CapabilityProvider {
             override val id = PHONE
@@ -179,7 +181,8 @@ fun recordedTools(): ToolIndex = legacyNames().let { legacy -> ToolIndex(allTool
 
 /** Mina 所有可能提供的工具,按发给模型的顺序。 */
 internal fun allTools(): List<AgentTool> =
-    GeneralGroup.tools + PhoneCapability.tools() + WebGroup.tools + SandboxGroup.tools
+    GeneralGroup.tools + com.meenai.mina.core.composio.ConnectorGroup.tools +
+    PhoneCapability.tools() + WebGroup.tools + SandboxGroup.tools
 
 /** Mina 所有可能提供的工具的声明。 */
 fun knownTools(): ToolIndex = ToolIndex(allTools())

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="tool_connector_list">जुड़े ऐप देखें</string>
+    <string name="tool_connector_actions">ऐप के ऐक्शन देखें</string>
+    <string name="tool_connector_run">ऐप ऐक्शन चलाएँ</string>
     <string name="tool_list_apps">इंस्टॉल किए गए ऐप्स की सूची बनाएं</string>
     <string name="tool_open_app">ऐप खोलें</string>
     <string name="tool_share_text">ऐप पर टेक्स्ट साझा करें</string>

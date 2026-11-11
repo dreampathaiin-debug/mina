@@ -1362,6 +1362,9 @@ class ToolLabels(private val tools: ToolIndex, private val legacy: LegacyNames =
     companion object {
         /** 工具声明里的 label → 界面文字;中文资源与 label 一字不差(ToolLabelsTest 核对每个工具都有)。 */
         val TOOL_LABELS: Map<String, Int> = mapOf(
+            "List connected apps" to R.string.tool_connector_list,
+            "List app actions" to R.string.tool_connector_actions,
+            "Run an app action" to R.string.tool_connector_run,
             "View installed apps" to R.string.tool_list_apps,
             "Open app" to R.string.tool_open_app,
             "Open app directly" to R.string.tool_app_intent,

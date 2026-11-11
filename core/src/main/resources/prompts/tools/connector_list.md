@@ -1,0 +1,1 @@
+List the apps the user has connected to their Composio account (Accounts > Connections in Mina). Call this first to see which services (gmail, slack, notion, github, …) are ready to act on. If nothing is connected, tell the user they can link apps in Accounts > Connections; you cannot connect apps yourself.

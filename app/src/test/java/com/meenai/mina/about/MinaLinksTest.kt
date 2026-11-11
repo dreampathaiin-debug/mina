@@ -38,7 +38,7 @@ class MinaLinksTest {
     @Test
     fun issueUrlIsEncoded() {
         val url = MinaLinks.issueUrl(device)
-        assertTrue(url.startsWith("https://github.com/anilmeenaa/mina/issues/new?title=&body="))
+        assertTrue(url.startsWith("https://github.com/dreampathaiin-debug/mina/issues/new?title=&body="))
         val query = url.substringAfter('?')
         assertFalse("no raw spaces or newlines", query.any { it == ' ' || it == '\n' || it == '+' })
         assertFalse("no raw non-ASCII", query.any { it.code > 127 })

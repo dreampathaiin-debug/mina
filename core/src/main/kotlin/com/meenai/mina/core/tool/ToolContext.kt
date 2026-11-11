@@ -44,6 +44,8 @@ internal class ToolConfig(
     val selfConfig: com.meenai.mina.core.settings.SelfConfig? = null,
     /** 存下的运行记录;给了、而这个对话之前有记过运行的轮次时提供 history_read。 */
     val runRecords: com.meenai.mina.core.record.RunRecords? = null,
+    /** The user's Composio account (API key saved in Accounts > Connections); without it no connector tools. */
+    val composio: com.meenai.mina.core.composio.ComposioClient? = null,
 )
 
 /**

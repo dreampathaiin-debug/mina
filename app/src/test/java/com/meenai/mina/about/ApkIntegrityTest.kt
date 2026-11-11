@@ -10,7 +10,7 @@ class ApkIntegrityTest {
     @get:Rule val temp = TemporaryFolder()
 
     @Test fun acceptsOfficialApk() {
-        ApkIntegrity.requireOfficialUrl("https://github.com/anilmeenaa/mina/releases/download/v0.2.0/Mina.apk")
+        ApkIntegrity.requireOfficialUrl("https://github.com/dreampathaiin-debug/mina/releases/download/v0.2.0/Mina.apk")
     }
 
     @Test fun rejectsUntrustedDownloads() {

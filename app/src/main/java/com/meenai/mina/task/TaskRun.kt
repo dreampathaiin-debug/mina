@@ -738,6 +738,7 @@ class TaskRun(
                         webIdleScroll = { IdleScroll(Random.Default) },
                         appPacing = { pace.appPacing() }, appPace = { PlacePace.of(catalog.appPace(it)) }, appIdleScroll = { IdleScroll(Random.Default) },
                         phoneData = PhoneDataBridge(service),
+                        composio = com.meenai.mina.settings.ComposioStore.client(service),
                         sandbox = sandbox, workspace = { conversationId }, runSpec = childSpec,
                         conversationId = conversationId, inlineScreen = speed.inlineScreen,
                         adaptiveVision = speed.adaptiveVision)
@@ -751,6 +752,7 @@ class TaskRun(
             ).also { children = it } else null
             val tools = toolDispatcher(accessedPhone, model.capabilities.vision, catalog, recordFrames = true, vision = vision?.let { VisionService(it, BitmapImageOps) },
                 phoneData = PhoneDataBridge(service),
+                composio = com.meenai.mina.settings.ComposioStore.client(service),
                 // 设置里允许 Mina 改自己时,才把 settings_list、settings_set 发给模型
                 selfConfig = if (FeatureFlags.get(service).selfConfig()) {
                     com.meenai.mina.settings.SelfConfigImpl(FeatureFlags.get(service))

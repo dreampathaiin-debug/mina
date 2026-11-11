@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="tool_connector_list">List connected apps</string>
+    <string name="tool_connector_actions">List app actions</string>
+    <string name="tool_connector_run">Run an app action</string>
     <string name="tool_list_apps">View installed apps</string>
     <string name="tool_open_app">Open app</string>
     <string name="tool_app_intent">Open app directly</string>

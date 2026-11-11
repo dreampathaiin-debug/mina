@@ -35,6 +35,7 @@ enum class Verb {
     KnowledgeSearch, KnowledgeRead, SkillSearch, SkillRead, SkillSave, MemorySearch, MemorySave, ProfileEdit, HistoryRead,
     ScheduleTask,
     SpawnAgent, SettingsList, SettingsSet,
+    ConnectorList, ConnectorRun,
 }
 
 /** 按名字查得到的工具声明。 */

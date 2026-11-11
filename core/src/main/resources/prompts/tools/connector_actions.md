@@ -1,0 +1,1 @@
+List the executable tools of one connected app, with each tool's parameter schema. Pass the app slug from connector_list (e.g. gmail, github). Use this to find the right tool slug and its required arguments before running it with connector_run. Tool slugs are SCREAMING_SNAKE_CASE like GMAIL_SEND_EMAIL.
