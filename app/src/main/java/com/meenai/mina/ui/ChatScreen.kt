@@ -298,7 +298,7 @@ fun ChatScreen(
                 }
                 ui.exchanges.forEachIndexed { i, ex ->
                     val backgroundNote = i == ui.exchanges.lastIndex && ui.operatingPhone
-                    exchange(i, ex, ui.conversationId, ui.takeoverStage, vm, reduceMotion, backgroundNote, openRun, loadSource, openSource, kept)
+                    exchange(i, ex, ui.conversationId, ui.takeoverStage, vm, reduceMotion, backgroundNote, ui.exchanges.lastIndex, openRun, loadSource, openSource, kept)
                 }
                 if (phoneSetupNeeded && ui.exchanges.isNotEmpty()) item("phone-setup") { PhoneSetupLine(openPhoneSetup) }
                 ui.blocked?.let { problems ->
@@ -478,7 +478,7 @@ private fun ExampleRow(icon: ImageVector, text: String, first: Boolean, onClick:
 // ---------- 一问一答 ----------
 
 private fun LazyListScope.exchange(
-    index: Int, ex: Exchange, conversationId: String?, stage: Takeover.Stage, vm: ChatViewModel, reduceMotion: Boolean, backgroundNote: Boolean,
+    index: Int, ex: Exchange, conversationId: String?, stage: Takeover.Stage, vm: ChatViewModel, reduceMotion: Boolean, backgroundNote: Boolean, lastIndex: Int,
     openRun: (String) -> Unit, loadSource: suspend (String) -> EvidenceSource?, openSource: (String?, String?) -> Unit,
     kept: KeptPage? = null,
 ) {
@@ -486,23 +486,38 @@ private fun LazyListScope.exchange(
     val active = ex.status.isActive()
     val answering = ex.status == ExchangeStatus.Working && !ex.draft.isNullOrBlank()
     if (active) {
-        if (!answering) item("s$index") { WorkBlock(ex, reduceMotion, backgroundNote, openRun) }
+        if (!answering) item("s$index") {
+            // 做事的表情;停下来等你时是困惑的脸(下面的白卡上还有一张),只有进行中才露脸
+            MinaRow(mood = if (ChatCopy.paused(ex.status)) MinaMood.Confused else MinaMood.Working, showFace = ex.status is ExchangeStatus.Working) {
+                WorkBlock(ex, reduceMotion, backgroundNote, openRun)
+            }
+        }
     } else if (ex.steps.isNotEmpty() || ex.runId != null) {
-        item("s$index") { DoneLine(ex, reduceMotion, openRun) }
+        item("s$index") { MinaRow(mood = MinaMood.Idle, showFace = false) { DoneLine(ex, reduceMotion, openRun) } }
     }
     // 任务进行中插的话:用户的原话,下面一行小字说它的去向。
     // 插话之前已经说完的回复照常显示;插话打断的那段留在原处(淡色、标「被你的新消息打断」);接着才是插话。
     // 还没交给模型的插话排在正在长出来的回答后面:那段回答是它到之前就在写的,不是对它的回复。
     fun steer(n: SteerNote) {
-        n.finished?.takeIf(String::isNotBlank)?.let { done -> item("a$index-${n.id}") { FinishedReply(done, "a$index-${n.id}") } }
-        n.interrupted?.takeIf(String::isNotBlank)?.let { cut -> item("i$index-${n.id}") { InterruptedReply(cut) } }
+        n.finished?.takeIf(String::isNotBlank)?.let { done -> item("a$index-${n.id}") { MinaRow(mood = MinaMood.Idle, showFace = false) { FinishedReply(done, "a$index-${n.id}") } } }
+        n.interrupted?.takeIf(String::isNotBlank)?.let { cut -> item("i$index-${n.id}") { MinaRow(mood = MinaMood.Idle, showFace = false) { InterruptedReply(cut) } } }
         item("m$index-${n.id}") { UserBubble(n.text, conversationId, steerLabel(n.state), "m$index-${n.id}") }
     }
     val (joined, waiting) = steersAroundDraft(ex.steers)
     joined.forEach(::steer)
-    ex.draft?.takeIf(String::isNotBlank)?.let { draft -> item("d$index") { DraftText(draft, ex.waitingForModel) } }
+    ex.draft?.takeIf(String::isNotBlank)?.let { draft -> item("d$index") { MinaRow(mood = MinaMood.Thinking) { DraftText(draft, ex.waitingForModel) } } }
     waiting.forEach(::steer)
-    item("r$index") { StatusCard(ex.status, stage, vm, ex.runId, loadSource, openSource, "r$index") }
+    val faceMood = when (ex.status) {
+        is ExchangeStatus.Done -> if (index == lastIndex) MinaMood.Success else MinaMood.Idle
+        is ExchangeStatus.Failed, is ExchangeStatus.Cancelled -> MinaMood.Failed
+        is ExchangeStatus.Queued -> MinaMood.Idle
+        else -> MinaMood.Confused
+    }
+    item("r$index") {
+        MinaRow(mood = faceMood, showFace = ex.status !is ExchangeStatus.Working) {
+            StatusCard(ex.status, stage, vm, ex.runId, loadSource, openSource, "r$index")
+        }
+    }
     // 这一轮结束后留在后台运行的那一页:还开着是绿色一行(能关),关了是一句原因
     keptPageRow(index, ex, kept, vm::closeKeptPage)
     if (ex.files.isNotEmpty()) item("f$index") { FileCards(ex.files) }
