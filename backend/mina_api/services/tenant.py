@@ -27,8 +27,15 @@ async def get_owned(db: AsyncSession, model: Any, object_id: uuid.UUID, user_id:
     return row
 
 
-async def list_owned(db: AsyncSession, model: Any, user_id: uuid.UUID, limit: int = 50) -> list[Any]:
-    result = await db.execute(
-        select(model).where(model.user_id == user_id).order_by(model.created_at.desc()).limit(limit)
-    )
+async def list_owned(
+    db: AsyncSession,
+    model: Any,
+    user_id: uuid.UUID,
+    limit: int = 50,
+    provider: str | None = None,
+) -> list[Any]:
+    query = select(model).where(model.user_id == user_id)
+    if provider is not None and hasattr(model, "provider"):
+        query = query.where(model.provider == provider.lower())
+    result = await db.execute(query.order_by(model.created_at.desc()).limit(limit))
     return list(result.scalars().all())

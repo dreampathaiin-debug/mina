@@ -11,7 +11,7 @@ def _create_conversation(client, user, title):
 
 def _create_provider_key(client, user, name="sk-openai-secret-key-9876"):
     response = client.post(
-        "/v1/provider-keys",
+        "/v1/providers/keys",
         json={"provider": "openai", "label": "main", "key": name},
         headers=headers_for(user),
     )
@@ -51,10 +51,10 @@ def test_user_b_cannot_touch_user_a_conversation_messages(client, user_a, user_b
 
 def test_user_b_cannot_delete_or_modify_user_a_provider_keys(client, user_a, user_b):
     key = _create_provider_key(client, user_a)
-    assert client.get("/v1/provider-keys", headers=headers_for(user_b)).json() == []
-    assert client.delete(f"/v1/provider-keys/{key['id']}", headers=headers_for(user_b)).status_code == 404
+    assert client.get("/v1/providers/keys", headers=headers_for(user_b)).json() == []
+    assert client.delete(f"/v1/providers/keys/{key['id']}", headers=headers_for(user_b)).status_code == 404
     # A's key still there after B's failed attempt.
-    assert client.get("/v1/provider-keys", headers=headers_for(user_a)).json()[0]["id"] == key["id"]
+    assert client.get("/v1/providers/keys", headers=headers_for(user_a)).json()[0]["id"] == key["id"]
 
 
 def test_user_b_cannot_execute_user_a_tasks(client, user_a, user_b):
@@ -76,7 +76,7 @@ def test_user_id_in_body_is_never_trusted(client, user_a, user_b):
 
 def test_provider_keys_are_masked_and_isolated(client, user_a, user_b):
     key = _create_provider_key(client, user_a)
-    body = client.get("/v1/provider-keys", headers=headers_for(user_a)).json()[0]
+    body = client.get("/v1/providers/keys", headers=headers_for(user_a)).json()[0]
     assert "sk-openai-secret-key-9876" not in body["key_preview"]
     assert body["key_preview"].endswith("9876")
     assert key["id"] == body["id"]

@@ -79,16 +79,60 @@ class ProviderKey(Base):
     __tablename__ = "provider_keys"
 
     id: Mapped[uuid.UUID] = _pk()
-    user_id: Mapped[uuid.UUID] = _user_fk()
+    # Managed (Mina-provisioned) keys have no owning user; BYOK keys do.
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=True
+    )
     provider: Mapped[str] = mapped_column(String(60), nullable=False)
     label: Mapped[str | None] = mapped_column(String(120))
-    # Fernet-encrypted when MINA_ENCRYPTION_KEY is set; plaintext otherwise.
+    # Envelope encryption: key_value is the data ciphertext (Fernet token),
+    # wrapped_dek is the DEK wrapped under the KEK version in key_version.
+    # Rows from Phase 2 (wrapped_dek NULL) are legacy single-key Fernet.
     key_value: Mapped[str] = mapped_column(Text, nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    key_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    wrapped_dek: Mapped[str | None] = mapped_column(Text)
+    source: Mapped[str] = mapped_column(String(20), default="byok", nullable=False)  # byok | managed
+    status: Mapped[str] = mapped_column(String(20), default="active", nullable=False)  # active | disabled
+    last_tested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_test_ok: Mapped[bool | None] = mapped_column(Boolean)
+    last_test_error: Mapped[str | None] = mapped_column(Text)
+    last_test_latency_ms: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), **_timestamps())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), **_timestamps())
 
     __table_args__ = (Index("ix_provider_keys_user_provider", "user_id", "provider"),)
+
+
+class UserAISettings(Base):
+    __tablename__ = "user_ai_settings"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("profiles.id", ondelete="CASCADE"), primary_key=True
+    )
+    # byok_only | byok_first | managed_only
+    policy: Mapped[str] = mapped_column(String(20), default="byok_only", nullable=False)
+    # byok_first falls back to Mina-managed keys only when the user turned
+    # this on themselves; it is never assumed.
+    allow_managed_fallback: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), **_timestamps())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), **_timestamps())
+
+
+class ProviderHealth(Base):
+    __tablename__ = "provider_health"
+
+    id: Mapped[uuid.UUID] = _pk()
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=True
+    )
+    provider: Mapped[str] = mapped_column(String(60), nullable=False)
+    ok: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    # Detail strings are fixed phrases; they never contain key material.
+    detail: Mapped[str | None] = mapped_column(Text)
+    checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), **_timestamps())
+
+    __table_args__ = (Index("ix_provider_health_provider_checked", "provider", "checked_at"),)
 
 
 class ComposioConnection(Base):

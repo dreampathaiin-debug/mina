@@ -48,19 +48,6 @@ class MessageOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class ProviderKeyCreate(BaseModel):
-    provider: str = Field(min_length=1, max_length=60)
-    label: str | None = Field(default=None, max_length=120)
-    key: str = Field(min_length=1, max_length=8000)
-
-
-class ProviderKeyOut(BaseModel):
-    id: UUID
-    provider: str
-    label: str | None
-    key_preview: str
-    is_active: bool
-    created_at: datetime
 
 
 class TaskCreate(BaseModel):

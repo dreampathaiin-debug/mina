@@ -49,6 +49,14 @@ class Settings(BaseSettings):
     supabase_service_key: str | None = None
     # Optional Fernet key: encrypts provider API keys at rest.
     encryption_key: str | None = None
+    # Envelope-encryption key ring: JSON {"1": "<key>", "2": "<key>"}. Falls
+    # back to encryption_key as version 1. Rotating in a new version re-wraps
+    # DEKs without touching data.
+    encryption_keys_json: str | None = None
+    # Extra LiteLLM-compatible providers: "name=https://.../v1/models,..."
+    extra_providers: str = ""
+    # Mina-managed provider keys (server-side only): JSON {"openai": "..."}.
+    managed_provider_keys: str = ""
 
     @field_validator("cors_origins", mode="before")
     @classmethod

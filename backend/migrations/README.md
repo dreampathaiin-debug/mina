@@ -15,3 +15,12 @@ Notes:
 - profiles.id references auth.users(id) on delete cascade, so deleting a
   Supabase auth user removes all of their data.
 - New migrations get ascending numbers and are applied in order.
+
+## 0002_provider_keys_phase3.sql
+
+Adds envelope-encryption columns (key_version, wrapped_dek), source
+(byok/managed), status (active/disabled) and per-key health fields to
+provider_keys; creates user_ai_settings and provider_health with RLS.
+Phase 2 rows (wrapped_dek NULL) decrypt through the legacy single-key path.
+New env variables: MINA_ENCRYPTION_KEYS_JSON (key ring),
+MINA_EXTRA_PROVIDERS, MINA_MANAGED_PROVIDER_KEYS.

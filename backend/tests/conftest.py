@@ -11,6 +11,7 @@ from uuid import UUID, uuid4
 
 import jwt as pyjwt
 import pytest
+from cryptography.fernet import Fernet
 from fastapi.testclient import TestClient
 
 from mina_api.core.config import Settings
@@ -18,6 +19,7 @@ from mina_api.database.models import Base, Profile
 from mina_api.main import create_app
 
 SUPABASE_URL = "https://test-project.supabase.co"
+ENCRYPTION_KEY = Fernet.generate_key().decode()
 JWT_SECRET = "test-jwt-secret-please-ignore"
 
 
@@ -81,6 +83,7 @@ def settings() -> Settings:
         cors_origins=["https://app.mina.example"],
         supabase_url=SUPABASE_URL,
         supabase_jwt_secret=JWT_SECRET,
+        encryption_key=ENCRYPTION_KEY,
         supabase_audience="authenticated",
         database_url="sqlite+aiosqlite://",
     )
