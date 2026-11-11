@@ -14,6 +14,8 @@ from mina_api.core.errors import register_exception_handlers
 from mina_api.core.logging import configure_logging
 from mina_api.core.middleware import RequestIdMiddleware, TimeoutMiddleware
 from mina_api.database.session import Database
+from mina_api.security.auth import TokenVerifier
+from mina_api.security.crypto import SecretBox
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -33,6 +35,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = settings
     app.state.database = Database(settings.database_url)
+    app.state.auth = TokenVerifier(settings.supabase_jwt_secret, settings.supabase_url, settings.supabase_audience)
+    app.state.secrets = SecretBox(settings.encryption_key)
 
     app.include_router(api_v1_router, prefix="/v1")
 

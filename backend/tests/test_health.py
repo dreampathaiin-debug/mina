@@ -7,7 +7,13 @@ def test_health_is_ok(client):
     assert response.json() == {"status": "ok"}
 
 
-def test_ready_reports_skipped_database(client):
+def test_ready_reports_skipped_database():
+    from fastapi.testclient import TestClient
+
+    from mina_api.core.config import Settings
+    from mina_api.main import create_app
+
+    client = TestClient(create_app(Settings(log_json=False)))
     response = client.get("/v1/ready")
     assert response.status_code == 200
     body = response.json()

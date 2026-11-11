@@ -39,6 +39,17 @@ class Settings(BaseSettings):
     # readiness check reports "skipped" so free-tier deploys need nothing.
     database_url: str | None = None
 
+    # Supabase Auth (Phase 2). Identity comes ONLY from these verified
+    # JWTs; user ids in request bodies are never trusted.
+    supabase_url: str | None = None
+    supabase_jwt_secret: str | None = None
+    supabase_audience: str = "authenticated"
+    # Server-only secret for admin operations (account deletion). It is
+    # never returned by any endpoint or included in any schema.
+    supabase_service_key: str | None = None
+    # Optional Fernet key: encrypts provider API keys at rest.
+    encryption_key: str | None = None
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_origins(cls, value: object) -> object:
@@ -65,6 +76,10 @@ class Settings(BaseSettings):
                 raise ValueError("MINA_CORS_ORIGINS must be a non-empty allowlist in production")
             if "*" in self.cors_origins:
                 raise ValueError("CORS wildcard '*' is not allowed in production")
+            if not self.supabase_url:
+                raise ValueError("MINA_SUPABASE_URL is required in production")
+            if not self.supabase_jwt_secret:
+                raise ValueError("MINA_SUPABASE_JWT_SECRET is required in production")
         if self.request_timeout_seconds <= 0:
             raise ValueError("MINA_REQUEST_TIMEOUT_SECONDS must be positive")
         return self
