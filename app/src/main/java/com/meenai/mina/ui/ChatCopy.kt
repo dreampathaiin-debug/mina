@@ -10,8 +10,8 @@ import com.meenai.mina.i18n.trPlural
 object ChatCopy {
     /** 空对话的问候,按时段。 */
     fun greeting(hour: Int): String = when (hour) {
-        in 5..10 -> tr(R.string.chat_greeting_morning)
-        in 11..12 -> tr(R.string.chat_greeting_noon)
+        in 5..11 -> tr(R.string.chat_greeting_morning)
+        in 12..12 -> tr(R.string.chat_greeting_noon)
         in 13..17 -> tr(R.string.chat_greeting_afternoon)
         in 18..22 -> tr(R.string.chat_greeting_evening)
         else -> tr(R.string.chat_greeting_night)
@@ -24,14 +24,10 @@ object ChatCopy {
     data class Example(val kind: ExampleKind, val text: String)
 
     val examples get() = listOf(
-        Example(ExampleKind.App, tr(R.string.chat_example_message)),
-        Example(ExampleKind.App, tr(R.string.chat_example_group_summary)),
         Example(ExampleKind.Web, tr(R.string.chat_example_jobs)),
         Example(ExampleKind.App, tr(R.string.chat_example_music)),
         Example(ExampleKind.Device, tr(R.string.chat_example_alarms)),
-        Example(ExampleKind.App, tr(R.string.chat_example_creator)),
         Example(ExampleKind.App, tr(R.string.chat_example_food)),
-        Example(ExampleKind.App, tr(R.string.chat_example_ride)),
     )
 
     /** 对话页顶栏的标题:固定是 App 名;副标题说此刻在做什么。 */

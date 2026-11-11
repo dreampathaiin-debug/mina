@@ -13,9 +13,9 @@ import java.time.ZoneId
 class ChatCopyTest {
     @get:Rule val texts = EnglishTexts()
 
-    @Test fun sixDistinctNonBlankExamples() {
-        assertEquals(8, ChatCopy.examples.size)
-        assertEquals(8, ChatCopy.examples.map { it.text }.filter { it.isNotBlank() }.toSet().size)
+    @Test fun distinctNonBlankExamples() {
+        assertEquals(4, ChatCopy.examples.size)
+        assertEquals(4, ChatCopy.examples.map { it.text }.filter { it.isNotBlank() }.toSet().size)
     }
 
     @Test fun titleIsTheFirstLineOfTheFirstMessage() {
@@ -100,6 +100,8 @@ class ChatCopyTest {
 
     @Test fun greetingFollowsTheTimeOfDay() {
         assertEquals("Good morning", ChatCopy.greeting(7))
+        // 11点还是上午;下午从12点起
+        assertEquals("Good morning", ChatCopy.greeting(11))
         assertEquals("Good afternoon", ChatCopy.greeting(12))
         assertEquals("Good afternoon", ChatCopy.greeting(15))
         assertEquals("Good evening", ChatCopy.greeting(20))
