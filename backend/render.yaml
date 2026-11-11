@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: mina-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn mina_api.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /v1/health
+    envVars:
+      - key: MINA_ENVIRONMENT
+        value: production
+      - key: MINA_DEBUG
+        value: "false"
+      - key: MINA_LOG_LEVEL
+        value: INFO
+      # Explicit allowlist; wildcard is rejected by config validation.
+      - key: MINA_CORS_ORIGINS
+        sync: false
+      - key: MINA_DATABASE_URL
+        sync: false
