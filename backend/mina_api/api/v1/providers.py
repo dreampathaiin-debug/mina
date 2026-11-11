@@ -167,6 +167,8 @@ async def get_ai_policy(user: CurrentUser, db: AsyncSession = Depends(get_db)) -
     return AIPolicyOut(
         policy=settings_row.policy,  # type: ignore[arg-type]
         allow_managed_fallback=settings_row.allow_managed_fallback,
+        preferred_model=settings_row.preferred_model,
+        preferred_group=settings_row.preferred_group,
         updated_at=settings_row.updated_at,
     )
 
@@ -179,10 +181,20 @@ async def patch_ai_policy(
     settings_row.policy = payload.policy
     if payload.allow_managed_fallback is not None:
         settings_row.allow_managed_fallback = payload.allow_managed_fallback
+    if "preferred_model" in payload.model_fields_set:
+        settings_row.preferred_model = payload.preferred_model
+    if "preferred_group" in payload.model_fields_set:
+        if payload.preferred_group is not None and payload.preferred_group not in {
+            "fast", "cheap", "balanced", "powerful"
+        }:
+            raise HTTPException(status_code=422, detail="preferred_group must be fast, cheap, balanced or powerful")
+        settings_row.preferred_group = payload.preferred_group
     await db.commit()
     await db.refresh(settings_row)
     return AIPolicyOut(
         policy=settings_row.policy,  # type: ignore[arg-type]
         allow_managed_fallback=settings_row.allow_managed_fallback,
+        preferred_model=settings_row.preferred_model,
+        preferred_group=settings_row.preferred_group,
         updated_at=settings_row.updated_at,
     )

@@ -17,6 +17,8 @@ from mina_api.database.models import (
     Profile,
     ProviderKey,
     Task,
+    DurableTask,
+    TaskEvent,
     UsageLog,
 )
 from mina_api.schemas.tenant import MeResponse
@@ -27,7 +29,7 @@ from mina_api.security.auth import CurrentUser, get_db
 logger = logging.getLogger("mina.account")
 router = APIRouter(tags=["account"])
 
-_OWNED_TABLES = (Message, Conversation, ProviderKey, ComposioConnection, Approval, Task, Memory, UsageLog)
+_OWNED_TABLES = (Message, Conversation, ProviderKey, ComposioConnection, Approval, Task, DurableTask, TaskEvent, Memory, UsageLog)
 
 
 @router.get("/me", response_model=MeResponse, summary="Current user")

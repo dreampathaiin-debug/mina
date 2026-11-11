@@ -65,6 +65,9 @@ class AIPolicyIn(BaseModel):
     policy: AIPolicy
     # Explicit opt-in for the byok_first fallback; absent means "leave as is".
     allow_managed_fallback: Optional[bool] = None
+    # Phase 4: optional routing pins. Absent means "leave as is".
+    preferred_model: Optional[str] = None
+    preferred_group: Optional[str] = None
 
     @field_validator("allow_managed_fallback")
     @classmethod
@@ -78,4 +81,6 @@ class AIPolicyIn(BaseModel):
 class AIPolicyOut(BaseModel):
     policy: AIPolicy
     allow_managed_fallback: bool
+    preferred_model: Optional[str] = None
+    preferred_group: Optional[str] = None
     updated_at: datetime

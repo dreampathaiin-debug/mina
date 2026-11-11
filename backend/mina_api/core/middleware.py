@@ -7,9 +7,12 @@ request is bounded so a stuck upstream can never pin a free-tier worker.
 
 from __future__ import annotations
 
+import hashlib
 import logging
+import threading
 import time
 import uuid
+from collections import deque
 from typing import Any, Awaitable, Callable
 
 import anyio
@@ -74,3 +77,57 @@ class TimeoutMiddleware(BaseHTTPMiddleware):
                 status_code=503,
                 headers={"x-request-id": request_id_var.get() or ""},
             )
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """Per client+credential sliding-window rate limit.
+
+    Defence against request floods and cost-abuse loops: keyed by client IP
+    (first X-Forwarded-For hop when present, i.e. behind a trusted proxy)
+    plus a hash of the bearer credential, so one stolen token cannot also
+    burn another client's budget. Health endpoints and preflight are exempt.
+    """
+
+    _EXEMPT = frozenset({"/health", "/ready", "/v1/health", "/v1/ready", "/"})
+    _WINDOW = 60.0
+    _MAX_BUCKETS = 10000
+
+    def __init__(self, app: Any, requests_per_minute: int) -> None:
+        super().__init__(app)
+        self.capacity = max(1, int(requests_per_minute))
+        self._hits: dict[tuple[str, str], deque[float]] = {}
+        self._lock = threading.Lock()
+
+    def _key(self, request: Request) -> tuple[str, str]:
+        forwarded = request.headers.get("x-forwarded-for", "")
+        ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
+        credential = request.headers.get("authorization", "")
+        token = hashlib.sha256(credential.encode("utf-8", "replace")).hexdigest()[:16] if credential else "-"
+        return ip, token
+
+    async def dispatch(self, request: Request, call_next: AccessLog) -> Response:
+        if request.method == "OPTIONS" or request.url.path in self._EXEMPT:
+            return await call_next(request)
+        settings = getattr(request.app.state, "settings", None)
+        capacity = int(getattr(settings, "rate_limit_requests_per_minute", self.capacity) or self.capacity)
+        key = self._key(request)
+        now = time.monotonic()
+        with self._lock:
+            bucket = self._hits.get(key)
+            if bucket is None:
+                if len(self._hits) >= self._MAX_BUCKETS:
+                    for stale in [k for k, v in self._hits.items() if not v or now - v[-1] > self._WINDOW]:
+                        del self._hits[stale]
+                bucket = deque()
+                self._hits[key] = bucket
+            while bucket and now - bucket[0] > self._WINDOW:
+                bucket.popleft()
+            if len(bucket) >= capacity:
+                retry_after = max(1, int(self._WINDOW - (now - bucket[0])) + 1)
+                return JSONResponse(
+                    {"error": "rate_limited", "detail": "Too many requests"},
+                    status_code=429,
+                    headers={"Retry-After": str(retry_after), "x-request-id": request_id_var.get() or ""},
+                )
+            bucket.append(now)
+        return await call_next(request)

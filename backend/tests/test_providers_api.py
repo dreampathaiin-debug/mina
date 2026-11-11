@@ -144,7 +144,11 @@ def test_provider_catalog_lists_builtins(crypto_client, user_a):
 
 def test_ai_policy_roundtrip_and_validation(crypto_client, user_a):
     default = crypto_client.get("/v1/settings/ai-policy", headers=headers_for(user_a)).json()
-    assert default == {"policy": "byok_only", "allow_managed_fallback": False, "updated_at": default["updated_at"]}
+    assert default == {
+        "policy": "byok_only", "allow_managed_fallback": False,
+        "preferred_model": None, "preferred_group": None,
+        "updated_at": default["updated_at"],
+    }
     patched = crypto_client.patch(
         "/v1/settings/ai-policy",
         json={"policy": "byok_first", "allow_managed_fallback": True},

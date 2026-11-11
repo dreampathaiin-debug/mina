@@ -12,6 +12,8 @@ RUN pip install -r requirements.txt
 COPY mina_api ./mina_api
 
 RUN useradd --create-home appuser
+COPY migrations/ /app/migrations/
+COPY scripts/ /app/scripts/
 USER appuser
 
 EXPOSE 8000

@@ -1,12 +1,16 @@
+# Mina backend - production blueprint (Render). Applied via Blueprint deploy;
+# every sync:false value is filled once in the Render dashboard and stored encrypted.
 services:
   - type: web
     name: mina-api
-    runtime: python
-    plan: free
+    runtime: docker
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn mina_api.main:app --host 0.0.0.0 --port $PORT --workers 1
-    healthCheckPath: /v1/health
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    plan: starter
+    autoDeploy: true
+    healthCheckPath: /v1/ready
+    preDeployCommand: ["python", "scripts/apply_migrations.py"]
     envVars:
       - key: MINA_ENVIRONMENT
         value: production
@@ -14,8 +18,54 @@ services:
         value: "false"
       - key: MINA_LOG_LEVEL
         value: INFO
-      # Explicit allowlist; wildcard is rejected by config validation.
       - key: MINA_CORS_ORIGINS
         sync: false
       - key: MINA_DATABASE_URL
+        sync: false
+      - key: MINA_SUPABASE_URL
+        sync: false
+      - key: MINA_SUPABASE_JWT_SECRET
+        sync: false
+      - key: MINA_ENCRYPTION_KEYS_JSON
+        sync: false
+      - key: MINA_WORKER_TOKEN
+        generateValue: true
+      - key: MINA_COMPOSIO_API_KEY
+        sync: false
+      - key: MINA_REDIS_URL
+        fromService:
+          type: keyvalue
+          name: mina-redis
+          property: connectionString
+      - key: MINA_RATE_LIMIT_REQUESTS_PER_MINUTE
+        value: "120"
+      - key: MINA_LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: MINA_LANGFUSE_SECRET_KEY
+        sync: false
+      - key: MINA_LANGFUSE_HOST
+        sync: false
+
+  - type: keyvalue
+    name: mina-redis
+    plan: starter
+    id: mina-redis
+    maxmemoryPolicy: noeviction
+
+  - type: worker
+    name: mina-worker-tick
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    dockerCommand: ["python", "scripts/worker_tick.py"]
+    plan: starter
+    envVars:
+      - key: MINA_API_URL
+        fromService:
+          type: web
+          name: mina-api
+          property: host
+      # Paste the same generated value Render shows for mina-api MINA_WORKER_TOKEN.
+      - key: MINA_WORKER_TOKEN
         sync: false

@@ -21,6 +21,11 @@ android {
         versionName = "0.1.67"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
+        // Cloud backend (final integration phase): empty = on-device BYOK only,
+        // unchanged behaviour. Set via gradle property or Settings override.
+        buildConfigField("String", "MINA_API_BASE_URL", "\"${propertyOrEmpty("mina.apiBaseUrl")}\"")
+        buildConfigField("String", "MINA_SUPABASE_URL", "\"${propertyOrEmpty("mina.supabaseUrl")}\"")
+        buildConfigField("String", "MINA_SUPABASE_ANON_KEY", "\"${propertyOrEmpty("mina.supabaseAnonKey")}\"")
         // The Beta tag after the version on the About page; set to false for a stable release
         buildConfigField("boolean", "BETA", "true")
     }
@@ -140,3 +145,7 @@ dependencies {
 tasks.withType<Test>().configureEach {
     inputs.file(rootProject.file("licenses/THIRD_PARTY_NOTICES.md")).withPropertyName("thirdPartyNotices")
 }
+
+
+fun propertyOrEmpty(name: String): String =
+    (project.findProperty(name) as String?).orEmpty()
