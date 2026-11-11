@@ -297,6 +297,7 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
         when (step) {
             // 上手的每一步都直接放在对话页上面一层,做完回到对话页
             OnboardingStep.Welcome -> nav.show(Route.Welcome)
+            OnboardingStep.Choose -> nav.show(Route.ChooseModel)
             OnboardingStep.Model -> nav.show(Route.ModelSetup)
             OnboardingStep.Phone -> { setupRepair = false; nav.show(Route.PhoneSetup) }
             null -> nav.reset()
@@ -328,12 +329,22 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
             phoneSetup.markGuideSeen()
             if (onboarding == OnboardingStep.Phone) goOnboarding(null) else nav.back()
         }
-        Route.Welcome -> WelcomeScreen { goOnboarding(OnboardingStep.Model) }
+        Route.Welcome -> WelcomeScreen { goOnboarding(OnboardingStep.Choose) }
+        Route.ChooseModel -> ChooseModelScreen(
+            onBack = { goOnboarding(OnboardingStep.Welcome) },
+            onContinue = { choice ->
+                when (choice) {
+                    // TODO: Mina Cloud 的真实 Google Sign-In 在这里接入;现在只是 UI 占位,不登录、不写任何配置
+                    ModelChoice.MinaCloud -> goOnboarding(Onboarding.next(OnboardingStep.Model, onboardingInputs()))
+                    ModelChoice.BringYourOwnKey -> goOnboarding(OnboardingStep.Model)
+                }
+            },
+        )
         Route.ModelSetup -> {
             val inOnboarding = onboarding == OnboardingStep.Model
             ModelSetupScreen(
                 store, onboarding = inOnboarding,
-                onBack = { if (inOnboarding) goOnboarding(OnboardingStep.Welcome) else nav.back() },
+                onBack = { if (inOnboarding) goOnboarding(OnboardingStep.Choose) else nav.back() },
                 onDone = {
                     if (inOnboarding) {
                         onboardingState.markModelSetupDone()

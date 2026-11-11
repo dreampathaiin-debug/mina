@@ -2,8 +2,8 @@ package com.meenai.mina.ui
 
 import android.content.Context
 
-/** 首次上手的三步。 */
-enum class OnboardingStep { Welcome, Model, Phone }
+/** 首次上手的四步:欢迎 → 选模型方式(Mina Cloud 或自带 key)→ 配置模型 → 手机操作。 */
+enum class OnboardingStep { Welcome, Choose, Model, Phone }
 
 /**
  * 首次打开时走哪几步(纯函数,便于测试)。和手机引导一样按「看过没有」判断,不每次都弹:
@@ -27,14 +27,16 @@ object Onboarding {
 
     /** [step] 做完后的下一步;没有了为 null(进对话)。 */
     fun next(step: OnboardingStep, i: Inputs): OnboardingStep? = when (step) {
-        OnboardingStep.Welcome -> OnboardingStep.Model
+        OnboardingStep.Welcome -> OnboardingStep.Choose
+        // 选模型方式页:自带 key 走配置模型;选 Mina Cloud 时界面直接跳过配置模型(见 ChooseModelScreen 的回调)
+        OnboardingStep.Choose -> OnboardingStep.Model
         OnboardingStep.Model -> if (i.phoneNeeded && !i.phoneGuideSeen) OnboardingStep.Phone else null
         OnboardingStep.Phone -> null
     }
 
-    /** 底部分页点:三步里的第几步。 */
+    /** 底部分页点:四步里的第几步。 */
     fun dot(step: OnboardingStep): Int = step.ordinal
-    const val DOTS = 3
+    const val DOTS = 4
 }
 
 /** 上手流程里「配置模型」做完没有;存在本机。 */

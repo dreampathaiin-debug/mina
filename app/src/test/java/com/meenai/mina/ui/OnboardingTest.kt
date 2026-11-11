@@ -11,7 +11,8 @@ class OnboardingTest {
     @Test fun freshInstallStartsWithWelcomeThenModelThenPhone() {
         val i = inputs()
         assertEquals(OnboardingStep.Welcome, Onboarding.start(i))
-        assertEquals(OnboardingStep.Model, Onboarding.next(OnboardingStep.Welcome, i))
+        assertEquals(OnboardingStep.Choose, Onboarding.next(OnboardingStep.Welcome, i))
+        assertEquals(OnboardingStep.Model, Onboarding.next(OnboardingStep.Choose, i))
         assertEquals(OnboardingStep.Phone, Onboarding.next(OnboardingStep.Model, i))
         assertNull(Onboarding.next(OnboardingStep.Phone, i))
     }
@@ -33,6 +34,6 @@ class OnboardingTest {
     }
 
     @Test fun dotsFollowSteps() {
-        assertEquals(listOf(0, 1, 2), OnboardingStep.entries.map(Onboarding::dot))
+        assertEquals(listOf(0, 1, 2, 3), OnboardingStep.entries.map(Onboarding::dot))
     }
 }
