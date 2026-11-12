@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "888782884478",
+    "project_id": "mina-2a7ba",
+    "storage_bucket": "mina-2a7ba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888782884478:android:7bd869e4f95dff3440922f",
+        "android_client_info": {
+          "package_name": "com.meenai.mina"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "888782884478-j4f26qcn460acnr0q91nlb1mcl57nuuk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.meenai.mina",
+            "certificate_hash": "fbe95620dc6703b30de652304c8f5a52562e4c67"
+          }
+        },
+        {
+          "client_id": "888782884478-5unsdgqrshas1hl7r36rc2d2k7i190iq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuYPFA2DTLlnQ2vdjc1HsIZoHZ_wPX-uU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "888782884478-5unsdgqrshas1hl7r36rc2d2k7i190iq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

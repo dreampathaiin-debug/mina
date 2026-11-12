@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     # Server-only secret for admin operations (account deletion). It is
     # never returned by any endpoint or included in any schema.
     supabase_service_key: str | None = None
+    # Firebase third-party auth (Mina Cloud sign-in): identity is verified from
+    # Firebase ID tokens (RS256, Google's public keys); UIDs map to
+    # deterministic UUIDs so profiles and RLS keep their UUID contract.
+    firebase_project_id: str | None = None
+    # Firebase Admin SDK service-account JSON (raw or base64): stamps the
+    # role:'authenticated' custom claim at provisioning. Never logged or returned.
+    firebase_service_account_json: str | None = None
     # Optional Fernet key: encrypts provider API keys at rest.
     encryption_key: str | None = None
     # Envelope-encryption key ring: JSON {"1": "<key>", "2": "<key>"}. Falls

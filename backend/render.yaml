@@ -36,6 +36,13 @@ services:
         sync: false
       - key: MINA_SUPABASE_JWT_SECRET
         sync: false
+      # Firebase third-party auth (Mina Cloud sign-in tokens are Firebase ID tokens)
+      - key: MINA_FIREBASE_PROJECT_ID
+        value: mina-2a7ba
+      # Admin SDK service account (raw JSON or base64): stamps role:'authenticated'
+      # custom claims at provisioning
+      - key: MINA_FIREBASE_SERVICE_ACCOUNT
+        sync: false
       - key: MINA_ENCRYPTION_KEYS_JSON
         sync: false
       # Free plan: the durable-task worker runs inside this web service.

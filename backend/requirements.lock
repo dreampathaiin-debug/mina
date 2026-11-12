@@ -34,6 +34,8 @@ botocore==1.44.0
     # via
     #   boto3
     #   s3transfer
+cachecontrol==0.14.4
+    # via firebase-admin
 certifi==2026.10.23
     # via
     #   composio
@@ -55,7 +57,10 @@ composio==0.32.0
 composio-client==2.1.0
     # via composio
 cryptography==50.0.2
-    # via pyjwt
+    # via
+    #   firebase-admin
+    #   google-auth
+    #   pyjwt
 fastapi==0.162.4
     # via -r requirements.in
 fastuuid==0.14.0
@@ -64,16 +69,55 @@ filelock==4.2.10
     # via
     #   huggingface-hub
     #   litellm
+firebase-admin==7.8.0
+    # via -r requirements.in
 frozenlist==1.8.0
     # via
     #   aiohttp
     #   aiosignal
 fsspec==2026.9.0
     # via huggingface-hub
+google-api-core==2.44.0
+    # via
+    #   firebase-admin
+    #   google-cloud-core
+    #   google-cloud-firestore
+    #   google-cloud-storage
+google-auth==2.62.2
+    # via
+    #   google-api-core
+    #   google-cloud-core
+    #   google-cloud-firestore
+    #   google-cloud-storage
+google-cloud-core==2.8.0
+    # via
+    #   google-cloud-firestore
+    #   google-cloud-storage
+google-cloud-firestore==2.34.1
+    # via firebase-admin
+google-cloud-storage==3.17.1
+    # via firebase-admin
+google-crc32c==1.9.0
+    # via
+    #   google-cloud-storage
+    #   google-resumable-media
+google-resumable-media==2.11.0
+    # via google-cloud-storage
+googleapis-common-protos==1.76.0
+    # via
+    #   google-api-core
+    #   grpcio-status
 greenlet==3.5.6
     # via
     #   -r requirements.in
     #   sqlalchemy
+grpcio==1.85.1
+    # via
+    #   google-api-core
+    #   google-cloud-firestore
+    #   grpcio-status
+grpcio-status==1.85.1
+    # via google-api-core
 h11==0.16.0
     # via
     #   httpcore
@@ -95,6 +139,7 @@ httpx==0.28.1
     # via
     #   -r requirements.in
     #   composio-client
+    #   firebase-admin
     #   huggingface-hub
     #   litellm
 httpx2==2.16.0
@@ -136,6 +181,8 @@ litellm==1.109.0
     # via -r requirements.in
 markupsafe==3.0.4
     # via jinja2
+msgpack==1.2.4
+    # via cachecontrol
 multidict==7.2.1
     # via
     #   aiohttp
@@ -145,7 +192,9 @@ openai==3.49.0
     #   composio
     #   litellm
 opentelemetry-api==1.45.2
-    # via fastapi
+    # via
+    #   fastapi
+    #   google-api-core
 packaging==26.3
     # via
     #   huggingface-hub
@@ -157,6 +206,21 @@ propcache==0.5.4
     # via
     #   aiohttp
     #   yarl
+proto-plus==1.29.0
+    # via
+    #   google-api-core
+    #   google-cloud-firestore
+protobuf==7.36.2
+    # via
+    #   google-api-core
+    #   google-cloud-firestore
+    #   googleapis-common-protos
+    #   grpcio-status
+    #   proto-plus
+pyasn1==0.6.5
+    # via pyasn1-modules
+pyasn1-modules==0.4.2
+    # via google-auth
 pycparser==3.12
     # via cffi
 pydantic==2.14.3
@@ -177,7 +241,9 @@ pydantic-settings==2.16.2
 pygments==2.21.0
     # via pytest
 pyjwt==2.15.1
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   firebase-admin
 pysher==1.0.8
     # via composio
 pytest==9.2.0
@@ -202,7 +268,10 @@ regex==2026.11.9
     # via tiktoken
 requests==2.34.2
     # via
+    #   cachecontrol
     #   composio
+    #   google-api-core
+    #   google-cloud-storage
     #   pysher
     #   tiktoken
 rpds-py==2026.9.1
@@ -237,6 +306,7 @@ typing-extensions==4.16.0
     #   composio
     #   composio-client
     #   fastapi
+    #   grpcio
     #   httpx2
     #   huggingface-hub
     #   litellm

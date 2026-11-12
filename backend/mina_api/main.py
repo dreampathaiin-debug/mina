@@ -110,7 +110,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = settings
     app.state.database = Database(settings.database_url)
-    app.state.auth = TokenVerifier(settings.supabase_jwt_secret, settings.supabase_url, settings.supabase_audience)
+    app.state.auth = TokenVerifier(
+        settings.supabase_jwt_secret, settings.supabase_url, settings.supabase_audience,
+        firebase_project_id=settings.firebase_project_id,
+    )
     app.state.secrets = SecretBox(settings.encryption_key)
     # Phase 3: envelope encryption for provider keys + provider registry.
     app.state.crypto = EnvelopeCrypto.from_env_mapping(settings.encryption_keys_json, settings.encryption_key)

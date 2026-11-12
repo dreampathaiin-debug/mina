@@ -4,14 +4,14 @@ import android.content.Context
 
 /**
  * One place the app reaches the Mina Cloud backend. Enabled only when an
- * HTTPS API base URL is baked in; every call carries the Supabase access
- * token, which refreshes itself 60s before expiry.
+ * HTTPS API base URL is baked in; every call carries the Firebase ID token,
+ * which the Firebase SDK keeps fresh automatically.
  */
 object ServerRuntime {
     val config: ServerConfig = ServerConfig.fromBuildConfig
     val enabled: Boolean get() = config.isEnabled()
 
-    class Instance(val store: PrefsTokenStore, val client: MinaServerClient, val api: MinaApi)
+    class Instance(val client: MinaServerClient, val api: MinaApi)
 
     @Volatile private var instance: Instance? = null
 
@@ -19,24 +19,19 @@ object ServerRuntime {
         instance?.let { return it }
         synchronized(this) {
             instance?.let { return it }
-            val store = PrefsTokenStore(context.applicationContext)
-            val provider = SupabaseTokenProvider(config, store)
+            FirebaseAuthFlow.ensureInit(context.applicationContext)
+            val provider = FirebaseTokenProvider()
             val client = MinaServerClient(config, provider)
             val api = MinaApi(client, MinaSseClient(config, provider))
-            return Instance(store, client, api).also { instance = it }
+            return Instance(client, api).also { instance = it }
         }
     }
 
-    /** True when a refresh token is on file: the user has signed in before. */
-    suspend fun signedIn(context: Context): Boolean = obtain(context).store.refreshToken() != null
-
-    /** Save tokens that came back on the OAuth deep link. */
-    suspend fun storeSession(context: Context, access: String, refresh: String, expiresInSec: Long) {
-        obtain(context).store.updateTokens(
-            access, refresh,
-            System.currentTimeMillis() / 1000 * 1000 + expiresInSec * 1000,
-        )
+    /** True when a Firebase session is live: the user has signed in. */
+    suspend fun signedIn(context: Context): Boolean {
+        obtain(context)
+        return FirebaseAuthFlow.signedIn()
     }
 
-    suspend fun signOut(context: Context) = obtain(context).store.clear()
+    suspend fun signOut(context: Context) = FirebaseAuthFlow.signOut(context)
 }

@@ -17,8 +17,8 @@ android {
         applicationId = "com.meenai.mina"
         minSdk = 30
         targetSdk = 35
-        versionCode = 70
-        versionName = "0.1.69"
+        versionCode = 71
+        versionName = "0.1.70"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
         // Cloud backend (final integration phase): empty = on-device BYOK only,
@@ -26,6 +26,13 @@ android {
         buildConfigField("String", "MINA_API_BASE_URL", "\"${propertyOrEmpty("mina.apiBaseUrl")}\"")
         buildConfigField("String", "MINA_SUPABASE_URL", "\"${propertyOrEmpty("mina.supabaseUrl")}\"")
         buildConfigField("String", "MINA_SUPABASE_ANON_KEY", "\"${propertyOrEmpty("mina.supabaseAnonKey")}\"")
+        // Firebase cloud config (Mina Cloud sign-in), parsed from google-services.json so the
+        // console file stays the single source of truth. Empty values keep BYOK builds unchanged.
+        val fb = firebaseConfig()
+        buildConfigField("String", "MINA_FIREBASE_APP_ID", "\"${fb["app_id"]}\"")
+        buildConfigField("String", "MINA_FIREBASE_API_KEY", "\"${fb["api_key"]}\"")
+        buildConfigField("String", "MINA_FIREBASE_PROJECT_ID", "\"${fb["project_id"]}\"")
+        buildConfigField("String", "MINA_FIREBASE_WEB_CLIENT_ID", "\"${fb["web_client_id"]}\"")
         // The Beta tag after the version on the About page; set to false for a stable release
         buildConfigField("boolean", "BETA", "true")
     }
@@ -110,6 +117,13 @@ dependencies {
     implementation(libs.androidx.webkit)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.okhttp)
+    // Mina Cloud sign-in: Firebase Auth session from the Credential Manager Google popup
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.googleid)
+    implementation(libs.coroutines.play.services)
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
@@ -149,3 +163,23 @@ tasks.withType<Test>().configureEach {
 
 fun propertyOrEmpty(name: String): String =
     (project.findProperty(name) as String?).orEmpty()
+
+// Firebase values parsed from app/google-services.json (project entry for the production package,
+// plus the client_type-3 web client the Credential Manager flow uses as serverClientId).
+fun firebaseConfig(): Map<String, String> = runCatching {
+    val gs = groovy.json.JsonSlurper().parse(file("google-services.json")) as Map<*, *>
+    val project = gs["project_info"] as? Map<*, *>
+    val client = (gs["client"] as? List<*>)?.filterIsInstance<Map<*, *>>()?.firstOrNull {
+        (it["client_info"] as? Map<*, *>)?.get("package_name") == "com.meenai.mina"
+    }
+    val info = client?.get("client_info") as? Map<*, *>
+    val apiKey = ((client?.get("api_key") as? List<*>)?.firstOrNull() as? Map<*, *>)?.get("current_key")?.toString().orEmpty()
+    val webClientId = (client?.get("oauth_client") as? List<*>)?.filterIsInstance<Map<*, *>>()
+        ?.firstOrNull { it["client_type"]?.toString() == "3" }?.get("client_id")?.toString().orEmpty()
+    mapOf(
+        "app_id" to info?.get("mobilesdk_app_id")?.toString().orEmpty(),
+        "api_key" to apiKey,
+        "project_id" to project?.get("project_id")?.toString().orEmpty(),
+        "web_client_id" to webClientId,
+    )
+}.getOrDefault(mapOf("app_id" to "", "api_key" to "", "project_id" to "", "web_client_id" to ""))

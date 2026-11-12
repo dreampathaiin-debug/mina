@@ -87,21 +87,6 @@ private var authError by mutableStateOf<String?>(null)
 class MainActivity : ComponentActivity() {
     private lateinit var monitor: SystemStatusMonitor
     private var requestedConversation by mutableStateOf<String?>(null)
-    private fun handleAuthIntent(intent: Intent?) {
-        val uri = intent?.data ?: return
-        val err = com.meenai.mina.server.GoogleAuth.errorOf(uri)
-        if (err != null) { authError = err; return }
-        val session = com.meenai.mina.server.GoogleAuth.parseCallback(uri) ?: return
-        lifecycleScope.launch {
-            try {
-                com.meenai.mina.server.ServerRuntime.storeSession(this@MainActivity, session.accessToken, session.refreshToken, session.expiresInSec)
-                authSuccess++
-            } catch (e: Exception) {
-                authError = e.message ?: "sign-in failed"
-            }
-        }
-    }
-
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         // 用户选过「不再询问」时系统不再弹窗,只能去设置里打开
         if (!granted && !shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) openNotificationSettings()
@@ -117,7 +102,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         requestedConversation = intent.getStringExtra(EXTRA_OPEN_CONVERSATION)
-        handleAuthIntent(intent)
         monitor = SystemStatusMonitor(this, PhoneServices.of(this).shellControl)
         val store = ProviderStore.get(this)
         setContent {
@@ -147,7 +131,6 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         requestedConversation = intent.getStringExtra(EXTRA_OPEN_CONVERSATION)
-        handleAuthIntent(intent)
     }
 
     private var updateWatch: Job? = null
@@ -356,7 +339,7 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                 onBack = { goOnboarding(OnboardingStep.Welcome) },
                 onContinue = { choice ->
                     when (choice) {
-                        // Mina Cloud: Google Sign-In via Supabase OAuth; tokens come back on mina://auth-callback
+                        // Mina Cloud: Google sign-in opens as an in-app account-chooser popup (Credential Manager + Firebase), no browser
                         ModelChoice.MinaCloud -> scope.launch {
                             if (!com.meenai.mina.server.ServerRuntime.enabled) {
                                 Toast.makeText(context, context.getString(com.meenai.mina.R.string.auth_server_missing), Toast.LENGTH_LONG).show()
@@ -366,12 +349,10 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
                                 if (onboardingInputs().phoneNeeded && !onboardingInputs().phoneGuideSeen) goOnboarding(OnboardingStep.Phone) else goOnboarding(null)
                             } else {
                                 try {
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(com.meenai.mina.server.GoogleAuth.authorizeUrl(com.meenai.mina.server.ServerRuntime.config)))
-                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                                    )
-                                } catch (e: ActivityNotFoundException) {
-                                    Toast.makeText(context, context.getString(com.meenai.mina.R.string.auth_no_browser), Toast.LENGTH_LONG).show()
+                                    com.meenai.mina.server.FirebaseAuthFlow.signIn(context)
+                                    authSuccess++
+                                } catch (e: Exception) {
+                                    authError = e.message ?: "Sign-in failed"
                                 }
                             }
                         }

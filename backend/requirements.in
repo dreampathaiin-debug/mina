@@ -10,3 +10,4 @@ aiosqlite>=0.20
 pytest>=8.3
 litellm
 composio>=0.32
+firebase-admin>=6
