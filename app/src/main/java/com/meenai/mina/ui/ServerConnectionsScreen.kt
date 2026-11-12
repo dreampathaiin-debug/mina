@@ -1,6 +1,7 @@
 package com.meenai.mina.ui
 
 import android.content.Intent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +12,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
@@ -27,6 +31,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -69,6 +75,19 @@ private val CONNECTOR_PRESETS = listOf(
 )
 
 private data class Connector(val id: String, val toolkit: String, val status: String)
+
+/** Preset app badges: bundled vector glyph (white) on the app's brand colour. */
+private val CONNECTOR_ICONS: Map<String, Pair<Int, Long>> = mapOf(
+    "gmail" to (R.drawable.ic_conn_gmail to 0xFFEA4335),
+    "googlecalendar" to (R.drawable.ic_conn_googlecalendar to 0xFF4285F4),
+    "whatsapp" to (R.drawable.ic_conn_whatsapp to 0xFF25D366),
+    "slack" to (R.drawable.ic_conn_slack to 0xFF4A154B),
+    "github" to (R.drawable.ic_conn_github to 0xFF181717),
+    "notion" to (R.drawable.ic_conn_notion to 0xFF000000),
+    "linkedin" to (R.drawable.ic_conn_linkedin to 0xFF0A66C2),
+    "spotify" to (R.drawable.ic_conn_spotify to 0xFF1DB954),
+    "youtube" to (R.drawable.ic_conn_youtube to 0xFFFF0000),
+)
 
 @Composable
 fun ServerConnectionsContent() {
@@ -188,13 +207,27 @@ fun ServerConnectionsContent() {
                         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             rowApps.forEach { (slug, label) ->
                                 val active = busy == slug
+                                val badge = CONNECTOR_ICONS[slug]
                                 Box(
                                     Modifier
                                         .background(if (active) MinaTheme.colors.ink else MinaTheme.colors.fill, RoundedCornerShape(50))
                                         .clickable(enabled = busy == null) { connect(slug) }
-                                        .padding(horizontal = 14.dp, vertical = 7.dp),
+                                        .padding(horizontal = 10.dp, vertical = 5.dp),
                                 ) {
-                                    Text(label, style = MinaType.Caption, color = if (active) MinaTheme.colors.bg else MinaTheme.colors.ink)
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        if (badge != null) {
+                                            Box(
+                                                Modifier
+                                                    .size(20.dp)
+                                                    .background(Color(badge.second), CircleShape),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                Image(painterResource(badge.first), null, Modifier.size(11.dp))
+                                            }
+                                            Spacer(Modifier.width(6.dp))
+                                        }
+                                        Text(label, style = MinaType.Caption, color = if (active) MinaTheme.colors.bg else MinaTheme.colors.ink)
+                                    }
                                 }
                             }
                         }
