@@ -17,8 +17,8 @@ android {
         applicationId = "com.meenai.mina"
         minSdk = 30
         targetSdk = 35
-        versionCode = 68
-        versionName = "0.1.67"
+        versionCode = 69
+        versionName = "0.1.68"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
         // Cloud backend (final integration phase): empty = on-device BYOK only,
