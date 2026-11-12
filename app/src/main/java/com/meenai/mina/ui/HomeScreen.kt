@@ -1,5 +1,12 @@
 package com.meenai.mina.ui
 
+import com.meenai.mina.ui.theme.MinaSize
+import com.meenai.mina.ui.components.pressScale
+import com.meenai.mina.server.FirebaseAuthFlow
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -108,10 +115,21 @@ fun HomeScreen(
 
     // 回到前台时看一眼天气(半小时内的缓存直接用,位置挪远了才重取)
     val owner = LocalLifecycleOwner.current
+    var avatarTick by remember { mutableStateOf(0) }
+    var photoUrl by remember { mutableStateOf<String?>(null) }
     DisposableEffect(owner) {
-        val obs = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_RESUME) vm.onResume() }
+        val obs = LifecycleEventObserver { _, e ->
+            if (e == Lifecycle.Event.ON_RESUME) {
+                vm.onResume()
+                avatarTick++
+            }
+        }
         owner.lifecycle.addObserver(obs)
         onDispose { owner.lifecycle.removeObserver(obs) }
+    }
+
+    LaunchedEffect(avatarTick) {
+        withContext(Dispatchers.IO) { photoUrl = FirebaseAuthFlow.userPhotoUrl() }
     }
 
     val staggerBase = (if (updateAvailable) 1 else 0) + (if (phoneSetupNeeded) 1 else 0)
@@ -122,7 +140,14 @@ fun HomeScreen(
                 TopBar(
                     "", left = MinaIcons.Menu, leftLabel = stringResource(R.string.chat_menu), onLeft = openDrawer,
                     center = pill,
-                    right = { BarIconButton(MinaIcons.Gear, stringResource(R.string.settings_title), onSettings) },
+                    right = {
+                        val url = photoUrl
+                        if (url.isNullOrBlank()) {
+                            BarIconButton(MinaIcons.Gear, stringResource(R.string.settings_title), onSettings)
+                        } else {
+                            BarAvatarButton(url, stringResource(R.string.settings_title), onSettings)
+                        }
+                    },
                 )
                 LazyColumn(
                     Modifier.fillMaxSize(),
@@ -419,5 +444,26 @@ private fun KindChip(text: String, selected: Boolean, onClick: () -> Unit) {
             .clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
         Text(text, style = MinaType.Caption, color = if (selected) c.bg else c.ink)
+    }
+}
+
+/** Top-bar avatar: the signed-in Google account's profile photo, styled like BarIconButton. */
+@Composable
+private fun BarAvatarButton(url: String, label: String, onClick: () -> Unit) {
+    val c = MinaTheme.colors
+    Box(
+        Modifier.size(MinaSize.IconButton)
+            .background(c.glass.copy(alpha = if (c.isDark) 0.55f else 0.6f), CircleShape)
+            .border(1.dp, c.cardEdge, CircleShape)
+            .clip(CircleShape)
+            .pressScale(onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        AsyncImage(
+            model = url,
+            contentDescription = label,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }

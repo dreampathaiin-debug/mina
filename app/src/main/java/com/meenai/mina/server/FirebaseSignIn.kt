@@ -62,6 +62,11 @@ object FirebaseAuthFlow {
         FirebaseAuth.getInstance().currentUser?.getIdToken(force)?.await()?.token
     }.getOrNull()
 
+    /** Photo URL of the signed-in Google account for avatar UI; null when signed out. */
+    fun userPhotoUrl(): String? = runCatching {
+        FirebaseAuth.getInstance().currentUser?.photoUrl?.toString()
+    }.getOrNull()
+
     suspend fun signOut(context: Context) {
         runCatching { FirebaseAuth.getInstance().signOut() }
         runCatching { CredentialManager.create(context).clearCredentialState(ClearCredentialStateRequest()) }
