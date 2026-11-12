@@ -163,7 +163,7 @@ fun ServerConnectionsContent() {
         }
     }
 
-        Column(Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
+        Column(Modifier.padding(bottom = 24.dp)) {
             Column(Modifier.padding(horizontal = 16.dp)) {
                 GroupCard {
                     ListRow(
