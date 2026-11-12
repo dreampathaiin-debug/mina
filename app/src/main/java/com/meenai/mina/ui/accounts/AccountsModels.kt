@@ -16,6 +16,10 @@ data class AccountItem(
     val type: AccountType,
     val status: AccountStatus = AccountStatus.NOT_CONNECTED,
     val identity: String? = null,
+    /** Catalog logo URL (real connections). */
+    val logoUrl: String? = null,
+    /** Connection id on Mina Cloud, for real Composio connections. */
+    val remoteId: String? = null,
 )
 
 /** demo 用的假身份,等真的 OAuth / 存储接上后就换成真数据。 */

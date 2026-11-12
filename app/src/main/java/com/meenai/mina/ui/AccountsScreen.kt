@@ -7,6 +7,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -57,7 +59,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meenai.mina.R
+import androidx.core.net.toUri
 import com.meenai.mina.i18n.tr
+import com.meenai.mina.server.ServerRuntime
 import com.meenai.mina.ui.accounts.AccountItem
 import com.meenai.mina.ui.accounts.AccountStatus
 import com.meenai.mina.ui.accounts.AccountTabs
@@ -98,6 +102,15 @@ private data class AccountSection(val label: String?, val rows: List<AccountItem
 fun AccountsScreen(onBack: () -> Unit) {
     val vm: AccountsViewModel = viewModel()
     val state by vm.ui.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val server = remember { ServerRuntime.obtain(context) }
+    LaunchedEffect(Unit) {
+        val signed = runCatching { ServerRuntime.signedIn(context) }.getOrNull() == true
+        vm.attach(if (signed) server else null, signed)
+    }
+    val openUrl: (String) -> Unit = { url ->
+        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
     AccountsContent(
         state = state,
         onBack = onBack,
@@ -106,7 +119,7 @@ fun AccountsScreen(onBack: () -> Unit) {
         onOpen = vm::openSheet,
         onRemove = vm::remove,
         onDismiss = vm::dismissSheet,
-        onConnect = vm::confirmConnection,
+        onConnect = { item -> vm.connect(item, openUrl) },
         onSaveLogin = vm::saveLogin,
         onSaveKey = vm::saveKey,
     )
@@ -122,7 +135,7 @@ fun AccountsContent(
     onOpen: (AccountItem) -> Unit,
     onRemove: (AccountItem) -> Unit,
     onDismiss: () -> Unit = {},
-    onConnect: () -> Unit = {},
+    onConnect: (AccountItem) -> Unit = {},
     onSaveLogin: (String) -> Unit = {},
     onSaveKey: (String) -> Unit = {},
 ) {
@@ -158,6 +171,27 @@ fun AccountsContent(
                     contentPadding = PaddingValues(top = topPad, bottom = bottomPad),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
+                    if (state.signedIn == false && (page == 0 || page == 1)) {
+                        item(key = "signedout") {
+                            Text(
+                                tr(R.string.connectors_signed_out),
+                                Modifier.padding(horizontal = 32.dp),
+                                style = MinaType.Hint,
+                                color = c.ink3,
+                            )
+                        }
+                    }
+                    state.error?.let { err ->
+                        item(key = "error") {
+                            Text(
+                                err,
+                                Modifier.padding(horizontal = 32.dp),
+                                style = MinaType.Hint,
+                                color = c.bad,
+                                maxLines = 2,
+                            )
+                        }
+                    }
                     connectedSection(state.connected, onOpen, onRemove)
                     if (sections.isEmpty()) {
                         item(key = "empty") {
@@ -282,7 +316,7 @@ fun AccountsContent(
                 target = state.sheet,
                 loading = state.sheetLoading,
                 onDismiss = onDismiss,
-                onConnect = onConnect,
+                onConnect = { state.sheet?.item?.let(onConnect) },
                 onSaveLogin = onSaveLogin,
                 onSaveKey = onSaveKey,
             )

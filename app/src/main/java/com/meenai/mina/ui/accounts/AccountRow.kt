@@ -2,6 +2,7 @@ package com.meenai.mina.ui.accounts
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import coil.compose.AsyncImage
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,14 +65,20 @@ private val LetterColors: Map<String, Long> = mapOf(
 @Composable
 fun AccountLogo(item: AccountItem, size: Dp = 36.dp) {
     val c = MinaTheme.colors
-    if (item.logoRes != null) {
-        Image(
+    when {
+        !item.logoUrl.isNullOrBlank() -> AsyncImage(
+            model = item.logoUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.size(size),
+        )
+        item.logoRes != null -> Image(
             painterResource(item.logoRes),
             contentDescription = null,
             Modifier.size(size),
             colorFilter = if (item.type == AccountType.API_KEY && item.id != "gemini") ColorFilter.tint(c.ink) else null,
         )
-    } else {
+        else -> {
         Box(
             Modifier.size(size)
                 .clip(RoundedCornerShape(size / 4))
@@ -83,6 +90,7 @@ fun AccountLogo(item: AccountItem, size: Dp = 36.dp) {
                 style = TextStyle(fontSize = (size.value * 0.44f).sp, fontWeight = FontWeight.SemiBold, fontFamily = InterTight),
                 color = Color.White,
             )
+        }
         }
     }
 }
