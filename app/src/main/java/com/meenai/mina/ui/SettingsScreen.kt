@@ -206,7 +206,7 @@ fun SettingsScreen(
             versionName = BuildConfig.VERSION_NAME, updateVersion = updateVersion,
         )
         SettingsPage.Profile -> ProfileScreen(profile, onBack = toHome)
-        SettingsPage.Accounts -> AccountsScreen(webSites, onBack = toHome)
+        SettingsPage.Accounts -> AccountsScreen(onBack = toHome)
         SettingsPage.Privacy -> PrivacyScreen(
             onOpenMemory = onOpenMemory,
             webSitesCount = webSites?.sites?.size,
