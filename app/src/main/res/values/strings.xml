@@ -183,7 +183,7 @@
     <string name="settings_profile_sub">Bio data the agent uses for you</string>
     <string name="settings_scheduled">Scheduled tasks</string>
     <string name="settings_accounts">Accounts</string>
-    <string name="settings_accounts_sub">Connections and website logins</string>
+    <string name="settings_accounts_sub">Connect apps through Mina Cloud</string>
     <string name="settings_privacy_data">Privacy &amp; data</string>
     <string name="settings_privacy_data_sub">Memory and website logins</string>
     <string name="settings_advanced_sub">Proxy, usage, sandbox, recovery and more</string>
@@ -199,4 +199,21 @@
     <string name="home_deleted">Deleted</string>
     <string name="home_undo">Undo</string>
     <string name="home_no_location">Add your area to see the weather</string>
+    <string name="connectors_title">Connectors</string>
+    <string name="connectors_sub">Apps connect through Mina Cloud. Sign in with Google once, the keys stay on the server.</string>
+    <string name="connectors_signed_in">Signed in to Mina Cloud</string>
+    <string name="connectors_signed_out">Not signed in yet</string>
+    <string name="connectors_pill_on">On</string>
+    <string name="connectors_pill_off">Off</string>
+    <string name="connectors_loading">Loading…</string>
+    <string name="connectors_empty">No apps connected yet. Pick one below.</string>
+    <string name="connectors_add_title">Connect an app</string>
+    <string name="connectors_add_hint">App name, e.g. gmail</string>
+    <string name="connectors_connect">Connect</string>
+    <string name="connectors_presets_title">Popular apps</string>
+    <string name="connectors_remove">Remove</string>
+    <string name="connectors_sign_out">Sign out of Mina Cloud</string>
+    <string name="auth_failed">Sign-in failed: %1$s</string>
+    <string name="auth_server_missing">Mina Cloud server is not configured in this build.</string>
+    <string name="auth_no_browser">No browser found to open sign-in.</string>
 </resources>

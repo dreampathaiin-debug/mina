@@ -183,7 +183,7 @@
     <string name="settings_profile_sub">\u090F\u091C\u0947\u0902\u091F \u0915\u0947 \u0932\u093F\u090F \u0906\u092A\u0915\u0940 \u0921\u093F\u091F\u0947\u0932</string>
     <string name="settings_scheduled">\u0936\u0947\u0932\u094D\u092F\u0942\u0932 \u091F\u093E\u0938\u094D\u0915</string>
     <string name="settings_accounts">\u0905\u0915\u093E\u0909\u0902\u091F\u094D\u0938</string>
-    <string name="settings_accounts_sub">\u0915\u0928\u0947\u0915\u094D\u0936\u0928 \u0914\u0930 \u0935\u0947\u092C\u0938\u093E\u0907\u091F \u0932\u0949\u0917\u093F\u0928</string>
+    <string name="settings_accounts_sub">एप Mina Cloud से कनेक्ट करें</string>
     <string name="settings_privacy_data">\u092A\u094D\u0930\u093E\u0907\u0935\u0938\u0940 \u0914\u0930 \u0921\u0947\u091F\u093E</string>
     <string name="settings_privacy_data_sub">\u092E\u0947\u092E\u0930\u0940 \u0914\u0930 \u0935\u0947\u092C\u0938\u093E\u0907\u091F \u0932\u0949\u0917\u093F\u0928</string>
     <string name="settings_advanced_sub">\u092A\u094D\u0930\u0949\u0915\u094D\u0938\u0940, \u092F\u0942\u091C\u0947\u091C, \u0938\u0948\u0902\u0921\u092C\u0949\u0915\u094D\u0938 \u0914\u0930 \u0930\u093F\u0915\u0935\u0930\u0940</string>
@@ -199,4 +199,21 @@
     <string name="home_deleted">हटा दिया</string>
     <string name="home_undo">वापस लाएँ</string>
     <string name="home_no_location">मौसम देखने के लिए अपना इलाका जोड़ें</string>
+    <string name="connectors_title">कनेक्टर</string>
+    <string name="connectors_sub">एप Mina Cloud से कनेक्ट होते हैं। एक बार Google से साइन इन करें, keys सर्वर पर रहती हैं।</string>
+    <string name="connectors_signed_in">Mina Cloud में साइन इन है</string>
+    <string name="connectors_signed_out">अभी साइन इन नहीं</string>
+    <string name="connectors_pill_on">चालू</string>
+    <string name="connectors_pill_off">बंद</string>
+    <string name="connectors_loading">लोड हो रहा है…</string>
+    <string name="connectors_empty">अभी कोई एप कनेक्ट नहीं है, नीचे से एक चुनें।</string>
+    <string name="connectors_add_title">एप कनेक्ट करें</string>
+    <string name="connectors_add_hint">एप का नाम, जैसे gmail</string>
+    <string name="connectors_connect">कनेक्ट करें</string>
+    <string name="connectors_presets_title">लोकप्रिय एप्स</string>
+    <string name="connectors_remove">हटाएँ</string>
+    <string name="connectors_sign_out">Mina Cloud से साइन आउट</string>
+    <string name="auth_failed">साइन इन नाकाम: %1$s</string>
+    <string name="auth_server_missing">इस बिल्ड में Mina Cloud सर्वर कॉन्फ़िगर नहीं है।</string>
+    <string name="auth_no_browser">साइन इन खोलने के लिए ब्राउज़र नहीं मिला।</string>
 </resources>

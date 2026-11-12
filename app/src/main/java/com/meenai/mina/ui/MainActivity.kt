@@ -80,9 +80,27 @@ import com.meenai.mina.ui.theme.animationsOff
 import com.meenai.mina.ui.theme.appearanceDark
 import com.meenai.mina.ui.theme.systemBarsFor
 
+// Sign-in round-trip: the browser returns on mina://auth-callback and onboarding finishes here
+private var authSuccess by mutableStateOf(0)
+private var authError by mutableStateOf<String?>(null)
+
 class MainActivity : ComponentActivity() {
     private lateinit var monitor: SystemStatusMonitor
     private var requestedConversation by mutableStateOf<String?>(null)
+    private fun handleAuthIntent(intent: Intent?) {
+        val uri = intent?.data ?: return
+        val err = com.meenai.mina.server.GoogleAuth.errorOf(uri)
+        if (err != null) { authError = err; return }
+        val session = com.meenai.mina.server.GoogleAuth.parseCallback(uri) ?: return
+        lifecycleScope.launch {
+            try {
+                com.meenai.mina.server.ServerRuntime.storeSession(this@MainActivity, session.accessToken, session.refreshToken, session.expiresInSec)
+                authSuccess++
+            } catch (e: Exception) {
+                authError = e.message ?: "sign-in failed"
+            }
+        }
+    }
 
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         // 用户选过「不再询问」时系统不再弹窗,只能去设置里打开
@@ -99,6 +117,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         requestedConversation = intent.getStringExtra(EXTRA_OPEN_CONVERSATION)
+        handleAuthIntent(intent)
         monitor = SystemStatusMonitor(this, PhoneServices.of(this).shellControl)
         val store = ProviderStore.get(this)
         setContent {
@@ -128,6 +147,7 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         requestedConversation = intent.getStringExtra(EXTRA_OPEN_CONVERSATION)
+        handleAuthIntent(intent)
     }
 
     private var updateWatch: Job? = null
@@ -330,16 +350,50 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
             if (onboarding == OnboardingStep.Phone) goOnboarding(null) else nav.back()
         }
         Route.Welcome -> WelcomeScreen { goOnboarding(OnboardingStep.Choose) }
-        Route.ChooseModel -> ChooseModelScreen(
-            onBack = { goOnboarding(OnboardingStep.Welcome) },
-            onContinue = { choice ->
-                when (choice) {
-                    // TODO: Mina Cloud 的真实 Google Sign-In 在这里接入;现在只是 UI 占位,不登录、不写任何配置
-                    ModelChoice.MinaCloud -> goOnboarding(Onboarding.next(OnboardingStep.Model, onboardingInputs()))
-                    ModelChoice.BringYourOwnKey -> goOnboarding(OnboardingStep.Model)
+        Route.ChooseModel -> {
+            val scope = rememberCoroutineScope()
+            ChooseModelScreen(
+                onBack = { goOnboarding(OnboardingStep.Welcome) },
+                onContinue = { choice ->
+                    when (choice) {
+                        // Mina Cloud: Google Sign-In via Supabase OAuth; tokens come back on mina://auth-callback
+                        ModelChoice.MinaCloud -> scope.launch {
+                            if (!com.meenai.mina.server.ServerRuntime.enabled) {
+                                Toast.makeText(context, context.getString(com.meenai.mina.R.string.auth_server_missing), Toast.LENGTH_LONG).show()
+                            } else if (com.meenai.mina.server.ServerRuntime.signedIn(context)) {
+                                onboardingState.markModelSetupDone()
+                                // Sign-in replaces model setup: straight to phone setup or done
+                                if (onboardingInputs().phoneNeeded && !onboardingInputs().phoneGuideSeen) goOnboarding(OnboardingStep.Phone) else goOnboarding(null)
+                            } else {
+                                try {
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(com.meenai.mina.server.GoogleAuth.authorizeUrl(com.meenai.mina.server.ServerRuntime.config)))
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                                    )
+                                } catch (e: ActivityNotFoundException) {
+                                    Toast.makeText(context, context.getString(com.meenai.mina.R.string.auth_no_browser), Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        }
+                        ModelChoice.BringYourOwnKey -> goOnboarding(OnboardingStep.Model)
+                    }
+                },
+            )
+            // Sign-in came back: finish the step and move on
+            LaunchedEffect(authSuccess) {
+                if (authSuccess > 0 && onboarding == OnboardingStep.Choose) {
+                    onboardingState.markModelSetupDone()
+                    // Sign-in replaces model setup: straight to phone setup or done
+                    if (onboardingInputs().phoneNeeded && !onboardingInputs().phoneGuideSeen) goOnboarding(OnboardingStep.Phone) else goOnboarding(null)
                 }
-            },
-        )
+            }
+            LaunchedEffect(authError) {
+                authError?.let {
+                    Toast.makeText(context, context.getString(com.meenai.mina.R.string.auth_failed, it), Toast.LENGTH_LONG).show()
+                    authError = null
+                }
+            }
+        }
         Route.ModelSetup -> {
             val inOnboarding = onboarding == OnboardingStep.Model
             ModelSetupScreen(

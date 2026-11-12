@@ -86,7 +86,10 @@ fun AccountsScreen(webSites: WebSitesState?, onBack: () -> Unit) {
             Column(Modifier.padding(horizontal = 16.dp)) {
                 AccountsTabs(tab, onPick = { tab = it })
             }
-            if (tab == 0) ConnectionsSection() else LoginsSection(webSites)
+            if (tab == 0) {
+                // Composio connectors always go through the Mina Cloud backend; the key lives server-side
+                if (com.meenai.mina.server.ServerRuntime.enabled) ServerConnectionsContent() else ConnectionsSection()
+            } else LoginsSection(webSites)
         }
     }
 }
