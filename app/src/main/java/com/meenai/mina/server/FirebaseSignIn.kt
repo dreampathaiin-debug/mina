@@ -3,6 +3,7 @@ package com.meenai.mina.server
 import android.content.Context
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
@@ -16,6 +17,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.meenai.mina.BuildConfig
 import kotlinx.coroutines.tasks.await
+
+/** Credential type the Google provider reports through Credential Manager. */
+private const val GOOGLE_ID_TOKEN_TYPE = "com.google.android.libraries.identity.googleid.TYPE_GOOGLE_ID_TOKEN"
 
 /** Supplies the Firebase ID token used on every server request. */
 class FirebaseTokenProvider : MinaTokenProvider {
@@ -88,8 +92,20 @@ object FirebaseAuthFlow {
         } catch (e: GetCredentialException) {
             error(e.message ?: "Google sign-in failed")
         }
-        val googleToken = (response.credential as? GoogleIdTokenCredential)?.idToken
-            ?: error("unexpected credential type")
+        // Credential Manager hands the Google credential back as a CustomCredential on
+        // most devices; some providers return a GoogleIdTokenCredential directly. Both
+        // shapes are accepted here (casting alone fails with "unexpected credential type").
+        val credential = response.credential
+        val googleToken = when (credential) {
+            is GoogleIdTokenCredential -> credential.idToken
+            is CustomCredential ->
+                if (credential.type == GOOGLE_ID_TOKEN_TYPE) {
+                    GoogleIdTokenCredential.createFrom(credential.data).idToken
+                } else {
+                    error("unexpected credential type: ${credential.type}")
+                }
+            else -> error("unexpected credential type: ${credential.type}")
+        }
         val auth = FirebaseAuth.getInstance()
         return auth.signInWithCredential(GoogleAuthProvider.getCredential(googleToken, null)).await().user
             ?: error("Firebase sign-in returned no user")
