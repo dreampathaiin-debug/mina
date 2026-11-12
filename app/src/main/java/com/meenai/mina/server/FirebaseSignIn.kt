@@ -19,7 +19,7 @@ import com.meenai.mina.BuildConfig
 import kotlinx.coroutines.tasks.await
 
 /** Credential type the Google provider reports through Credential Manager. */
-private const val GOOGLE_ID_TOKEN_TYPE = "com.google.android.libraries.identity.googleid.TYPE_GOOGLE_ID_TOKEN"
+private const val GOOGLE_ID_TYPE_PREFIX = "com.google.android.libraries.identity.googleid."
 
 /** Supplies the Firebase ID token used on every server request. */
 class FirebaseTokenProvider : MinaTokenProvider {
@@ -96,14 +96,14 @@ object FirebaseAuthFlow {
         // most devices; some providers return a GoogleIdTokenCredential directly. Both
         // shapes are accepted here (casting alone fails with "unexpected credential type").
         val credential = response.credential
-        val googleToken = when (credential) {
-            is GoogleIdTokenCredential -> credential.idToken
-            is CustomCredential ->
-                if (credential.type == GOOGLE_ID_TOKEN_TYPE) {
-                    GoogleIdTokenCredential.createFrom(credential.data).idToken
-                } else {
-                    error("unexpected credential type: ${credential.type}")
-                }
+        // Devices report several type variants here (TYPE_GOOGLE_ID_TOKEN,
+        // TYPE_GOOGLE_ID_TOKEN_CREDENTIAL, TYPE_GOOGLE_ID_TOKEN_SIWG_CREDENTIAL),
+        // so match on the library prefix, not one exact string.
+        val googleToken = when {
+            credential is GoogleIdTokenCredential -> credential.idToken
+            credential is CustomCredential && credential.type.startsWith(GOOGLE_ID_TYPE_PREFIX) ->
+                runCatching { GoogleIdTokenCredential.createFrom(credential.data).idToken }
+                    .getOrElse { error("google credential unreadable (${credential.type}): ${it.message}") }
             else -> error("unexpected credential type: ${credential.type}")
         }
         val auth = FirebaseAuth.getInstance()
