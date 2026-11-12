@@ -1,5 +1,15 @@
-# Mina backend - production blueprint (Render). Applied via Blueprint deploy;
-# every sync:false value is filled once in the Render dashboard and stored encrypted.
+# Mina backend - FREE-plan production blueprint (Render). Applied via Blueprint
+# deploy; every sync:false value is filled once in the Render dashboard and
+# stored encrypted.
+#
+# Free-plan reality (full notes in DEPLOYMENT_GUIDE.md):
+# - Free web services spin down after ~15 minutes of inactivity and take about
+#   a minute to serve the next request. 750 free instance-hours per month.
+# - Render has NO free background workers, NO free cron jobs and NO free
+#   Redis/Key Value, so this blueprint has neither. The durable-task worker
+#   runs in-process (MINA_WORKER_ENABLED=true) and Redis comes from Upstash's
+#   free tier through MINA_REDIS_URL (rediss://...). The external-cron
+#   fallback (POST /v1/tasks/worker/tick with X-Worker-Token) stays available.
 services:
   - type: web
     name: mina-api
@@ -7,7 +17,7 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: ./
-    plan: starter
+    plan: free
     autoDeploy: true
     healthCheckPath: /v1/ready
     preDeployCommand: ["python", "scripts/apply_migrations.py"]
@@ -19,24 +29,31 @@ services:
       - key: MINA_LOG_LEVEL
         value: INFO
       - key: MINA_CORS_ORIGINS
-        sync: false
+        sync: false # e.g. https://app.meenai.in (comma-separated, no trailing slash)
       - key: MINA_DATABASE_URL
-        sync: false
+        sync: false # Supabase session-pooler URL, copied from the dashboard
       - key: MINA_SUPABASE_URL
         sync: false
       - key: MINA_SUPABASE_JWT_SECRET
         sync: false
       - key: MINA_ENCRYPTION_KEYS_JSON
         sync: false
+      # Free plan: the durable-task worker runs inside this web service.
+      - key: MINA_WORKER_ENABLED
+        value: "true"
+      # Gentler DB polling on the shared free instance; task pickup <= 5 s.
+      - key: MINA_WORKER_POLL_SECONDS
+        value: "5"
+      # Kept for the external-cron fallback that fights spin-down: an external
+      # scheduler calls POST /v1/tasks/worker/tick with this token.
       - key: MINA_WORKER_TOKEN
         generateValue: true
       - key: MINA_COMPOSIO_API_KEY
         sync: false
+      # Upstash free-tier Redis (256 MB, 500K commands/month); TLS URL:
+      # rediss://default:<password>@<host>.upstash.io:6379
       - key: MINA_REDIS_URL
-        fromService:
-          type: keyvalue
-          name: mina-redis
-          property: connectionString
+        sync: false
       - key: MINA_RATE_LIMIT_REQUESTS_PER_MINUTE
         value: "120"
       - key: MINA_LANGFUSE_PUBLIC_KEY
@@ -44,28 +61,4 @@ services:
       - key: MINA_LANGFUSE_SECRET_KEY
         sync: false
       - key: MINA_LANGFUSE_HOST
-        sync: false
-
-  - type: keyvalue
-    name: mina-redis
-    plan: starter
-    id: mina-redis
-    maxmemoryPolicy: noeviction
-
-  - type: worker
-    name: mina-worker-tick
-    runtime: docker
-    rootDir: backend
-    dockerfilePath: ./Dockerfile
-    dockerContext: ./
-    dockerCommand: ["python", "scripts/worker_tick.py"]
-    plan: starter
-    envVars:
-      - key: MINA_API_URL
-        fromService:
-          type: web
-          name: mina-api
-          property: host
-      # Paste the same generated value Render shows for mina-api MINA_WORKER_TOKEN.
-      - key: MINA_WORKER_TOKEN
         sync: false
