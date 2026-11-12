@@ -3,7 +3,6 @@ package com.meenai.mina.ui
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,11 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,12 +26,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import coil.compose.AsyncImage
 import com.meenai.mina.R
 import com.meenai.mina.i18n.tr
 import com.meenai.mina.server.ServerRuntime
@@ -59,24 +58,14 @@ import kotlinx.serialization.json.jsonObject
  * Connectors: apps connected through Mina Cloud. The Composio key lives on
  * the server; the app only carries the Google sign-in session. Connection
  * status is read live from the backend, so "connected or not" is always
- * visible here.
+ * visible here, and the full toolkit catalog comes from the server too.
  */
-
-private val CONNECTOR_PRESETS = listOf(
-    "gmail" to "Gmail",
-    "googlecalendar" to "Google Calendar",
-    "whatsapp" to "WhatsApp",
-    "slack" to "Slack",
-    "github" to "GitHub",
-    "notion" to "Notion",
-    "linkedin" to "LinkedIn",
-    "spotify" to "Spotify",
-    "youtube" to "YouTube",
-)
 
 private data class Connector(val id: String, val toolkit: String, val status: String)
 
-/** Preset app badges: bundled vector glyph (white) on the app's brand colour. */
+private data class CatalogApp(val slug: String, val name: String, val description: String, val logo: String)
+
+/** Bundled fallback badges: vector glyph (white) on the app's brand colour. */
 private val CONNECTOR_ICONS: Map<String, Pair<Int, Long>> = mapOf(
     "gmail" to (R.drawable.ic_conn_gmail to 0xFFEA4335),
     "googlecalendar" to (R.drawable.ic_conn_googlecalendar to 0xFF4285F4),
@@ -89,6 +78,43 @@ private val CONNECTOR_ICONS: Map<String, Pair<Int, Long>> = mapOf(
     "youtube" to (R.drawable.ic_conn_youtube to 0xFFFF0000),
 )
 
+/** Catalog icon tile: the app's real logo when the server has one, else the bundled badge, else an initial. */
+@Composable
+private fun CatalogIcon(slug: String, name: String, logo: String) {
+    val badge = CONNECTOR_ICONS[slug]
+    Box(
+        Modifier
+            .size(44.dp)
+            .background(MinaTheme.colors.fill, RoundedCornerShape(12.dp)),
+        contentAlignment = Alignment.Center,
+    ) {
+        when {
+            logo.isNotBlank() -> AsyncImage(
+                model = logo,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(26.dp),
+            )
+            badge != null -> Box(
+                Modifier
+                    .size(26.dp)
+                    .background(Color(badge.second), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(painterResource(badge.first), null, Modifier.size(15.dp))
+            }
+            else -> Box(
+                Modifier
+                    .size(26.dp)
+                    .background(MinaTheme.colors.ink2.copy(alpha = 0.25f), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(name.take(1).uppercase(), style = MinaType.Caption, color = MinaTheme.colors.ink)
+            }
+        }
+    }
+}
+
 @Composable
 fun ServerConnectionsContent() {
     val context = LocalContext.current
@@ -96,10 +122,11 @@ fun ServerConnectionsContent() {
     val server = remember { ServerRuntime.obtain(context) }
     var signedIn by remember { mutableStateOf<Boolean?>(null) }
     var loading by remember { mutableStateOf(true) }
+    var catalogLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var connections by remember { mutableStateOf<List<Connector>>(emptyList()) }
+    var apps by remember { mutableStateOf<List<CatalogApp>>(emptyList()) }
     var busy by remember { mutableStateOf<String?>(null) }
-    var newApp by remember { mutableStateOf("") }
 
     fun refresh() {
         scope.launch {
@@ -118,9 +145,36 @@ fun ServerConnectionsContent() {
         }
     }
 
+    fun loadCatalog() {
+        scope.launch {
+            catalogLoading = true
+            try {
+                val arr = server.api.catalogApps().jsonObject["items"]?.jsonArray
+                apps = arr?.mapNotNull { el ->
+                    val o = el.jsonObject
+                    val slug = (o["slug"] as? JsonPrimitive)?.content ?: return@mapNotNull null
+                    CatalogApp(
+                        slug = slug,
+                        name = (o["name"] as? JsonPrimitive)?.contentOrNull ?: slug,
+                        description = (o["description"] as? JsonPrimitive)?.contentOrNull ?: "",
+                        logo = (o["logo"] as? JsonPrimitive)?.contentOrNull ?: "",
+                    )
+                } ?: emptyList()
+            } catch (e: Exception) {
+                // catalog is best-effort; connecting an app still works without it
+            }
+            catalogLoading = false
+        }
+    }
+
     LaunchedEffect(Unit) {
         signedIn = ServerRuntime.signedIn(context)
-        if (signedIn == true) refresh() else loading = false
+        if (signedIn == true) {
+            refresh()
+            loadCatalog()
+        } else {
+            loading = false
+        }
     }
 
     fun connect(appRaw: String) {
@@ -163,86 +217,89 @@ fun ServerConnectionsContent() {
         }
     }
 
-        Column(Modifier.padding(bottom = 24.dp)) {
-            Column(Modifier.padding(horizontal = 16.dp)) {
-                GroupCard {
-                    ListRow(
-                        MinaIcons.Link,
-                        tr(if (signedIn == true) R.string.connectors_signed_in else R.string.connectors_signed_out),
-                        onClick = {},
+    Column(Modifier.padding(bottom = 24.dp)) {
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            GroupCard {
+                ListRow(
+                    MinaIcons.Link,
+                    tr(if (signedIn == true) R.string.connectors_signed_in else R.string.connectors_signed_out),
+                    onClick = {},
+                ) {
+                    RowValue(
+                        tr(if (signedIn == true) R.string.connectors_pill_on else R.string.connectors_pill_off),
+                        if (signedIn == true) ValueTone.Ok else ValueTone.Warn,
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            GroupCard {
+                if (loading) {
+                    Text(tr(R.string.connectors_loading), Modifier.padding(16.dp), style = MinaType.Body, color = MinaTheme.colors.ink2)
+                } else if (connections.isEmpty()) {
+                    Text(tr(R.string.connectors_empty), Modifier.padding(16.dp), style = MinaType.Body, color = MinaTheme.colors.ink2)
+                }
+                connections.forEach { c ->
+                    ListRow(MinaIcons.Link, c.toolkit, c.status.lowercase(), onClick = { disconnect(c) }) {
+                        RowValue(tr(R.string.connectors_remove), ValueTone.Warn)
+                    }
+                }
+                error?.let { FooterNote(it) }
+            }
+            Spacer(Modifier.height(12.dp))
+            GroupCard {
+                GroupLabel(tr(R.string.connectors_add_title))
+                if (catalogLoading) {
+                    Text(tr(R.string.connectors_loading), Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MinaType.Body, color = MinaTheme.colors.ink2)
+                }
+                apps.forEach { a ->
+                    val connected = connections.any {
+                        it.toolkit.equals(a.slug, ignoreCase = true) && it.status.equals("ACTIVE", ignoreCase = true)
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        RowValue(
-                            tr(if (signedIn == true) R.string.connectors_pill_on else R.string.connectors_pill_off),
-                            if (signedIn == true) ValueTone.Ok else ValueTone.Warn,
-                        )
-                    }
-                }
-                Spacer(Modifier.height(12.dp))
-                GroupCard {
-                    if (loading) {
-                        Text(tr(R.string.connectors_loading), Modifier.padding(16.dp), style = MinaType.Body, color = MinaTheme.colors.ink2)
-                    } else if (connections.isEmpty()) {
-                        Text(tr(R.string.connectors_empty), Modifier.padding(16.dp), style = MinaType.Body, color = MinaTheme.colors.ink2)
-                    }
-                    connections.forEach { c ->
-                        ListRow(MinaIcons.Link, c.toolkit, c.status.lowercase(), onClick = { disconnect(c) }) {
-                            RowValue(tr(R.string.connectors_remove), ValueTone.Warn)
+                        CatalogIcon(a.slug, a.name, a.logo)
+                        Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                            Text(a.name, style = MinaType.Body, color = MinaTheme.colors.ink)
+                            if (a.description.isNotBlank()) {
+                                Text(
+                                    a.description,
+                                    style = MinaType.Caption,
+                                    color = MinaTheme.colors.ink2,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
-                    }
-                    error?.let { FooterNote(it) }
-                }
-                Spacer(Modifier.height(12.dp))
-                GroupCard {
-                    GroupLabel(tr(R.string.connectors_add_title))
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(
-                            value = newApp, onValueChange = { newApp = it }, singleLine = true,
-                            label = { Text(tr(R.string.connectors_add_hint)) },
-                            modifier = Modifier.weight(1f),
-                        )
-                        TextButton(onClick = { connect(newApp) }) { Text(tr(R.string.connectors_connect)) }
-                    }
-                    GroupLabel(tr(R.string.connectors_presets_title))
-                    CONNECTOR_PRESETS.chunked(3).forEach { rowApps ->
-                        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            rowApps.forEach { (slug, label) ->
-                                val active = busy == slug
-                                val badge = CONNECTOR_ICONS[slug]
-                                Box(
-                                    Modifier
-                                        .background(if (active) MinaTheme.colors.ink else MinaTheme.colors.fill, RoundedCornerShape(50))
-                                        .clickable(enabled = busy == null) { connect(slug) }
-                                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        if (badge != null) {
-                                            Box(
-                                                Modifier
-                                                    .size(20.dp)
-                                                    .background(Color(badge.second), CircleShape),
-                                                contentAlignment = Alignment.Center,
-                                            ) {
-                                                Image(painterResource(badge.first), null, Modifier.size(11.dp))
-                                            }
-                                            Spacer(Modifier.width(6.dp))
-                                        }
-                                        Text(label, style = MinaType.Caption, color = if (active) MinaTheme.colors.bg else MinaTheme.colors.ink)
-                                    }
-                                }
+                        if (connected) {
+                            val conn = connections.first {
+                                it.toolkit.equals(a.slug, ignoreCase = true) && it.status.equals("ACTIVE", ignoreCase = true)
+                            }
+                            TextButton(enabled = busy == null, onClick = { disconnect(conn) }) {
+                                Text(tr(R.string.connectors_remove), color = MinaTheme.colors.ink2)
+                            }
+                        } else {
+                            TextButton(enabled = busy == null, onClick = { connect(a.slug) }) {
+                                Text(if (busy == a.slug) "…" else tr(R.string.connectors_connect))
                             }
                         }
                     }
                 }
-                Spacer(Modifier.height(12.dp))
-                GroupCard {
-                    ListRow(MinaIcons.Link, tr(R.string.connectors_sign_out), onClick = {
-                        scope.launch {
-                            ServerRuntime.signOut(context)
-                            signedIn = false
-                            connections = emptyList()
-                        }
-                    }) {}
-                }
+            }
+            Spacer(Modifier.height(12.dp))
+            GroupCard {
+                ListRow(MinaIcons.Link, tr(R.string.connectors_sign_out), onClick = {
+                    scope.launch {
+                        ServerRuntime.signOut(context)
+                        signedIn = false
+                        connections = emptyList()
+                        apps = emptyList()
+                    }
+                }) {}
             }
         }
+    }
 }

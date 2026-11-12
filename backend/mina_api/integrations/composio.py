@@ -364,6 +364,31 @@ class ComposioService:
         await db.commit()
         return result
 
+    async def catalog(self, limit: int = 80) -> list[dict]:
+        """Toolkit catalog for the app's Connectors screen: Composio's catalog
+        ordered by usage, with name/description/logo for each app."""
+        sdk = self._sdk()
+
+        def _run() -> list[Any]:
+            return sdk.toolkits.list(sort_by="usage", limit=limit).items
+
+        items = await self._call(_run)
+        out: list[dict] = []
+        for it in items or []:
+            meta = getattr(it, "meta", None)
+            cats = getattr(meta, "categories", None) or []
+            out.append(
+                {
+                    "slug": (getattr(it, "slug", "") or ""),
+                    "name": (getattr(it, "name", "") or ""),
+                    "description": (getattr(meta, "description", None) or "")[:180],
+                    "logo": (getattr(meta, "logo", None) or ""),
+                    "categories": [str(getattr(c, "name", c)) for c in cats][:3],
+                    "no_auth": bool(getattr(it, "no_auth", False) or False),
+                }
+            )
+        return out
+
     async def list_connections(self, user_id: UUID, db: AsyncSession) -> list[dict]:
         """List this user's connected accounts only. The user_ids filter is
         Composio-enforced, so another user's accounts cannot appear."""

@@ -54,6 +54,19 @@ class ToolSearchItem(BaseModel):
     output_parameters: dict | None = None
 
 
+class ToolkitCatalogItem(BaseModel):
+    slug: str
+    name: str
+    description: str = ""
+    logo: str = ""
+    categories: list[str] = Field(default_factory=list)
+    no_auth: bool = False
+
+
+class ToolkitCatalogOut(BaseModel):
+    items: list[ToolkitCatalogItem]
+
+
 class ToolSearchOut(BaseModel):
     items: list[ToolSearchItem]
 

@@ -20,6 +20,8 @@ from mina_api.schemas.composio import (
     ConnectionOut,
     ConnectionRequestOut,
     ConnectRequest,
+    ToolkitCatalogItem,
+    ToolkitCatalogOut,
 )
 from mina_api.security.auth import CurrentUser
 from mina_api.database.session import get_db
@@ -76,6 +78,14 @@ async def list_connections(
     service = _service(request)
     items = await service.list_connections(user.id, db)
     return ConnectionListOut(items=[ConnectionOut(**item) for item in items])
+
+
+@router.get("/catalog", response_model=ToolkitCatalogOut)
+async def toolkit_catalog(request: Request, user: CurrentUser) -> ToolkitCatalogOut:
+    """Toolkit catalog for the app's Connectors screen (usage-ordered)."""
+    service = _service(request)
+    items = await service.catalog()
+    return ToolkitCatalogOut(items=[ToolkitCatalogItem(**item) for item in items])
 
 
 @router.get("/{connection_id}", response_model=ConnectionOut)

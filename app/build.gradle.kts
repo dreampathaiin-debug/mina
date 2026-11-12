@@ -17,8 +17,8 @@ android {
         applicationId = "com.meenai.mina"
         minSdk = 30
         targetSdk = 35
-        versionCode = 72
-        versionName = "0.1.71"
+        versionCode = 73
+        versionName = "0.1.72"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
         // Cloud backend (final integration phase): empty = on-device BYOK only,
@@ -123,6 +123,8 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.googleid)
+    // Toolkit catalog logos on the Connectors screen
+    implementation("io.coil-kt:coil-compose:2.7.0")
     implementation(libs.coroutines.play.services)
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
@@ -170,7 +172,7 @@ fun firebaseConfig(): Map<String, String> = runCatching {
     val gs = groovy.json.JsonSlurper().parse(file("google-services.json")) as Map<*, *>
     val project = gs["project_info"] as? Map<*, *>
     val client = (gs["client"] as? List<*>)?.filterIsInstance<Map<*, *>>()?.firstOrNull {
-        (it["client_info"] as? Map<*, *>)?.get("package_name") == "com.meenai.mina"
+        ((it["client_info"] as? Map<*, *>)?.get("android_client_info") as? Map<*, *>)?.get("package_name") == "com.meenai.mina"
     }
     val info = client?.get("client_info") as? Map<*, *>
     val apiKey = ((client?.get("api_key") as? List<*>)?.firstOrNull() as? Map<*, *>)?.get("current_key")?.toString().orEmpty()

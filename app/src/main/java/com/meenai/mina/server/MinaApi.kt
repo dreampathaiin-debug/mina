@@ -45,6 +45,7 @@ class MinaApi(private val client: MinaServerClient, private val sse: MinaSseClie
     suspend fun connectApp(app: String): JsonElement =
         client.post("/v1/connections/$app/connect", buildJsonObject { })
     suspend fun connectionStatus(connectionId: String): JsonElement = client.get("/v1/connections/$connectionId")
+    suspend fun catalogApps(): JsonElement = client.get("/v1/connections/catalog")
     suspend fun disconnectApp(connectionId: String): JsonElement = client.delete("/v1/connections/$connectionId")
 
     // ---- Tools ----
