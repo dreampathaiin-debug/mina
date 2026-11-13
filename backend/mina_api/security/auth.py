@@ -3,8 +3,11 @@
 Identity is extracted EXCLUSIVELY from a verified bearer token. Firebase ID
 tokens are verified with RS256 against Google's published signing keys (issuer
 https://securetoken.google.com/<project>, audience <project>), so the Supabase
-JWT secret alone is no longer the trust root. A Supabase HS256 JWT is still
-accepted as a fallback while configured. Request bodies never carry a trusted
+JWT secret alone is no longer the trust root. Supabase JWTs are verified with
+the project's asymmetric ES256 signing key (JWKS at <url>/auth/v1/.well-known/
+jwks.json, selected by kid); the legacy HS256 shared-secret path stays as a
+fallback, dispatched strictly by the token's header algorithm so an ES256
+token can never be verified against the shared secret. Request bodies never carry a trusted
 user_id. get_current_user is the single dependency every protected endpoint
 uses; require_admin layers role-based authorization on top of it.
 
@@ -41,6 +44,7 @@ MINA_IDENTITY_NAMESPACE = uuid.UUID("1d80183d-ee88-5629-aa33-095d9e273252")
 _FIREBASE_JWKS_URL = (
     "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
 )
+_SUPABASE_JWKS_PATH = "/auth/v1/.well-known/jwks.json"
 _JWKS_MAX_AGE_SECONDS = 6 * 3600
 
 
@@ -58,6 +62,8 @@ class TokenVerifier:
         self.firebase_project_id = firebase_project_id or None
         self._keys: dict[str, Any] | None = None
         self._keys_at: float = 0.0
+        self._sb_keys: dict[str, Any] | None = None
+        self._sb_keys_at: float = 0.0
 
     def verify(self, token: str) -> dict[str, Any]:
         if self.firebase_project_id:
@@ -74,14 +80,22 @@ class TokenVerifier:
         if not (self.secret and self.url):
             raise HTTPException(status_code=503, detail="Auth is not configured on this server")
         try:
-            claims = jwt.decode(
-                token,
-                self.secret,
-                algorithms=["HS256"],
-                audience=self.audience,
-                issuer=f"{self.url}/auth/v1",
-                options={"require": ["exp", "sub", "aud", "iss"]},
-            )
+            header = jwt.get_unverified_header(token)
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=401, detail="Invalid token") from None
+        # Strict dispatch: the header's algorithm alone picks the verifier, so
+        # an ES256 token is never offered to the HS256 shared secret (and vice
+        # versa) -- that confusion is exactly the attack this prevents.
+        try:
+            if header.get("alg") == "ES256":
+                kid = header.get("kid")
+                if not kid:
+                    raise jwt.InvalidTokenError("ES256 token without kid")
+                claims = self._verify_supabase_es256(token, str(kid))
+            elif header.get("alg") == "HS256":
+                claims = self._verify_supabase_hs256(token)
+            else:
+                raise jwt.InvalidTokenError(f"unsupported token algorithm {header.get('alg')!r}")
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token expired") from None
         except jwt.InvalidTokenError:
@@ -111,6 +125,60 @@ class TokenVerifier:
         claims["firebase_uid"] = uid
         claims["user_id"] = uuid.uuid5(MINA_IDENTITY_NAMESPACE, uid)
         return claims
+
+    def _verify_supabase_es256(self, token: str, kid: str) -> dict[str, Any]:
+        """Verify a Supabase JWT signed with the project's asymmetric ES256 key."""
+        key = self._supabase_signing_key(kid)
+        if key is None:
+            raise jwt.InvalidTokenError("unknown Supabase signing key")
+        return jwt.decode(
+            token,
+            key,
+            algorithms=["ES256"],
+            audience=self.audience,
+            issuer=f"{self.url}/auth/v1",
+            options={"require": ["exp", "sub", "aud", "iss"]},
+        )
+
+    def _verify_supabase_hs256(self, token: str) -> dict[str, Any]:
+        """Legacy fallback: JWTs signed with the shared JWT secret."""
+        return jwt.decode(
+            token,
+            self.secret,
+            algorithms=["HS256"],
+            audience=self.audience,
+            issuer=f"{self.url}/auth/v1",
+            options={"require": ["exp", "sub", "aud", "iss"]},
+        )
+
+    def _supabase_signing_key(self, kid: str) -> Any:
+        keys = self._sb_keys
+        if keys is None or kid not in keys:
+            keys = self._fetch_supabase_jwks()
+            self._sb_keys = keys
+        return keys.get(kid)
+
+    def _fetch_supabase_jwks(self) -> dict[str, Any]:
+        """The project's asymmetric signing keys, refreshed at most hourly."""
+        now = time.monotonic()
+        if self._sb_keys is not None and now - self._sb_keys_at < _JWKS_MAX_AGE_SECONDS:
+            return self._sb_keys
+        assert self.url is not None
+        try:
+            response = httpx.get(f"{self.url}{_SUPABASE_JWKS_PATH}", timeout=10.0)
+            response.raise_for_status()
+            entries = response.json().get("keys", [])
+        except Exception as error:
+            logger.warning("Supabase signing keys unavailable: %s", error)
+            raise HTTPException(status_code=503, detail="Auth keys unavailable") from None
+        keys: dict[str, Any] = {}
+        for entry in entries:
+            try:
+                keys[entry["kid"]] = jwt.algorithms.ECAlgorithm.from_jwk(json.dumps(entry))
+            except Exception:  # malformed entry: skip it, the rest still verify
+                continue
+        self._sb_keys_at = now
+        return keys
 
     def _signing_key(self, kid: str) -> Any:
         keys = self._keys
