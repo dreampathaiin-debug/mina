@@ -1,5 +1,6 @@
 package com.meenai.mina.ui
 
+import com.meenai.mina.ui.components.rememberShimmerBrush
 import com.meenai.mina.ui.components.bubbleIn
 import androidx.compose.foundation.gestures.scrollBy
 import com.meenai.mina.core.agent.QuoteMessage
@@ -676,8 +677,12 @@ private fun WorkBlock(ex: Exchange, reduceMotion: Boolean, backgroundNote: Boole
                 Modifier.size(16.dp), spinning = !paused && !reduceMotion,
                 track = if (paused) c.warnSoft else c.accentSoft, head = if (paused) c.warnSolid else c.accent,
             )
+            // Live line shimmers while Mina works (Hark-style); paused or reduced motion stays plain.
+            val shimmer = rememberShimmerBrush(c.ink, c.ink3, enabled = !paused && !reduceMotion)
             Text(
-                ChatCopy.progressLine(ex), Modifier.weight(1f), style = NowText, color = c.ink,
+                ChatCopy.progressLine(ex), Modifier.weight(1f),
+                style = if (shimmer != null) NowText.copy(brush = shimmer) else NowText,
+                color = if (shimmer != null) Color.Unspecified else c.ink,
                 maxLines = 2, overflow = TextOverflow.Ellipsis,
             )
             if (elapsed != null) Text(ChatCopy.clock(elapsed), style = ClockText, color = c.ink3)
@@ -1292,11 +1297,25 @@ internal fun Composer(
                     }
                 }
                 if (!busy || canSend) {
+                    // Send button wakes up when there is something to send: colour fades in, the button springs to full size.
+                    val sendBg by androidx.compose.animation.animateColorAsState(
+                        if (canSend) c.accent else c.greySoft, tween(180), label = "sendBg",
+                    )
+                    val sendScale by animateFloatAsState(
+                        if (canSend) 1f else 0.88f,
+                        if (reduceMotion) snap<Float>() else MinaMotion.bouncy<Float>(), label = "sendScale",
+                    )
+                    val sendHaptic = androidx.compose.ui.platform.LocalHapticFeedback.current
                     Box(
                         Modifier.size(MinaSize.IconButton)
-                            .background(if (canSend) c.accent else c.greySoft, CircleShape)
+                            .graphicsLayer { scaleX = sendScale; scaleY = sendScale }
+                            .background(sendBg, CircleShape)
                             .clip(CircleShape)
-                            .clickable(enabled = canSend, onClickLabel = stringResource(R.string.chat_send)) { panel = Panel.Closed; onSend() },
+                            .clickable(enabled = canSend, onClickLabel = stringResource(R.string.chat_send)) {
+                                sendHaptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                panel = Panel.Closed
+                                onSend()
+                            },
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(MinaIcons.Up, stringResource(R.string.chat_send), Modifier.size(20.dp), tint = if (canSend) c.onAccent else c.ink3)

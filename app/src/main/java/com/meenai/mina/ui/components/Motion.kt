@@ -1,6 +1,7 @@
 package com.meenai.mina.ui.components
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -66,4 +67,33 @@ fun Modifier.bubbleIn(fromEnd: Boolean): Modifier = composed {
         this.alpha = alpha.value
         transformOrigin = TransformOrigin(if (fromEnd) 1f else 0f, 1f)
     }
+}
+
+/**
+ * Shimmer for live status text: a soft highlight sweeps left to right across [base], like
+ * Hark's "working" line. Returns null when [enabled] is false so callers fall back to a plain colour.
+ */
+@androidx.compose.runtime.Composable
+fun rememberShimmerBrush(
+    base: androidx.compose.ui.graphics.Color,
+    highlight: androidx.compose.ui.graphics.Color,
+    enabled: Boolean,
+): androidx.compose.ui.graphics.Brush? {
+    if (!enabled) return null
+    val t = androidx.compose.animation.core.rememberInfiniteTransition(label = "shimmer")
+    val x by t.animateFloat(
+        initialValue = -0.4f,
+        targetValue = 1.4f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            tween(1500, delayMillis = 250, easing = androidx.compose.animation.core.LinearEasing),
+        ),
+        label = "shimmerX",
+    )
+    val span = with(LocalDensity.current) { 320.dp.toPx() }
+    val band = span * 0.35f
+    return androidx.compose.ui.graphics.Brush.linearGradient(
+        colors = listOf(base, highlight, base),
+        start = androidx.compose.ui.geometry.Offset(x * span - band, 0f),
+        end = androidx.compose.ui.geometry.Offset(x * span + band, 0f),
+    )
 }
