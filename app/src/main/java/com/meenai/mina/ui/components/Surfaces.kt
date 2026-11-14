@@ -94,7 +94,7 @@ fun MinaCard(modifier: Modifier = Modifier, shape: Shape = MinaShapes.Card, cont
  */
 @Composable
 fun GroupCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    MinaCard(modifier.padding(bottom = 12.dp), content = content)
+    MinaCard(modifier.pageStagger().padding(bottom = 12.dp), content = content)
 }
 
 /** 状态卡:左边圆形图标,右边标题和说明。用于页面顶上的总状态。 */
@@ -108,7 +108,7 @@ fun StateCard(
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
     val c = MinaTheme.colors
-    MinaCard(modifier.padding(bottom = 12.dp)) {
+    MinaCard(modifier.pageStagger().padding(bottom = 12.dp)) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,

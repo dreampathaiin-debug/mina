@@ -1,5 +1,6 @@
 package com.meenai.mina.ui
 
+import com.meenai.mina.ui.components.bubbleIn
 import androidx.compose.foundation.gestures.scrollBy
 import com.meenai.mina.core.agent.QuoteMessage
 import com.meenai.mina.core.cap.web.AttachedPage
@@ -561,7 +562,7 @@ internal fun UserBubble(text: String, conversationId: String?, note: String? = n
     val attached = remember(text) { AttachmentMessage.parse(quoted.words) }
     BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 14.dp), contentAlignment = Alignment.CenterEnd) {
         val max = maxWidth * 0.8f
-        Column(horizontalAlignment = Alignment.End) {
+        Column(Modifier.bubbleIn(fromEnd = true), horizontalAlignment = Alignment.End) {
             paged.page?.let { SentPage(it, max) }
             quoted.quote?.let { SentQuote(it, max) }
             if (attached.hasAttachments) {

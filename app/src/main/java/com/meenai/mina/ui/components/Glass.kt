@@ -77,6 +77,7 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 // ---------- 背景:渐变 + 光晕 + 胶片颗粒 ----------
 
@@ -176,11 +177,22 @@ fun Modifier.pressScale(
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val reduce = MinaTheme.reduceMotion
+    val down = pressed && !reduce
+    // Spring in, springier out: the press sinks fast and the release lands with a small bounce.
+    val scale by animateFloatAsState(
+        if (down) pressedScale else 1f,
+        if (reduce) androidx.compose.animation.core.snap<Float>() else if (down) MinaMotion.press<Float>() else MinaMotion.release<Float>(),
+        label = "pressScale",
+    )
+    val dim by animateFloatAsState(
+        if (down) 0.05f else 0f,
+        if (reduce) androidx.compose.animation.core.snap<Float>() else tween<Float>(if (down) 90 else 220),
+        label = "pressDim",
+    )
     this
         .graphicsLayer {
-            val s = if (pressed && !reduce) pressedScale else 1f
-            scaleX = s
-            scaleY = s
+            scaleX = scale
+            scaleY = scale
         }
         .then(
             if (onClick != null) {
@@ -191,7 +203,7 @@ fun Modifier.pressScale(
         )
         .drawWithContent {
             drawContent()
-            if (pressed && !reduce) drawRect(Color.Black.copy(alpha = 0.04f))
+            if (dim > 0.001f) drawRect(Color.Black.copy(alpha = dim))
         }
 }
 
@@ -201,12 +213,22 @@ fun Modifier.staggerIn(index: Int, slide: Dp = 26.dp): Modifier = composed {
     if (MinaTheme.reduceMotion) {
         this
     } else {
-        var shown by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { shown = true }
-        val delay = (index % 10) * 40
-        val a by animateFloatAsState(if (shown) 1f else 0f, tween(260, delayMillis = delay, easing = MinaMotion.Decelerate), label = "stagA")
-        val ty by animateFloatAsState(if (shown) 0f else slide.value, tween(300, delayMillis = delay, easing = MinaMotion.Decelerate), label = "stagY")
-        graphicsLayer { alpha = a; translationY = ty }
+        val alpha = remember { androidx.compose.animation.core.Animatable(0f) }
+        val rise = remember { androidx.compose.animation.core.Animatable(0f) }
+        LaunchedEffect(Unit) {
+            // Each item waits for its slot, then fades and rises on a spring: the list lands like a cascade.
+            kotlinx.coroutines.delay(((index % 12) * 35).toLong())
+            launch { alpha.animateTo(1f, tween(260, easing = MinaMotion.Decelerate)) }
+            rise.animateTo(1f, androidx.compose.animation.core.spring(dampingRatio = 0.8f, stiffness = 380f))
+        }
+        graphicsLayer {
+            val q = rise.value
+            this.alpha = alpha.value
+            translationY = (1f - q) * slide.toPx()
+            val sc = 0.97f + 0.03f * q
+            scaleX = sc
+            scaleY = sc
+        }
     }
 }
 

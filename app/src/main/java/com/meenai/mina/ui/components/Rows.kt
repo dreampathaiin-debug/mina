@@ -47,7 +47,7 @@ import com.meenai.mina.ui.theme.MinaType
 /** 分组小标题:13 / 500,辅助文字色。 */
 @Composable
 fun GroupLabel(text: String, modifier: Modifier = Modifier) {
-    Text(text, modifier.padding(top = 8.dp, bottom = 8.dp), style = MinaType.Label, color = MinaTheme.colors.ink3)
+    Text(text, modifier.pageStagger().padding(top = 8.dp, bottom = 8.dp), style = MinaType.Label, color = MinaTheme.colors.ink3)
 }
 
 /** 分组下面的说明,和卡片里的文字对齐。 */

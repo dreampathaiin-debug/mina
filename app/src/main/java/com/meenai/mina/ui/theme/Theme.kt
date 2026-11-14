@@ -5,7 +5,10 @@ import android.provider.Settings
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
@@ -36,6 +39,22 @@ object MinaMotion {
 
     fun <T> page(reduceMotion: Boolean): AnimationSpec<T> = if (reduceMotion) snap() else tween(PAGE_MS, easing = Decelerate)
     fun <T> switch(reduceMotion: Boolean): AnimationSpec<T> = if (reduceMotion) snap() else tween(SWITCH_MS, easing = Decelerate)
+
+    /** Page push / pop length: a touch longer than [PAGE_MS] so the emphasized curve reads as one glide. */
+    const val NAV_MS = 340
+    /** Material 3 "emphasized decelerate": fast launch, long soft landing (iOS-like push). */
+    val Emphasized: Easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)
+    /** Exit curve for the page that leaves. */
+    val EmphasizedAccelerate: Easing = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
+
+    /** Tactile press: quick, barely any overshoot. */
+    fun <T> press(): FiniteAnimationSpec<T> = spring(dampingRatio = 0.6f, stiffness = 1400f)
+    /** Release after a press: a small, lively bounce back to rest. */
+    fun <T> release(): FiniteAnimationSpec<T> = spring(dampingRatio = 0.45f, stiffness = 600f)
+    /** Entrances (bubbles, cards): soft spring with a hint of overshoot. */
+    fun <T> bouncy(): FiniteAnimationSpec<T> = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow)
+    /** Settling motion without overshoot (slides, list rises). */
+    fun <T> settle(): FiniteAnimationSpec<T> = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
 }
 
 /** 系统「移除动画」(动画时长缩放为 0)时为真。 */

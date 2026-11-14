@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
@@ -75,6 +77,7 @@ import com.meenai.mina.cap.phone.PhoneServices
 import com.meenai.mina.cap.phone.setup.DeveloperSettings
 import com.meenai.mina.cap.phone.setup.PairingNotifier
 import com.meenai.mina.core.shell.BuiltinShellStatus
+import com.meenai.mina.ui.theme.MinaMotion
 import com.meenai.mina.ui.theme.MinaTheme
 import com.meenai.mina.ui.theme.animationsOff
 import com.meenai.mina.ui.theme.appearanceDark
@@ -320,11 +323,34 @@ private fun MinaRoot(store: ProviderStore, monitor: SystemStatusMonitor, activit
         targetState = nav.current,
         label = "page",
         transitionSpec = {
-            val dur = if (reduceMotion) 1 else 220
-            val enter =
-                if (targetState != Route.Chat) slideInHorizontally(tween(dur)) { it } + fadeIn(tween(dur))
-                else slideInHorizontally(tween(dur)) { -it / 5 } + fadeIn(tween(dur))
-            enter togetherWith (scaleOut(targetScale = 0.96f, animationSpec = tween(dur)) + fadeOut(tween(dur)))
+            if (reduceMotion) {
+                fadeIn(tween(1)) togetherWith fadeOut(tween(1))
+            } else {
+                // Push when the page we leave is still in the stack (we went deeper); pop otherwise.
+                // Push: the new page glides in from the right, the old one drifts a quarter left and dims.
+                // Pop: the reverse. Emphasized easing gives the fast-launch, soft-landing feel of an iOS stack.
+                val flow = listOf(Route.Welcome, Route.ChooseModel, Route.ModelSetup, Route.PhoneSetup)
+                val push = if (initialState in flow && targetState in flow) {
+                    flow.indexOf(targetState) > flow.indexOf(initialState)
+                } else {
+                    initialState in nav.stack && targetState != Route.Chat
+                }
+                val d = MinaMotion.NAV_MS
+                val glide = tween<androidx.compose.ui.unit.IntOffset>(d, easing = MinaMotion.Emphasized)
+                val enter = if (push) {
+                    slideInHorizontally(glide) { it } + fadeIn(tween(d / 2, easing = MinaMotion.Decelerate))
+                } else {
+                    slideInHorizontally(glide) { -it / 4 } + fadeIn(tween(d, easing = MinaMotion.Decelerate)) +
+                        scaleIn(tween(d, easing = MinaMotion.Emphasized), initialScale = 0.97f)
+                }
+                val exit = if (push) {
+                    slideOutHorizontally(glide) { -it / 4 } + fadeOut(tween(d, easing = MinaMotion.EmphasizedAccelerate), targetAlpha = 0.35f) +
+                        scaleOut(tween(d, easing = MinaMotion.Emphasized), targetScale = 0.97f)
+                } else {
+                    slideOutHorizontally(glide) { it } + fadeOut(tween(d, easing = MinaMotion.EmphasizedAccelerate))
+                }
+                (enter togetherWith exit).apply { targetContentZIndex = if (push) 1f else -1f }
+            }
         },
     ) { route ->
     when (route) {

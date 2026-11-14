@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.meenai.mina.ui.theme.MinaTheme
+import com.meenai.mina.ui.components.bubbleIn
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -226,7 +227,7 @@ private fun DrawScope.drawFace(
 fun MinaRow(mood: MinaMood, showFace: Boolean = true, content: @Composable () -> Unit) {
     Row(verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
         Box(Modifier.width(42.dp).padding(top = 2.dp)) { if (showFace) MinaFace(mood) }
-        Box(Modifier.weight(1f)) { content() }
+        Box(Modifier.weight(1f).bubbleIn(fromEnd = false)) { content() }
     }
 }
 

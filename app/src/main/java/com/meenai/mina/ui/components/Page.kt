@@ -30,7 +30,10 @@ fun PageScaffold(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    // One stagger sequence per page: labels and cards rise in one after another.
+    val stagger = androidx.compose.runtime.remember { StaggerSequence() }
     PageBackground(modifier) {
+      androidx.compose.runtime.CompositionLocalProvider(LocalStagger provides stagger) {
         Column(Modifier.fillMaxSize()) {
             TopBar(title, MinaIcons.Back, onBack, stringResource(R.string.back))
             Column(
@@ -44,5 +47,6 @@ fun PageScaffold(
                 Spacer(Modifier.height(MinaSpace.S24))
             }
         }
+      }
     }
 }
